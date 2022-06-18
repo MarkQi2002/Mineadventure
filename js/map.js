@@ -3,7 +3,7 @@ class map{
     constructor(size) {
         this.size = [size[0],size[1]];
         this.object = new THREE.Object3D();
-        this.object.position.set(0,0,-10);
+        this.object.position.set(0,0,0);
         this.spawn();
         scene.add( this.object );
     }

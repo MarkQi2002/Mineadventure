@@ -3,7 +3,12 @@ class controller extends EventDispatcher{
         super();
         this.creature = creature;
         this.camera = camera;
-        this.speed = 0.2;
+        this.baseMovementSpeed = 5;//per second
+        this.speed = this.baseMovementSpeed;//per second
+
+        this.initJumpVelocity = 1;//per second
+        this.jumpVelocity = 0;//per second
+        this.onGround = true;
 
         this.inputs = {
             forward: false,
@@ -38,6 +43,10 @@ class controller extends EventDispatcher{
                 this.inputs.right = true;
                 break;
             case 32: //space
+                if (this.onGround){
+                    this.jumpVelocity = this.initJumpVelocity;//jump
+                    this.onGround = false;
+                }
                 this.inputs.space = true;
                 break;
             case 16: //shift
@@ -70,10 +79,24 @@ class controller extends EventDispatcher{
         }
     }
 
-    update(){
+    update(delta){
+
+
+        //change movement speed
+        if (!this.inputs.shift){
+            //walk
+            this.speed = this.baseMovementSpeed
+        }else{
+            //run
+            this.speed = this.baseMovementSpeed*1.5
+        }
+
+        let speedPerFrame = this.speed*delta;//correct speed with frame
+        
+
+
         let dy = this.inputs.forward - this.inputs.backward;
         let dx = this.inputs.right - this.inputs.left;
-
         let magnitude = Math.sqrt(dx*dx + dy*dy);
         if (magnitude == 0){//magnitude can't be zero
             magnitude = 1;
@@ -84,30 +107,50 @@ class controller extends EventDispatcher{
         
         //movement
         if (this.inputs.forward) {
-            creatureTrans.translateY(this.speed/magnitude);
-
-           // let screenPos = new THREE.Vector3();
-            //creatureTrans.position;
-            //console.log(screenPos.project( this.camera ));
-
-
-            this.camera.translateY(this.speed/magnitude);
+            creatureTrans.translateY(speedPerFrame/magnitude);
         }
 
         if (this.inputs.backward) {
-            creatureTrans.translateY(-this.speed/magnitude);
-            this.camera.translateY(-this.speed/magnitude);
+            creatureTrans.translateY(-speedPerFrame/magnitude);
         }
 
         if (this.inputs.left) {
-            creatureTrans.translateX(-this.speed/magnitude);
-            this.camera.translateX(-this.speed/magnitude);
+            creatureTrans.translateX(-speedPerFrame/magnitude);
         }
 
         if (this.inputs.right) {
-            creatureTrans.translateX(this.speed/magnitude);
-            this.camera.translateX(this.speed/magnitude);
+            creatureTrans.translateX(speedPerFrame/magnitude);
         }
+
+
+            
+        //jump
+        if(this.jumpVelocity > -this.initJumpVelocity){
+            this.jumpVelocity -= gravity*delta;
+        }
+
+        if (creatureTrans.position.z + this.jumpVelocity > groundLevel){
+            creatureTrans.translateZ(this.jumpVelocity);
+        }else{
+            creatureTrans.position.z = groundLevel;
+            this.onGround = true;
+        }
+
+
+        
+
+
+
+        //get controlled creature's 2D position from screen
+        let screenPos = new THREE.Vector3(
+            creatureTrans.position.x,
+            creatureTrans.position.y,
+            creatureTrans.position.z).project( this.camera );
+
+        //Auto center camera
+        this.camera.translateY(screenPos.y*speedPerFrame*2);
+        this.camera.translateX(screenPos.x*speedPerFrame*2);
+
         
 
     }

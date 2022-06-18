@@ -82,7 +82,7 @@ var Stats = function () {
 
 			if ( time >= prevTime + 1000 ) {
 
-				fpsPanel.update( ( frames * 1000 ) / ( time - prevTime ), 100 );
+				fpsPanel.update(( frames * 1000 ) / ( time - prevTime ), 100 );
 
 				prevTime = time;
 				frames = 0;
@@ -105,6 +105,7 @@ var Stats = function () {
 			beginTime = this.end();
 
 		},
+
 
 		// Backwards Compatibility
 
