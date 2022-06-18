@@ -17,6 +17,14 @@ class creature{
 class player extends creature{
     constructor(name, position, health) {
         super(name,position, health)
+
+        //cube body
+        let geometry = new THREE.BoxGeometry( 1, 1, 1 );
+        let material = new THREE.MeshBasicMaterial( { color: new THREE.Color(Math.random(), Math.random(), Math.random()) } );
+        let cube = new THREE.Mesh( geometry, material );
+        this.object.add( cube );
+
+
     }
 
 
