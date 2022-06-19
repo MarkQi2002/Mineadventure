@@ -1,31 +1,39 @@
-const initSelf = (playerID) => {
-  selfPlayerID = playerID;
-  
- 
-  
-};
-
-
-const newPlayer = (playerInfo) => {
+function spawnPlayer(playerInfo){
   let new_player = new player(playerInfo.name,
     [playerInfo.position[0], playerInfo.position[1], groundLevel],
     playerInfo.health);
 
   playerArray[playerInfo.ID] = new_player;
+  return new_player;
+}
 
+
+
+
+const initSelf = (playerID,oldPlayerArray) => {
+  selfPlayerID = playerID;
+  for (let i = 0; i < oldPlayerArray.length; i++) {
+    if (oldPlayerArray[i] != null){
+      spawnPlayer(oldPlayerArray[i]);
+    }
+  }
+
+};
+
+
+const newPlayer = (playerInfo) => {
+  let new_player = spawnPlayer(playerInfo);
   if (playerInfo.ID == selfPlayerID){
     player_controller = new controller(new_player,camera);
     animate();
   }
-
-
-  
 };
 
 
 const playerPositionUpdate = (Pos,PlayerID) => {
-  console.log(Pos);
-  console.log(PlayerID);
+  
+  playerArray[PlayerID].object.position.set(Pos[0],Pos[1],Pos[2]);
+
 };
 
 
@@ -45,7 +53,8 @@ const playerPositionUpdate = (Pos,PlayerID) => {
 
   const updatePosition = () => {
     sock.emit('newPos', [player_controller.creature.object.position.x,
-                         player_controller.creature.object.position.y]);
+                         player_controller.creature.object.position.y,
+                         player_controller.creature.object.position.z]);
   };
   document.addEventListener('position event', updatePosition);
 

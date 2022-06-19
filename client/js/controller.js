@@ -40,8 +40,6 @@ class controller{
                 this.inputs.right = true;
                 break;
             case 32: //space
-                var event = new Event('position event', { bubbles: true, cancelable: false })
-                document.dispatchEvent( event );
                 if (this.onGround){
                     this.jumpVelocity = this.initJumpVelocity;//jump
                     this.onGround = false;
@@ -121,6 +119,12 @@ class controller{
             creatureTrans.translateX(speedPerFrame/magnitude);
         }
 
+
+        //update position on server
+        if (this.inputs.forward||this.inputs.backward||this.inputs.left||this.inputs.right||!this.onGround) {
+            var event = new Event('position event', { bubbles: true, cancelable: false })
+            document.dispatchEvent( event );
+        }
 
             
         //jump

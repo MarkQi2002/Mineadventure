@@ -51,7 +51,7 @@ io.on('connection', (sock) => {
   const playerID = ID_count;
   ID_count ++;
   console.log("new player joined, ID: ",playerID);
-  sock.emit('initSelf',playerID);//init the new player
+  sock.emit('initSelf',playerID,playerArray);//init the new player
   io.emit('newPlayer',CreateNewPlayer(playerID));//send new player info to all player
 
   
