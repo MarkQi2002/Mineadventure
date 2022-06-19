@@ -13,8 +13,13 @@ document.body.appendChild( renderer.domElement );
 const groundLevel = 1;//set ground position on world z axis
 const gravity = 9.81;//per second
 const game_map = new map([100,100]);
-const main_player = new player("pERIKarua",[0,0,groundLevel],100);
-const player_controller = new controller(main_player,camera);
+
+var playerArray = [];
+playerArray.length = 30;
+
+//const main_player = new player("pERIKarua",[0,0,groundLevel],100);
+var selfPlayerID;
+var player_controller;
 
 
 
@@ -43,5 +48,3 @@ function animate() {
     stats.end();
     requestAnimationFrame( animate );
 };
-
-animate();

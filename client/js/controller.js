@@ -1,6 +1,5 @@
-class controller extends EventDispatcher{
+class controller{
     constructor(creature,camera) {
-        super();
         this.creature = creature;
         this.camera = camera;
         this.baseMovementSpeed = 5;//per second
@@ -21,8 +20,6 @@ class controller extends EventDispatcher{
 
 
 
-        //this.dispatchEvent( { type: 'start', message: 'movement update' } );
-        //this.addEventListener( 'start', this.movement);
         document.addEventListener("keydown", (e) => this.KeyDown(e), false);
         document.addEventListener("keyup", (e) => this.KeyUp(e), false);
 
@@ -43,6 +40,8 @@ class controller extends EventDispatcher{
                 this.inputs.right = true;
                 break;
             case 32: //space
+                var event = new Event('position event', { bubbles: true, cancelable: false })
+                document.dispatchEvent( event );
                 if (this.onGround){
                     this.jumpVelocity = this.initJumpVelocity;//jump
                     this.onGround = false;
@@ -165,4 +164,4 @@ class controller extends EventDispatcher{
         
 
     }
-}
+} 

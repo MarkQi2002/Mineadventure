@@ -1,7 +1,6 @@
 {
   "name": "mineadventure",
   "version": "1.0.0",
-  "type": "module",
   "description": "An online web-based adventure mini game",
   "main": "index.js",
   "scripts": {

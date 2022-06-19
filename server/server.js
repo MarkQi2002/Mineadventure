@@ -1,30 +1,14 @@
-//const three = require('../client/js/module/three.js');
-//const player =require('../client/js/creature');
-//import * as THREE from '../client/js/module/three.js'
-//import * as ds from '../client/js/creature.js'
-
-import * as http from 'http';
-import express from 'express';
-import { Server } from "socket.io";
-
-import path from 'path';
-import {fileURLToPath} from 'url';
-
 // CommonJS Syntax
-//const http = require('http');
-//const express = require('express');
-//const socketio = require('socket.io');
+const http = require('http');
+const express = require('express');
+const socketio = require('socket.io');
 
 const app = express();
-
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use(express.static(__dirname+'/../client'));
+app.use(express.static(`${__dirname}/../client`));
 
 const server = http.createServer(app);
-//const io = socketio(server);
-const io = new Server(server, {});
+const io = socketio(server);
+//const io = new Server(server, {});
 
 
 
@@ -33,22 +17,47 @@ const io = new Server(server, {});
 
 //const muain_player = new ds.player("pERIKarua",[0,0,0],100);
 
+const CreateNewPlayer = (playerID) => {
+
+  var playerInfo  = {
+    ID: playerID,
+    name: 'pERIKarya',
+    position: [Math.random()*5,Math.random()*5],
+    health: 100,
+  };
+
+  playerArray.push(playerInfo);
+
+  console.log(playerInfo);
+  return playerInfo;
+};
+
+
+const UpdatePlayerPosition = (Pos) => {
+  console.log("new position: ",Pos)
+  return Pos;
+};
+
+//var creature
 
 
 
-
-
-
-
-
-
-
+var playerArray = [];
+playerArray.length = 30;
 //const { clear, getBoard, makeTurn } = createBoard(20);
 
+var ID_count = 0;
 io.on('connection', (sock) => {
-  console.log("new player joined");
-  sock.emit('new player',233);
+  const playerID = ID_count;
+  ID_count ++;
+  console.log("new player joined, ID: ",playerID);
+  sock.emit('initSelf',playerID);//init the new player
+  io.emit('newPlayer',CreateNewPlayer(playerID));//send new player info to all player
 
+  
+  
+  
+  sock.on('newPos',(Pos) => io.emit('clientPos', UpdatePlayerPosition(Pos),playerID));
   //sock.on('message', (text) => io.emit('message', text));
  /* sock.on('turn', ({ x, y }) => {
     if (cooldown()) {
