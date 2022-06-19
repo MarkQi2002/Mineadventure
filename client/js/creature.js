@@ -19,10 +19,10 @@ class player extends creature{
         super(name,position, health)
 
         //cube body
-        let geometry = new THREE.BoxGeometry( 1, 1, 1 );
+        let geometry = new THREE.SphereGeometry( 0.5, 10, 10 );
         let material = new THREE.MeshBasicMaterial( { color: new THREE.Color(Math.random(), Math.random(), Math.random()) } );
-        let cube = new THREE.Mesh( geometry, material );
-        this.object.add( cube );
+        let mesh = new THREE.Mesh( geometry, material );
+        this.object.add( mesh );
 
 
     }

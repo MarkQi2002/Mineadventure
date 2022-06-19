@@ -1,0 +1,21 @@
+{
+  "name": "mineadventure",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "An online web-based adventure mini game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarkQi2002/Mineadventure.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MarkQi2002/Mineadventure/issues"
+  },
+  "homepage": "https://github.com/MarkQi2002/Mineadventure#readme"
+}

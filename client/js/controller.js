@@ -147,9 +147,20 @@ class controller extends EventDispatcher{
             creatureTrans.position.y,
             creatureTrans.position.z).project( this.camera );
 
+
+            
         //Auto center camera
-        this.camera.translateY(screenPos.y*speedPerFrame*2);
-        this.camera.translateX(screenPos.x*speedPerFrame*2);
+        magnitude = Math.sqrt(screenPos.x*screenPos.x + screenPos.y*screenPos.y);
+        let autoX,autoY;
+        if (magnitude == 0){//magnitude can't be zero
+            autoY = 0;
+            autoX = 0;
+        }else{
+            autoY = 2-Math.abs(screenPos.y/magnitude);
+            autoX = 2-Math.abs(screenPos.x/magnitude);
+        }
+        this.camera.translateY(screenPos.y*speedPerFrame*autoY*2);
+        this.camera.translateX(screenPos.x*speedPerFrame*autoX*2);
 
         
 

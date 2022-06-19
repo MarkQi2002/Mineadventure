@@ -37,7 +37,6 @@ function animate() {
 
 
     delta = clock.getDelta();
-    console.log(delta);
     player_controller.update(delta);
 
     renderer.render( scene, camera );
