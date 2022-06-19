@@ -19,23 +19,25 @@ const io = socketio(server);
 
 const CreateNewPlayer = (playerID) => {
 
-  var playerInfo  = {
+  let playerInfo  = {
     ID: playerID,
     name: 'pERIKarya',
-    position: [Math.random()*5,Math.random()*5],
+    position: [Math.random()*5,Math.random()*5,1],
     health: 100,
   };
 
-  playerArray.push(playerInfo);
+  playerArray[playerID] = playerInfo;
 
   console.log(playerInfo);
   return playerInfo;
 };
 
 
-const UpdatePlayerPosition = (Pos) => {
-  console.log("new position: ",Pos)
-  return Pos;
+const UpdatePlayerPosition = (Pos,playerID) => {
+  if (playerArray[playerID]!= null){
+    playerArray[playerID].position = [Pos[0],Pos[1],Pos[2]];
+  }
+  return [Pos,playerID];
 };
 
 //var creature
@@ -57,7 +59,7 @@ io.on('connection', (sock) => {
   
   
   
-  sock.on('newPos',(Pos) => io.emit('clientPos', UpdatePlayerPosition(Pos),playerID));
+  sock.on('newPos',(Pos) => io.emit('clientPos', UpdatePlayerPosition(Pos,playerID)));
   //sock.on('message', (text) => io.emit('message', text));
  /* sock.on('turn', ({ x, y }) => {
     if (cooldown()) {

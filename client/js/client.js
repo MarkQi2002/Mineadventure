@@ -1,6 +1,6 @@
 function spawnPlayer(playerInfo){
   let new_player = new player(playerInfo.name,
-    [playerInfo.position[0], playerInfo.position[1], groundLevel],
+    [playerInfo.position[0], playerInfo.position[1], playerInfo.position[2]],
     playerInfo.health);
 
   playerArray[playerInfo.ID] = new_player;
@@ -30,9 +30,10 @@ const newPlayer = (playerInfo) => {
 };
 
 
-const playerPositionUpdate = (Pos,PlayerID) => {
-  
-  playerArray[PlayerID].object.position.set(Pos[0],Pos[1],Pos[2]);
+const playerPositionUpdate = ([Pos,PlayerID]) => {
+  if (PlayerID != selfPlayerID){
+    playerArray[PlayerID].object.position.set(Pos[0],Pos[1],Pos[2]);
+  }
 
 };
 
@@ -56,6 +57,7 @@ const playerPositionUpdate = (Pos,PlayerID) => {
                          player_controller.creature.object.position.y,
                          player_controller.creature.object.position.z]);
   };
+  
   document.addEventListener('position event', updatePosition);
 
 
