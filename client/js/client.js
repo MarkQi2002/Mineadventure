@@ -12,6 +12,7 @@ function spawnPlayer(playerInfo){
 // Initialization Every Player Before You Enter The Game
 const initSelf = (severPlayerID, serverPlayerArray) => {
 	clientPlayerID = severPlayerID;
+	playerArray.length = serverPlayerArray.length;
 	for (let i = 0; i < serverPlayerArray.length; i++) {
 		if (serverPlayerArray[i] != null){
 			spawnPlayer(serverPlayerArray[i]);
@@ -20,7 +21,8 @@ const initSelf = (severPlayerID, serverPlayerArray) => {
 };
 
 // Initialization Myself And All Future Players
-const newPlayer = (playerInfo) => {
+const newPlayer = (playerInfo,playerArrayLength) => {
+	playerArray.length = playerArrayLength;
 	let new_player = spawnPlayer(playerInfo);
 	// Setting The Controller To The Player When First Enter
 	if (playerInfo.ID == clientPlayerID){

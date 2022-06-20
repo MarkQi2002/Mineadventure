@@ -14,7 +14,6 @@ const game_map = new map([100,100]);
 
 // Client Side playerArray, Used To Store Player Object
 var playerArray = [];
-playerArray.length = 256;
 
 // Client Side Personal Player ID
 var clientPlayerID;

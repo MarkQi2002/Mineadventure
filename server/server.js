@@ -16,7 +16,7 @@ const io = socketio(server);
 
 // Game Related Variable Declaration
 var playerArray = [];
-playerArray.length = 256;
+playerArray.length = 32;
 
 // Function Used To Create A New Player Using Two Parameters
 const CreateNewPlayer = (playerID, playerName) => {
@@ -53,14 +53,31 @@ const clientDisconnect = (Info, playerID) => {
 	return playerID
 };
 
-// Number Of Player
+// Get A New Player ID From The Empty Space In PlayArray
+function newPlayerID(){
+	let exceedCount = 0;
+	// Stop Untill Get An playerID Corresponding To An Empty Space In PlayArray
+	while (playerArray[ID_count] != null){
+		ID_count = (ID_count + 1) % playerArray.length;
+		exceedCount++;
+		if (exceedCount >= playerArray.length){// If Exceed Max playerArray Length
+			playerArray.length *= 2;
+			console.log("exceed max playArray length, double the playArray length!");
+		}
+	}
+	return ID_count;
+}
+
+
+// ID Of Player
 var ID_count = 0;
 
 // Once A New Player Join, Update To All Other Clients
 io.on('connection', (sock) => {
 	// Setting The New PlayerID
-	const playerID = ID_count;
-	ID_count++;
+	
+	const playerID = newPlayerID(ID_count);
+	
 
 	// Initializing The Player To The Client
 	sock.emit('initSelf', playerID, playerArray);
@@ -69,7 +86,7 @@ io.on('connection', (sock) => {
 	// Receiving Information From Client And Calling Function
 	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
 	// First Parameter Data Name (Same As Client Side), Second Parameter The Actual Data
-	sock.on('newName', (playerName) => io.emit('newPlayer', CreateNewPlayer(playerID, playerName)));
+	sock.on('newName', (playerName) => io.emit('newPlayer', CreateNewPlayer(playerID, playerName),playerArray.length));
 	sock.on('newPos', (Pos) => io.emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
 	sock.on('disconnect', (Info) => io.emit('clientDisconnect', clientDisconnect(Info, playerID)));
 
