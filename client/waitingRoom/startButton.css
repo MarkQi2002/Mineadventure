@@ -1,0 +1,43 @@
+#startButton {
+    background-color: #72ccc9;
+    border: 2px solid dodgerblue;
+    border-radius: 12px;
+    color: black;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 16px;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    transition-property: background-color, border, color, width;
+    transition-duration: 0.5s;
+    width: 150px;
+}
+#startButton:hover {
+    background-color: rebeccapurple;
+    border: 2px solid #72ccc9;
+    color: white;
+    cursor: pointer;
+    width: 200px;
+}
+#startButton span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+}
+#startButton span:after {
+    content: '\00bb';
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -20px;
+    transition: 0.5s;
+}
+#startButton:hover span {
+    padding-right: 25px;
+}
+#startButton:hover span:after {
+    opacity: 1;
+    right: 0;
+}

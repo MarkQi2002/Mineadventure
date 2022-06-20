@@ -1,7 +1,7 @@
 /* Function To Get Element From HTML*/
 /* Used To Get Player Name*/
 function getPlayerName() {
-    var startName = document.getElementById("playerName").value;
+    var startName = document.getElementById("playerInput").value;
     sessionStorage.setItem("playerInitialName", startName);
 }
 
@@ -10,6 +10,7 @@ function getPlayerName() {
 function startGame() {
     getPlayerName();
     window.location.href = "game.html";
+    return false;
 }
 
 /* Variable Used To Display The Current Time In The HTML*/

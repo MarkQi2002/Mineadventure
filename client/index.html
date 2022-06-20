@@ -5,6 +5,9 @@
         <!-- Title And Favicon-->
         <title>Mineadventure</title>
         <link rel="icon" type="image/x-icon" href="/image/favicon.png">
+        <!-- External CSS-->
+        <link rel="styleSheet" href="waitingRoom/startButton.css">
+        <link rel="styleSheet" href="waitingRoom/navigationBar.css">
         <!-- Internal CSS-->
         <style>
             body {
@@ -13,19 +16,12 @@
             h1, h2, h3, h4, h5, h6{
                 text-align:center;
             }
-            #startButton {
-                background-color: #4CAF50; /* Green */
-                border: none;
-                color: white;
-                padding: 15px 32px;
-                text-align: center;
-                text-decoration: none;
-                display: inline-block;
-                font-size: 16px;
-            }
         </style>
     </head>
     <body onload="onloadUpdateTime()">
+        <!-- Top Navigation Bar-->
+        
+
         <!-- Headings-->
         <h1>Mineadventure</h1>
         <h2>Waiting Room</h2>
@@ -38,12 +34,12 @@
 
         <!-- Getting The Player Name-->
         <span>Please Enter Player Name: </span>
-        <input type="text" id="playerName" value="">
+        <input type="text" id="playerInput" value="">
         
         <!-- Starting The Game-->
-        <button id="startButton" onclick="startGame()">Start Game</button>
+        <button id="startButton" onclick="startGame()"><span>Start Game</span></button>
     </body>
 </html>
 
 <!-- External JavaScript-->
-<script src="waitingRoom.js"></script>
+<script src="waitingRoom/waitingRoom.js"></script>
