@@ -42,6 +42,13 @@ const connectionError = (error) => {
 	window.location.href = "index.html";
 };
 
+// When A Player Is Disconnected
+const playerDisconnect = (PlayerID) => {
+	if (playerArray[PlayerID] != null){
+		playerArray[PlayerID].delete();
+	}
+};
+
 (() => {
 	// When Connected To Server, Create A Sock (MySelf)
 	const sock = io();
@@ -56,6 +63,7 @@ const connectionError = (error) => {
 	sock.on('newPlayer', newPlayer);
 	sock.on('clientPos', playerPositionUpdate);
 	sock.on('connect_error', connectionError)
+	sock.on('clientDisconnect', playerDisconnect);
 
 	// Sending My New Position To Server
 	const updatePosition = () => {

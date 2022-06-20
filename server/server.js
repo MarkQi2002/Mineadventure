@@ -44,6 +44,14 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 	return [Pos, playerID];
 };
 
+// When Client Is Disconnected
+const clientDisconnect = (Info, playerID) => {
+	if (playerArray[playerID] != null){
+		console.log("Player ID:", playerID, " Name:", playerArray[playerID].name, "is disconnected!  Info:", Info);
+	}
+	return playerID
+};
+
 // Number Of Player
 var ID_count = 0;
 
@@ -61,7 +69,9 @@ io.on('connection', (sock) => {
 	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
 	// First Parameter Data Name (Same As Client Side), Second Parameter The Actual Data
 	sock.on('newName', (playerName) => io.emit('newPlayer', CreateNewPlayer(playerID, playerName)));
-	sock.on('newPos',(Pos) => io.emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
+	sock.on('newPos', (Pos) => io.emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
+	sock.on('disconnect', (Info) => io.emit('clientDisconnect', clientDisconnect(Info, playerID)));
+
 });
 
 // Whenever An Error Occur, Log The Error
