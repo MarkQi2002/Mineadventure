@@ -1,65 +1,70 @@
-function spawnPlayer(playerInfo){
-  let new_player = new player(playerInfo.name,
-    [playerInfo.position[0], playerInfo.position[1], playerInfo.position[2]],
-    playerInfo.health);
 
-  playerArray[playerInfo.ID] = new_player;
-  return new_player;
+// Constructing An Player Object And Storing In The Client Side playerArray
+function spawnPlayer(playerInfo){
+	let new_player = new player(playerInfo.name,
+								playerInfo.position,
+								playerInfo.health);
+
+	playerArray[playerInfo.ID] = new_player;
+	return new_player;
 }
 
-
-
-
-const initSelf = (playerID,oldPlayerArray) => {
-  selfPlayerID = playerID;
-  for (let i = 0; i < oldPlayerArray.length; i++) {
-    if (oldPlayerArray[i] != null){
-      spawnPlayer(oldPlayerArray[i]);
-    }
-  }
-
+// Initialization Every Player Before You Enter The Game
+const initSelf = (severPlayerID, serverPlayerArray) => {
+	clientPlayerID = severPlayerID;
+	for (let i = 0; i < serverPlayerArray.length; i++) {
+		if (serverPlayerArray[i] != null){
+			spawnPlayer(serverPlayerArray[i]);
+		}
+	}
 };
 
-
+// Initialization Myself And All Future Players
 const newPlayer = (playerInfo) => {
-  let new_player = spawnPlayer(playerInfo);
-  if (playerInfo.ID == selfPlayerID){
-    player_controller = new controller(new_player,camera);
-    animate();
-  }
+	let new_player = spawnPlayer(playerInfo);
+	// Setting The Controller To The Player When First Enter
+	if (playerInfo.ID == clientPlayerID){
+		player_controller = new controller(new_player, camera);
+		animate();
+	}
 };
 
-
-const playerPositionUpdate = ([Pos,PlayerID]) => {
-  if (PlayerID != selfPlayerID){
-    playerArray[PlayerID].object.position.set(Pos[0],Pos[1],Pos[2]);
-  }
-
+// Update Every Player's Position
+const playerPositionUpdate = ([Pos, PlayerID]) => {
+	if (PlayerID != clientPlayerID){
+		playerArray[PlayerID].object.position.set(Pos[0], Pos[1], Pos[2]);
+	}
 };
 
-
-
-
+// When The Server Shutdown Or An Connection Error Occur, Log The Error And Transfer To index.html
+const connectionError = (error) => {
+	console.log(error);
+	window.location.href = "index.html";
+};
 
 (() => {
+	// When Connected To Server, Create A Sock (MySelf)
+	const sock = io();
 
-  const sock = io();
-  sock.on('initSelf',  initSelf);
+	// Sending Information To Server Only Once
+	// First Parameter Is The Tag, Second Parameter Is What We Send To The Server
+	sock.emit('newName', sessionStorage.getItem("playerInitialName"));
 
-  sock.on('newPlayer',  newPlayer);
+	// Receiving Information From Server
+	// First Parameter Is The Tag, Second Parameter Is The Event/Function To Operate On Information From Server
+	sock.on('initSelf', initSelf);
+	sock.on('newPlayer', newPlayer);
+	sock.on('clientPos', playerPositionUpdate);
+	sock.on('connect_error', connectionError)
 
-
-  sock.on('clientPos',  playerPositionUpdate);
-
-
-  const updatePosition = () => {
-    sock.emit('newPos', [player_controller.creature.object.position.x,
-                         player_controller.creature.object.position.y,
-                         player_controller.creature.object.position.z]);
-  };
-  
-  document.addEventListener('position event', updatePosition);
-
-
-
+	// Sending My New Position To Server
+	const updatePosition = () => {
+		// Return The Player's Accurate Position To The Server As A Tuple
+		sock.emit('newPos', [player_controller.creature.object.position.x,
+							player_controller.creature.object.position.y,
+							player_controller.creature.object.position.z]);
+	};
+	
+	// Add An Event Called 'position event' And Run updataPosition When The Event Occur
+	document.addEventListener('position event', updatePosition);
 })();

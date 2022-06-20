@@ -1,26 +1,13 @@
+<!-- Waiting Server, Player Will Input Their Name-->
 <!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title>Mineadventure</title>
-		<style>
-			body { margin: 0; }
-		</style>
-	</head>
-	<body>
-		<script src="/socket.io/socket.io.js"></script>
-
-		<script src="js/module/three.js"></script>
-        <script src="js/module/stats.js"></script>
-		<script src="js/controller.js"></script>
-        <script src="js/creature.js"></script>
-		<script src="js/map.js"></script>
-
-		
-		<script src="js/main.js"></script>
-		<script src="js/client.js"></script>
-
-		
-    	
-	</body>
+<html lang="en-US">
+    <head>
+        <title>Mineadventure</title>
+    </head>
+    <body>
+        <input type="text" id="myText" value="Some text...">
+        <button onclick="getPlayerName()">Try it</button>
+        <a href="game.html">Jump to Chapter 4</a>
+        <script src="waitingRoom.js"></script>
+    </body>
 </html>

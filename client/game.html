@@ -1,0 +1,29 @@
+<!-- Actual Game Server-->
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Mineadventure</title>
+		<!-- Internal CSS-->
+		<style>
+			body { margin: 0; }
+		</style>
+	</head>
+	<body>
+		<!-- Special socket.io Importation-->
+		<script src="/socket.io/socket.io.js"></script>
+
+		<!-- Import The Necessary Module-->
+		<script src="js/module/three.js"></script>
+        <script src="js/module/stats.js"></script>
+
+		<!-- Cutome JavaScript For Game Logic-->
+		<script src="js/controller.js"></script>
+        <script src="js/creature.js"></script>
+		<script src="js/map.js"></script>
+		
+		<!-- Main Running JavaScript-->
+		<script src="js/main.js"></script>
+		<script src="js/client.js"></script>
+	</body>
+</html>

@@ -1,85 +1,76 @@
 // CommonJS Syntax
+// Hyper Text Transfer Protocol (HTTP)
+// Setting Socket Related Modules
 const http = require('http');
 const express = require('express');
 const socketio = require('socket.io');
 
+// An Express Function
 const app = express();
+// Current Directory, Back One Level, Client Folder
 app.use(express.static(`${__dirname}/../client`));
 
+// Create An Server Instance
 const server = http.createServer(app);
 const io = socketio(server);
-//const io = new Server(server, {});
 
-
-
-
-
-
-//const muain_player = new ds.player("pERIKarua",[0,0,0],100);
-
-const CreateNewPlayer = (playerID) => {
-
-  let playerInfo  = {
-    ID: playerID,
-    name: 'pERIKarya',
-    position: [Math.random()*5,Math.random()*5,1],
-    health: 100,
-  };
-
-  playerArray[playerID] = playerInfo;
-
-  console.log(playerInfo);
-  return playerInfo;
-};
-
-
-const UpdatePlayerPosition = (Pos,playerID) => {
-  if (playerArray[playerID]!= null){
-    playerArray[playerID].position = [Pos[0],Pos[1],Pos[2]];
-  }
-  return [Pos,playerID];
-};
-
-//var creature
-
-
-
+// Game Related Variable Declaration
 var playerArray = [];
-playerArray.length = 30;
-//const { clear, getBoard, makeTurn } = createBoard(20);
+playerArray.length = 256;
 
+// Function Used To Create A New Player Using Two Parameters
+const CreateNewPlayer = (playerID, playerName) => {
+	// Similar To A Struct
+	let playerInfo  = {
+		ID: playerID,
+		name: playerName,
+		position: [Math.random() * 5, Math.random() * 5, 1],
+		health: 100
+	};
+
+	// Indexing Player Array To Include The New Player
+	playerArray[playerID] = playerInfo;
+
+	// Log The PlayerInfo On The Server Side
+	console.log(playerInfo);
+	return playerInfo;
+};
+
+// Pos Is An Array Of Size 3 (XYZ)
+const UpdatePlayerPosition = (Pos, playerID) => {
+	if (playerArray[playerID] != null) {
+		playerArray[playerID].position = Pos;
+	}
+	return [Pos, playerID];
+};
+
+// Number Of Player
 var ID_count = 0;
+
+// Once A New Player Join, Update To All Other Clients
 io.on('connection', (sock) => {
-  const playerID = ID_count;
-  ID_count ++;
-  console.log("new player joined, ID: ",playerID);
-  sock.emit('initSelf',playerID,playerArray);//init the new player
-  io.emit('newPlayer',CreateNewPlayer(playerID));//send new player info to all player
+	// Setting The New PlayerID
+	const playerID = ID_count;
+	ID_count++;
 
-  
-  
-  
-  sock.on('newPos',(Pos) => io.emit('clientPos', UpdatePlayerPosition(Pos,playerID)));
-  //sock.on('message', (text) => io.emit('message', text));
- /* sock.on('turn', ({ x, y }) => {
-    if (cooldown()) {
-      const playerWon = makeTurn(x, y, color);
-      io.emit('turn', { x, y, color });
-
-      if (playerWon) {
-        sock.emit('message', 'You Won!');
-        io.emit('message', 'New Round');
-        clear();
-        io.emit('board');
-      }
-    }
-  });*/
+	// Initializing The Player To The Client
+	sock.emit('initSelf', playerID, playerArray);
+	console.log("new player joined, ID: ", playerID);
+	
+	// Receiving Information From Client And Calling Function
+	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
+	// First Parameter Data Name (Same As Client Side), Second Parameter The Actual Data
+	sock.on('newName', (playerName) => io.emit('newPlayer', CreateNewPlayer(playerID, playerName)));
+	sock.on('newPos',(Pos) => io.emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
 });
 
+// Whenever An Error Occur, Log The Error
 server.on('error', (err) => {
-  console.error(err);
+  	console.error(err);
 });
 
+// Cannot Use 3000 As It Creates A New HTTP Server
+// Listening To Requests From The Port 8080
 server.listen(8080, () => {
-  console.log('server is ready');
+  	console.log('server is ready');
 });
