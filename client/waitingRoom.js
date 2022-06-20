@@ -1,13 +1,14 @@
 /* Function To Get Element From HTML*/
 /* Used To Get Player Name*/
 function getPlayerName() {
-    var startName = document.getElementById("myText").value;
+    var startName = document.getElementById("playerName").value;
     sessionStorage.setItem("playerInitialName", startName);
 }
 
 /* Function To Start The Game*/
 /* Transfer The HTML File From index.html to game.html*/
 function startGame() {
+    getPlayerName();
     window.location.href = "game.html";
 }
 
