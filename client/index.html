@@ -2,12 +2,50 @@
 <!DOCTYPE html>
 <html lang="en-US">
     <head>
+        <!-- Title And Favicon-->
         <title>Mineadventure</title>
+        <link rel="icon" type="image/x-icon" href="/image/favicon.png">
+        <!-- Internal CSS-->
+        <style>
+            body {
+                background-color:powderblue;
+            }
+            h1, h2, h3, h4, h5, h6{
+                text-align:center;
+            }
+            #startButton {
+                background-color: #4CAF50; /* Green */
+                border: none;
+                color: white;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+            }
+        </style>
     </head>
-    <body>
-        <input type="text" id="myText" value="Some text...">
-        <button onclick="getPlayerName()">Try it</button>
-        <a href="game.html">Jump to Chapter 4</a>
-        <script src="waitingRoom.js"></script>
+    <body onload="onloadUpdateTime()">
+        <!-- Headings-->
+        <h1>Mineadventure</h1>
+        <h2>Waiting Room</h2>
+
+        <!-- Basic Information-->
+        <p>This is a web based 3D adventure game created by <i>Erik Zeng</i> and <i>Mark Qi</i> for educational purposes.</p>
+        <span>The Current Time Is: </span>
+        <span id="currentDate"></span>
+        <p></p>
+
+        <!-- Getting The Player Name-->
+        <span>Please Enter Player Name: </span>
+        <input type="text" id="myText" value="">
+        <button id="submitButton" onclick="getPlayerName()">Submit</button>
+        <p></p>
+        
+        <!-- Starting The Game-->
+        <button id="startButton" onclick="startGame()">Start Game</button>
     </body>
 </html>
+
+<!-- External JavaScript-->
+<script src="waitingRoom.js"></script>
