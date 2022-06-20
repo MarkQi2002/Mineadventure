@@ -48,6 +48,7 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 const clientDisconnect = (Info, playerID) => {
 	if (playerArray[playerID] != null){
 		console.log("Player ID:", playerID, " Name:", playerArray[playerID].name, "is disconnected!  Info:", Info);
+		playerArray[playerID] = null;
 	}
 	return playerID
 };
