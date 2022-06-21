@@ -1,4 +1,3 @@
-<!-- Waiting Server, Player Will Input Their Name-->
 <!DOCTYPE html>
 <html lang="en-US">
     <head>
@@ -6,8 +5,8 @@
         <title>Mineadventure</title>
         <link rel="icon" type="image/x-icon" href="image/favicon.png">
         <!-- External CSS-->
-        <link rel="styleSheet" href="waitingRoom/startButton.css">
         <link rel="styleSheet" href="waitingRoom/navigationBar.css">
+        <link rel="styleSheet" href="waitingRoom/image.css">
         <!-- Internal CSS-->
         <style>
             body {
@@ -15,11 +14,11 @@
                 margin: 0px;
             }
             h1, h2, h3, h4, h5, h6{
-                text-align:center;
+                text-align:left;
             }
         </style>
     </head>
-    <body onload="onloadUpdateTime()" id="home">
+    <body id="contact">
         <!-- Top Navigation Bar-->
         <ul id="navigationBar">
             <div class="navigationList">
@@ -30,23 +29,12 @@
         </ul>
 
         <!-- Headings-->
-        <h1>Mineadventure</h1>
-        <h2>Waiting Room</h2>
-
-        <!-- Basic Information-->
-        <p>This is a web based 3D adventure game created by <i>Erik Zeng</i> and <i>Mark Qi</i> for educational purposes.</p>
-        <span>The Current Time Is: </span>
-        <span id="currentDate"></span>
-        <p></p>
-
-        <!-- Getting The Player Name-->
-        <span>Please Enter Player Name: </span>
-        <input type="text" id="playerInput" value="">
-        
-        <!-- Starting The Game-->
-        <button id="startButton" onclick="startGame()"><span>Start Game</span></button>
+        <h1>Author Contact:</h1>
+        <h2>Erik Zeng - Software Engineer, Server Manager</h2>
+        <a href="https://github.com/zengc10" target="_blank"><img src="image/github.png" alt="GitHub Image" class="contactImage"></a>
+        <p>Unwilling To Share His Email</p>
+        <h2>Mark Qi - Software Engineer, Frontend Developer</h2>
+        <a href="https://github.com/MarkQi2002" target="_blank"><img src="image/github.png" alt="GitHub Image" class="contactImage"></a>
+        <a href="mailto:mark.qi@mail.utoronto.ca" target="_blank"><img src="image/gmail.png" alt="Gmail Image" class="contactImage"></a><br>
     </body>
 </html>
-
-<!-- External JavaScript-->
-<script src="waitingRoom/waitingRoom.js"></script>

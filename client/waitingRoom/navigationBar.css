@@ -1,0 +1,27 @@
+#navigationBar {
+    background-color: darkred;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    overflow: hidden;
+}
+
+.navigationList li {
+    border-right: 1px solid black;
+    float: left;
+}
+
+.navigationList li a {
+    background-color: darkred;
+    color: white;
+    display: block;
+    padding: 8px;
+    text-decoration: none;
+    text-align: center;
+}
+
+.navigationList li a:hover {
+    background-color: deeppink;
+}
