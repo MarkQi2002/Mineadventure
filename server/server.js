@@ -29,7 +29,7 @@ const CreateNewPlayer = (playerID, playerName) => {
 	let playerInfo  = {
 		ID: playerID,
 		name: playerName,
-		position: [Math.random() * 0, Math.random() * 0, 1],
+		position: [0, 0, 1],
 		health: 100
 	};
 
@@ -73,29 +73,8 @@ function newPlayerID(){
 	return ID_count;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-var game_map = new map([3,3],[50, 50]);
-
-
-
-
-
-
-
-
-
-
-
+// Setting The Size Of The Map
+var game_map = new map([3, 3],[50, 50]);
 
 // ID Of Player
 var ID_count = 0;
