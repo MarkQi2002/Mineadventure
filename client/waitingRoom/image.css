@@ -1,6 +1,6 @@
-.contactImage {
+.contact-image {
     border: 3px solid rebeccapurple;
-    width:100px;
-    height:100px;
+    width: 80px;
+    height: 80px;
     background-color:white;
 }

@@ -1,0 +1,27 @@
+.contact-us-box #contact-button {
+    border: 2px solid blue;
+    border-radius: 8px;
+    background-color: lightpink;
+    font-size: 20px;
+    padding: 10px;
+    width: 20%;
+    margin-left: 40%;
+    margin-right: 40%;
+    margin-top: 2%;
+    margin-bottom: 2%;
+    transition-property: all;
+    transition-duration: 1s;
+}
+
+.contact-us-box #contact-button:hover {
+    border: 2px solid blue;
+    border-radius: 8px;
+    background-color: peru;
+    font-size: 20px;
+    padding: 10px;
+    width: 30%;
+    margin-left: 35%;
+    margin-right: 35%;
+    margin-top: 2%;
+    margin-bottom: 2%;
+}

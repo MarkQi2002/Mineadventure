@@ -1,0 +1,38 @@
+.contact-us-box {
+    background-color:lightgrey;
+    width: 50%;
+    color:black;
+}
+
+.contact-us-box p{
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.contact-us-box #firstName {
+    width: 90%;
+    height: 25px;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.contact-us-box #lastName {
+    width: 90%;
+    height: 25px;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.contact-us-box #email {
+    width: 90%;
+    height: 25px;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.contact-us-box #subject {
+    width: 90%;
+    height: 160px;
+    margin-left: 5%;
+    margin-right: 5%;
+}

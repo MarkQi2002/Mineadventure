@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <!-- Title And Favicon-->
+        <title>Mineadventure</title>
+        <link rel="icon" type="image/png" href="image/favicon.png">
+        <!-- External CSS-->
+        <link rel="styleSheet" href="waitingRoom/navigationBar.css">
+        <link rel="styleSheet" href="waitingRoom/contactus.css">
+        <link rel="styleSheet" href="waitingRoom/contactbutton.css">
+        <!-- Internal CSS-->
+        <style>
+            body {
+                background-color:lightpink;
+                margin: 0px;
+            }
+            h1, h2, h3, h4, h5, h6{
+                color:white;
+                text-align:center;
+                text-shadow: 2px 2px 5px purple;
+            }
+        </style>
+    </head>
+    <body id="contactUs">
+        <!-- Top Navigation Bar-->
+        <ul id="navigationBar">
+            <div class="navigationList">
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="about.html#about">About</a></li>
+                <li><a href="contactus.html#contactUs">Contact Us</a></li>
+            </div>
+        </ul>
+
+        <!-- Headings-->
+        <h1>Mineadventure Help Center</h1>
+        <h3>Need Something? The Team Is Here To Help!</h3>
+        <hr>
+
+        <!-- Contact Us-->
+        <div class="contact-us-box">
+            <p>First Name</p>
+            <input type="text" id="firstName" placeholder="Your First Name"><br>
+
+            <p>Last Name</p>
+            <input type="text" id="lastName" placeholder="Your Last Name"><br>
+
+            <p>Email</p>
+            <input type="text" id="email" placeholder="Your Email"><br>
+
+            <p>Subject</p>
+            <textarea id="subject" placeholder="Suggestion Or Anything"></textarea><br>
+
+            <button id="contact-button" onclick="saveMessage()"><span>Submit</span></button>
+        </div>
+    </body>
+</html>
+
+<!-- External JavaScript-->
+<script src="waitingRoom/contactus.js"></script>
