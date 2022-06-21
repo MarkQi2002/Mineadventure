@@ -1,4 +1,15 @@
+@keyframes slidein {
+    from {
+        margin-left: 0%;
+    }
+
+    to {
+        margin-left: 40%;
+    }
+}
+
 .contact-us-box #contact-button {
+    animation: 1s slidein;
     border: 2px solid blue;
     border-radius: 8px;
     background-color: lightpink;
