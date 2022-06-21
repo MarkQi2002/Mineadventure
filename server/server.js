@@ -5,6 +5,11 @@ const http = require('http');
 const express = require('express');
 const socketio = require('socket.io');
 
+
+const map = require('./mapClass.js');
+//const quarterMap = require('./quarterMap.js');
+//const block = require('./block.js');
+
 // An Express Function
 const app = express();
 // Current Directory, Back One Level, Client Folder
@@ -69,6 +74,29 @@ function newPlayerID(){
 }
 
 
+
+
+
+
+
+
+
+
+
+
+var game_map = new map([5,5],[50, 50]);
+
+
+
+
+
+
+
+
+
+
+
+
 // ID Of Player
 var ID_count = 0;
 
@@ -80,7 +108,7 @@ io.on('connection', (sock) => {
 	
 
 	// Initializing The Player To The Client
-	sock.emit('initSelf', playerID, playerArray);
+	sock.emit('initSelf', playerID, playerArray, game_map);
 	console.log("new player joined, ID: ", playerID);
 	
 	// Receiving Information From Client And Calling Function

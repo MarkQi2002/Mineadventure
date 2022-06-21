@@ -3,7 +3,7 @@ class controller{
     constructor(creature,camera) {
         this.creature = creature;
         this.camera = camera;
-        this.baseMovementSpeed = 5; // Per Second
+        this.baseMovementSpeed = 3; // Per Second
         this.speed = this.baseMovementSpeed; // Per Second
 
         this.initJumpVelocity = 1; // Per Second

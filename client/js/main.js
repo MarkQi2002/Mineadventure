@@ -22,8 +22,8 @@ document.body.appendChild(renderer.domElement);
 
 // Game Setting
 const groundLevel = 1;
-const gravity = 8;
-const game_map = new map([100,100]);
+const gravity = 10;
+var game_map;
 
 // Client Side playerArray, Used To Store Player Object
 var playerArray = [];

@@ -10,7 +10,7 @@ function spawnPlayer(playerInfo){
 }
 
 // Initialization Every Player Before You Enter The Game
-const initSelf = (severPlayerID, serverPlayerArray) => {
+const initSelf = (severPlayerID, serverPlayerArray, serverMap) => {
 	clientPlayerID = severPlayerID;
 	playerArray.length = serverPlayerArray.length;
 	for (let i = 0; i < serverPlayerArray.length; i++) {
@@ -18,6 +18,8 @@ const initSelf = (severPlayerID, serverPlayerArray) => {
 			spawnPlayer(serverPlayerArray[i]);
 		}
 	}
+
+	game_map = new map(serverMap);
 };
 
 // Initialization Myself And All Future Players
