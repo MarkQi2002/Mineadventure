@@ -189,7 +189,7 @@ class block{
         for (let y_Axis = 0; y_Axis < this.unitList.length; y_Axis++) {
             for (let x_Axis = 0; x_Axis < this.unitList[y_Axis].length; x_Axis++) {
 
-                var colorHeight = 2-PerlinNoise.noise(PerlinNoise.initX + (x + x_Axis / 10) * direction.x , PerlinNoise.initY + (y + y_Axis / 10) * direction.y, 0.1)*4;
+                var colorHeight = 2-PerlinNoise.noise((PerlinNoise.initX + (x * this.unitList[0].length + x_Axis) * direction.x) / 10 , (PerlinNoise.initY + (y * this.unitList.length + y_Axis) * direction.y) / 10, 0.1)*4;
                 if(colorHeight < 0){
                     colorHeight = 0;
                 }

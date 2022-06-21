@@ -29,7 +29,7 @@ const CreateNewPlayer = (playerID, playerName) => {
 	let playerInfo  = {
 		ID: playerID,
 		name: playerName,
-		position: [Math.random() * 5, Math.random() * 5, 1],
+		position: [Math.random() * 0, Math.random() * 0, 1],
 		health: 100
 	};
 
@@ -84,7 +84,7 @@ function newPlayerID(){
 
 
 
-var game_map = new map([5,5],[50, 50]);
+var game_map = new map([3,3],[50, 50]);
 
 
 
