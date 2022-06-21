@@ -1,3 +1,8 @@
+.contact-us-first-line {
+    width: 100%;
+    display: flex;
+}
+
 .contact-us-box {
     background-color:lightgrey;
     width: 50%;
@@ -35,4 +40,15 @@
     height: 160px;
     margin-left: 5%;
     margin-right: 5%;
+}
+
+.wechat-donation {
+    background-color:lightgrey;
+    width: 50%;
+    color:black;
+}
+
+.wechat-donation img {
+    width: 100%;
+    height: 100%;
 }
