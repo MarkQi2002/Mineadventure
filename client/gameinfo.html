@@ -1,3 +1,4 @@
+<!-- Waiting Server, Player Will Input Their Name-->
 <!DOCTYPE html>
 <html lang="en-US">
     <head>
@@ -5,8 +6,8 @@
         <title>Mineadventure</title>
         <link rel="icon" type="image/png" href="image/favicon.png">
         <!-- External CSS-->
+        <link rel="styleSheet" href="waitingRoom/startbutton.css">
         <link rel="styleSheet" href="waitingRoom/navigationbar.css">
-        <link rel="styleSheet" href="waitingRoom/image.css">
         <!-- Internal CSS-->
         <style>
             body {
@@ -14,11 +15,11 @@
                 margin: 0px;
             }
             h1, h2, h3, h4, h5, h6{
-                text-align:left;
+                text-align:center;
             }
         </style>
     </head>
-    <body id="about">
+    <body onload="onloadUpdateTime()" id="home">
         <!-- Top Navigation Bar-->
         <ul id="navigation-bar">
             <div class="navigation-list">
@@ -36,21 +37,10 @@
             </div>
         </ul>
 
-
         <!-- Headings-->
-        <h1 style="text-align:center;">Author Contact</h1>
-
-        <!-- Author Contact-->
-        <!-- Erik Zeng-->
-        <h3>Erik Zeng - Software Engineer, Server Manager</h3>
-        <p>Upcoming third year computer engineering student at McMaster University.</p>
-        <a href="https://github.com/zengc10" target="_blank"><img src="image/github.png" alt="GitHub Image" class="contact-image"></a>
-        <a href="mailto:zc1279166541@gmail.com" target="_blank"><img src="image/gmail.png" alt="Gmail Image" class="contact-image"></a><br>
-
-        <!-- Mark Qi-->
-        <h3>Mark Qi - Software Engineer, Frontend Developer</h3>
-        <p>Upcoming third year computer engineering student at University Of Toronto.</p>
-        <a href="https://github.com/MarkQi2002" target="_blank"><img src="image/github.png" alt="GitHub Image" class="contact-image"></a>
-        <a href="mailto:mark.qi@mail.utoronto.ca" target="_blank"><img src="image/gmail.png" alt="Gmail Image" class="contact-image"></a><br>
+        <h1>Please Select One From The Dropdown Bar</h1>
     </body>
 </html>
+
+<!-- External JavaScript-->
+<script src="waitingRoom/waitingRoom.js"></script>

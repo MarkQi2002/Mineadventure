@@ -5,7 +5,7 @@
         <title>Mineadventure</title>
         <link rel="icon" type="image/png" href="image/favicon.png">
         <!-- External CSS-->
-        <link rel="styleSheet" href="waitingRoom/navigationBar.css">
+        <link rel="styleSheet" href="waitingRoom/navigationbar.css">
         <link rel="styleSheet" href="waitingRoom/contactus.css">
         <link rel="styleSheet" href="waitingRoom/contactbutton.css">
         <!-- Internal CSS-->
@@ -23,10 +23,18 @@
     </head>
     <body id="contactUs">
         <!-- Top Navigation Bar-->
-        <ul id="navigationBar">
-            <div class="navigationList">
+        <ul id="navigation-bar">
+            <div class="navigation-list">
                 <li><a href="index.html#home">Home</a></li>
                 <li><a href="about.html#about">About</a></li>
+                <li class="gameinfo-dropdown">
+                    <a href="gameinfo.html">Game Info</a>
+                    <div class="gameinfo-dropdown-content">
+                        <a href="gameInfo/map.html">Map</a>
+                        <a href="gameInfo/creature.html">Creature</a>
+                        <a href="gameInfo/item.html">Item</a>
+                    </div>
+                </li> 
                 <li><a href="contactus.html#contactUs">Contact Us</a></li>
             </div>
         </ul>

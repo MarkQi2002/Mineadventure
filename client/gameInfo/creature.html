@@ -1,0 +1,45 @@
+<!-- Waiting Server, Player Will Input Their Name-->
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <!-- Title And Favicon-->
+        <title>Mineadventure</title>
+        <link rel="icon" type="image/png" href="image/favicon.png">
+        <!-- External CSS-->
+        <link rel="styleSheet" href="../waitingRoom/navigationbar.css">
+        <!-- Internal CSS-->
+        <style>
+            body {
+                background-color:lightpink;
+                margin: 0px;
+            }
+            h1, h2, h3, h4, h5, h6{
+                text-align:center;
+            }
+        </style>
+    </head>
+    <body onload="onloadUpdateTime()" id="home">
+        <!-- Top Navigation Bar-->
+        <ul id="navigation-bar">
+            <div class="navigation-list">
+                <li><a href="../index.html#home">Home</a></li>
+                <li><a href="../about.html#about">About</a></li>
+                <li class="gameinfo-dropdown">
+                    <a href="../gameinfo.html">Game Info</a>
+                    <div class="gameinfo-dropdown-content">
+                        <a href="map.html">Map</a>
+                        <a href="creature.html">Creature</a>
+                        <a href="item.html">Item</a>
+                    </div>
+                </li> 
+                <li><a href="../contactus.html#contactUs">Contact Us</a></li>
+            </div>
+        </ul>
+
+        <!-- Headings-->
+        <h1>Please Select One From The Dropdown Bar</h1>
+    </body>
+</html>
+
+<!-- External JavaScript-->
+<script src="waitingRoom/waitingRoom.js"></script>

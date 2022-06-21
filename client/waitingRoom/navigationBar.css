@@ -1,27 +1,53 @@
-#navigationBar {
-    background-color: darkred;
+#navigation-bar {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    position: sticky;
-    top: 0;
     overflow: hidden;
+    background-color: darkred
 }
 
-.navigationList li {
+.navigation-list li{
     border-right: 1px solid black;
     float: left;
 }
 
-.navigationList li a {
+.navigation-list a {
+    background-color: darkred;
+    display: inline-block;
+    color: white;
+    padding: 14px 16px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.navigation-list a:hover {
+    background-color: deeppink;
+}
+
+.gameinfo-dropdown {
+    display: inline-block;
+}
+
+.gameinfo-dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+  
+.gameinfo-dropdown-content a {
     background-color: darkred;
     color: white;
     display: block;
-    padding: 8px;
+    padding: 12px 16px;
+    text-align: left;
     text-decoration: none;
-    text-align: center;
 }
-
-.navigationList li a:hover {
-    background-color: deeppink;
+  
+.gameinfo-dropdown-content a:hover {background-color: deeppink;}
+  
+.gameinfo-dropdown:hover .gameinfo-dropdown-content {
+    display: block;
 }
