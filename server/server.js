@@ -33,7 +33,10 @@ const CreateNewPlayer = (playerID, playerName) => {
 		ID: playerID,
 		name: playerName,
 		position: [0, 0, 1],
-		health: 100
+		health: 100,
+		playerItemArray: {
+            "Blood Orb" : 0
+        }
 	};
 
 	// Indexing Player Array To Include The New Player
@@ -51,6 +54,14 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 	}
 	return [Pos, playerID];
 };
+
+// Increment Player Item Array
+const UpdatePlayerItemArray = (additionalItemName, updatePlayerID) => {
+	if (playerArray[updatePlayerID] != null) {
+		playerArray[updatePlayerID].playerItemArray[additionalItemName]++;
+	}
+	return additionalItemName;
+}
 
 // Get A New Player ID From The Empty Space In PlayArray
 function newPlayerID(){
@@ -85,10 +96,10 @@ var newItemID;
 const CreateNewItem = () => {
 	// Similar To A Struct
 	let itemInfo = {
-		itemName: "bloodOrb",
+		itemName: "Blood Orb",
 		itemRarity: "Common",
 		itemStackType: "Linear",
-		itemBuffType: "Defense",
+		itemBuffType: "Defensive",
 		itemPosition: [1, 1, 1]
 	};
 
@@ -146,6 +157,7 @@ io.on('connection', (sock) => {
 	sock.on('disconnect', (Info) => io.emit('clientDisconnect', clientDisconnect(Info, playerID)));
 
 	// Item Related
+	sock.on('newPlayerItemArray', (additionalItemName, updatePlayerID) => io.emit('clientPlayerItemArray', UpdatePlayerItemArray(additionalItemName, updatePlayerID), updatePlayerID));
 	sock.on('serverNewItem', () => io.emit('clientNewItem', CreateNewItem(), newItemID));
 	sock.on('deleteItem', (itemIndex) => io.emit('removeItem', deleteItem(itemIndex)));
 });

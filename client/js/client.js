@@ -42,11 +42,17 @@ const playerPositionUpdate = ([Pos, PlayerID]) => {
 // ------------------Item----------------------
 // Variable Declaration
 var removeItemID;
+var additionalItemName;
 
+// For Updating Player Item Array
+const playerItemArrayUpdate = (additionalItemName, updatePlayerID) => {
+	playerArray[updatePlayerID].playerItemArray[additionalItemName]++;
+	console.log("Player ", updatePlayerID, " Item Array: ", playerArray[updatePlayerID].playerItemArray);
+}
 // Initialization Myself And All Future Players
 // Constructing An Player Object And Storing In The Client Side playerArray
 function spawnItem(itemInfo, itemIndex){
-	console.log("Spawning Item At ItemIndex: ", itemIndex);
+	console.log("Spawning", itemInfo, " At ItemIndex: ", itemIndex);
 	let new_item = new bloodOrb(itemInfo.itemName,
 								itemInfo.itemRarity,
 								itemInfo.itemStackType,
@@ -62,7 +68,6 @@ const initItem = (serverItemArray) => {
 	itemArray.length = serverItemArray.length;
 	for (let itemIndex = 0; itemIndex < serverItemArray.length; itemIndex++) {
 		if (serverItemArray[itemIndex] != null){
-			console.log("(INIT) Spawning Item At ItemIndex: ", itemIndex);
 			spawnItem(serverItemArray[itemIndex], itemIndex);
 		}
 	}
@@ -70,7 +75,6 @@ const initItem = (serverItemArray) => {
 
 // Initialization All Future Item
 const newItem = (itemInfo, itemIndex) => {
-	console.log("(NEW) Spawning Item At ItemIndex: ", itemIndex);
 	spawnItem(itemInfo, itemIndex);
 };
 
@@ -112,6 +116,7 @@ const playerDisconnect = (PlayerID) => {
 	sock.on('clientPos', playerPositionUpdate);
 	sock.on('clientDisconnect', playerDisconnect);
 
+	sock.on('clientPlayerItemArray', playerItemArrayUpdate);
 	sock.on('initItem', initItem);
 	sock.on('clientNewItem', newItem);
 	sock.on('removeItem', deleteItem);
@@ -126,6 +131,11 @@ const playerDisconnect = (PlayerID) => {
 							player_controller.creature.object.position.z]);
 	};
 	
+	// Sending New Item List To Server
+	const updateItem = () => {
+		sock.emit('newPlayerItemArray', additionalItemName, clientPlayerID);
+	}
+	// Removing A Collectable Item
 	const removeItem = () => {
 		sock.emit('deleteItem', removeItemID);
 	}
@@ -134,4 +144,5 @@ const playerDisconnect = (PlayerID) => {
 
 	// Add An Event Called 'remove item' To Remove An Collectable Item
 	document.addEventListener('remove item', removeItem);
+	document.addEventListener('player collected item', updateItem);
 })();

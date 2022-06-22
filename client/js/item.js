@@ -29,8 +29,6 @@ class item {
     }
 
     delete() {
-        console.log("Deleting An Item");
-
         // Remove All Child Object
         var obj;
         for (var i = this.object.children.length - 1; i >= 0; i--) { 
@@ -47,6 +45,7 @@ class item {
 }
 
 // Blood Orb
+// itemName: "Blood Orb"
 class bloodOrb extends item {
     constructor(itemName, itemRarity, itemStackType, itemBuffType, itemPosition) {
         // Calling Parent Constructor
@@ -57,8 +56,5 @@ class bloodOrb extends item {
         let material = new THREE.MeshBasicMaterial({color: 'red'});
         let mesh = new THREE.Mesh(geometry, material);
         this.object.add(mesh);
-
-        // Output
-        console.log("Creating A Blood Orb");
     }
 }

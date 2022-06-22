@@ -142,20 +142,24 @@ class controller{
         // Getting Player Bounding Box
         let playerBB = new THREE.Sphere(predictedPosition, 0.5);
 
-        // Checking Collision With Every Other Player
+        // Checking Collision With Every Collectable Item
         for (let itemIndex = 0; itemIndex < itemArray.length; itemIndex++) {
             // A Few Condition To Skip Collision Detection
             if (itemArray[itemIndex] == null) continue;
             if (predictedPosition.manhattanDistanceTo(itemArray[itemIndex].object.position) > 2) continue;
 
-            // Getting Other Player's Bounding Box
+            // Getting Item Bounding Box
             // console.log(itemArray[itemIndex].object.position);
-            let otherPlayerBB = new THREE.Sphere(itemArray[itemIndex].object.position, 0.2);
+            let itemBB = new THREE.Sphere(itemArray[itemIndex].object.position, 0.2);
 
-            // If Collision Occur, Move In Opposite Direction And Return True
-            if (playerBB.intersectsSphere(otherPlayerBB)) {
-                console.log("Collided With Item", itemIndex);
-                
+            // If Collision Occur, Increment Item Count Using Event
+            if (playerBB.intersectsSphere(itemBB)) {
+                console.log("Collided With Item", itemArray[itemIndex]);
+
+                additionalItemName = itemArray[itemIndex].name;
+                var event = new Event('player collected item', {bubbles: true, cancelable: false})
+                document.dispatchEvent(event);
+
                 removeItemID = itemIndex;
                 var event = new Event('remove item', {bubbles: true, cancelable: false})
                 document.dispatchEvent(event);

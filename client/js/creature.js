@@ -5,7 +5,7 @@ class creature{
         this.object = new THREE.Object3D();
         this.object.position.set(position[0], position[1], position[2]);
         this.health = health;
-        scene.add( this.object );
+        scene.add(this.object);
     }
 
     damage(amount) {
@@ -31,6 +31,10 @@ class player extends creature {
     constructor(name, position, health) {
         // Calling Parent Constructor
         super(name, position, health)
+
+        this.playerItemArray = {
+            "Blood Orb" : 0
+        }
 
         // Spherical Body
         let geometry = new THREE.SphereGeometry(0.5, 10, 10);
