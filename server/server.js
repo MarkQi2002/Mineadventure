@@ -56,11 +56,19 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 };
 
 // Increment Player Item Array
-const UpdatePlayerItemArray = (additionalItemName, updatePlayerID) => {
+const UpdatePlayerItemArray = (additionalItem, updatePlayerID) => {
 	if (playerArray[updatePlayerID] != null) {
-		playerArray[updatePlayerID].playerItemArray[additionalItemName]++;
+		playerArray[updatePlayerID].playerItemArray[additionalItem.name]++;
 	}
-	return additionalItemName;
+
+	// Player Property Update
+	// Defensive Property Update
+	if (additionalItem.buffType == "Defensive") {
+		playerArray[updatePlayerID].health += additionalItem.health;
+		console.log(playerArray[updatePlayerID].health);
+	}
+
+	return additionalItem;
 }
 
 // Get A New Player ID From The Empty Space In PlayArray
@@ -157,7 +165,7 @@ io.on('connection', (sock) => {
 	sock.on('disconnect', (Info) => io.emit('clientDisconnect', clientDisconnect(Info, playerID)));
 
 	// Item Related
-	sock.on('newPlayerItemArray', (additionalItemName, updatePlayerID) => io.emit('clientPlayerItemArray', UpdatePlayerItemArray(additionalItemName, updatePlayerID), updatePlayerID));
+	sock.on('newPlayerItemArray', (additionalItem, updatePlayerID) => io.emit('clientPlayerItemArray', UpdatePlayerItemArray(additionalItem, updatePlayerID), updatePlayerID));
 	sock.on('serverNewItem', () => io.emit('clientNewItem', CreateNewItem(), newItemID));
 	sock.on('deleteItem', (itemIndex) => io.emit('removeItem', deleteItem(itemIndex)));
 });

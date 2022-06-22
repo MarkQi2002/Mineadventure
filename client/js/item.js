@@ -26,6 +26,11 @@ class item {
         this.object = new THREE.Object3D();
         this.object.position.set(itemPosition[0], itemPosition[1], itemPosition[2]);
         scene.add( this.object );
+
+        // Item Properties
+        // Defensive Properties
+        this.health = 0;
+        this.armor = 0;
     }
 
     delete() {
@@ -56,5 +61,10 @@ class bloodOrb extends item {
         let material = new THREE.MeshBasicMaterial({color: 'red'});
         let mesh = new THREE.Mesh(geometry, material);
         this.object.add(mesh);
+
+        // Item Properties
+        // Defensive Properties
+        this.health = 20;
+        this.armor = 0;
     }
 }

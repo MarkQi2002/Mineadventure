@@ -156,7 +156,7 @@ class controller{
             if (playerBB.intersectsSphere(itemBB)) {
                 console.log("Collided With Item", itemArray[itemIndex]);
 
-                additionalItemName = itemArray[itemIndex].name;
+                additionalItem = itemArray[itemIndex];
                 var event = new Event('player collected item', {bubbles: true, cancelable: false})
                 document.dispatchEvent(event);
 

@@ -42,12 +42,19 @@ const playerPositionUpdate = ([Pos, PlayerID]) => {
 // ------------------Item----------------------
 // Variable Declaration
 var removeItemID;
-var additionalItemName;
+var additionalItem;
 
 // For Updating Player Item Array
-const playerItemArrayUpdate = (additionalItemName, updatePlayerID) => {
-	playerArray[updatePlayerID].playerItemArray[additionalItemName]++;
+const playerItemArrayUpdate = (additionalItem, updatePlayerID) => {
+	playerArray[updatePlayerID].playerItemArray[additionalItem.name]++;
 	console.log("Player ", updatePlayerID, " Item Array: ", playerArray[updatePlayerID].playerItemArray);
+
+	// Player Property Update
+	// Defensive Property Update
+	if (additionalItem.buffType == "Defensive") {
+		playerArray[updatePlayerID].health += additionalItem.health;
+		console.log(playerArray[updatePlayerID].health);
+	}
 }
 // Initialization Myself And All Future Players
 // Constructing An Player Object And Storing In The Client Side playerArray
@@ -133,7 +140,7 @@ const playerDisconnect = (PlayerID) => {
 	
 	// Sending New Item List To Server
 	const updateItem = () => {
-		sock.emit('newPlayerItemArray', additionalItemName, clientPlayerID);
+		sock.emit('newPlayerItemArray', additionalItem, clientPlayerID);
 	}
 	// Removing A Collectable Item
 	const removeItem = () => {
