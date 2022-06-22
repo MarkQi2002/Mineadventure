@@ -33,7 +33,7 @@ class item {
 
         // Remove All Child Object
         var obj;
-        for ( var i = this.object.children.length - 1; i >= 0; i--) { 
+        for (var i = this.object.children.length - 1; i >= 0; i--) { 
             obj = this.object.children[i];
             obj.geometry.dispose();
             obj.material.dispose();
@@ -41,13 +41,13 @@ class item {
         }
 
         // Removing It From The Scene
-        scene.remove( this.object );
+        scene.remove(this.object);
         delete this;
     }
 }
 
 // Blood Orb
-class bloodOrb extends item{
+class bloodOrb extends item {
     constructor(itemName, itemRarity, itemStackType, itemBuffType, itemPosition) {
         // Calling Parent Constructor
         super(itemName, itemRarity, itemStackType, itemBuffType, itemPosition)

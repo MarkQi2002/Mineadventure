@@ -62,7 +62,7 @@ const initItem = (serverItemArray) => {
 	itemArray.length = serverItemArray.length;
 	for (let itemIndex = 0; itemIndex < serverItemArray.length; itemIndex++) {
 		if (serverItemArray[itemIndex] != null){
-			console.log("Spawning Item At ItemIndex: ", itemIndex);
+			console.log("(INIT) Spawning Item At ItemIndex: ", itemIndex);
 			spawnItem(serverItemArray[itemIndex], itemIndex);
 		}
 	}
@@ -70,7 +70,7 @@ const initItem = (serverItemArray) => {
 
 // Initialization All Future Item
 const newItem = (itemInfo, itemIndex) => {
-	console.log("Spawning Item At ItemIndex: ", itemIndex);
+	console.log("(NEW) Spawning Item At ItemIndex: ", itemIndex);
 	spawnItem(itemInfo, itemIndex);
 };
 
@@ -79,7 +79,6 @@ const deleteItem = (itemIndex) => {
 	if (itemArray[itemIndex] != null) {
 		itemArray[itemIndex].delete();
 		itemArray[itemIndex] = null;
-		console.log("H");
 	}
 }
 
@@ -93,6 +92,7 @@ const connectionError = (error) => {
 const playerDisconnect = (PlayerID) => {
 	if (playerArray[PlayerID] != null){
 		playerArray[PlayerID].delete();
+		playerArray[PlayerID] = null;
 	}
 };
 
@@ -103,7 +103,7 @@ const playerDisconnect = (PlayerID) => {
 	// Sending Information To Server Only Once
 	// First Parameter Is The Tag, Second Parameter Is What We Send To The Server
 	sock.emit('newName', sessionStorage.getItem("playerInitialName"));
-	sock.emit('newItem');
+	sock.emit('serverNewItem');
 
 	// Receiving Information From Server
 	// First Parameter Is The Tag, Second Parameter Is The Event/Function To Operate On Information From Server
@@ -113,7 +113,7 @@ const playerDisconnect = (PlayerID) => {
 	sock.on('clientDisconnect', playerDisconnect);
 
 	sock.on('initItem', initItem);
-	sock.on('newItem', newItem);
+	sock.on('clientNewItem', newItem);
 	sock.on('removeItem', deleteItem);
 
 	sock.on('connect_error', connectionError);
@@ -126,10 +126,12 @@ const playerDisconnect = (PlayerID) => {
 							player_controller.creature.object.position.z]);
 	};
 	
-	const updateItem = () => {
+	const removeItem = () => {
 		sock.emit('deleteItem', removeItemID);
 	}
 	// Add An Event Called 'position event' And Run updataPosition When The Event Occur
 	document.addEventListener('position event', updatePosition);
-	document.addEventListener('item event', updateItem);
+
+	// Add An Event Called 'remove item' To Remove An Collectable Item
+	document.addEventListener('remove item', removeItem);
 })();

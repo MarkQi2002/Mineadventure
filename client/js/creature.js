@@ -15,19 +15,19 @@ class creature{
     delete() {
         // Remove All Child Object
         var obj;
-        for( var i = this.object.children.length - 1; i >= 0; i--) { 
+        for(var i = this.object.children.length - 1; i >= 0; i--) { 
             obj = this.object.children[i];
             obj.geometry.dispose();
             obj.material.dispose();
             this.object.remove(obj); 
         }
-        scene.remove( this.object );
+        scene.remove(this.object);
         delete this;
     }
 }
 
 // Player Class
-class player extends creature{
+class player extends creature {
     constructor(name, position, health) {
         // Calling Parent Constructor
         super(name, position, health)

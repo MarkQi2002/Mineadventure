@@ -157,7 +157,7 @@ class controller{
                 console.log("Collided With Item", itemIndex);
                 
                 removeItemID = itemIndex;
-                var event = new Event('item event', {bubbles: true, cancelable: false})
+                var event = new Event('remove item', {bubbles: true, cancelable: false})
                 document.dispatchEvent(event);
                 
                 // Indicate Collision Occurred

@@ -115,6 +115,13 @@ const deleteItem = (itemIndex) => {
 	return itemIndex;
 };
 
+// Randomly Spawn An Item Every Ten Second
+setInterval(randomSpawnItem, 10000);
+function randomSpawnItem() {
+	io.emit('clientNewItem', CreateNewItem(), newItemID);
+}
+
+// -----------Map-------------
 // Setting The Size Of The Map
 var game_map = new map([1, 1],[50, 50]);
 
@@ -125,18 +132,22 @@ io.on('connection', (sock) => {
 
 	// Initializing The Player To The Client
 	sock.emit('initSelf', playerID, playerArray, game_map);
-	sock.emit('initItem', itemArray);
 	console.log("new player joined, ID: ", playerID);
+
+	// Initializing Collectable Item To The Client
+	sock.emit('initItem', itemArray);
 	
 	// Receiving Information From Client And Calling Function
 	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
 	// First Parameter Data Name (Same As Client Side), Second Parameter The Actual Data
+	// Player Related
 	sock.on('newName', (playerName) => io.emit('newPlayer', CreateNewPlayer(playerID, playerName), playerArray.length));
-	sock.on('newItem', () => io.emit('newItem', CreateNewItem(), newItemID));
-	sock.on('deleteItem', (itemIndex) => io.emit('removeItem', deleteItem(itemIndex)));
 	sock.on('newPos', (Pos) => io.emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
 	sock.on('disconnect', (Info) => io.emit('clientDisconnect', clientDisconnect(Info, playerID)));
 
+	// Item Related
+	sock.on('serverNewItem', () => io.emit('clientNewItem', CreateNewItem(), newItemID));
+	sock.on('deleteItem', (itemIndex) => io.emit('removeItem', deleteItem(itemIndex)));
 });
 
 // Whenever An Error Occur, Log The Error
