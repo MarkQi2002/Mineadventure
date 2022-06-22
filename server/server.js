@@ -140,7 +140,7 @@ function randomSpawnItem() {
 	io.emit('clientNewItem', CreateNewItem(), newItemID);
 }
 
-// -----------Map-------------
+
 function getPlayerMapPos2D(playerID){
 	let pos = [0,0];
 	if (playerArray[playerID] != null) {
@@ -149,7 +149,7 @@ function getPlayerMapPos2D(playerID){
 	return pos;
 }
 
-
+// -----------Map-------------
 // Setting The Size Of The Map
 var game_map = new map([120, 120],[16, 16]);
 
