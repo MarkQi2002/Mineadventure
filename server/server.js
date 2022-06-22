@@ -21,9 +21,10 @@ const io = socketio(server);
 
 // Game Related Variable Declaration
 var playerArray = [];
-var itemArray = [];
 playerArray.length = 32;
-itemArray.length = 32;
+
+// ID Of Player
+var ID_count = 0;
 
 // Function Used To Create A New Player Using Two Parameters
 const CreateNewPlayer = (playerID, playerName) => {
@@ -75,11 +76,47 @@ const clientDisconnect = (Info, playerID) => {
 	return playerID
 };
 
+// Item Related Variable Declaration
+var itemArray = [];
+itemArray.length = 256;
+var newItemID;
+
+// Function Used To Create A New Item
+const CreateNewItem = () => {
+	// Similar To A Struct
+	let itemInfo = {
+		itemName: "bloodOrb",
+		itemRarity: "Common",
+		itemStackType: "Linear",
+		itemBuffType: "Defense",
+		itemPosition: [1, 1, 1]
+	};
+
+	// Indexing Player Array To Include The New Player
+	for (let itemIndex = 0; itemIndex < itemArray.length; itemIndex++) {
+		if (itemArray[itemIndex] == null) {
+			itemArray[itemIndex] = itemInfo;
+			newItemID = itemIndex;
+			break;
+		}
+	}
+	
+	// Log The PlayerInfo On The Server Side
+	console.log(itemInfo, newItemID);
+	return itemInfo;
+};
+
+// When Client Is Disconnected
+const deleteItem = (itemIndex) => {
+	if (itemArray[itemIndex] != null){
+		console.log("Deleting Item ", itemIndex);
+		itemArray[itemIndex] = null;
+	}
+	return itemIndex;
+};
+
 // Setting The Size Of The Map
 var game_map = new map([1, 1],[50, 50]);
-
-// ID Of Player
-var ID_count = 0;
 
 // Once A New Player Join, Update To All Other Clients
 io.on('connection', (sock) => {
@@ -88,12 +125,15 @@ io.on('connection', (sock) => {
 
 	// Initializing The Player To The Client
 	sock.emit('initSelf', playerID, playerArray, game_map);
+	sock.emit('initItem', itemArray);
 	console.log("new player joined, ID: ", playerID);
 	
 	// Receiving Information From Client And Calling Function
 	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
 	// First Parameter Data Name (Same As Client Side), Second Parameter The Actual Data
 	sock.on('newName', (playerName) => io.emit('newPlayer', CreateNewPlayer(playerID, playerName), playerArray.length));
+	sock.on('newItem', () => io.emit('newItem', CreateNewItem(), newItemID));
+	sock.on('deleteItem', (itemIndex) => io.emit('removeItem', deleteItem(itemIndex)));
 	sock.on('newPos', (Pos) => io.emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
 	sock.on('disconnect', (Info) => io.emit('clientDisconnect', clientDisconnect(Info, playerID)));
 

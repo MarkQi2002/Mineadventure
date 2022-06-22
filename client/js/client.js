@@ -39,6 +39,50 @@ const playerPositionUpdate = ([Pos, PlayerID]) => {
 	}
 };
 
+// ------------------Item----------------------
+// Variable Declaration
+var removeItemID;
+
+// Initialization Myself And All Future Players
+// Constructing An Player Object And Storing In The Client Side playerArray
+function spawnItem(itemInfo, itemIndex){
+	console.log("Spawning Item At ItemIndex: ", itemIndex);
+	let new_item = new bloodOrb(itemInfo.itemName,
+								itemInfo.itemRarity,
+								itemInfo.itemStackType,
+								itemInfo.itemBuffType,
+								itemInfo.itemPosition);
+
+	itemArray[itemIndex] = new_item;
+	return new_item;
+}
+
+// Initialization Every Item Before You Enter The Game
+const initItem = (serverItemArray) => {
+	itemArray.length = serverItemArray.length;
+	for (let itemIndex = 0; itemIndex < serverItemArray.length; itemIndex++) {
+		if (serverItemArray[itemIndex] != null){
+			console.log("Spawning Item At ItemIndex: ", itemIndex);
+			spawnItem(serverItemArray[itemIndex], itemIndex);
+		}
+	}
+};
+
+// Initialization All Future Item
+const newItem = (itemInfo, itemIndex) => {
+	console.log("Spawning Item At ItemIndex: ", itemIndex);
+	spawnItem(itemInfo, itemIndex);
+};
+
+// Removing An Item
+const deleteItem = (itemIndex) => {
+	if (itemArray[itemIndex] != null) {
+		itemArray[itemIndex].delete();
+		itemArray[itemIndex] = null;
+		console.log("H");
+	}
+}
+
 // When The Server Shutdown Or An Connection Error Occur, Log The Error And Transfer To index.html
 const connectionError = (error) => {
 	console.log(error);
@@ -59,6 +103,7 @@ const playerDisconnect = (PlayerID) => {
 	// Sending Information To Server Only Once
 	// First Parameter Is The Tag, Second Parameter Is What We Send To The Server
 	sock.emit('newName', sessionStorage.getItem("playerInitialName"));
+	sock.emit('newItem');
 
 	// Receiving Information From Server
 	// First Parameter Is The Tag, Second Parameter Is The Event/Function To Operate On Information From Server
@@ -66,6 +111,11 @@ const playerDisconnect = (PlayerID) => {
 	sock.on('newPlayer', newPlayer);
 	sock.on('clientPos', playerPositionUpdate);
 	sock.on('clientDisconnect', playerDisconnect);
+
+	sock.on('initItem', initItem);
+	sock.on('newItem', newItem);
+	sock.on('removeItem', deleteItem);
+
 	sock.on('connect_error', connectionError);
 
 	// Sending My New Position To Server
@@ -76,6 +126,10 @@ const playerDisconnect = (PlayerID) => {
 							player_controller.creature.object.position.z]);
 	};
 	
+	const updateItem = () => {
+		sock.emit('deleteItem', removeItemID);
+	}
 	// Add An Event Called 'position event' And Run updataPosition When The Event Occur
 	document.addEventListener('position event', updatePosition);
+	document.addEventListener('item event', updateItem);
 })();

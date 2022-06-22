@@ -16,7 +16,7 @@ class item {
     Attack
     Defensive
     */
-    constructor(itemName, itemRarity,  itemStackType, itemBuffType, itemPosition) {
+    constructor(itemName, itemRarity, itemStackType, itemBuffType, itemPosition) {
         this.name = itemName;
         this.rarity = itemRarity;
         this.stackType = itemStackType;
@@ -24,21 +24,41 @@ class item {
 
         this.position = itemPosition;
         this.object = new THREE.Object3D();
-        this.object.position.set(position[0], position[1], position[2]);
+        this.object.position.set(itemPosition[0], itemPosition[1], itemPosition[2]);
         scene.add( this.object );
+    }
+
+    delete() {
+        console.log("Deleting An Item");
+
+        // Remove All Child Object
+        var obj;
+        for ( var i = this.object.children.length - 1; i >= 0; i--) { 
+            obj = this.object.children[i];
+            obj.geometry.dispose();
+            obj.material.dispose();
+            this.object.remove(obj); 
+        }
+
+        // Removing It From The Scene
+        scene.remove( this.object );
+        delete this;
     }
 }
 
 // Blood Orb
 class bloodOrb extends item{
-    constructor(itemName, itemRarity,  itemStackType, itemBuffType, itemPosition) {
+    constructor(itemName, itemRarity, itemStackType, itemBuffType, itemPosition) {
         // Calling Parent Constructor
-        super(itemName, itemRarity,  itemStackType, itemBuffType, itemPosition)
+        super(itemName, itemRarity, itemStackType, itemBuffType, itemPosition)
 
         // Spherical Body
-        let geometry = new THREE.SphereGeometry(0.5, 10, 10);
-        let material = new THREE.MeshBasicMaterial({color: new THREE.Color(Math.random(), Math.random(), Math.random())});
+        let geometry = new THREE.SphereGeometry(0.2, 10, 10);
+        let material = new THREE.MeshBasicMaterial({color: 'red'});
         let mesh = new THREE.Mesh(geometry, material);
         this.object.add(mesh);
+
+        // Output
+        console.log("Creating A Blood Orb");
     }
 }

@@ -99,7 +99,7 @@ class controller{
             if (predictedPosition.manhattanDistanceTo(playerArray[playerIndex].object.position) > 2) continue;
 
             // Getting Other Player's Bounding Box
-            console.log(playerArray[playerIndex].object.position);
+            // console.log(playerArray[playerIndex].object.position);
             let otherPlayerBB = new THREE.Sphere(playerArray[playerIndex].object.position, 0.5);
 
             // If Collision Occur, Move In Opposite Direction And Return True
@@ -116,6 +116,49 @@ class controller{
                     var event = new Event('position event', {bubbles: true, cancelable: false})
                     document.dispatchEvent(event);
                 }
+                
+                // Indicate Collision Occurred
+                return true;
+            }
+        }
+
+        // No Collision Has Occurred
+        return false;
+    }
+
+    // Item Collision Detection
+    itemCollision(translateDistance){
+        // For Collision Detection
+        let creatureTrans = this.creature.object;
+        let predictedPosition = new THREE.Vector3();
+        predictedPosition.copy(creatureTrans.position);
+
+        // Predicting Future Position
+        if (this.inputs.forward) predictedPosition.y += translateDistance;
+        if (this.inputs.backward) predictedPosition.y -= translateDistance;
+        if (this.inputs.left) predictedPosition.x -= translateDistance;
+        if (this.inputs.right) predictedPosition.x += translateDistance;
+
+        // Getting Player Bounding Box
+        let playerBB = new THREE.Sphere(predictedPosition, 0.5);
+
+        // Checking Collision With Every Other Player
+        for (let itemIndex = 0; itemIndex < itemArray.length; itemIndex++) {
+            // A Few Condition To Skip Collision Detection
+            if (itemArray[itemIndex] == null) continue;
+            if (predictedPosition.manhattanDistanceTo(itemArray[itemIndex].object.position) > 2) continue;
+
+            // Getting Other Player's Bounding Box
+            // console.log(itemArray[itemIndex].object.position);
+            let otherPlayerBB = new THREE.Sphere(itemArray[itemIndex].object.position, 0.2);
+
+            // If Collision Occur, Move In Opposite Direction And Return True
+            if (playerBB.intersectsSphere(otherPlayerBB)) {
+                console.log("Collided With Item", itemIndex);
+                
+                removeItemID = itemIndex;
+                var event = new Event('item event', {bubbles: true, cancelable: false})
+                document.dispatchEvent(event);
                 
                 // Indicate Collision Occurred
                 return true;
@@ -170,6 +213,8 @@ class controller{
                 creatureTrans.translateX(translateDistance);
             }
         }
+
+        this.itemCollision();
 
         // Update Position On Server
         if (this.inputs.forward || this.inputs.backward || this.inputs.left || this.inputs.right || !this.onGround) {

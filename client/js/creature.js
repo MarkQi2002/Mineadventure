@@ -20,7 +20,7 @@ class creature{
             obj.geometry.dispose();
             obj.material.dispose();
             this.object.remove(obj); 
-       }
+        }
         scene.remove( this.object );
         delete this;
     }
