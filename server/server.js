@@ -21,7 +21,9 @@ const io = socketio(server);
 
 // Game Related Variable Declaration
 var playerArray = [];
+var itemArray = [];
 playerArray.length = 32;
+itemArray.length = 32;
 
 // Function Used To Create A New Player Using Two Parameters
 const CreateNewPlayer = (playerID, playerName) => {
@@ -49,15 +51,6 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 	return [Pos, playerID];
 };
 
-// When Client Is Disconnected
-const clientDisconnect = (Info, playerID) => {
-	if (playerArray[playerID] != null){
-		console.log("Player ID:", playerID, " Name:", playerArray[playerID].name, "is disconnected!  Info:", Info);
-		playerArray[playerID] = null;
-	}
-	return playerID
-};
-
 // Get A New Player ID From The Empty Space In PlayArray
 function newPlayerID(){
 	let exceedCount = 0;
@@ -73,6 +66,15 @@ function newPlayerID(){
 	return ID_count;
 }
 
+// When Client Is Disconnected
+const clientDisconnect = (Info, playerID) => {
+	if (playerArray[playerID] != null){
+		console.log("Player ID:", playerID, " Name:", playerArray[playerID].name, "is disconnected!  Info:", Info);
+		playerArray[playerID] = null;
+	}
+	return playerID
+};
+
 // Setting The Size Of The Map
 var game_map = new map([1, 1],[50, 50]);
 
@@ -82,9 +84,7 @@ var ID_count = 0;
 // Once A New Player Join, Update To All Other Clients
 io.on('connection', (sock) => {
 	// Setting The New PlayerID
-	
 	const playerID = newPlayerID(ID_count);
-	
 
 	// Initializing The Player To The Client
 	sock.emit('initSelf', playerID, playerArray, game_map);
@@ -93,7 +93,7 @@ io.on('connection', (sock) => {
 	// Receiving Information From Client And Calling Function
 	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
 	// First Parameter Data Name (Same As Client Side), Second Parameter The Actual Data
-	sock.on('newName', (playerName) => io.emit('newPlayer', CreateNewPlayer(playerID, playerName),playerArray.length));
+	sock.on('newName', (playerName) => io.emit('newPlayer', CreateNewPlayer(playerID, playerName), playerArray.length));
 	sock.on('newPos', (Pos) => io.emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
 	sock.on('disconnect', (Info) => io.emit('clientDisconnect', clientDisconnect(Info, playerID)));
 

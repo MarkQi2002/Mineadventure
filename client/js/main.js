@@ -32,6 +32,9 @@ var playerArray = [];
 var clientPlayerID;
 var player_controller;
 
+// Client Side Item Spawn
+var itemArray = [];
+
 // Stats Module
 var stats = new Stats();
 stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom

@@ -1,4 +1,3 @@
-
 // Constructing An Player Object And Storing In The Client Side playerArray
 function spawnPlayer(playerInfo){
 	let new_player = new player(playerInfo.name,
