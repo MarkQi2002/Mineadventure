@@ -72,6 +72,11 @@ class map {
             y: blockSize2D[1],
         };
 
+        this.quarterSize2D = {
+            x: quarterSize2D[0],
+            y: quarterSize2D[1],
+        };
+
         // QuarterMap
         this.spaceArray = {
             pp: new quarterMap([1, 1], quarterSize2D, blockSize2D, this.PerlinNoise),
@@ -81,47 +86,132 @@ class map {
         };
     }
 
+
+
+
+    map2DToBlock2D([mapX, mapY]){
+        let unitX = (mapX < 0) ? mapX + 1 : mapX;
+        let unitY = (mapY < 0) ? mapY + 1 : mapY;
+        return [Math.floor(Math.abs(unitX) / this.blockSize2D.x), Math.floor(Math.abs(unitY) / this.blockSize2D.y)];
+    }
+
+    
     // Return The QuarterMap Based On xy Coordinate
-    getQuarterMap(x, y){
+    getQuarterMap([mapX, mapY]){
         var selectArray;
-        if (x > 0 && y > 0) {
+
+        let unitX = (mapX < 0) ? mapX + 1 : mapX;
+        let unitY = (mapY < 0) ? mapY + 1 : mapY;
+        
+        if (unitX >= 0 && unitY >= 0) {
             selectArray = this.spaceArray.pp;
-        } else if (x > 0 && y <= 0) {
+        } else if (unitX >= 0 && unitY < 0) {
             selectArray = this.spaceArray.pn;
-        } else if (x <= 0 && y > 0) {
+        } else if (unitX < 0 && unitY >= 0) {
             selectArray = this.spaceArray.np;
-        } else if (x <= 0 && y <= 0) {
+        } else if (unitX < 0 && unitY < 0) {
             selectArray = this.spaceArray.nn;
         }
-        
+
         return selectArray;
     }
 
-    // Return The Unit Based On xy Coordinate
-    getUnit(unitX, unitY){
-        return getBlock(Math.floor(unitX / blockSize2D.x), Math.floor(unitY / blockSize2D.y)).unitList[Math.abs(unitY) % blockSize2D.y][Math.abs(unitX) % blockSize2D.x];
+    getQuarterMapByInt([directionX, directionY]){
+        var selectArray;
+        
+        if (directionX >= 0 && directionY >= 0) {
+            selectArray = this.spaceArray.pp;
+        } else if (directionX >= 0 && directionY < 0) {
+            selectArray = this.spaceArray.pn;
+        } else if (directionX < 0 && directionY >= 0) {
+            selectArray = this.spaceArray.np;
+        } else if (directionX < 0 && directionY < 0) {
+            selectArray = this.spaceArray.nn;
+        }
+
+        return selectArray;
     }
 
     // Return The Block Based On The Block xy Coordinate
-    getBlock(x, y) {
-        return this.getQuarterMap(x,y)[Math.abs(x)][Math.abs(y)];
+    getBlockByQuarter([blockX, blockY], theQuarterMap) {
+        return theQuarterMap.blockList[Math.abs(blockX)][Math.abs(blockY)];
     }
 
-    // Adding Additional Block
-    addBlock(x,y) {
-        let theQuarterMap =  getQuarterMap(x, y);
-        theQuarterMap.blockList[y][x] = new block(x, y, this.PerlinNoise);
+    getBlock([mapX, mapY]){
+        return this.getBlockByQuarter(this.map2DToBlock2D([mapX, mapY]),this.getQuarterMap([mapX, mapY]));
     }
+
+    getInitMap([mapX, mapY], [blockHalfRangeX, blockHalfRangeY]){
+
+        let sendingBlock = [];
+        for (let y_Axis = -blockHalfRangeY; y_Axis <= blockHalfRangeY; y_Axis++) {
+            for (let x_Axis = -blockHalfRangeX; x_Axis <= blockHalfRangeX; x_Axis++) {
+
+
+
+                let [newMapX, newMapY] = [mapX + x_Axis * this.blockSize2D.x, mapY + y_Axis * this.blockSize2D.y];
+  
+                let [blockX, blockY] = this.map2DToBlock2D([newMapX, newMapY]);
+            
+                let theQuarterMap = this.getQuarterMap([newMapX, newMapY]);
+
+
+                let blockInfo = {
+                    x: blockX,
+                    y: blockY,
+                    direction: theQuarterMap.direction,
+                    block: theQuarterMap.blockList[blockY][blockX]
+                }
+                sendingBlock.push(blockInfo);
+            }
+        }
+        return [sendingBlock,[this.quarterSize2D.x, this.quarterSize2D.y],[this.blockSize2D.x,this.blockSize2D.y]];
+    }
+
+    getUpdateBlock(blockPosList){
+
+        let sendingBlock = [];
+        for (let i = 0; i < blockPosList.length; i++) {
+                let theQuarterMap = this.getQuarterMapByInt(blockPosList[i].direction);
+
+                let blockX = blockPosList[i].position[0];
+                let blockY = blockPosList[i].position[1];
+
+                let blockInfo = {
+                    x: blockX,
+                    y: blockY,
+                    direction: theQuarterMap.direction,
+                    block: theQuarterMap.blockList[blockY][blockX]
+                }
+                sendingBlock.push(blockInfo);
+
+        }
+        return [sendingBlock,[this.quarterSize2D.x, this.quarterSize2D.y],[this.blockSize2D.x,this.blockSize2D.y]];
+    }
+
+    // Return The Unit Based On xy Coordinate
+    getUnit([mapX, mapY]){
+        return this.getBlock(mapX, mapY).unitList[Math.abs(unitY) % this.blockSize2D.y][Math.abs(unitX) % this.blockSize2D.x];
+    }
+
+    
+
+    // Adding Additional Block
+    /*
+    addBlock([blockX, blockY]) {
+        let theQuarterMap =  getQuarterMap(blockX, blockY);
+        theQuarterMap.blockList[blockY][blockX] = new block(blockX, blockY, this.PerlinNoise);
+    }*/
 }
 
 // Map QuarterMap
 class quarterMap{
-    constructor(diriction, quarterSize2D, blockSize2D, PerlinNoise) {
+    constructor(direction, quarterSize2D, blockSize2D, PerlinNoise) {
         this.blockList = [];
         // Direction Is Either 1 Or -1
-        this.diriction = {
-            x: diriction[0],
-            y: diriction[1]
+        this.direction = {
+            x: direction[0],
+            y: direction[1]
         }
         this.makeQuarterMap(quarterSize2D[0], quarterSize2D[1]);
         this.initQuarterMap(blockSize2D, PerlinNoise);
@@ -146,7 +236,7 @@ class quarterMap{
     initQuarterMap(blockSize2D, PerlinNoise){
         for (let y_Axis = 0; y_Axis < this.blockList.length; y_Axis++) {
             for (let x_Axis = 0; x_Axis < this.blockList[y_Axis].length; x_Axis++) {
-                this.blockList[y_Axis][x_Axis] = new block(x_Axis, y_Axis, this.diriction, blockSize2D, PerlinNoise);
+                this.blockList[y_Axis][x_Axis] = new block(x_Axis, y_Axis, this.direction, blockSize2D, PerlinNoise);
             }
         }
     }
@@ -187,6 +277,7 @@ class block{
                     colorHeight: colorHeight,
                     color3D: [Math.random(), Math.random(), Math.random()]
                 };
+
             }
         }
     }

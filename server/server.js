@@ -141,8 +141,17 @@ function randomSpawnItem() {
 }
 
 // -----------Map-------------
+function getPlayerMapPos2D(playerID){
+	let pos = [0,0];
+	if (playerArray[playerID] != null) {
+		pos = [Math.floor(playerArray[playerID].position[0]), Math.floor(playerArray[playerID].position[1])];
+	}
+	return pos;
+}
+
+
 // Setting The Size Of The Map
-var game_map = new map([1, 1],[50, 50]);
+var game_map = new map([120, 120],[16, 16]);
 
 // Once A New Player Join, Update To All Other Clients
 io.on('connection', (sock) => {
@@ -150,7 +159,7 @@ io.on('connection', (sock) => {
 	const playerID = newPlayerID(ID_count);
 
 	// Initializing The Player To The Client
-	sock.emit('initSelf', playerID, playerArray, game_map);
+	sock.emit('initSelf', playerID, playerArray, game_map.getInitMap(getPlayerMapPos2D(playerID), [1, 1]));
 	console.log("new player joined, ID: ", playerID);
 
 	// Initializing Collectable Item To The Client
@@ -163,6 +172,7 @@ io.on('connection', (sock) => {
 	sock.on('newName', (playerName) => io.emit('newPlayer', CreateNewPlayer(playerID, playerName), playerArray.length));
 	sock.on('newPos', (Pos) => io.emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
 	sock.on('disconnect', (Info) => io.emit('clientDisconnect', clientDisconnect(Info, playerID)));
+	sock.on('requireBlock', (blockPosList) => sock.emit('addBlocks', game_map.getUpdateBlock(blockPosList)));
 
 	// Item Related
 	sock.on('newPlayerItemArray', (additionalItem, updatePlayerID) => io.emit('clientPlayerItemArray', UpdatePlayerItemArray(additionalItem, updatePlayerID), updatePlayerID));

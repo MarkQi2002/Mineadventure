@@ -9,7 +9,7 @@ function spawnPlayer(playerInfo){
 }
 
 // Initialization Every Player Before You Enter The Game
-const initSelf = (severPlayerID, serverPlayerArray, serverMap) => {
+const initSelf = (severPlayerID, serverPlayerArray, serverBlocks) => {
 	clientPlayerID = severPlayerID;
 	playerArray.length = serverPlayerArray.length;
 	for (let i = 0; i < serverPlayerArray.length; i++) {
@@ -18,7 +18,8 @@ const initSelf = (severPlayerID, serverPlayerArray, serverMap) => {
 		}
 	}
 
-	game_map = new map(serverMap);
+	
+	game_map = new map(serverBlocks);
 };
 
 // Initialization Myself And All Future Players
@@ -107,6 +108,11 @@ const playerDisconnect = (PlayerID) => {
 	}
 };
 
+const clientUpdateBlocks = (blockList) => {
+	game_map.spawnBlocks(blockList[0]);
+};
+
+
 (() => {
 	// When Connected To Server, Create A Sock (MySelf)
 	const sock = io();
@@ -122,6 +128,7 @@ const playerDisconnect = (PlayerID) => {
 	sock.on('newPlayer', newPlayer);
 	sock.on('clientPos', playerPositionUpdate);
 	sock.on('clientDisconnect', playerDisconnect);
+	sock.on('addBlocks', clientUpdateBlocks);
 
 	sock.on('clientPlayerItemArray', playerItemArrayUpdate);
 	sock.on('initItem', initItem);
@@ -152,4 +159,11 @@ const playerDisconnect = (PlayerID) => {
 	// Add An Event Called 'remove item' To Remove An Collectable Item
 	document.addEventListener('remove item', removeItem);
 	document.addEventListener('player collected item', updateItem);
+	const updateBlock = () => {
+		var blockPosList = player_controller.getSurroundingBlockPos([1,1]);
+		if (blockPosList.length > 0){
+			sock.emit('requireBlock', blockPosList);
+		}
+	};
+	document.addEventListener('updateBlock', updateBlock);
 })();

@@ -10,6 +10,12 @@ class controller{
         this.jumpVelocity = 0; // Per Second
         this.onGround = true;
 
+
+        this.lastBlockPos = {
+            position: [0,0],
+            direction: [1,1]
+        }
+
         this.inputs = {
             forward: false,
             backward: false,
@@ -173,6 +179,115 @@ class controller{
         return false;
     }
 
+    getPlayerBlockPos2D(){
+        let mapX, mapY;
+        if (this.creature.object != null) {
+            [mapX, mapY] = [Math.floor(this.creature.object.position.x), Math.floor(this.creature.object.position.y)];
+        }
+
+        let unitX = (mapX < 0) ? mapX + 1 : mapX;
+        let unitY = (mapY < 0) ? mapY + 1 : mapY;
+
+        var direction;
+    
+            
+        if (unitX >= 0 && unitY >= 0) {
+            direction = [1, 1];
+        } else if (unitX >= 0 && unitY < 0) {
+            direction = [1, -1];
+        } else if (unitX < 0 && unitY >= 0) {
+            direction = [-1, 1];
+        } else if (unitX < 0 && unitY < 0) {
+            direction = [-1, -1];
+        }
+
+        return [[Math.floor(Math.abs(unitX) / game_map.blockSize.x), Math.floor(Math.abs(unitY) / game_map.blockSize.y)], direction];
+
+    }
+
+
+    controllerUpdateBlock(){
+        let [blockPos, direction] = this.getPlayerBlockPos2D();
+
+        if  (blockPos[0] != this.lastBlockPos.position[0] ||
+             blockPos[1] != this.lastBlockPos.position[1] ||
+             direction[0] != this.lastBlockPos.direction[0] ||
+             direction[1] != this.lastBlockPos.direction[1]){
+
+            
+            this.lastBlockPos.position = blockPos;
+            this.lastBlockPos.direction = direction;
+
+            var event = new Event('updateBlock', {bubbles: true, cancelable: false})
+            document.dispatchEvent(event);
+
+
+        }
+    }
+
+    getSurroundingBlockPos([blockHalfRangeX, blockHalfRangeY]){
+
+        for(let i = 0; i < game_map.blockObjectClass.length; i++){
+            game_map.blockObjectClass[i].view = false;
+        }
+
+
+        var blockPosList = [];
+        for (let y_Axis = -blockHalfRangeY; y_Axis <= blockHalfRangeY; y_Axis++) {
+            for (let x_Axis = -blockHalfRangeX; x_Axis <= blockHalfRangeX; x_Axis++) {
+
+                let BlockX = this.lastBlockPos.position[0] + x_Axis;
+                let BlockY = this.lastBlockPos.position[1] + y_Axis;
+                let dirX = this.lastBlockPos.direction[0];
+                let dirY = this.lastBlockPos.direction[1];
+                if (BlockX < 0){
+                    dirX *= -1;
+                    BlockX = -BlockX-1;
+                }
+
+                if (BlockY < 0){
+                    dirY *= -1;
+                    BlockY = -BlockY-1;
+                }
+
+                var blockPos = {
+                    position: [BlockX,BlockY],
+                    direction: [dirX,dirY]
+                };
+
+
+                let theQuarterMap = game_map.getQuarterMap([dirX,dirY]);
+                if (theQuarterMap.blockList[BlockY][BlockX] == null){
+                    blockPosList.push(blockPos);
+                }else{
+                    
+                    game_map.spawnBlockObject(BlockX, BlockY, [dirX, dirY]);
+                }
+
+                
+
+            }
+        }
+
+        for(let i = 0; i < game_map.blockObjectClass.length; i++){
+            if (!game_map.blockObjectClass[i].view){
+                if (game_map.blockObjectClass[i].block != null){
+                    game_map.deleteBlock(game_map.blockObjectClass[i].block);
+                    game_map.blockObjectClass[i].block = null;
+                }
+               
+            }else{
+                game_map.newBlockObjectClass.push(game_map.blockObjectClass[i]);
+            }
+        }
+
+        game_map.blockObjectClass = game_map.newBlockObjectClass;
+        game_map.newBlockObjectClass = [];
+        
+        return blockPosList;
+
+    }
+
     // Updating The Position
     update(delta){
         //change movement speed
@@ -224,6 +339,7 @@ class controller{
         if (this.inputs.forward || this.inputs.backward || this.inputs.left || this.inputs.right || !this.onGround) {
             var event = new Event('position event', {bubbles: true, cancelable: false})
             document.dispatchEvent(event);
+            this.controllerUpdateBlock();
         }
 
         // Jump Update
@@ -258,4 +374,5 @@ class controller{
         this.camera.translateY(screenPos.y * speedPerFrame * autoY * 2);
         this.camera.translateX(screenPos.x * speedPerFrame * autoX * 2);
     }
+
 } 
