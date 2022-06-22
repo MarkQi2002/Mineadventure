@@ -140,9 +140,9 @@ function randomSpawnItem() {
 	io.emit('clientNewItem', CreateNewItem(), newItemID);
 }
 
-
+// Map Related Function
 function getPlayerMapPos2D(playerID){
-	let pos = [0,0];
+	let pos = [0, 0];
 	if (playerArray[playerID] != null) {
 		pos = [Math.floor(playerArray[playerID].position[0]), Math.floor(playerArray[playerID].position[1])];
 	}
@@ -151,7 +151,7 @@ function getPlayerMapPos2D(playerID){
 
 // -----------Map-------------
 // Setting The Size Of The Map
-var game_map = new map([120, 120],[16, 16]);
+var game_map = new map([12, 12],[16, 16]);
 
 // Once A New Player Join, Update To All Other Clients
 io.on('connection', (sock) => {

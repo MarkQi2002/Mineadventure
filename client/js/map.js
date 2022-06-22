@@ -24,6 +24,7 @@ class map {
         scene.add(this.object);
     }
 
+    // Return The Direction QuarterMap
     getQuarterMap([directionX, directionY]){
         var selectArray;
         
@@ -39,7 +40,6 @@ class map {
 
         return selectArray;
     }
-
 
     // Creating Client Side Map
     spawnMap(serverMapClass){
@@ -58,35 +58,17 @@ class map {
         }
     }
 
+    // Creating Client Side Blocks
     spawnBlocks(blockInfoList){
         for (let i = 0; i < blockInfoList.length; i++) {
             this.spawnBlock(blockInfoList[i].x, blockInfoList[i].y, blockInfoList[i].direction, blockInfoList[i].block);
         }
     }
 
-
-
-    
-
     // Creating Client Side Block
     spawnBlock(x, y, direction, blockClass){
         var theQuarterMap = this.getQuarterMap([direction.x, direction.y]);
         if (theQuarterMap.blockList[y][x] == null){
-            //var block = new THREE.Object3D();
-            //let offX = (direction.x == -1) ? -1 : 0;
-            //let offY = (direction.y == -1) ? -1 : 0;
-        
-            //block.position.set(offX + direction.x * x * blockClass.unitList.length, offY + direction.y * y * blockClass.unitList[0].length, 0);
-            /*
-            for (let y_Axis = 0; y_Axis < blockClass.unitList.length; y_Axis++) {
-                for (let x_Axis = 0; x_Axis < blockClass.unitList[y_Axis].length; x_Axis++) {
-                    this.spawnUnit(direction.x * x_Axis, direction.y * y_Axis, blockClass.unitList[y_Axis][x_Axis], block);
-                }
-            }
-            */
-            // Adding New Block Into The Entire Map
-            //this.object.add(block);
-
             theQuarterMap.blockList[y][x] = {
                 class: blockClass,
                 block: null,
@@ -94,12 +76,8 @@ class map {
             };
 
             this.spawnBlockObject(x, y, [direction.x, direction.y]);
-        }
-        
-        
+        }        
     }
-
-
 
     // Creating Client Side Block
     spawnBlockObject(x, y, direction){
@@ -112,33 +90,24 @@ class map {
 
                 let blockClass = theQuarterMap.blockList[y][x].class;
                 
-                
-            
                 block.position.set(offX + direction[0] * x * blockClass.unitList.length, offY + direction[1] * y * blockClass.unitList[0].length, 0);
-            
+                
+                // Double For Loop To Spawn Each Unit Within The Block
                 for (let y_Axis = 0; y_Axis < blockClass.unitList.length; y_Axis++) {
                     for (let x_Axis = 0; x_Axis < blockClass.unitList[y_Axis].length; x_Axis++) {
-                        
                         this.spawnUnit(direction[0] * x_Axis, direction[1] * y_Axis, blockClass.unitList[y_Axis][x_Axis], block);
                     }
                 }
 
-                
-
                 // Adding New Block Into The Entire Map
                 this.object.add(block);
-
                 theQuarterMap.blockList[y][x].block = block;
-
-
-       
                 this.blockObjectClass.push(theQuarterMap.blockList[y][x]);
             }
 
+            // Setting Its View Tag To True
             theQuarterMap.blockList[y][x].view = true;
-
         }
-        
     }
 
     // Creating Client Side Unit
@@ -152,24 +121,21 @@ class map {
         mesh.position.set(x, y, height);
     }
 
-
+    // Removing A Block (No Longer Render This Block)
     deleteBlock(block){
         // Remove All Child Object
         var obj;
-        for( var i = block.children.length - 1; i >= 0; i--) { 
+        for (var i = block.children.length - 1; i >= 0; i--) { 
             obj = block.children[i];
             obj.geometry.dispose();
             obj.material.dispose();
             block.remove(obj); 
         }
-        this.object.remove( block );
+        this.object.remove(block);
     }
-    
 }
 
-
-
-
+// Client Side quarterMap Class;
 class quarterMap{
     constructor(direction, quarterSize2D) {
         this.blockList = [];
@@ -192,9 +158,8 @@ class quarterMap{
     // Resizing The Number Of Blocks In A QuarterMap
     setQuarterSize(x, y){
         this.blockList.length = y;
-        for(let i = 0; i < this.blockList.length; i++) {
+        for (let i = 0; i < this.blockList.length; i++) {
             this.blockList[i].length = x;
         }
     }
-
 }

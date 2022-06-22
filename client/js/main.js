@@ -5,7 +5,7 @@ camera.position.z = 10;
 
 // Resize Window
 const resizeWindow = () => {
-	console.log("resize!!!")
+	console.log("Resize Window In Main!")
     const width = window.innerWidth;
     const height = window.innerHeight;
     camera.aspect = width / height;

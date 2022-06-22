@@ -12,8 +12,8 @@ class controller{
 
 
         this.lastBlockPos = {
-            position: [0,0],
-            direction: [1,1]
+            position: [0, 0],
+            direction: [1, 1]
         }
 
         this.inputs = {
@@ -170,16 +170,18 @@ class controller{
                 var event = new Event('remove item', {bubbles: true, cancelable: false})
                 document.dispatchEvent(event);
                 
-                // Indicate Collision Occurred
+                // Indicate Item Collision Occurred
                 return true;
             }
         }
 
-        // No Collision Has Occurred
+        // No Item Collision Has Occurred
         return false;
     }
 
+    // Getting Player's Position And Direction
     getPlayerBlockPos2D(){
+        // Calculating Player Position
         let mapX, mapY;
         if (this.creature.object != null) {
             [mapX, mapY] = [Math.floor(this.creature.object.position.x), Math.floor(this.creature.object.position.y)];
@@ -190,7 +192,7 @@ class controller{
 
         var direction;
     
-            
+        // Get Which Direction The Player In Going TO
         if (unitX >= 0 && unitY >= 0) {
             direction = [1, 1];
         } else if (unitX >= 0 && unitY < 0) {
@@ -201,11 +203,12 @@ class controller{
             direction = [-1, -1];
         }
 
+        // Return The Player's Position And The Player's Direction
         return [[Math.floor(Math.abs(unitX) / game_map.blockSize.x), Math.floor(Math.abs(unitY) / game_map.blockSize.y)], direction];
 
     }
 
-
+    // Updating Client Block If Moving Between Blocks
     controllerUpdateBlock(){
         let [blockPos, direction] = this.getPlayerBlockPos2D();
 
@@ -217,17 +220,17 @@ class controller{
             
             this.lastBlockPos.position = blockPos;
             this.lastBlockPos.direction = direction;
-
+            
+            // Sending Update Block Command As An Event
             var event = new Event('updateBlock', {bubbles: true, cancelable: false})
             document.dispatchEvent(event);
-
-
         }
     }
 
+    // Getting All The Surrounding Nine Blocks (3 By 3)
     getSurroundingBlockPos([blockHalfRangeX, blockHalfRangeY]){
-
-        for(let i = 0; i < game_map.blockObjectClass.length; i++){
+        // Modifying The View Tag
+        for (let i = 0; i < game_map.blockObjectClass.length; i++){
             game_map.blockObjectClass[i].view = false;
         }
 
@@ -235,17 +238,17 @@ class controller{
         var blockPosList = [];
         for (let y_Axis = -blockHalfRangeY; y_Axis <= blockHalfRangeY; y_Axis++) {
             for (let x_Axis = -blockHalfRangeX; x_Axis <= blockHalfRangeX; x_Axis++) {
-
+                // Variable Declaration
                 let BlockX = this.lastBlockPos.position[0] + x_Axis;
                 let BlockY = this.lastBlockPos.position[1] + y_Axis;
                 let dirX = this.lastBlockPos.direction[0];
                 let dirY = this.lastBlockPos.direction[1];
-                if (BlockX < 0){
+                if (BlockX < 0) {
                     dirX *= -1;
                     BlockX = -BlockX-1;
                 }
 
-                if (BlockY < 0){
+                if (BlockY < 0) {
                     dirY *= -1;
                     BlockY = -BlockY-1;
                 }
@@ -259,24 +262,20 @@ class controller{
                 let theQuarterMap = game_map.getQuarterMap([dirX,dirY]);
                 if (theQuarterMap.blockList[BlockY][BlockX] == null){
                     blockPosList.push(blockPos);
-                }else{
-                    
+                } else {
                     game_map.spawnBlockObject(BlockX, BlockY, [dirX, dirY]);
                 }
-
-                
-
             }
         }
 
-        for(let i = 0; i < game_map.blockObjectClass.length; i++){
+        for (let i = 0; i < game_map.blockObjectClass.length; i++){
             if (!game_map.blockObjectClass[i].view){
                 if (game_map.blockObjectClass[i].block != null){
                     game_map.deleteBlock(game_map.blockObjectClass[i].block);
                     game_map.blockObjectClass[i].block = null;
                 }
                
-            }else{
+            } else {
                 game_map.newBlockObjectClass.push(game_map.blockObjectClass[i]);
             }
         }
@@ -285,12 +284,11 @@ class controller{
         game_map.newBlockObjectClass = [];
         
         return blockPosList;
-
     }
 
     // Updating The Position
     update(delta){
-        //change movement speed
+        // Change Movement Speed By Shift
         if (!this.inputs.shift) {
             // Walk
             this.speed = this.baseMovementSpeed
@@ -333,6 +331,7 @@ class controller{
             }
         }
 
+        // Apply Item Collision
         this.itemCollision();
 
         // Update Position On Server
@@ -374,5 +373,4 @@ class controller{
         this.camera.translateY(screenPos.y * speedPerFrame * autoY * 2);
         this.camera.translateX(screenPos.x * speedPerFrame * autoX * 2);
     }
-
 } 

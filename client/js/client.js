@@ -108,6 +108,7 @@ const playerDisconnect = (PlayerID) => {
 	}
 };
 
+// Update Client Side Block
 const clientUpdateBlocks = (blockList) => {
 	game_map.spawnBlocks(blockList[0]);
 };
@@ -128,6 +129,7 @@ const clientUpdateBlocks = (blockList) => {
 	sock.on('newPlayer', newPlayer);
 	sock.on('clientPos', playerPositionUpdate);
 	sock.on('clientDisconnect', playerDisconnect);
+	
 	sock.on('addBlocks', clientUpdateBlocks);
 
 	sock.on('clientPlayerItemArray', playerItemArrayUpdate);
@@ -159,6 +161,8 @@ const clientUpdateBlocks = (blockList) => {
 	// Add An Event Called 'remove item' To Remove An Collectable Item
 	document.addEventListener('remove item', removeItem);
 	document.addEventListener('player collected item', updateItem);
+
+	// Map Related
 	const updateBlock = () => {
 		var blockPosList = player_controller.getSurroundingBlockPos([1,1]);
 		if (blockPosList.length > 0){
