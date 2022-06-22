@@ -48,7 +48,7 @@ class map {
     spawnUnit(x, y, unitClass, block){
         let geometry = new THREE.BoxGeometry(1, 1, 1);
         let colorHeight = unitClass.colorHeight;
-        let height = colorHeight*3;
+        let height = colorHeight * 3;
         let material = new THREE.MeshBasicMaterial({color: new THREE.Color(unitClass.color3D[0] * colorHeight, unitClass.color3D[1] * colorHeight, unitClass.color3D[2] * colorHeight)});
         let mesh = new THREE.Mesh(geometry, material);
         

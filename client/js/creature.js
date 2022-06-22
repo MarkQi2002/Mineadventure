@@ -12,7 +12,7 @@ class creature{
         this.health -= amount;
     }
 
-    delete(){
+    delete() {
         // Remove All Child Object
         var obj;
         for( var i = this.object.children.length - 1; i >= 0; i--) { 
@@ -30,7 +30,7 @@ class creature{
 class player extends creature{
     constructor(name, position, health) {
         // Calling Parent Constructor
-        super(name,position, health)
+        super(name, position, health)
 
         // Spherical Body
         let geometry = new THREE.SphereGeometry(0.5, 10, 10);

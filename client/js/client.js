@@ -23,7 +23,7 @@ const initSelf = (severPlayerID, serverPlayerArray, serverMap) => {
 };
 
 // Initialization Myself And All Future Players
-const newPlayer = (playerInfo,playerArrayLength) => {
+const newPlayer = (playerInfo, playerArrayLength) => {
 	playerArray.length = playerArrayLength;
 	let new_player = spawnPlayer(playerInfo);
 	// Setting The Controller To The Player When First Enter
@@ -66,8 +66,8 @@ const playerDisconnect = (PlayerID) => {
 	sock.on('initSelf', initSelf);
 	sock.on('newPlayer', newPlayer);
 	sock.on('clientPos', playerPositionUpdate);
-	sock.on('connect_error', connectionError)
 	sock.on('clientDisconnect', playerDisconnect);
+	sock.on('connect_error', connectionError);
 
 	// Sending My New Position To Server
 	const updatePosition = () => {

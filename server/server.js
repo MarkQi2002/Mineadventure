@@ -74,7 +74,7 @@ function newPlayerID(){
 }
 
 // Setting The Size Of The Map
-var game_map = new map([3, 3],[50, 50]);
+var game_map = new map([1, 1],[50, 50]);
 
 // ID Of Player
 var ID_count = 0;

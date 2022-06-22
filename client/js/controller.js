@@ -1,6 +1,6 @@
 // Controller Class
 class controller{
-    constructor(creature,camera) {
+    constructor(creature, camera) {
         this.creature = creature;
         this.camera = camera;
         this.baseMovementSpeed = 3; // Per Second
@@ -74,6 +74,57 @@ class controller{
                 break;
         }
     }
+    
+    // Player Collision Detection
+    playerCollision(translateDistance){
+        // For Collision Detection
+        let creatureTrans = this.creature.object;
+        let predictedPosition = new THREE.Vector3();
+        predictedPosition.copy(creatureTrans.position);
+
+        // Predicting Future Position
+        if (this.inputs.forward) predictedPosition.y += translateDistance;
+        if (this.inputs.backward) predictedPosition.y -= translateDistance;
+        if (this.inputs.left) predictedPosition.x -= translateDistance;
+        if (this.inputs.right) predictedPosition.x += translateDistance;
+
+        // Getting Player Bounding Box
+        let playerBB = new THREE.Sphere(predictedPosition, 0.5);
+
+        // Checking Collision With Every Other Player
+        for (let playerIndex = 0; playerIndex < playerArray.length; playerIndex++) {
+            // A Few Condition To Skip Collision Detection
+            if (playerArray[playerIndex] == null) continue;
+            if (clientPlayerID == playerIndex) continue;
+            if (predictedPosition.manhattanDistanceTo(playerArray[playerIndex].object.position) > 2) continue;
+
+            // Getting Other Player's Bounding Box
+            console.log(playerArray[playerIndex].object.position);
+            let otherPlayerBB = new THREE.Sphere(playerArray[playerIndex].object.position, 0.5);
+
+            // If Collision Occur, Move In Opposite Direction And Return True
+            if (playerBB.intersectsSphere(otherPlayerBB)) {
+                console.log("Collided With Player", playerIndex);
+                // Sliding The Block
+                if (this.inputs.forward) creatureTrans.translateY(-translateDistance);
+                else if (this.inputs.backward) creatureTrans.translateY(translateDistance);
+                else if (this.inputs.left) creatureTrans.translateX(translateDistance);
+                else if (this.inputs.right) creatureTrans.translateX(-translateDistance);
+
+                // Update Position On Server
+                if (this.inputs.forward || this.inputs.backward || this.inputs.left || this.inputs.right || !this.onGround) {
+                    var event = new Event('position event', {bubbles: true, cancelable: false})
+                    document.dispatchEvent(event);
+                }
+                
+                // Indicate Collision Occurred
+                return true;
+            }
+        }
+
+        // No Collision Has Occurred
+        return false;
+    }
 
     // Updating The Position
     update(delta){
@@ -97,24 +148,27 @@ class controller{
             magnitude = 1;
         }
 
-        // Shorthand Name
+        // Variable Declaration
+        let translateDistance = speedPerFrame / magnitude;
         let creatureTrans = this.creature.object;
-        
-        // Moving The Creature
-        if (this.inputs.forward) {
-            creatureTrans.translateY(speedPerFrame / magnitude);
-        }
 
-        if (this.inputs.backward) {
-            creatureTrans.translateY(-speedPerFrame / magnitude);
-        }
+        // If No Collision Occur, Move The Creature
+        if (!this.playerCollision(translateDistance)) {
+            if (this.inputs.forward) {
+                creatureTrans.translateY(translateDistance);
+            }
 
-        if (this.inputs.left) {
-            creatureTrans.translateX(-speedPerFrame/magnitude);
-        }
+            if (this.inputs.backward) {
+                creatureTrans.translateY(-translateDistance);
+            }
 
-        if (this.inputs.right) {
-            creatureTrans.translateX(speedPerFrame/magnitude);
+            if (this.inputs.left) {
+                creatureTrans.translateX(-translateDistance);
+            }
+
+            if (this.inputs.right) {
+                creatureTrans.translateX(translateDistance);
+            }
         }
 
         // Update Position On Server
@@ -128,6 +182,7 @@ class controller{
             this.jumpVelocity -= gravity*delta;
         }
 
+        // Jumping Related Detection
         if (creatureTrans.position.z + this.jumpVelocity > groundLevel) {
             creatureTrans.translateZ(this.jumpVelocity);
         } else {
