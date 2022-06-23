@@ -1,6 +1,7 @@
 // THREE.js Initial Set Up Variable
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 15);
+//scene.background = new THREE.Color( 0xffffff );
 camera.position.z = 10;
 
 // Resize Window
@@ -19,6 +20,27 @@ window.addEventListener('resize', resizeWindow);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+renderer.shadowMap.enabled = true;
+
+// Light Setting
+
+const skyColor = 0xFFFFFF;  // light blue
+const groundColor = 0x000000;  // brownish orange
+const intensity = 2;
+const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+light.position.set(0, 0, 1);
+scene.add(light);
+
+/*
+const color = 0xFFFFFF;
+const intensity = 1;
+const light = new THREE.DirectionalLight(color, intensity);
+light.position.set(0, 0, 0);
+light.target.position.set(0, 0, -1);
+scene.add(light);
+scene.add(light.target);*/
+
+
 
 // Game Setting
 const groundLevel = 1;

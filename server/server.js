@@ -26,13 +26,29 @@ playerArray.length = 32;
 // ID Of Player
 var ID_count = 0;
 
+// find a spawn place without collision
+function createSpawnPosition() {
+	let posX, posY;
+	while (1){
+		posX = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.x * game_map.blockSize2D.x);
+		posY = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.y * game_map.blockSize2D.y);
+		let unit = game_map.getUnit([posX, posY]);
+		if ( unit != null && !(game_map.unitIDList[unit.ID].collision)){
+			break;
+		}
+	}
+	return [posX, posY];
+}
+
 // Function Used To Create A New Player Using Two Parameters
-const CreateNewPlayer = (playerID, playerName) => {
+const CreateNewPlayer = (playerID, playerName, spawnPos) => {
 	// Similar To A Struct
+
+
 	let playerInfo  = {
 		ID: playerID,
 		name: playerName,
-		position: [0, 0, 1],
+		position: [spawnPos[0], spawnPos[1], 1],
 		// Player Properties
 		// Defensive Properties
 		health: 100,
@@ -171,8 +187,9 @@ io.on('connection', (sock) => {
 	// Setting The New PlayerID
 	const playerID = newPlayerID(ID_count);
 
+	const spawnPos = createSpawnPosition();
 	// Initializing The Player To The Client
-	sock.emit('initSelf', playerID, playerArray, game_map.getInitMap(getPlayerMapPos2D(playerID), [1, 1]));
+	sock.emit('initSelf', playerID, playerArray, game_map.getInitMap(spawnPos, [1, 1]));
 	console.log("new player joined, ID: ", playerID);
 
 	// Initializing Collectable Item To The Client
@@ -182,7 +199,7 @@ io.on('connection', (sock) => {
 	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
 	// First Parameter Data Name (Same As Client Side), Second Parameter The Actual Data
 	// Player Related
-	sock.on('newName', (playerName) => io.emit('newPlayer', CreateNewPlayer(playerID, playerName), playerArray.length));
+	sock.on('newName', (playerName) => io.emit('newPlayer', CreateNewPlayer(playerID, playerName, spawnPos), playerArray.length));
 	sock.on('newPos', (Pos) => io.emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
 	sock.on('disconnect', (Info) => io.emit('clientDisconnect', clientDisconnect(Info, playerID)));
 	sock.on('requireBlock', (blockPosList) => sock.emit('addBlocks', game_map.getUpdateBlock(blockPosList)));

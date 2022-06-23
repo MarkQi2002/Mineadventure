@@ -2,7 +2,10 @@
 class controller{ 
     constructor(creature, camera) { 
         this.creature = creature; 
-        this.camera = camera; 
+        this.camera = camera;
+        this.camera.position.x = this.creature.object.position.x;
+        this.camera.position.y = this.creature.object.position.y;
+        
         this.baseMovementSpeed = 3; // Per Second 
         this.speed = this.baseMovementSpeed; // Per Second 
  
@@ -191,8 +194,9 @@ class controller{
         if (this.inputs.backward) predictedPosition.y -= translateDistance; 
         if (this.inputs.left) predictedPosition.x -= translateDistance; 
         if (this.inputs.right) predictedPosition.x += translateDistance; 
- 
-        if (game_map.getUnit([Math.floor(predictedPosition.x), Math.floor(predictedPosition.y)]).Height > 0.05) { 
+        
+        let unitID = game_map.getUnit([Math.floor(predictedPosition.x), Math.floor(predictedPosition.y)]).ID;
+        if (game_map.unitIDList[unitID].collision) { 
             console.log("Collided With Wall", game_map.getUnit([Math.floor(predictedPosition.x), Math.floor(predictedPosition.y)]).Height); 
             console.log("Player Position: ", creatureTrans.position); 
              

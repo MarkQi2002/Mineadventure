@@ -48,9 +48,11 @@ class map {
     loadMaterials(){
         this.materialList.length = this.unitIDList.length;
         for (let i = 0; i < this.unitIDList.length; i++) {
-            this.materialList[i] =  new THREE.MeshBasicMaterial({
-                    map: this.loader.load(this.unitIDList[0].texture),
-                });
+            let texture = this.loader.load(this.unitIDList[i].texture);
+
+            this.materialList[i] =  new THREE.MeshPhongMaterial({
+                    map: texture,
+            });
         }
     
     }
@@ -64,7 +66,7 @@ class map {
         return theQuarterMap.blockList[Math.abs(blockY)][Math.abs(blockX)];
     }
  
-    // ERROR
+    
     getUnit([mapX, mapY]){
         let unitX = (mapX < 0) ? -mapX - 1 : mapX;
         let unitY = (mapY < 0) ? -mapY - 1 : mapY;

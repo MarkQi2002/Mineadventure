@@ -5,9 +5,9 @@ class map {
     constructor(quarterSize2D, blockSize2D) {
         this.unitIDList = [
 
-            this.setUnitIDInfo("image/gmail.png", false),
+            this.setUnitIDInfo("image/unit_material/0_ground.jpg", false),
 
-            this.setUnitIDInfo("image/gmail.png", false)
+            this.setUnitIDInfo("image/unit_material/1_wall.jpg", true)
             
 
 
@@ -117,6 +117,9 @@ class map {
         return [Math.floor(Math.abs(unitX) / this.blockSize2D.x), Math.floor(Math.abs(unitY) / this.blockSize2D.y)];
     }
 
+    unit2DToBlock2D([unitX, unitY]){
+        return [Math.floor(Math.abs(unitX) / this.blockSize2D.x), Math.floor(Math.abs(unitY) / this.blockSize2D.y)];
+    }
     
     // Return The QuarterMap Based On xy Coordinate
     getQuarterMap([mapX, mapY]){
@@ -153,11 +156,26 @@ class map {
 
     // Return The Block Based On The Block xy Coordinate
     getBlockByQuarter([blockX, blockY], theQuarterMap) {
-        return theQuarterMap.blockList[Math.abs(blockX)][Math.abs(blockY)];
+        return theQuarterMap.blockList[Math.abs(blockY)][Math.abs(blockX)];
     }
 
     getBlock([mapX, mapY]){
         return this.getBlockByQuarter(this.map2DToBlock2D([mapX, mapY]),this.getQuarterMap([mapX, mapY]));
+    }
+
+    // Return The Unit Based On xy Coordinate
+    getUnit([mapX, mapY]){
+        let unitX = (mapX < 0) ? -mapX - 1 : mapX;
+        let unitY = (mapY < 0) ? -mapY - 1 : mapY;
+
+        let theBlock = this.getBlockByQuarter(this.unit2DToBlock2D([unitX, unitY]), this.getQuarterMap([mapX, mapY]));
+        console.log(theBlock);
+        if (theBlock != null){
+            return theBlock.unitList[Math.abs(unitY) % this.blockSize2D.y][Math.abs(unitX) % this.blockSize2D.x];
+        }else{
+            return null;
+        }
+        
     }
 
     getInitMap([mapX, mapY], [blockHalfRangeX, blockHalfRangeY]){
@@ -208,10 +226,7 @@ class map {
         return [sendingBlock,[this.quarterSize2D.x, this.quarterSize2D.y],[this.blockSize2D.x,this.blockSize2D.y]];
     }
 
-    // Return The Unit Based On xy Coordinate
-    getUnit([mapX, mapY]){
-        return this.getBlock(mapX, mapY).unitList[Math.abs(unitY) % this.blockSize2D.y][Math.abs(unitX) % this.blockSize2D.x];
-    }
+    
 
     
 
@@ -289,8 +304,12 @@ class block{
     initBlock(x, y, direction, PerlinNoise){
         for (let y_Axis = 0; y_Axis < this.unitList.length; y_Axis++) {
             for (let x_Axis = 0; x_Axis < this.unitList[y_Axis].length; x_Axis++) {
+                var ID = 1;
                 var Height = (2 - PerlinNoise.noise((PerlinNoise.initX + (x * this.unitList[0].length + x_Axis) * direction.x) / 10 , (PerlinNoise.initY + (y * this.unitList.length + y_Axis) * direction.y) / 10, 0.1) * 4) *3;
-                if (Height < 0) Height = 0;
+                if (Height < 0) {
+                    Height = 0;
+                    ID = 0;
+                }
 
 
                 //let color = [Math.random(), Math.random(), Math.random()];
@@ -300,8 +319,9 @@ class block{
                     colorHeight = 0.01;
                 }*/
 
+
                 this.unitList[y_Axis][x_Axis] = {
-                    ID: 0,
+                    ID: ID,
                     Height: Height,
                 };
 
