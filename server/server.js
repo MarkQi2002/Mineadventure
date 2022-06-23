@@ -111,10 +111,10 @@ itemArray.length = 256;
 var newItemID;
 
 // Function Used To Create A New Item
-const CreateNewItem = () => {
+const CreateNewItem = (itemName) => {
 	// Similar To A Struct
 	let itemInfo = {
-		itemName: "Blood Orb",
+		itemName: itemName,
 		itemRarity: "Common",
 		itemStackType: "Linear",
 		itemBuffType: "Defensive",
@@ -127,6 +127,7 @@ const CreateNewItem = () => {
 			// Save The Item Into The Item Array
 			itemArray[itemIndex] = itemInfo;
 			newItemID = itemIndex;
+			
 			// Log The ItemInfo On The Server Side
 			console.log(itemInfo, newItemID);
 			break;
@@ -149,7 +150,7 @@ const deleteItem = (itemIndex) => {
 // Randomly Spawn An Item Every Ten Second
 setInterval(randomSpawnItem, 10000);
 function randomSpawnItem() {
-	io.emit('clientNewItem', CreateNewItem(), newItemID);
+	io.emit('clientNewItem', CreateNewItem("Blood Orb"), newItemID);
 }
 
 // Map Related Function
@@ -188,7 +189,7 @@ io.on('connection', (sock) => {
 
 	// Item Related
 	sock.on('newPlayerItemArray', (additionalItem, updatePlayerID) => io.emit('clientPlayerItemArray', UpdatePlayerItemArray(additionalItem, updatePlayerID), updatePlayerID));
-	sock.on('serverNewItem', () => io.emit('clientNewItem', CreateNewItem(), newItemID));
+	sock.on('serverNewItem', (itemName) => io.emit('clientNewItem', CreateNewItem(itemName), newItemID));
 	sock.on('deleteItem', (itemIndex) => io.emit('removeItem', deleteItem(itemIndex)));
 });
 

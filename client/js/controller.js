@@ -187,7 +187,7 @@ class controller{
         if (this.creature.object != null) {
             [mapX, mapY] = [Math.floor(this.creature.object.position.x), Math.floor(this.creature.object.position.y)];
 
-            console.log( game_map.getUnit([mapX, mapY]));
+            // console.log(game_map.getUnit([mapX, mapY]));
         }
 
         let unitX = (mapX < 0) ? mapX + 1 : mapX;

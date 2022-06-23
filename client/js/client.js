@@ -72,11 +72,21 @@ const playerItemArrayUpdate = (additionalItem, updatePlayerID) => {
 // Constructing An Player Object And Storing In The Client Side playerArray
 function spawnItem(itemInfo, itemIndex){
 	console.log("Spawning", itemInfo, " At ItemIndex: ", itemIndex);
-	let new_item = new bloodOrb(itemInfo.itemName,
+	var new_item;
+	if (itemInfo.itemName == "Blood Orb") {
+		new_item = new bloodOrb(itemInfo.itemName,
 								itemInfo.itemRarity,
 								itemInfo.itemStackType,
 								itemInfo.itemBuffType,
 								itemInfo.itemPosition);
+
+	} else if (itemInfo.itemName == "Attack Orb") {
+		new_item = new attackOrb(itemInfo.itemName,
+								itemInfo.itemRarity,
+								itemInfo.itemStackType,
+								itemInfo.itemBuffType,
+								itemInfo.itemPosition);
+	}
 
 	itemArray[itemIndex] = new_item;
 	return new_item;
@@ -132,7 +142,7 @@ const clientUpdateBlocks = (blockList) => {
 	// Sending Information To Server Only Once
 	// First Parameter Is The Tag, Second Parameter Is What We Send To The Server
 	sock.emit('newName', sessionStorage.getItem("playerInitialName"));
-	sock.emit('serverNewItem');
+	sock.emit('serverNewItem', "Blood Orb");
 
 	// Receiving Information From Server
 	// First Parameter Is The Tag, Second Parameter Is The Event/Function To Operate On Information From Server
