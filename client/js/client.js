@@ -32,6 +32,14 @@ const newPlayer = (playerInfo, playerArrayLength) => {
 	// Setting The Controller To The Player When First Enter
 	if (playerInfo.ID == clientPlayerID){
 		player_controller = new controller(new_player, camera);
+
+		// Display Infomration On UI
+		displayPlayerName();
+		displayPlayerHealth();
+		displayPlayerArmor();
+		displayPlayerAttackDamage();
+
+		// Animate The Player
 		animate();
 	}
 };
@@ -67,6 +75,12 @@ const playerItemArrayUpdate = (additionalItem, updatePlayerID) => {
 		playerArray[updatePlayerID].attackSpeed += additionalItem.attackSpeed;
 		console.log(playerArray[updatePlayerID].health);
 	}
+
+	// Display Infomration On UI
+	displayPlayerName();
+	displayPlayerHealth();
+	displayPlayerArmor();
+	displayPlayerAttackDamage();
 }
 // Initialization Myself And All Future Players
 // Constructing An Player Object And Storing In The Client Side playerArray

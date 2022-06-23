@@ -1,0 +1,27 @@
+.bottomInformationUI {
+    background-color: pink;
+    overflow: hidden;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 10%;
+}
+
+.playerInformation {
+    background-color: darkred;
+    position: fixed;
+    width: 25%;
+    height: 100%;
+}
+
+.playerInformation p {
+    font-size: 25%;
+}
+
+.verticalSeparation {
+    background-color: darkblue;
+    position: fixed;
+    margin-left: 25%;
+    width: 5%;
+    height: 100%;
+}

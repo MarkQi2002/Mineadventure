@@ -5,6 +5,9 @@
 		<!-- Title And Favicon-->
 		<title>Mineadventure</title>
 		<link rel="icon" type="image/png" href="image/favicon.png">
+		<!-- External CSS-->
+		<link rel="styleSheet" href="UI/bottominformationUI.css">
+
 		<!-- Internal CSS-->
 		<style>
 			body { margin: 0; }
@@ -27,5 +30,24 @@
 		<!-- Main Running JavaScript-->
 		<script src="js/main.js"></script>
 		<script src="js/client.js"></script>
+
+		<!-- Bottom Information UI-->
+		<div class="bottomInformationUI">
+			<!-- Displaying Player Information On Bottom UI-->
+			<div class="playerInformation">
+				<p id="playerName"></p>
+				<p id="playerHealth"></p>
+				<p id="playerArmor"></p>
+				<p id="playerAttackDamange"></p>
+			</div>
+			
+			<!-- Vertical Separation-->
+			<div class="verticalSeparation" >
+
+			</div>
+		</div>
 	</body>
 </html>
+
+<!-- External JavaScript-->
+<script src="js/UI.js"></script>
