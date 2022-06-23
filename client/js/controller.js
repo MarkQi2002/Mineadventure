@@ -183,8 +183,11 @@ class controller{
     getPlayerBlockPos2D(){
         // Calculating Player Position
         let mapX, mapY;
+
         if (this.creature.object != null) {
             [mapX, mapY] = [Math.floor(this.creature.object.position.x), Math.floor(this.creature.object.position.y)];
+
+            console.log( game_map.getUnit([mapX, mapY]));
         }
 
         let unitX = (mapX < 0) ? mapX + 1 : mapX;
@@ -193,13 +196,13 @@ class controller{
         var direction;
     
         // Get Which Direction The Player In Going TO
-        if (unitX >= 0 && unitY >= 0) {
+        if (mapX >= 0 && mapY >= 0) {
             direction = [1, 1];
-        } else if (unitX >= 0 && unitY < 0) {
+        } else if (mapX >= 0 && mapY < 0) {
             direction = [1, -1];
-        } else if (unitX < 0 && unitY >= 0) {
+        } else if (mapX < 0 && mapY >= 0) {
             direction = [-1, 1];
-        } else if (unitX < 0 && unitY < 0) {
+        } else if (mapX < 0 && mapY < 0) {
             direction = [-1, -1];
         }
 

@@ -99,17 +99,14 @@ class map {
     // Return The QuarterMap Based On xy Coordinate
     getQuarterMap([mapX, mapY]){
         var selectArray;
-
-        let unitX = (mapX < 0) ? mapX + 1 : mapX;
-        let unitY = (mapY < 0) ? mapY + 1 : mapY;
         
-        if (unitX >= 0 && unitY >= 0) {
+        if (mapX >= 0 && mapY >= 0) {
             selectArray = this.spaceArray.pp;
-        } else if (unitX >= 0 && unitY < 0) {
+        } else if (mapX >= 0 && mapY < 0) {
             selectArray = this.spaceArray.pn;
-        } else if (unitX < 0 && unitY >= 0) {
+        } else if (mapX < 0 && mapY >= 0) {
             selectArray = this.spaceArray.np;
-        } else if (unitX < 0 && unitY < 0) {
+        } else if (mapX < 0 && mapY < 0) {
             selectArray = this.spaceArray.nn;
         }
 

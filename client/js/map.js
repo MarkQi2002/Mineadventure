@@ -24,6 +24,26 @@ class map {
         scene.add(this.object);
     }
 
+    unit2DToBlock2D([unitX, unitY]){
+        return [Math.floor(Math.abs(unitX) / this.blockSize.x), Math.floor(Math.abs(unitY) / this.blockSize.y)];
+    }
+
+
+    getBlockByQuarter([blockX, blockY], theQuarterMap) {
+        return theQuarterMap.blockList[Math.abs(blockX)][Math.abs(blockY)];
+    }
+ 
+
+    getUnit([mapX, mapY]){
+        let unitX = (mapX < 0) ? mapX + 1 : mapX;
+        let unitY = (mapY < 0) ? mapY + 1 : mapY;
+
+        let theBlock = this.getBlockByQuarter(this.unit2DToBlock2D([unitX, unitY]), this.getQuarterMap([mapX, mapY]))
+        return theBlock.class.unitList[Math.abs(unitY) % this.blockSize.y][Math.abs(unitX) % this.blockSize.x];
+    }
+
+
+
     // Return The Direction QuarterMap
     getQuarterMap([directionX, directionY]){
         var selectArray;
