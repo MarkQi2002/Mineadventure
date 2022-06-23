@@ -85,7 +85,7 @@ const playerItemArrayUpdate = (additionalItem, updatePlayerID) => {
 // Initialization Myself And All Future Players
 // Constructing An Player Object And Storing In The Client Side playerArray
 function spawnItem(itemInfo, itemIndex){
-	console.log("Spawning", itemInfo, " At ItemIndex: ", itemIndex);
+	// Creating The Item Object
 	var new_item;
 	if (itemInfo.itemName == "Blood Orb") {
 		new_item = new bloodOrb(itemInfo.itemName,
@@ -102,7 +102,11 @@ function spawnItem(itemInfo, itemIndex){
 								itemInfo.itemPosition);
 	}
 
-	itemArray[itemIndex] = new_item;
+	if (itemArray[itemIndex] == null) {
+		itemArray[itemIndex] = new_item;
+		console.log("Spawning", itemInfo, " At ItemIndex: ", itemIndex);
+	}
+
 	return new_item;
 }
 
