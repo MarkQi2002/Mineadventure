@@ -3,6 +3,20 @@
 // blockSize2D - The Size Of The Block (Number Of Unit)
 class map {
     constructor(quarterSize2D, blockSize2D) {
+        this.unitIDList = [
+
+            this.setUnitIDInfo("image/gmail.png", false),
+
+            this.setUnitIDInfo("image/gmail.png", false)
+            
+
+
+
+        ];
+
+        
+
+
         // This PerlinNoise Function Is Imported From Outside Source
         this.PerlinNoise = new function() {
             // Similar To A Randomized Seed For PerlinNoise
@@ -87,11 +101,19 @@ class map {
     }
 
 
+    // set UnitIDInfo by (texture url address, collision bool)
+    setUnitIDInfo(texture, collision){
+        var unitIDInfo = {
+            texture: texture, // texture url address
+            collision: collision //true or false
+        }
+        return unitIDInfo
+    }
 
 
     map2DToBlock2D([mapX, mapY]){
-        let unitX = (mapX < 0) ? mapX + 1 : mapX;
-        let unitY = (mapY < 0) ? mapY + 1 : mapY;
+        let unitX = (mapX < 0) ? -mapX - 1 : mapX;
+        let unitY = (mapY < 0) ? -mapY - 1 : mapY;
         return [Math.floor(Math.abs(unitX) / this.blockSize2D.x), Math.floor(Math.abs(unitY) / this.blockSize2D.y)];
     }
 
@@ -162,7 +184,7 @@ class map {
                 sendingBlock.push(blockInfo);
             }
         }
-        return [sendingBlock,[this.quarterSize2D.x, this.quarterSize2D.y],[this.blockSize2D.x,this.blockSize2D.y]];
+        return [sendingBlock, [this.quarterSize2D.x, this.quarterSize2D.y], [this.blockSize2D.x,this.blockSize2D.y], this.unitIDList];
     }
 
     getUpdateBlock(blockPosList){
@@ -267,12 +289,20 @@ class block{
     initBlock(x, y, direction, PerlinNoise){
         for (let y_Axis = 0; y_Axis < this.unitList.length; y_Axis++) {
             for (let x_Axis = 0; x_Axis < this.unitList[y_Axis].length; x_Axis++) {
-                var colorHeight = 2 - PerlinNoise.noise((PerlinNoise.initX + (x * this.unitList[0].length + x_Axis) * direction.x) / 10 , (PerlinNoise.initY + (y * this.unitList.length + y_Axis) * direction.y) / 10, 0.1) * 4;
-                if(colorHeight < 0) colorHeight = 0;
+                var Height = (2 - PerlinNoise.noise((PerlinNoise.initX + (x * this.unitList[0].length + x_Axis) * direction.x) / 10 , (PerlinNoise.initY + (y * this.unitList.length + y_Axis) * direction.y) / 10, 0.1) * 4) *3;
+                if (Height < 0) Height = 0;
+
+
+                //let color = [Math.random(), Math.random(), Math.random()];
+                /*
+                if (x_Axis == 0|| y_Axis == 0 || x_Axis == this.unitList[y_Axis].length-1 || y_Axis == this.unitList.length-1 ){
+                    color = [1,0,0];
+                    colorHeight = 0.01;
+                }*/
 
                 this.unitList[y_Axis][x_Axis] = {
-                    colorHeight: colorHeight,
-                    color3D: [Math.random(), Math.random(), Math.random()]
+                    ID: 0,
+                    Height: Height,
                 };
 
             }

@@ -4,7 +4,7 @@
 // Map Class
 class map {
     // Constructor
-    constructor([serverBlocks, quarterSize2D, blockSize2D]) {
+    constructor([serverBlocks, quarterSize2D, blockSize2D, unitIDList]) {
         this.object = new THREE.Object3D();
         this.object.position.set(0, 0, 0);
         //this.spawnMap(serverMapClass);
@@ -20,11 +20,39 @@ class map {
             nn: new quarterMap([-1, -1], quarterSize2D),
         };
 
+
+
+        this.cubeGeometry = new THREE.BoxGeometry(1, 1, 1);// geometry for all cubes
+        this.unitIDList = unitIDList;// get unit ID list from server
+        this.loader = new THREE.TextureLoader();// texture loader
+        this.materialList = []; //
+        this.loadMaterials(); //load materials
+
+
+
+
         this.blockObjectClass = [];
         this.newBlockObjectClass = [];
 
         this.spawnBlocks(serverBlocks);
         scene.add(this.object);
+
+        
+        /*
+        let material = new THREE.MeshBasicMaterial({
+            map: this.loader.load(texture),
+            });*/
+    }
+
+    // for each unit ID, load materials
+    loadMaterials(){
+        this.materialList.length = this.unitIDList.length;
+        for (let i = 0; i < this.unitIDList.length; i++) {
+            this.materialList[i] =  new THREE.MeshBasicMaterial({
+                    map: this.loader.load(this.unitIDList[0].texture),
+                });
+        }
+    
     }
 
     unit2DToBlock2D([unitX, unitY]){
@@ -33,16 +61,21 @@ class map {
 
 
     getBlockByQuarter([blockX, blockY], theQuarterMap) {
-        return theQuarterMap.blockList[Math.abs(blockX)][Math.abs(blockY)];
+        return theQuarterMap.blockList[Math.abs(blockY)][Math.abs(blockX)];
     }
  
     // ERROR
     getUnit([mapX, mapY]){
-        let unitX = (mapX < 0) ? mapX + 1 : mapX;
-        let unitY = (mapY < 0) ? mapY + 1 : mapY;
+        let unitX = (mapX < 0) ? -mapX - 1 : mapX;
+        let unitY = (mapY < 0) ? -mapY - 1 : mapY;
 
         let theBlock = this.getBlockByQuarter(this.unit2DToBlock2D([unitX, unitY]), this.getQuarterMap([mapX, mapY]));
-        return theBlock.class.unitList[Math.abs(unitY) % this.blockSize.y][Math.abs(unitX) % this.blockSize.x];
+        if (theBlock != null && theBlock.class != null){
+            return theBlock.class.unitList[Math.abs(unitY) % this.blockSize.y][Math.abs(unitX) % this.blockSize.x];
+        }else{
+            return null;
+        }
+        
     }
 
     // Return The Direction QuarterMap
@@ -97,7 +130,7 @@ class map {
             };
 
             this.spawnBlockObject(x, y, [direction.x, direction.y]);
-        }        
+        }
     }
 
     // Creating Client Side Block
@@ -133,14 +166,13 @@ class map {
 
     // Creating Client Side Unit
     spawnUnit(x, y, unitClass, block){
-        let geometry = new THREE.BoxGeometry(1, 1, 1);
-        let colorHeight = unitClass.colorHeight;
-        let height = colorHeight * 3;
-        if (colorHeight > 0.05) colorHeight = 1;
-        let material = new THREE.MeshBasicMaterial({color: new THREE.Color(unitClass.color3D[0] * colorHeight, unitClass.color3D[1] * colorHeight, unitClass.color3D[2] * colorHeight)});
+        let geometry = this.cubeGeometry;
+        let material = this.materialList[unitClass.ID];
+            
+            //new THREE.MeshBasicMaterial({color: new THREE.Color(unitClass.color3D[0] * colorHeight, unitClass.color3D[1] * colorHeight, unitClass.color3D[2] * colorHeight)});
         let mesh = new THREE.Mesh(geometry, material);
         block.add(mesh);
-        mesh.position.set(x, y, height);
+        mesh.position.set(x, y, unitClass.Height);
     }
 
     // Removing A Block (No Longer Render This Block)
@@ -149,8 +181,8 @@ class map {
         var obj;
         for (var i = block.children.length - 1; i >= 0; i--) { 
             obj = block.children[i];
-            obj.geometry.dispose();
-            obj.material.dispose();
+            //obj.geometry.dispose();
+            //obj.material.dispose();
             block.remove(obj); 
         }
         this.object.remove(block);
