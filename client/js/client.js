@@ -21,7 +21,6 @@ const initSelf = (severPlayerID, serverPlayerArray, serverBlocks) => {
 		}
 	}
 
-	
 	game_map = new map(serverBlocks);
 };
 

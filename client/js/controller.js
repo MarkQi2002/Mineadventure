@@ -179,6 +179,31 @@ class controller{
         return false;
     }
 
+    // Map Collision Detection
+    mapCollision(translateDistance){
+        // For Collision Detection
+        let creatureTrans = this.creature.object;
+        let predictedPosition = new THREE.Vector3();
+        predictedPosition.copy(creatureTrans.position);
+
+        // Predicting Future Position
+        if (this.inputs.forward) predictedPosition.y += translateDistance;
+        if (this.inputs.backward) predictedPosition.y -= translateDistance;
+        if (this.inputs.left) predictedPosition.x -= translateDistance;
+        if (this.inputs.right) predictedPosition.x += translateDistance;
+
+        if (game_map.getUnit([Math.floor(predictedPosition.x), Math.floor(predictedPosition.y)]).colorHeight > 0.05) {
+            console.log("Collided With Wall", game_map.getUnit([Math.floor(predictedPosition.x), Math.floor(predictedPosition.y)]).colorHeight);
+            console.log("Player Position: ", creatureTrans.position);
+            
+            // Indicate Collision Occurred
+            return true;    
+        }
+
+        // No Item Collision Has Occurred
+        return false;
+    }
+
     // Getting Player's Position And Direction
     getPlayerBlockPos2D(){
         // Calculating Player Position
@@ -316,7 +341,7 @@ class controller{
         let creatureTrans = this.creature.object;
 
         // If No Collision Occur, Move The Creature
-        if (!this.playerCollision(translateDistance)) {
+        if (!this.playerCollision(translateDistance) && !this.mapCollision(translateDistance)) {
             if (this.inputs.forward) {
                 creatureTrans.translateY(translateDistance);
             }

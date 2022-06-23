@@ -1,3 +1,6 @@
+// mapX, mapY - Relative To The Entire Map, Use To Access Any Unit
+// unitX, unitY - Relative To The Quarter Map, To Select A Unit In The Quarter Map
+// blockX, blockY - Relative To The Quarter Map, To Select A Block In The Quarter Map
 // Map Class
 class map {
     // Constructor
@@ -33,16 +36,14 @@ class map {
         return theQuarterMap.blockList[Math.abs(blockX)][Math.abs(blockY)];
     }
  
-
+    // ERROR
     getUnit([mapX, mapY]){
         let unitX = (mapX < 0) ? mapX + 1 : mapX;
         let unitY = (mapY < 0) ? mapY + 1 : mapY;
 
-        let theBlock = this.getBlockByQuarter(this.unit2DToBlock2D([unitX, unitY]), this.getQuarterMap([mapX, mapY]))
+        let theBlock = this.getBlockByQuarter(this.unit2DToBlock2D([unitX, unitY]), this.getQuarterMap([mapX, mapY]));
         return theBlock.class.unitList[Math.abs(unitY) % this.blockSize.y][Math.abs(unitX) % this.blockSize.x];
     }
-
-
 
     // Return The Direction QuarterMap
     getQuarterMap([directionX, directionY]){
@@ -135,6 +136,7 @@ class map {
         let geometry = new THREE.BoxGeometry(1, 1, 1);
         let colorHeight = unitClass.colorHeight;
         let height = colorHeight * 3;
+        if (colorHeight > 0.05) colorHeight = 1;
         let material = new THREE.MeshBasicMaterial({color: new THREE.Color(unitClass.color3D[0] * colorHeight, unitClass.color3D[1] * colorHeight, unitClass.color3D[2] * colorHeight)});
         let mesh = new THREE.Mesh(geometry, material);
         block.add(mesh);
