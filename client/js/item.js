@@ -31,6 +31,10 @@ class item {
         // Defensive Properties
         this.health = 0;
         this.armor = 0;
+
+        // Attack Properties
+        this.attackDamage = 0;
+        this.attackSpeed = 0;
     }
 
     delete() {
@@ -66,5 +70,25 @@ class bloodOrb extends item {
         // Defensive Properties
         this.health = 20;
         this.armor = 0;
+    }
+}
+
+// Attack Orb
+// itemName: "Attack Orb"
+class attackOrb extends item {
+    constructor(itemName, itemRarity, itemStackType, itemBuffType, itemPosition) {
+        // Calling Parent Constructor
+        super(itemName, itemRarity, itemStackType, itemBuffType, itemPosition)
+
+        // Spherical Body
+        let geometry = new THREE.SphereGeometry(0.2, 10, 10);
+        let material = new THREE.MeshBasicMaterial({color: 'yellow'});
+        let mesh = new THREE.Mesh(geometry, material);
+        this.object.add(mesh);
+
+        // Item Properties
+        // Attack Properties
+        this.attackDamage = 10;
+        this.attackSpeed = 0;
     }
 }

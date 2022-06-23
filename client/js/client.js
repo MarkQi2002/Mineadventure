@@ -2,7 +2,10 @@
 function spawnPlayer(playerInfo){
 	let new_player = new player(playerInfo.name,
 								playerInfo.position,
-								playerInfo.health);
+								playerInfo.health,
+								playerInfo.armor,
+								playerInfo.attackDamage,
+								playerInfo.attackSpeed);
 
 	playerArray[playerInfo.ID] = new_player;
 	return new_player;
@@ -54,6 +57,14 @@ const playerItemArrayUpdate = (additionalItem, updatePlayerID) => {
 	// Defensive Property Update
 	if (additionalItem.buffType == "Defensive") {
 		playerArray[updatePlayerID].health += additionalItem.health;
+		playerArray[updatePlayerID].armor += additionalItem.armor;
+		console.log(playerArray[updatePlayerID].health);
+	}
+
+	// Attack Property Update
+	if (additionalItem.buffType == "Attack") {
+		playerArray[updatePlayerID].attackDamage += additionalItem.attackDamage;
+		playerArray[updatePlayerID].attackSpeed += additionalItem.attackSpeed;
 		console.log(playerArray[updatePlayerID].health);
 	}
 }
@@ -129,7 +140,7 @@ const clientUpdateBlocks = (blockList) => {
 	sock.on('newPlayer', newPlayer);
 	sock.on('clientPos', playerPositionUpdate);
 	sock.on('clientDisconnect', playerDisconnect);
-	
+
 	sock.on('addBlocks', clientUpdateBlocks);
 
 	sock.on('clientPlayerItemArray', playerItemArrayUpdate);

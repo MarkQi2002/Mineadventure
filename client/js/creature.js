@@ -1,10 +1,18 @@
 // The Most Basic Class, All Other Class (Player, Monster) Will Built Upon This By Inheritance
 class creature{
-    constructor(name, position, health) {
+    constructor(name, position, health, armor, attackDamage, attackSpeed) {
         this.name = name;
         this.object = new THREE.Object3D();
         this.object.position.set(position[0], position[1], position[2]);
+        
+        // Defensive Creature Property
         this.health = health;
+        this.armor = armor;
+
+        // Attack Creature Property
+        this.attackDamage = attackDamage;
+        this.attackSpeed = attackSpeed;
+
         scene.add(this.object);
     }
 
@@ -28,12 +36,13 @@ class creature{
 
 // Player Class
 class player extends creature {
-    constructor(name, position, health) {
+    constructor(name, position, health, armor, attackDamage, attackSpeed) {
         // Calling Parent Constructor
-        super(name, position, health)
+        super(name, position, health, armor, attackDamage, attackSpeed)
 
         this.playerItemArray = {
-            "Blood Orb" : 0
+            "Blood Orb" : 0,
+            "Attack Orb" : 0
         }
 
         // Spherical Body

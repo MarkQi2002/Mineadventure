@@ -332,7 +332,7 @@ class controller{
         }
 
         // Apply Item Collision
-        this.itemCollision();
+        this.itemCollision(translateDistance);
 
         // Update Position On Server
         if (this.inputs.forward || this.inputs.backward || this.inputs.left || this.inputs.right || !this.onGround) {

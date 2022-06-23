@@ -33,9 +33,19 @@ const CreateNewPlayer = (playerID, playerName) => {
 		ID: playerID,
 		name: playerName,
 		position: [0, 0, 1],
+		// Player Properties
+		// Defensive Properties
 		health: 100,
+		armor: 0,
+
+		// Attack Properties
+		attackDamage: 10,
+		attackSpeed: 1,
+
+		// Item Array
 		playerItemArray: {
-            "Blood Orb" : 0
+            "Blood Orb" : 0,
+			"Attack Orb" : 0
         }
 	};
 
@@ -111,17 +121,19 @@ const CreateNewItem = () => {
 		itemPosition: [1, 1, 1]
 	};
 
-	// Indexing Player Array To Include The New Player
+	// Indexing Item Array To Include The New Item
 	for (let itemIndex = 0; itemIndex < itemArray.length; itemIndex++) {
 		if (itemArray[itemIndex] == null) {
+			// Save The Item Into The Item Array
 			itemArray[itemIndex] = itemInfo;
 			newItemID = itemIndex;
+			// Log The ItemInfo On The Server Side
+			console.log(itemInfo, newItemID);
 			break;
 		}
 	}
 	
-	// Log The PlayerInfo On The Server Side
-	console.log(itemInfo, newItemID);
+	// Return itemInfo
 	return itemInfo;
 };
 
