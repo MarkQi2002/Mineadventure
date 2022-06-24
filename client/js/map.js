@@ -182,7 +182,8 @@ class map {
             
             //new THREE.MeshBasicMaterial({color: new THREE.Color(unitClass.color3D[0] * colorHeight, unitClass.color3D[1] * colorHeight, unitClass.color3D[2] * colorHeight)});
         let mesh = new THREE.Mesh(geometry, material);
-        //mesh.receiveShadow = true;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
         block.add(mesh);
         mesh.position.set(x, y, unitClass.Height);
     }

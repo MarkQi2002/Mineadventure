@@ -192,10 +192,10 @@ class controller{
         predictedPosition.copy(creatureTrans.position); 
  
         // Predicting Future Position 
-        if (this.inputs.forward) predictedPosition.y += translateDistance; 
+        if (this.inputs.forward) predictedPosition.y += translateDistance + 1; 
         if (this.inputs.backward) predictedPosition.y -= translateDistance; 
         if (this.inputs.left) predictedPosition.x -= translateDistance; 
-        if (this.inputs.right) predictedPosition.x += translateDistance; 
+        if (this.inputs.right) predictedPosition.x += translateDistance + 1; 
         
         let unit = game_map.getUnit([Math.floor(predictedPosition.x), Math.floor(predictedPosition.y)]);
         if (unit == null){

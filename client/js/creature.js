@@ -50,7 +50,7 @@ class player extends creature {
         let material = new THREE.MeshPhongMaterial({color: new THREE.Color(Math.random(), Math.random(), Math.random())});
         let mesh = new THREE.Mesh(geometry, material);
         mesh.castShadow = true; //default is false
-        mesh.receiveShadow = false;
+        mesh.receiveShadow = true;
         this.object.add(mesh);
     }
 }

@@ -189,17 +189,19 @@ class map {
                 let [newMapX, newMapY] = [mapX + x_Axis * this.blockSize2D.x, mapY + y_Axis * this.blockSize2D.y];
   
                 let [blockX, blockY] = this.map2DToBlock2D([newMapX, newMapY]);
-            
-                let theQuarterMap = this.getQuarterMap([newMapX, newMapY]);
+
+                if (this.quarterSize2D.x > blockX && this.quarterSize2D.y > blockY){
+                    let theQuarterMap = this.getQuarterMap([newMapX, newMapY]);
 
 
-                let blockInfo = {
-                    x: blockX,
-                    y: blockY,
-                    direction: theQuarterMap.direction,
-                    block: theQuarterMap.blockList[blockY][blockX]
+                    let blockInfo = {
+                        x: blockX,
+                        y: blockY,
+                        direction: theQuarterMap.direction,
+                        block: theQuarterMap.blockList[blockY][blockX]
+                    }
+                    sendingBlock.push(blockInfo);
                 }
-                sendingBlock.push(blockInfo);
             }
         }
         return [sendingBlock, [this.quarterSize2D.x, this.quarterSize2D.y], [this.blockSize2D.x,this.blockSize2D.y], this.unitIDList];
