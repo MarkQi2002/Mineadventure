@@ -120,7 +120,7 @@ class map {
     map2DToBlock2D([mapX, mapY]){
         let unitX = (mapX < 0) ? -mapX - 1 : mapX;
         let unitY = (mapY < 0) ? -mapY - 1 : mapY;
-        return [Math.floor(Math.abs(unitX) / this.blockSize2D.x), Math.floor(Math.abs(unitY) / this.blockSize2D.y)];
+        return this.unit2DToBlock2D([unitX, unitY]);
     }
 
     unit2DToBlock2D([unitX, unitY]){
@@ -129,19 +129,15 @@ class map {
     
     // Return The QuarterMap Based On xy Coordinate
     getQuarterMap([mapX, mapY]){
-        var selectArray;
-        
         if (mapX >= 0 && mapY >= 0) {
-            selectArray = this.spaceArray.pp;
+            return this.spaceArray.pp;
         } else if (mapX >= 0 && mapY < 0) {
-            selectArray = this.spaceArray.pn;
+            return this.spaceArray.pn;
         } else if (mapX < 0 && mapY >= 0) {
-            selectArray = this.spaceArray.np;
+            return this.spaceArray.np;
         } else if (mapX < 0 && mapY < 0) {
-            selectArray = this.spaceArray.nn;
+            return this.spaceArray.nn;
         }
-
-        return selectArray;
     }
 
     getQuarterMapByInt([directionX, directionY]){

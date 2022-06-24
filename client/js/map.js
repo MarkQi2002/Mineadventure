@@ -67,8 +67,15 @@ class map {
         this.geometryList.push(geometry); //0
 
         //******************************************************************
-        geometry = new THREE.BoxGeometry(1, 1, 3); // geometry for all cubes
+        geometry = new THREE.BoxGeometry(1, 1, 5); // geometry for all cubes
         this.geometryList.push(geometry); //1
+    }
+
+
+    map2DToBlock2D([mapX, mapY]){
+        let unitX = (mapX < 0) ? -mapX - 1 : mapX;
+        let unitY = (mapY < 0) ? -mapY - 1 : mapY;
+        return this.unit2DToBlock2D([unitX, unitY]);
     }
 
     unit2DToBlock2D([unitX, unitY]){
@@ -99,20 +106,23 @@ class map {
     }
 
     // Return The Direction QuarterMap
-    getQuarterMap([directionX, directionY]){
-        var selectArray;
-        
-        if (directionX >= 0 && directionY >= 0) {
-            selectArray = this.spaceArray.pp;
-        } else if (directionX >= 0 && directionY < 0) {
-            selectArray = this.spaceArray.pn;
-        } else if (directionX < 0 && directionY >= 0) {
-            selectArray = this.spaceArray.np;
-        } else if (directionX < 0 && directionY < 0) {
-            selectArray = this.spaceArray.nn;
-        }
+    getQuarterMap([mapX, mapY]){
 
-        return selectArray;
+        if (mapX >= 0 && mapY >= 0) {
+            return this.spaceArray.pp;
+        } else if (mapX >= 0 && mapY < 0) {
+            return this.spaceArray.pn;
+        } else if (mapX < 0 && mapY >= 0) {
+            return this.spaceArray.np;
+        } else if (mapX < 0 && mapY < 0) {
+            return this.spaceArray.nn;
+        }
+    }
+
+    getDirection([mapX, mapY]){
+    // Get Which Direction The Player In Going TO 
+        return [mapX >= 0 ? 1 : -1,
+                mapY >= 0 ? 1 : -1];
     }
 
     // Creating Client Side Map

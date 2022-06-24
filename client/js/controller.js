@@ -33,9 +33,22 @@ class controller{
             space: false, 
             shift: false, 
         }; 
+
+        
+
+        this.mouse = {
+            x: 0,
+            y: 0,
+            left: false,
+            right: false,
+            middle: false
+        }
  
         document.addEventListener("keydown", (e) => this.KeyDown(e), false); 
         document.addEventListener("keyup", (e) => this.KeyUp(e), false); 
+        document.addEventListener("mousedown", (e) => this.MouseDown(e), false); 
+        document.addEventListener("mouseup", (e) => this.MouseUp(e), false); 
+        document.addEventListener('mousemove', (e) => this.MouseMove(e), false);
     } 
  
     // When KeyBoard Is Pressed Down 
@@ -90,6 +103,66 @@ class controller{
         } 
     } 
      
+    // When Mouse Is Pressed Down 
+    MouseDown(event){ 
+        switch ( event.button ) {
+            case 0: // left
+                this.mouse.left = true;
+                this.sendProjectile();
+                break;
+            case 1: // middle
+                this.mouse.middle = true;
+                break;
+            case 2: // right
+                this.mouse.right = true;
+                break;
+        }
+    } 
+ 
+    // When The Mouse Is Released 
+    MouseUp(event){ 
+        switch ( event.button ) {
+            case 0: // left 
+                this.mouse.left = false;
+                break;
+            case 1: // middle
+                this.mouse.middle = false;
+                break;
+            case 2: // right
+                this.mouse.right = false;
+                break;
+        }
+    }
+
+    MouseMove(event) {
+        event.preventDefault();
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    }
+
+    sendProjectile(){
+        let groundX, groundY;
+        groundX = this.mouse.x * window.innerWidth;
+        groundY = this.mouse.y * window.innerHeight / Math.cos(cameraAngle);
+
+        let magnitude = Math.sqrt(groundX * groundX + groundY * groundY);
+
+        let vectorX, vectorY;
+        vectorX = groundX / magnitude;
+        vectorY = groundY / magnitude;
+
+
+
+        var newProjectile = {
+            position: [this.creature.object.position.x, this.creature.object.position.y, ,this.creature.object.position.z],
+            initVelocity: [0.1 * vectorX, 0.1 * vectorY],
+            damageInfo: 0
+        };
+        newProjectileList.push(newProjectile);
+        var event = new Event('createProjectile', {bubbles: true, cancelable: false}) 
+        document.dispatchEvent(event); 
+    }
+
     // Player Collision Detection 
     playerCollision(translateDistance){ 
         // For Collision Detection 
@@ -245,15 +318,15 @@ class controller{
 
             // Check If Hit A Border
             if (unit == null) {
-                console.log("Map Border!!!");
+                //console.log("Map Border!!!");
                 this.forwardCollision = true;
                 break;
             }
 
             // Check If Collide With A Wall
             if (game_map.unitIDList[unit.ID].collision) {
-                console.log("Collided With Wall", unit); 
-                console.log("Player Position: ", creatureTrans.position); 
+                //console.log("Collided With Wall", unit); 
+                //console.log("Player Position: ", creatureTrans.position); 
                  
                 // Indicate Collision Occurred 
                 this.forwardCollision = true;
@@ -272,15 +345,15 @@ class controller{
 
             // Check If Hit A Border
             if (unit == null) {
-                console.log("Map Border!!!");
+                //console.log("Map Border!!!");
                 this.backwardCollision = true;
                 break;
             }
 
             // Check If Collide With A Wall
             if (game_map.unitIDList[unit.ID].collision) {
-                console.log("Collided With Wall", unit); 
-                console.log("Player Position: ", creatureTrans.position); 
+                //console.log("Collided With Wall", unit); 
+                //console.log("Player Position: ", creatureTrans.position); 
                  
                 // Indicate Collision Occurred 
                 this.backwardCollision = true;
@@ -299,15 +372,15 @@ class controller{
 
             // Check If Hit A Border
             if (unit == null) {
-                console.log("Map Border!!!");
+                //console.log("Map Border!!!");
                 this.leftCollision = true;
                 break;
             }
 
             // Check If Collide With A Wall
             if (game_map.unitIDList[unit.ID].collision) {
-                console.log("Collided With Wall", unit); 
-                console.log("Player Position: ", creatureTrans.position); 
+                //console.log("Collided With Wall", unit); 
+                //console.log("Player Position: ", creatureTrans.position); 
                  
                 // Indicate Collision Occurred 
                 this.leftCollision = true;
@@ -326,15 +399,15 @@ class controller{
 
             // Check If Hit A Border
             if (unit == null) {
-                console.log("Map Border!!!");
+                //console.log("Map Border!!!");
                 this.rightCollision = true;
                 break;
             }
 
             // Check If Collide With A Wall
             if (game_map.unitIDList[unit.ID].collision) {
-                console.log("Collided With Wall", unit); 
-                console.log("Player Position: ", creatureTrans.position); 
+                //console.log("Collided With Wall", unit); 
+                //console.log("Player Position: ", creatureTrans.position); 
                  
                 // Indicate Collision Occurred 
                 this.rightCollision = true;
@@ -351,37 +424,23 @@ class controller{
         // Calculating Player Position 
         let mapX, mapY; 
 
+        /*
         if (this.cameraOffset > this.cameraRange  && this.creature.object != null) { 
             [mapX, mapY] = [Math.floor(this.creature.object.position.x), Math.floor(this.creature.object.position.y)]; 
             // console.log(game_map.getUnit([mapX, mapY])); 
         } else {
             [mapX, mapY] = [Math.floor(this.camera.position.x), Math.floor(this.camera.position.y)]; 
-        }
- 
-        let unitX = (mapX < 0) ? mapX + 1 : mapX;
-        let unitY = (mapY < 0) ? mapY + 1 : mapY; 
- 
-        var direction; 
-     
-        // Get Which Direction The Player In Going TO 
-        if (mapX >= 0 && mapY >= 0) { 
-            direction = [1, 1]; 
-        } else if (mapX >= 0 && mapY < 0) { 
-            direction = [1, -1]; 
-        } else if (mapX < 0 && mapY >= 0) { 
-            direction = [-1, 1]; 
-        } else if (mapX < 0 && mapY < 0) { 
-            direction = [-1, -1]; 
-        } 
+        }*/
+
+        [mapX, mapY] = [Math.floor(this.creature.object.position.x), Math.floor(this.creature.object.position.y)]; 
  
         // Return The Player's Position And The Player's Direction 
-        return [[Math.floor(Math.abs(unitX) / game_map.blockSize.x), Math.floor(Math.abs(unitY) / game_map.blockSize.y)], direction]; 
+        return [game_map.map2DToBlock2D([mapX, mapY]), game_map.getDirection([mapX, mapY])]; 
  
     } 
  
     // Updating Client Block If Moving Between Blocks 
-    controllerUpdateBlock(){ 
-        let [blockPos, direction] = this.getPlayerBlockPos2D(); 
+    controllerUpdateBlock([blockPos, direction]){ 
  
         if (blockPos[0] != this.lastBlockPos.position[0] || 
             blockPos[1] != this.lastBlockPos.position[1] || 
@@ -519,7 +578,7 @@ class controller{
         if (this.inputs.forward || this.inputs.backward || this.inputs.left || this.inputs.right || !this.onGround) { 
             var event = new Event('position event', {bubbles: true, cancelable: false}) 
             document.dispatchEvent(event); 
-            this.controllerUpdateBlock(); 
+            this.controllerUpdateBlock(this.getPlayerBlockPos2D()); 
         } 
  
         // Jump Update 
@@ -541,6 +600,11 @@ class controller{
             creatureTrans.position.y, 
             creatureTrans.position.z).project(this.camera); 
              
+        
+
+        this.camera.position.x = this.creature.object.position.x;
+        this.camera.position.y = this.creature.object.position.y - carmeraOffsetY;
+        /*
         // Auto center camera 
         if (this.cameraOffset <= this.cameraRange){
             magnitude = Math.sqrt(screenPos.x * screenPos.x + screenPos.y * screenPos.y); 
@@ -558,6 +622,7 @@ class controller{
             this.camera.position.x = this.creature.object.position.x;
             this.camera.position.y = this.creature.object.position.y;
         }
+        */
 
     } 
 } 

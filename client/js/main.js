@@ -1,8 +1,17 @@
+// Game Setting
+const groundLevel = 1;
+const gravity = 10;
+var game_map;
+
 // THREE.js Initial Set Up Variable
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 15);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
 //scene.background = new THREE.Color( 0xffffff );
-camera.position.z = 10;
+var cameraAngle = Math.PI / 8
+var carmeraHeight = 10;
+var carmeraOffsetY = Math.tan(cameraAngle) * (carmeraHeight - groundLevel);
+camera.rotation.x = cameraAngle;
+camera.position.z = carmeraHeight;
 
 // Resize Window
 const resizeWindow = () => {
@@ -32,21 +41,12 @@ hemisphereLight.position.set(0, 0, 1);
 scene.add(hemisphereLight);
 
 
-
 // Direction Light
 const directionLight = new THREE.DirectionalLight(0xFFFFFF, 2);// color, intensity
 directionLight.position.set(0, 0, 20);
 directionLight.target.position.set(0, 0, 0);
 scene.add(directionLight);
 scene.add(directionLight.target);
-
-
-
-
-// Game Setting
-const groundLevel = 1;
-const gravity = 10;
-var game_map;
 
 // Client Side playerArray, Used To Store Player Object
 var playerArray = [];
@@ -57,6 +57,10 @@ var player_controller;
 
 // Client Side Item Spawn
 var itemArray = [];
+
+// Projectile Relate
+var newProjectileList = [];
+var projectileList = [];
 
 // Stats Module
 var stats = new Stats();
@@ -74,6 +78,13 @@ function animate() {
     //helper.update()
     delta = clock.getDelta();
     player_controller.update(delta);
+
+    for (let i = 0; i < projectileList.length; i++){
+        if (projectileList[i] != null){
+            projectileList[i].update();
+        }
+
+    }
 
     renderer.render(scene, camera);
     stats.end();

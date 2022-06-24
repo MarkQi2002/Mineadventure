@@ -12,7 +12,7 @@ function spawnPlayer(playerInfo){
 }
 
 // Initialization Every Player Before You Enter The Game
-const initSelf = (severPlayerID, serverPlayerArray, serverMap) => {
+const initSelf = (severPlayerID, serverPlayerArray, serverMap, projectileList) => {
 	clientPlayerID = severPlayerID;
 	playerArray.length = serverPlayerArray.length;
 	for (let i = 0; i < serverPlayerArray.length; i++) {
@@ -22,6 +22,9 @@ const initSelf = (severPlayerID, serverPlayerArray, serverMap) => {
 	}
 
 	game_map = new map(serverMap);
+
+
+	spawnProjectile(projectileList);
 };
 
 // Initialization Myself And All Future Players
@@ -152,6 +155,19 @@ const clientUpdateBlocks = (blockList) => {
 };
 
 
+// Projectile Related
+const spawnProjectile = (projectileInfo) => {
+	for (let i = 0; i < projectileInfo.length; i++){
+		
+		if (projectileInfo[i] != null){
+			var newProjectile = new projectile(projectileInfo[i]);
+			projectileList.push(newProjectile);
+		}
+		
+	}
+};
+
+
 (() => {
 	// When Connected To Server, Create A Sock (MySelf)
 	const sock = io();
@@ -176,6 +192,9 @@ const clientUpdateBlocks = (blockList) => {
 	sock.on('removeItem', deleteItem);
 
 	sock.on('connect_error', connectionError);
+	
+	// Projectile Related
+	sock.on('spawnProjectile', spawnProjectile);
 
 	// Sending My New Position To Server
 	const updatePosition = () => {
@@ -208,4 +227,11 @@ const clientUpdateBlocks = (blockList) => {
 		}
 	};
 	document.addEventListener('updateBlock', updateBlock);
+
+	// Projectile Related
+	const createProjectile = () => {
+		sock.emit('newProjectile', newProjectileList);
+		newProjectileList = [];
+	}
+	document.addEventListener('createProjectile', createProjectile);
 })();

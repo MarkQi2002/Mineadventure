@@ -182,6 +182,16 @@ function getPlayerMapPos2D(playerID){
 	return pos;
 }
 
+// Projectile Related
+var projectileList = [];
+function spawnProjectile(projectileInfo){
+	for (let i = 0; i < projectileInfo.length; i++){
+		console.log(projectileInfo[i]);
+		projectileList.push(projectileInfo[i]);
+	}
+	return projectileInfo;
+}
+
 // -----------Map-------------
 // Setting The Size Of The Map
 var game_map = new map([12, 12],[20, 20]);
@@ -193,7 +203,7 @@ io.on('connection', (sock) => {
 
 	const spawnPos = createSpawnPosition();
 	// Initializing The Player To The Client
-	sock.emit('initSelf', playerID, playerArray, game_map.getInitMap(spawnPos, [1, 1]));
+	sock.emit('initSelf', playerID, playerArray, game_map.getInitMap(spawnPos, [1, 1]), projectileList);
 	console.log("new player joined, ID: ", playerID);
 
 	// Initializing Collectable Item To The Client
@@ -212,6 +222,9 @@ io.on('connection', (sock) => {
 	sock.on('newPlayerItemArray', (additionalItem, updatePlayerID) => io.emit('clientPlayerItemArray', UpdatePlayerItemArray(additionalItem, updatePlayerID), updatePlayerID));
 	sock.on('serverNewItem', (itemName) => io.emit('clientNewItem', CreateNewItem(itemName), newItemID));
 	sock.on('deleteItem', (itemIndex) => io.emit('removeItem', deleteItem(itemIndex)));
+
+	// Projectile Related
+	sock.on('newProjectile', (projectileInfo) => io.emit('spawnProjectile', spawnProjectile(projectileInfo)));
 });
 
 // Whenever An Error Occur, Log The Error

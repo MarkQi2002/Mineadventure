@@ -25,7 +25,7 @@ command.addEventListener("keypress", function(event) {
   });
 
 // SHA256 Unlock
-var hashKey = "";
+var hashKey = "kodiaks";
 
 function terminalSubmit() {
     // Receiving User Input
@@ -78,13 +78,15 @@ function lockedCommand(inputArray) {
             return;
         }
 
+        player_controller.controllerUpdateBlock([game_map.map2DToBlock2D([inputArray[1], inputArray[2]]), game_map.getDirection([inputArray[1], inputArray[2]])]);
+
         player_controller.creature.object.position.x = inputArray[1];
         player_controller.creature.object.position.y = inputArray[2];
 
         player_controller.camera.position.x = inputArray[1];
-        player_controller.camera.position.y = inputArray[2];
+        player_controller.camera.position.y = inputArray[2] - carmeraOffsetY;
 
-        player_controller.getSurroundingBlockPos([1, 1])
+        
         var event = new Event('position event', {bubbles: true, cancelable: false}) 
         document.dispatchEvent(event);
     }
