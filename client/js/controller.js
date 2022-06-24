@@ -15,7 +15,11 @@ class controller{
         this.jumpVelocity = 0; // Per Second 
         this.onGround = true; 
  
- 
+        this.forwardCollision = false;
+        this.backwardCollision = false;
+        this.leftCollision = false;
+        this.rightCollision = false;
+        
         this.lastBlockPos = { 
             position: [0, 0], 
             direction: [1, 1] 
@@ -184,34 +188,161 @@ class controller{
         return false; 
     } 
  
-    // Map Collision Detection 
+    // Map Collision Detection
+    // Always Return Return False (Intentional)
     mapCollision(translateDistance){ 
         // For Collision Detection 
         let creatureTrans = this.creature.object; 
-        let predictedPosition = new THREE.Vector3(); 
-        predictedPosition.copy(creatureTrans.position); 
- 
-        // Predicting Future Position 
-        if (this.inputs.forward) predictedPosition.y += translateDistance + 1; 
-        if (this.inputs.backward) predictedPosition.y -= translateDistance; 
-        if (this.inputs.left) predictedPosition.x -= translateDistance; 
-        if (this.inputs.right) predictedPosition.x += translateDistance + 1; 
+
+        this.forwardCollision = false;
+        this.backwardCollision = false;
+        this.leftCollision = false;
+        this.rightCollision = false;
+
+        // Initialize Position Array
+        let predictedPosition = [];
+        predictedPosition.length = 9;
+
+        // Copy Array And Predict Next Location
+        for (let positionIndex = 0; positionIndex < predictedPosition.length; positionIndex++) {
+            // Copy Current Position
+            predictedPosition[positionIndex] = new THREE.Vector3();
+            predictedPosition[positionIndex].copy(creatureTrans.position);
+
+            if (positionIndex == 0) {
+                predictedPosition[positionIndex].x += 0.15;
+                predictedPosition[positionIndex].y += 0.85;
+                continue;
+            } else if (positionIndex == 2) {
+                predictedPosition[positionIndex].x += 0.85;
+                predictedPosition[positionIndex].y += 0.85;
+                continue;
+            } else if (positionIndex == 6) {
+                predictedPosition[positionIndex].x += 0.15;
+                predictedPosition[positionIndex].y += 0.15;
+                continue;
+            } else if (positionIndex == 8) {
+                predictedPosition[positionIndex].x += 0.85;
+                predictedPosition[positionIndex].y += 0.85;
+                continue;
+            }
+            
+            // Shift Position
+            if (positionIndex % 3 == 1) predictedPosition[positionIndex].x += 0.5;
+            if (positionIndex % 3 == 2) predictedPosition[positionIndex].x += 1;
+            if (Math.floor(positionIndex / 3) == 0) predictedPosition[positionIndex].y += 1;
+            if (Math.floor(positionIndex / 3) == 1) predictedPosition[positionIndex].y += 0.5;
+        }
         
-        let unit = game_map.getUnit([Math.floor(predictedPosition.x), Math.floor(predictedPosition.y)]);
-        if (unit == null){
-            console.log("map border!!!");
-            return true; 
+        // Forward Collision
+        for (let positionIndex = 0; positionIndex < predictedPosition.length; positionIndex++) {
+            // Distance To Shift
+            var shiftDistance = 0;
+            if (this.inputs.forward) shiftDistance = translateDistance
+
+            // Get Unit
+            let unit = game_map.getUnit([Math.floor(predictedPosition[positionIndex].x), Math.floor(predictedPosition[positionIndex].y + shiftDistance)]);
+
+            // Check If Hit A Border
+            if (unit == null) {
+                console.log("Map Border!!!");
+                this.forwardCollision = true;
+                break;
+            }
+
+            // Check If Collide With A Wall
+            if (game_map.unitIDList[unit.ID].collision) {
+                console.log("Collided With Wall", unit); 
+                console.log("Player Position: ", creatureTrans.position); 
+                 
+                // Indicate Collision Occurred 
+                this.forwardCollision = true;
+                break;  
+            } 
+        }
+        
+        // Backward Collision
+        for (let positionIndex = 0; positionIndex < predictedPosition.length; positionIndex++) {
+            // Distance To Shift
+            var shiftDistance = 0;
+            if (this.inputs.backward) shiftDistance = translateDistance
+
+            // Get Unit
+            let unit = game_map.getUnit([Math.floor(predictedPosition[positionIndex].x), Math.floor(predictedPosition[positionIndex].y - shiftDistance)]);
+
+            // Check If Hit A Border
+            if (unit == null) {
+                console.log("Map Border!!!");
+                this.backwardCollision = true;
+                break;
+            }
+
+            // Check If Collide With A Wall
+            if (game_map.unitIDList[unit.ID].collision) {
+                console.log("Collided With Wall", unit); 
+                console.log("Player Position: ", creatureTrans.position); 
+                 
+                // Indicate Collision Occurred 
+                this.backwardCollision = true;
+                break;  
+            } 
         }
 
-        if (game_map.unitIDList[unit.ID].collision) { 
-            console.log("Collided With Wall", game_map.getUnit([Math.floor(predictedPosition.x), Math.floor(predictedPosition.y)]).Height); 
-            console.log("Player Position: ", creatureTrans.position); 
-             
-            // Indicate Collision Occurred 
-            return true;     
-        } 
- 
-        // No Item Collision Has Occurred 
+        // Left Collision
+        for (let positionIndex = 0; positionIndex < predictedPosition.length; positionIndex++) {
+            // Distance To Shift
+            var shiftDistance = 0;
+            if (this.inputs.left) shiftDistance = translateDistance
+
+            // Get Unit
+            let unit = game_map.getUnit([Math.floor(predictedPosition[positionIndex].x - shiftDistance), Math.floor(predictedPosition[positionIndex].y)]);
+
+            // Check If Hit A Border
+            if (unit == null) {
+                console.log("Map Border!!!");
+                this.leftCollision = true;
+                break;
+            }
+
+            // Check If Collide With A Wall
+            if (game_map.unitIDList[unit.ID].collision) {
+                console.log("Collided With Wall", unit); 
+                console.log("Player Position: ", creatureTrans.position); 
+                 
+                // Indicate Collision Occurred 
+                this.leftCollision = true;
+                break;  
+            } 
+        }
+
+        // Right Collision
+        for (let positionIndex = 0; positionIndex < predictedPosition.length; positionIndex++) {
+            // Distance To Shift
+            var shiftDistance = 0;
+            if (this.inputs.right) shiftDistance = translateDistance
+
+            // Get Unit
+            let unit = game_map.getUnit([Math.floor(predictedPosition[positionIndex].x + shiftDistance), Math.floor(predictedPosition[positionIndex].y)]);
+
+            // Check If Hit A Border
+            if (unit == null) {
+                console.log("Map Border!!!");
+                this.rightCollision = true;
+                break;
+            }
+
+            // Check If Collide With A Wall
+            if (game_map.unitIDList[unit.ID].collision) {
+                console.log("Collided With Wall", unit); 
+                console.log("Player Position: ", creatureTrans.position); 
+                 
+                // Indicate Collision Occurred 
+                this.rightCollision = true;
+                break;  
+            } 
+        }
+
+        // No Map Collision Has Occurred 
         return false; 
     } 
  
@@ -224,7 +355,7 @@ class controller{
             console.log(Math.sqrt((diffX * diffX) + (diffY * diffY)));
             [mapX, mapY] = [Math.floor(this.creature.object.position.x), Math.floor(this.creature.object.position.y)]; 
             // console.log(game_map.getUnit([mapX, mapY])); 
-        }else{
+        } else {
             [mapX, mapY] = [Math.floor(this.camera.position.x), Math.floor(this.camera.position.y)]; 
         }
  
@@ -253,12 +384,11 @@ class controller{
     controllerUpdateBlock(){ 
         let [blockPos, direction] = this.getPlayerBlockPos2D(); 
  
-        if  (blockPos[0] != this.lastBlockPos.position[0] || 
-             blockPos[1] != this.lastBlockPos.position[1] || 
-             direction[0] != this.lastBlockPos.direction[0] || 
-             direction[1] != this.lastBlockPos.direction[1]){ 
+        if (blockPos[0] != this.lastBlockPos.position[0] || 
+            blockPos[1] != this.lastBlockPos.position[1] || 
+            direction[0] != this.lastBlockPos.direction[0] || 
+            direction[1] != this.lastBlockPos.direction[1]){ 
  
-             
             this.lastBlockPos.position = blockPos; 
             this.lastBlockPos.direction = direction; 
              
@@ -362,19 +492,19 @@ class controller{
  
         // If No Collision Occur, Move The Creature 
         if (!this.playerCollision(translateDistance) && !this.mapCollision(translateDistance)) { 
-            if (this.inputs.forward) { 
+            if (this.inputs.forward && !this.forwardCollision) { 
                 creatureTrans.translateY(translateDistance); 
             } 
  
-            if (this.inputs.backward) { 
+            if (this.inputs.backward && !this.backwardCollision) { 
                 creatureTrans.translateY(-translateDistance); 
             } 
  
-            if (this.inputs.left) { 
+            if (this.inputs.left && !this.leftCollision) { 
                 creatureTrans.translateX(-translateDistance); 
             } 
  
-            if (this.inputs.right) { 
+            if (this.inputs.right && !this.rightCollision) { 
                 creatureTrans.translateX(translateDistance); 
             } 
         } 
@@ -421,7 +551,7 @@ class controller{
             } 
             this.camera.translateY(screenPos.y * speedPerFrame * autoY * 2); 
             this.camera.translateX(screenPos.x * speedPerFrame * autoX * 2); 
-        }else{
+        } else {
             this.camera.position.x = this.creature.object.position.x;
             this.camera.position.y = this.creature.object.position.y;
         }

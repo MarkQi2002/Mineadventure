@@ -26,10 +26,6 @@ class map {
             nn: new quarterMap([-1, -1], quarterSize2D),
         };
 
-
-
-
-        
         this.unitIDList = unitIDList;// get unit ID list from server
         this.loader = new THREE.TextureLoader();// texture loader
         this.materialList = []; // Material List
@@ -37,18 +33,11 @@ class map {
         this.loadMaterials(); // Load Materials
         this.loadGeometry(); // Load Geometry
 
-
         this.blockObjectClass = [];
         this.newBlockObjectClass = [];
 
         this.spawnBlocks(serverBlocks);
         scene.add(this.object);
-
-        
-        /*
-        let material = new THREE.MeshBasicMaterial({
-            map: this.loader.load(texture),
-            });*/
     }
 
     // for each unit ID, load materials
@@ -62,21 +51,14 @@ class map {
                 this.materialList[i] =  new THREE.MeshPhongMaterial({map: texture});
 
             } else {// for multi material
-
                 let materials = [];
                 for (let ii = 0; ii < this.unitIDList[i].texture.length; ii++) {
                     texture = this.loader.load(this.unitIDList[i].texture[ii]);
                     materials.push(new THREE.MeshPhongMaterial({map: texture}))
                 }
-
                 this.materialList[i] =  materials;
-
             }
-
-
-            
         }
-    
     }
 
     loadGeometry(){
@@ -86,63 +68,6 @@ class map {
 
         //******************************************************************
         geometry = new THREE.BoxGeometry(1, 1, 3); // geometry for all cubes
-        /*
-        var face1 = [
-        new THREE.Vector2(0, .666),
-        new THREE.Vector2(.5, .666),
-        new THREE.Vector2(.5, 1),
-        new THREE.Vector2(0, 1)];
-        
-        var face2 = [
-        new THREE.Vector2(.5, .666),
-        new THREE.Vector2(1, .666),
-        new THREE.Vector2(1, 1),
-        new THREE.Vector2(.5, 1)];
-        
-        var face3 = [
-        new THREE.Vector2(0, .333),
-        new THREE.Vector2(.5, .333),
-        new THREE.Vector2(.5, .666),
-        new THREE.Vector2(0, .666)];
-        
-        var face4 = [
-        new THREE.Vector2(.5, .333),
-        new THREE.Vector2(1, .333),
-        new THREE.Vector2(1, .666),
-        new THREE.Vector2(.5, .666)];
-        
-        var face5 = [
-        new THREE.Vector2(0, 0),
-        new THREE.Vector2(.5, 0),
-        new THREE.Vector2(.5, .333),
-        new THREE.Vector2(0, .333)];
-        
-        var face6 = [
-        new THREE.Vector2(.5, 0),
-        new THREE.Vector2(1, 0),
-        new THREE.Vector2(1, .333),
-        new THREE.Vector2(.5, .333)];
-
-        console.log(geometry);
-
-        geometry.faceVertexUvs[0][0] = [ face1[0], face1[1], face1[3] ];
-        geometry.faceVertexUvs[0][1] = [ face1[1], face1[2], face1[3] ];
-
-        geometry.faceVertexUvs[0][2] = [ face2[0], face2[1], face2[3] ];
-        geometry.faceVertexUvs[0][3] = [ face2[1], face2[2], face2[3] ];
-
-        geometry.faceVertexUvs[0][4] = [ face3[0], face3[1], face3[3] ];
-        geometry.faceVertexUvs[0][5] = [ face3[1], face3[2], face3[3] ];
-
-        geometry.faceVertexUvs[0][6] = [ face4[0], face4[1], face4[3] ];
-        geometry.faceVertexUvs[0][7] = [ face4[1], face4[2], face4[3] ];
-
-        geometry.faceVertexUvs[0][8] = [ face5[0], face5[1], face5[3] ];
-        geometry.faceVertexUvs[0][9] = [ face5[1], face5[2], face5[3] ];
-
-        geometry.faceVertexUvs[0][10] = [ face6[0], face6[1], face6[3] ];
-        geometry.faceVertexUvs[0][11] = [ face6[1], face6[2], face6[3] ];
-            */
         this.geometryList.push(geometry); //1
     }
 
@@ -150,16 +75,16 @@ class map {
         return [Math.floor(Math.abs(unitX) / this.blockSize.x), Math.floor(Math.abs(unitY) / this.blockSize.y)];
     }
 
-
+    // Return The Quarter Using The Block Coordinate
     getBlockByQuarter([blockX, blockY], theQuarterMap) {
         if (theQuarterMap != null && theQuarterMap.blockList != null && this.quarterSize2D.x > blockX && this.quarterSize2D.y > blockY){
             return theQuarterMap.blockList[Math.abs(blockY)][Math.abs(blockX)];
-        }else{
+        } else {
             return null;
         }
     }
  
-    
+    // Return The Information Of The Unit
     getUnit([mapX, mapY]){
         let unitX = (mapX < 0) ? -mapX - 1 : mapX;
         let unitY = (mapY < 0) ? -mapY - 1 : mapY;
@@ -167,7 +92,7 @@ class map {
         let theBlock = this.getBlockByQuarter(this.unit2DToBlock2D([unitX, unitY]), this.getQuarterMap([mapX, mapY]));
         if (theBlock != null && theBlock.class != null){
             return theBlock.class.unitList[Math.abs(unitY) % this.blockSize.y][Math.abs(unitX) % this.blockSize.x];
-        }else{
+        } else {
             return null;
         }
         
@@ -264,7 +189,7 @@ class map {
         let geometry = this.geometryList[this.unitIDList[unitClass.ID].geometryType];
         let material = this.materialList[unitClass.ID];
             
-            //new THREE.MeshBasicMaterial({color: new THREE.Color(unitClass.color3D[0] * colorHeight, unitClass.color3D[1] * colorHeight, unitClass.color3D[2] * colorHeight)});
+        //new THREE.MeshBasicMaterial({color: new THREE.Color(unitClass.color3D[0] * colorHeight, unitClass.color3D[1] * colorHeight, unitClass.color3D[2] * colorHeight)});
         let mesh = new THREE.Mesh(geometry, material);
         block.add(mesh);
         mesh.position.set(x, y, unitClass.Height);
