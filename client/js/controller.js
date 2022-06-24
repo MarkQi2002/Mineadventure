@@ -223,10 +223,10 @@ class controller{
                 continue;
             } else if (positionIndex == 8) {
                 predictedPosition[positionIndex].x += 0.85;
-                predictedPosition[positionIndex].y += 0.85;
+                predictedPosition[positionIndex].y += 0.15;
                 continue;
             }
-            
+
             // Shift Position
             if (positionIndex % 3 == 1) predictedPosition[positionIndex].x += 0.5;
             if (positionIndex % 3 == 2) predictedPosition[positionIndex].x += 1;
