@@ -19,26 +19,37 @@ window.addEventListener('resize', resizeWindow);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
 renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+document.body.appendChild(renderer.domElement);
 
 // Light Setting
 
-const skyColor = 0xFFFFFF;  // light blue
-const groundColor = 0x000000;  // brownish orange
-const intensity = 2;
-const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+// Light
+
+const light = new THREE.HemisphereLight(0xFFFFFF, 0x000000, 1);//skyColor, groundColor, intensity
 light.position.set(0, 0, 1);
 scene.add(light);
 
-/*
-const color = 0xFFFFFF;
-const intensity = 1;
-const light = new THREE.DirectionalLight(color, intensity);
-light.position.set(0, 0, 0);
-light.target.position.set(0, 0, -1);
-scene.add(light);
-scene.add(light.target);*/
+// Direction Light
+const directionLight = new THREE.DirectionalLight(0xFFFFFF, 1);// color, intensity
+directionLight.position.set(0, 0, 0);
+directionLight.target.position.set(-1, -1, -1);
+directionLight.castShadow = true;
+
+directionLight.shadowDarkness = 0.5;
+
+// these six values define the boundaries of the yellow box seen above
+directionLight.castShadow = true
+directionLight.shadow.mapSize.width = 512
+directionLight.shadow.mapSize.height = 512
+directionLight.shadow.camera.near = 0.5
+directionLight.shadow.camera.far = 100
+scene.add(directionLight);
+scene.add(directionLight.target);
+
+//const helper = new THREE.DirectionalLightHelper(light);
+
 
 
 
@@ -70,7 +81,7 @@ var delta = 0;
 function animate() {
     // Beginning Of The Frame
     stats.begin();
-
+    //helper.update()
     delta = clock.getDelta();
     player_controller.update(delta);
 

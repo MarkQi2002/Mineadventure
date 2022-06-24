@@ -13,6 +13,11 @@ class map {
             y: blockSize2D[1]
         }
 
+        this.quarterSize2D = {
+            x: quarterSize2D[0],
+            y: quarterSize2D[1],
+        };
+
         this.spaceArray = {
             pp: new quarterMap([1, 1], quarterSize2D),
             pn: new quarterMap([1, -1], quarterSize2D),
@@ -63,7 +68,11 @@ class map {
 
 
     getBlockByQuarter([blockX, blockY], theQuarterMap) {
-        return theQuarterMap.blockList[Math.abs(blockY)][Math.abs(blockX)];
+        if (theQuarterMap != null && theQuarterMap.blockList != null){
+            return theQuarterMap.blockList[Math.abs(blockY)][Math.abs(blockX)];
+        }else{
+            return null;
+        }
     }
  
     
@@ -124,7 +133,7 @@ class map {
     // Creating Client Side Block
     spawnBlock(x, y, direction, blockClass){
         var theQuarterMap = this.getQuarterMap([direction.x, direction.y]);
-        if (theQuarterMap.blockList[y][x] == null){
+        if (theQuarterMap.blockList[y][x] == null && this.quarterSize2D.x > x && this.quarterSize2D.y > y){
             theQuarterMap.blockList[y][x] = {
                 class: blockClass,
                 block: null,
@@ -173,6 +182,7 @@ class map {
             
             //new THREE.MeshBasicMaterial({color: new THREE.Color(unitClass.color3D[0] * colorHeight, unitClass.color3D[1] * colorHeight, unitClass.color3D[2] * colorHeight)});
         let mesh = new THREE.Mesh(geometry, material);
+        //mesh.receiveShadow = true;
         block.add(mesh);
         mesh.position.set(x, y, unitClass.Height);
     }

@@ -5,6 +5,8 @@ class controller{
         this.camera = camera;
         this.camera.position.x = this.creature.object.position.x;
         this.camera.position.y = this.creature.object.position.y;
+        this.cameraOffset = 0;
+        this.cameraRange = Math.sqrt((game_map.blockSize.x * game_map.blockSize.x) + (game_map.blockSize.y * game_map.blockSize.y))
         
         this.baseMovementSpeed = 3; // Per Second 
         this.speed = this.baseMovementSpeed; // Per Second 
@@ -195,8 +197,13 @@ class controller{
         if (this.inputs.left) predictedPosition.x -= translateDistance; 
         if (this.inputs.right) predictedPosition.x += translateDistance; 
         
-        let unitID = game_map.getUnit([Math.floor(predictedPosition.x), Math.floor(predictedPosition.y)]).ID;
-        if (game_map.unitIDList[unitID].collision) { 
+        let unit = game_map.getUnit([Math.floor(predictedPosition.x), Math.floor(predictedPosition.y)]);
+        if (unit == null){
+            console.log("map border!!!");
+            return true; 
+        }
+
+        if (game_map.unitIDList[unit.ID].collision) { 
             console.log("Collided With Wall", game_map.getUnit([Math.floor(predictedPosition.x), Math.floor(predictedPosition.y)]).Height); 
             console.log("Player Position: ", creatureTrans.position); 
              
@@ -212,14 +219,16 @@ class controller{
     getPlayerBlockPos2D(){ 
         // Calculating Player Position 
         let mapX, mapY; 
- 
-        if (this.creature.object != null) { 
+
+        if (this.cameraOffset > this.cameraRange  && this.creature.object != null) { 
+            console.log(Math.sqrt((diffX * diffX) + (diffY * diffY)));
             [mapX, mapY] = [Math.floor(this.creature.object.position.x), Math.floor(this.creature.object.position.y)]; 
- 
             // console.log(game_map.getUnit([mapX, mapY])); 
-        } 
+        }else{
+            [mapX, mapY] = [Math.floor(this.camera.position.x), Math.floor(this.camera.position.y)]; 
+        }
  
-        let unitX = (mapX < 0) ? mapX + 1 : mapX; 
+        let unitX = (mapX < 0) ? mapX + 1 : mapX;
         let unitY = (mapY < 0) ? mapY + 1 : mapY; 
  
         var direction; 
@@ -273,7 +282,7 @@ class controller{
                 // Variable Declaration 
                 let BlockX = this.lastBlockPos.position[0] + x_Axis; 
                 let BlockY = this.lastBlockPos.position[1] + y_Axis; 
-                if (game_map.blockSize.x > BlockX && game_map.blockSize.y > BlockY){
+                if (game_map.quarterSize2D.x > BlockX && game_map.quarterSize2D.y > BlockY){
                     let dirX = this.lastBlockPos.direction[0]; 
                     let dirY = this.lastBlockPos.direction[1]; 
                     if (BlockX < 0) { 
@@ -322,6 +331,11 @@ class controller{
  
     // Updating The Position 
     update(delta){ 
+        // Set camera offset for other calculation
+        let diffX = this.camera.position.x  - this.creature.object.position.x;
+        let diffY = this.camera.position.y  - this.creature.object.position.y;
+        this.cameraOffset = Math.sqrt((diffX * diffX) + (diffY * diffY));
+
         // Change Movement Speed By Shift 
         if (!this.inputs.shift) { 
             // Walk 
@@ -395,16 +409,22 @@ class controller{
             creatureTrans.position.z).project(this.camera); 
              
         // Auto center camera 
-        magnitude = Math.sqrt(screenPos.x * screenPos.x + screenPos.y * screenPos.y); 
-        let autoX, autoY; 
-        if (magnitude == 0){//magnitude can't be zero 
-            autoY = 0; 
-            autoX = 0; 
-        } else { 
-            autoY = 2 - Math.abs(screenPos.y / magnitude); 
-            autoX = 2 - Math.abs(screenPos.x / magnitude); 
-        } 
-        this.camera.translateY(screenPos.y * speedPerFrame * autoY * 2); 
-        this.camera.translateX(screenPos.x * speedPerFrame * autoX * 2); 
+        if (this.cameraOffset <= this.cameraRange){
+            magnitude = Math.sqrt(screenPos.x * screenPos.x + screenPos.y * screenPos.y); 
+            let autoX, autoY; 
+            if (magnitude == 0){//magnitude can't be zero 
+                autoY = 0; 
+                autoX = 0; 
+            } else { 
+                autoY = 2 - Math.abs(screenPos.y / magnitude); 
+                autoX = 2 - Math.abs(screenPos.x / magnitude); 
+            } 
+            this.camera.translateY(screenPos.y * speedPerFrame * autoY * 2); 
+            this.camera.translateX(screenPos.x * speedPerFrame * autoX * 2); 
+        }else{
+            this.camera.position.x = this.creature.object.position.x;
+            this.camera.position.y = this.creature.object.position.y;
+        }
+
     } 
 } 
