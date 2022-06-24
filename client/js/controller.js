@@ -352,7 +352,6 @@ class controller{
         let mapX, mapY; 
 
         if (this.cameraOffset > this.cameraRange  && this.creature.object != null) { 
-            console.log(Math.sqrt((diffX * diffX) + (diffY * diffY)));
             [mapX, mapY] = [Math.floor(this.creature.object.position.x), Math.floor(this.creature.object.position.y)]; 
             // console.log(game_map.getUnit([mapX, mapY])); 
         } else {

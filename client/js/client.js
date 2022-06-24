@@ -202,7 +202,7 @@ const clientUpdateBlocks = (blockList) => {
 
 	// Map Related
 	const updateBlock = () => {
-		var blockPosList = player_controller.getSurroundingBlockPos([1,1]);
+		var blockPosList = player_controller.getSurroundingBlockPos([1, 1]);
 		if (blockPosList.length > 0){
 			sock.emit('requireBlock', blockPosList);
 		}

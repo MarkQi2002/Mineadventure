@@ -1,3 +1,7 @@
+// SHA256
+// KEY: kodiaks
+// Hashed Value: 28713e0f7e8b977dcd866fcf8686d1242413e661162e68c0a02d9084b90d4a53
+
 // CommonJS Syntax
 // Hyper Text Transfer Protocol (HTTP)
 // Setting Socket Related Modules
