@@ -229,8 +229,8 @@ class controller{
 
             // Shift Position
             if (positionIndex % 3 == 1) predictedPosition[positionIndex].x += 0.5;
-            if (positionIndex % 3 == 2) predictedPosition[positionIndex].x += 1;
-            if (Math.floor(positionIndex / 3) == 0) predictedPosition[positionIndex].y += 1;
+            if (positionIndex % 3 == 2) predictedPosition[positionIndex].x += 0.9999;
+            if (Math.floor(positionIndex / 3) == 0) predictedPosition[positionIndex].y += 0.9999;
             if (Math.floor(positionIndex / 3) == 1) predictedPosition[positionIndex].y += 0.5;
         }
         
@@ -507,7 +507,11 @@ class controller{
                 creatureTrans.translateX(translateDistance); 
             } 
         } 
- 
+        
+        // Move To Nearest Integer
+        if (Math.abs(Math.round(creatureTrans.position.x) - creatureTrans.position.x) <= 0.03) creatureTrans.position.x = Math.round(creatureTrans.position.x);
+        if (Math.abs(Math.round(creatureTrans.position.y) - creatureTrans.position.y) <= 0.03) creatureTrans.position.y = Math.round(creatureTrans.position.y);
+
         // Apply Item Collision 
         this.itemCollision(translateDistance); 
  

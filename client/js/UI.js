@@ -35,18 +35,13 @@ function terminalSubmit() {
     // Forge Instance Initialized SHA-256
     var md = forge.md.sha256.create();
     md.start();
-
     md.update(hashKey, "utf8");
-    console.log(md.digest().toHex());
 
     // Check If Hash Key Input Correctly
     if (md.digest().toHex() != "28713e0f7e8b977dcd866fcf8686d1242413e661162e68c0a02d9084b90d4a53") {
-        console.log("Hash Failed! No Cheat For You!");
-
         // Commands That Doesn't Need Cheat
         unlockedCommand(inputArray);
     } else {
-        console.log("Hash Correctly");
         // Commands That Doesn't Need Cheat
         unlockedCommand(inputArray);
 
@@ -61,6 +56,14 @@ function unlockedCommand(inputArray) {
     if (inputArray[0] == "unlock") {
         hashKey = inputArray[1];
         console.log(hashKey);
+
+        // Forge Instance Initialized SHA-256
+        var md = forge.md.sha256.create();
+        md.start();
+        md.update(hashKey, "utf8");
+
+        if (md.digest().toHex() != "28713e0f7e8b977dcd866fcf8686d1242413e661162e68c0a02d9084b90d4a53") console.log("Hash Failed! No Cheat For You!");
+        else console.log("Hash Correctly");
     }
 
     if (inputArray[0] == "location") {
