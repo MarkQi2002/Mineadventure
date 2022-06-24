@@ -26,62 +26,21 @@ document.body.appendChild(renderer.domElement);
 
 // Light Setting
 
-
-
-const color = 0xFFFFFF;
-const intensity = 100;
-const light = new THREE.PointLight(color, intensity);
-light.position.set(0, 0, 100);
-light.castShadow = true;
-light.shadowDarkness = 0.5;
-light.shadow.mapSize.width = 512;
-light.shadow.mapSize.height = 512;
-var d = 200;
-
-light.shadow.cameraLeft = -d;
-light.shadow.cameraRight = d;
-light.shadow.cameraTop = d;
-light.shadow.cameraBottom = -d;
-
-light.shadow.camera.far = 1000;
-
-const helper = new THREE.CameraHelper( light.shadow.camera );
-scene.add( helper );
-
-scene.add(light);
-
-
-
-
-
-
 // Hemisphere Light 
-const hemisphereLight = new THREE.HemisphereLight(0xFFFFFF, 0x000000, 1);//skyColor, groundColor, intensity
+const hemisphereLight = new THREE.HemisphereLight(0xFFFFFF, 0x000000, 5);//skyColor, groundColor, intensity
 hemisphereLight.position.set(0, 0, 1);
 scene.add(hemisphereLight);
 
 
-/*
+
 // Direction Light
-const directionLight = new THREE.DirectionalLight(0xFFFFFF, 1);// color, intensity
+const directionLight = new THREE.DirectionalLight(0xFFFFFF, 2);// color, intensity
 directionLight.position.set(0, 0, 20);
-directionLight.target.position.set(-1, -1, -1);
-directionLight.castShadow = true;
-
-directionLight.shadowDarkness = 1;
-
-// these six values define the boundaries of the yellow box seen above
-directionLight.castShadow = true
-directionLight.shadow.mapSize.width = 512
-directionLight.shadow.mapSize.height = 512
-directionLight.shadow.camera.near = 0.5
-directionLight.shadow.camera.far = 100
+directionLight.target.position.set(0, 0, 0);
 scene.add(directionLight);
 scene.add(directionLight.target);
 
-const helper = new THREE.CameraHelper(directionLight.shadow.camera)
-scene.add(helper);
-*/
+
 
 
 // Game Setting

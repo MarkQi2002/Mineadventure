@@ -5,9 +5,14 @@ class map {
     constructor(quarterSize2D, blockSize2D) {
         this.unitIDList = [
 
-            this.setUnitIDInfo("image/unit_material/0_ground.jpg", false),
+            this.setUnitIDInfo(["image/unit_material/0_ground.jpg"], false, 0),
 
-            this.setUnitIDInfo("image/unit_material/1_wall.jpg", true)
+            this.setUnitIDInfo(["image/unit_material/0_ground.jpg",
+                                "image/unit_material/0_ground.jpg",
+                                "image/unit_material/0_ground.jpg",
+                                "image/unit_material/0_ground.jpg",
+                                "image/unit_material/1_wall.jpg",
+                                "image/unit_material/1_wall.jpg"], true, 1)
             
 
 
@@ -102,10 +107,11 @@ class map {
 
 
     // set UnitIDInfo by (texture url address, collision bool)
-    setUnitIDInfo(texture, collision){
+    setUnitIDInfo(texture, collision, geometryType){
         var unitIDInfo = {
             texture: texture, // texture url address
-            collision: collision //true or false
+            collision: collision, //true or false
+            geometryType: geometryType
         }
         return unitIDInfo
     }

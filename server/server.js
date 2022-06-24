@@ -180,7 +180,7 @@ function getPlayerMapPos2D(playerID){
 
 // -----------Map-------------
 // Setting The Size Of The Map
-var game_map = new map([12, 12],[16, 16]);
+var game_map = new map([12, 12],[20, 20]);
 
 // Once A New Player Join, Update To All Other Clients
 io.on('connection', (sock) => {

@@ -1,6 +1,7 @@
 // mapX, mapY - Relative To The Entire Map, Use To Access Any Unit
 // unitX, unitY - Relative To The Quarter Map, To Select A Unit In The Quarter Map
 // blockX, blockY - Relative To The Quarter Map, To Select A Block In The Quarter Map
+
 // Map Class
 class map {
     // Constructor
@@ -27,13 +28,14 @@ class map {
 
 
 
-        this.cubeGeometry = new THREE.BoxGeometry(1, 1, 1);// geometry for all cubes
+
+        
         this.unitIDList = unitIDList;// get unit ID list from server
         this.loader = new THREE.TextureLoader();// texture loader
-        this.materialList = []; //
-        this.loadMaterials(); //load materials
-
-
+        this.materialList = []; // Material List
+        this.geometryList = []; // Geometry List
+        this.loadMaterials(); // Load Materials
+        this.loadGeometry(); // Load Geometry
 
 
         this.blockObjectClass = [];
@@ -51,15 +53,97 @@ class map {
 
     // for each unit ID, load materials
     loadMaterials(){
+
         this.materialList.length = this.unitIDList.length;
         for (let i = 0; i < this.unitIDList.length; i++) {
-            let texture = this.loader.load(this.unitIDList[i].texture);
+            let texture;
+            if (this.unitIDList[i].texture.length == 1){
+                texture = this.loader.load(this.unitIDList[i].texture[0]);
+                this.materialList[i] =  new THREE.MeshPhongMaterial({map: texture});
 
-            this.materialList[i] =  new THREE.MeshPhongMaterial({
-                    map: texture,
-            });
+            } else {// for multi material
+
+                let materials = [];
+                for (let ii = 0; ii < this.unitIDList[i].texture.length; ii++) {
+                    texture = this.loader.load(this.unitIDList[i].texture[ii]);
+                    materials.push(new THREE.MeshPhongMaterial({map: texture}))
+                }
+
+                this.materialList[i] =  materials;
+
+            }
+
+
+            
         }
     
+    }
+
+    loadGeometry(){
+        var geometry;
+        geometry = new THREE.PlaneGeometry(1, 1); // geometry for all plane
+        this.geometryList.push(geometry); //0
+
+        //******************************************************************
+        geometry = new THREE.BoxGeometry(1, 1, 3); // geometry for all cubes
+        /*
+        var face1 = [
+        new THREE.Vector2(0, .666),
+        new THREE.Vector2(.5, .666),
+        new THREE.Vector2(.5, 1),
+        new THREE.Vector2(0, 1)];
+        
+        var face2 = [
+        new THREE.Vector2(.5, .666),
+        new THREE.Vector2(1, .666),
+        new THREE.Vector2(1, 1),
+        new THREE.Vector2(.5, 1)];
+        
+        var face3 = [
+        new THREE.Vector2(0, .333),
+        new THREE.Vector2(.5, .333),
+        new THREE.Vector2(.5, .666),
+        new THREE.Vector2(0, .666)];
+        
+        var face4 = [
+        new THREE.Vector2(.5, .333),
+        new THREE.Vector2(1, .333),
+        new THREE.Vector2(1, .666),
+        new THREE.Vector2(.5, .666)];
+        
+        var face5 = [
+        new THREE.Vector2(0, 0),
+        new THREE.Vector2(.5, 0),
+        new THREE.Vector2(.5, .333),
+        new THREE.Vector2(0, .333)];
+        
+        var face6 = [
+        new THREE.Vector2(.5, 0),
+        new THREE.Vector2(1, 0),
+        new THREE.Vector2(1, .333),
+        new THREE.Vector2(.5, .333)];
+
+        console.log(geometry);
+
+        geometry.faceVertexUvs[0][0] = [ face1[0], face1[1], face1[3] ];
+        geometry.faceVertexUvs[0][1] = [ face1[1], face1[2], face1[3] ];
+
+        geometry.faceVertexUvs[0][2] = [ face2[0], face2[1], face2[3] ];
+        geometry.faceVertexUvs[0][3] = [ face2[1], face2[2], face2[3] ];
+
+        geometry.faceVertexUvs[0][4] = [ face3[0], face3[1], face3[3] ];
+        geometry.faceVertexUvs[0][5] = [ face3[1], face3[2], face3[3] ];
+
+        geometry.faceVertexUvs[0][6] = [ face4[0], face4[1], face4[3] ];
+        geometry.faceVertexUvs[0][7] = [ face4[1], face4[2], face4[3] ];
+
+        geometry.faceVertexUvs[0][8] = [ face5[0], face5[1], face5[3] ];
+        geometry.faceVertexUvs[0][9] = [ face5[1], face5[2], face5[3] ];
+
+        geometry.faceVertexUvs[0][10] = [ face6[0], face6[1], face6[3] ];
+        geometry.faceVertexUvs[0][11] = [ face6[1], face6[2], face6[3] ];
+            */
+        this.geometryList.push(geometry); //1
     }
 
     unit2DToBlock2D([unitX, unitY]){
@@ -68,7 +152,7 @@ class map {
 
 
     getBlockByQuarter([blockX, blockY], theQuarterMap) {
-        if (theQuarterMap != null && theQuarterMap.blockList != null){
+        if (theQuarterMap != null && theQuarterMap.blockList != null && this.quarterSize2D.x > blockX && this.quarterSize2D.y > blockY){
             return theQuarterMap.blockList[Math.abs(blockY)][Math.abs(blockX)];
         }else{
             return null;
@@ -177,13 +261,11 @@ class map {
 
     // Creating Client Side Unit
     spawnUnit(x, y, unitClass, block){
-        let geometry = this.cubeGeometry;
+        let geometry = this.geometryList[this.unitIDList[unitClass.ID].geometryType];
         let material = this.materialList[unitClass.ID];
             
             //new THREE.MeshBasicMaterial({color: new THREE.Color(unitClass.color3D[0] * colorHeight, unitClass.color3D[1] * colorHeight, unitClass.color3D[2] * colorHeight)});
         let mesh = new THREE.Mesh(geometry, material);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
         block.add(mesh);
         mesh.position.set(x, y, unitClass.Height);
     }
