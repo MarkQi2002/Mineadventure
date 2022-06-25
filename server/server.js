@@ -180,7 +180,6 @@ function getPlayerMapPos2D(playerID){
 	return pos;
 }
 
-
 // Projectile Related
 function getNewProjectileID(){
 	let exceedCount = 0;

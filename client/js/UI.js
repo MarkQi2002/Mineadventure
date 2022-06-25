@@ -99,3 +99,8 @@ function lockedCommand(inputArray) {
         document.dispatchEvent(event);
     }
 }
+
+// Get That The WebPage Is Zoomed
+window.addEventListener('resize', () => {
+    alert("This Game Work Best With 100% Scale");
+})
