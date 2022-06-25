@@ -1,5 +1,5 @@
 .bottomInformationUI {
-    background-color: pink;
+    background-color: rgba(255, 192, 203, 0) ;
     overflow: hidden;
     position: fixed;
     bottom: 0;
@@ -8,10 +8,12 @@
 }
 
 .playerInformation {
-    background-color: darkred;
+    background-color: rgba(139, 0, 0, 0.5);
     position: fixed;
     width: 25%;
     height: 100%;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px pink;
 }
 
 .playerInformation p {
@@ -19,13 +21,13 @@
 }
 
 .verticalSeparation {
-    background-color: darkblue;
+    background-color: rgba(0, 0, 139, 0.5);
     position: fixed;
     margin-left: 25%;
-    width: 5%;
+    width: 1%;
     height: 100%;
 }
 
 .terminal {
-    margin-left: 30%;
+    margin-left: 26%;
 }
