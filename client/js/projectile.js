@@ -6,6 +6,12 @@ class projectile{
         this.initVelocity = projectileInfo.initVelocity;
         
         this.damageInfo = projectileInfo.damageInfo;
+
+
+        this.range;
+        
+
+
         this.spawnMesh()
         scene.add(this.object);
     }
@@ -18,11 +24,14 @@ class projectile{
     }
 
     update(){
-        this.object.translateX(this.initVelocity[0]);
-        this.object.translateY(this.initVelocity[1]);
+        //this.object.translateX(this.initVelocity[0]);
+        //this.object.translateY(this.initVelocity[1]);
     }
 
-
+    positionChange(projectilePos){
+        this.object.position.x = projectilePos.x;
+        this.object.position.y = projectilePos.y;
+    }
 
 
     delete() {

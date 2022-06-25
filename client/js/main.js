@@ -86,6 +86,8 @@ function animate() {
 
     }
 
+    document.dispatchEvent(new Event('frameEvent', {bubbles: true, cancelable: false})); 
+
     renderer.render(scene, camera);
     stats.end();
 

@@ -167,6 +167,16 @@ const spawnProjectile = (projectileInfo) => {
 	}
 };
 
+// Update Frame
+const updateFrame = (projectilePosList) => {
+	for (let i = 0; i < projectileList.length; i++){
+		if (projectileList[i] != null){
+			projectileList[i].positionChange(projectilePosList[i]);
+		}
+		
+	}
+};
+
 
 (() => {
 	// When Connected To Server, Create A Sock (MySelf)
@@ -195,6 +205,9 @@ const spawnProjectile = (projectileInfo) => {
 	
 	// Projectile Related
 	sock.on('spawnProjectile', spawnProjectile);
+
+	// Update Frame
+	sock.on('updateFrame', updateFrame);
 
 	// Sending My New Position To Server
 	const updatePosition = () => {
@@ -234,4 +247,10 @@ const spawnProjectile = (projectileInfo) => {
 		newProjectileList = [];
 	}
 	document.addEventListener('createProjectile', createProjectile);
+
+	// Projectile Related
+	const frameUpdate = () => {
+		sock.emit('clientFrame', "233");
+	}
+	document.addEventListener('frameEvent', frameUpdate);
 })();

@@ -192,6 +192,29 @@ function spawnProjectile(projectileInfo){
 	return projectileInfo;
 }
 
+
+var updateProjectileList = [];
+setInterval(updateProjectile, 10);
+function updateProjectile(){
+	updateProjectileList.length = projectileList.length;
+
+	let projectilePos;
+	for (let i = 0; i < projectileList.length; i++){
+		projectileList[i].position[0] += projectileList[i].initVelocity[0];
+		projectileList[i].position[1] += projectileList[i].initVelocity[1];
+		projectilePos = {
+			x: projectileList[i].position[0],
+			y: projectileList[i].position[1]
+		};
+		updateProjectileList[i] = projectilePos;
+	}
+}
+
+// Update Client Frame
+function ClientFrameUpdate(){
+	return updateProjectileList;
+}
+
 // -----------Map-------------
 // Setting The Size Of The Map
 var game_map = new map([12, 12],[20, 20]);
@@ -225,6 +248,9 @@ io.on('connection', (sock) => {
 
 	// Projectile Related
 	sock.on('newProjectile', (projectileInfo) => io.emit('spawnProjectile', spawnProjectile(projectileInfo)));
+
+	// Client Frame Update
+	sock.on('clientFrame', (e) => sock.emit('updateFrame', ClientFrameUpdate()));
 });
 
 // Whenever An Error Occur, Log The Error
