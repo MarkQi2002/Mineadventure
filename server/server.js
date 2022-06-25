@@ -9,7 +9,7 @@ const http = require('http');
 const express = require('express');
 const socketio = require('socket.io');
 
-
+// Map Related Setting
 const map = require('./mapClass.js');
 //const quarterMap = require('./quarterMap.js');
 //const block = require('./block.js');
@@ -47,8 +47,6 @@ function createSpawnPosition() {
 // Function Used To Create A New Player Using Two Parameters
 const CreateNewPlayer = (playerID, playerName, spawnPos) => {
 	// Similar To A Struct
-
-
 	let playerInfo  = {
 		ID: playerID,
 		name: playerName,
@@ -280,31 +278,31 @@ io.on('connection', (sock) => {
 
 	const spawnPos = createSpawnPosition();
 	// Initializing The Player To The Client
-	sock.emit('initSelf', playerID, playerArray, game_map.getInitMap(spawnPos, [1, 1]), initPlayerProjectile(projectileList));
+	sock.compress(true).emit('initSelf', playerID, playerArray, game_map.getInitMap(spawnPos, [1, 1]), initPlayerProjectile(projectileList));
 	console.log("new player joined, ID: ", playerID);
 
 	// Initializing Collectable Item To The Client
-	sock.emit('initItem', itemArray);
+	sock.compress(true).emit('initItem', itemArray);
 	
 	// Receiving Information From Client And Calling Function
 	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
 	// First Parameter Data Name (Same As Client Side), Second Parameter The Actual Data
 	// Player Related
-	sock.on('newName', (playerName) => io.emit('newPlayer', CreateNewPlayer(playerID, playerName, spawnPos), playerArray.length));
-	sock.on('newPos', (Pos) => io.emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
-	sock.on('disconnect', (Info) => io.emit('clientDisconnect', clientDisconnect(Info, playerID)));
-	sock.on('requireBlock', (blockPosList) => sock.emit('addBlocks', game_map.getUpdateBlock(blockPosList)));
+	sock.on('newName', (playerName) => io.compress(true).emit('newPlayer', CreateNewPlayer(playerID, playerName, spawnPos), playerArray.length));
+	sock.on('newPos', (Pos) => io.compress(true).emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
+	sock.on('disconnect', (Info) => io.compress(true).emit('clientDisconnect', clientDisconnect(Info, playerID)));
+	sock.on('requireBlock', (blockPosList) => sock.compress(true).emit('addBlocks', game_map.getUpdateBlock(blockPosList)));
 
 	// Item Related
-	sock.on('newPlayerItemArray', (additionalItem, updatePlayerID) => io.emit('clientPlayerItemArray', UpdatePlayerItemArray(additionalItem, updatePlayerID), updatePlayerID));
-	sock.on('serverNewItem', (itemName) => io.emit('clientNewItem', CreateNewItem(itemName), newItemID));
-	sock.on('deleteItem', (itemIndex) => io.emit('removeItem', deleteItem(itemIndex)));
+	sock.on('newPlayerItemArray', (additionalItem, updatePlayerID) => io.compress(true).emit('clientPlayerItemArray', UpdatePlayerItemArray(additionalItem, updatePlayerID), updatePlayerID));
+	sock.on('serverNewItem', (itemName) => io.compress(true).emit('clientNewItem', CreateNewItem(itemName), newItemID));
+	sock.on('deleteItem', (itemIndex) => io.compress(true).emit('removeItem', deleteItem(itemIndex)));
 
 	// Projectile Related
-	sock.on('newProjectile', (projectileInfo) => io.emit('spawnProjectile', spawnProjectile(projectileInfo)));
+	sock.on('newProjectile', (projectileInfo) => io.compress(true).emit('spawnProjectile', spawnProjectile(projectileInfo)));
 
 	// Client Frame Update
-	sock.on('clientFrame', (e) => sock.emit('updateFrame', ClientFrameUpdate()));
+	sock.on('clientFrame', (e) => sock.compress(true).emit('updateFrame', ClientFrameUpdate()));
 });
 
 // Whenever An Error Occur, Log The Error

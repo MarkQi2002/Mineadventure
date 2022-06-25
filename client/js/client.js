@@ -199,8 +199,8 @@ const deleteProjectile = (deleteProjectileList) => {
 
 	// Sending Information To Server Only Once
 	// First Parameter Is The Tag, Second Parameter Is What We Send To The Server
-	sock.emit('newName', sessionStorage.getItem("playerInitialName"));
-	sock.emit('serverNewItem', "Blood Orb");
+	sock.compress(true).emit('newName', sessionStorage.getItem("playerInitialName"));
+	sock.compress(true).emit('serverNewItem', "Blood Orb");
 
 	// Receiving Information From Server
 	// First Parameter Is The Tag, Second Parameter Is The Event/Function To Operate On Information From Server
@@ -228,18 +228,18 @@ const deleteProjectile = (deleteProjectileList) => {
 	// Sending My New Position To Server
 	const updatePosition = () => {
 		// Return The Player's Accurate Position To The Server As A Tuple
-		sock.emit('newPos', [player_controller.creature.object.position.x,
+		sock.compress(true).emit('newPos', [player_controller.creature.object.position.x,
 							player_controller.creature.object.position.y,
 							player_controller.creature.object.position.z]);
 	};
 	
 	// Sending New Item List To Server
 	const updateItem = () => {
-		sock.emit('newPlayerItemArray', additionalItem, clientPlayerID);
+		sock.compress(true).emit('newPlayerItemArray', additionalItem, clientPlayerID);
 	}
 	// Removing A Collectable Item
 	const removeItem = () => {
-		sock.emit('deleteItem', removeItemID);
+		sock.compress(true).emit('deleteItem', removeItemID);
 	}
 	// Add An Event Called 'position event' And Run updataPosition When The Event Occur
 	document.addEventListener('position event', updatePosition);
@@ -252,21 +252,21 @@ const deleteProjectile = (deleteProjectileList) => {
 	const updateBlock = () => {
 		var blockPosList = player_controller.getSurroundingBlockPos([1, 1]);
 		if (blockPosList.length > 0){
-			sock.emit('requireBlock', blockPosList);
+			sock.compress(true).emit('requireBlock', blockPosList);
 		}
 	};
 	document.addEventListener('updateBlock', updateBlock);
 
 	// Projectile Related
 	const createProjectile = () => {
-		sock.emit('newProjectile', newProjectileList);
+		sock.compress(true).emit('newProjectile', newProjectileList);
 		newProjectileList = [];
 	}
 	document.addEventListener('createProjectile', createProjectile);
 
 	// Projectile Related
 	const frameUpdate = () => {
-		sock.emit('clientFrame', "233");
+		sock.compress(true).emit('clientFrame', "233");
 	}
 	document.addEventListener('frameEvent', frameUpdate);
 })();
