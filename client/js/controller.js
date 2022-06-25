@@ -155,7 +155,7 @@ class controller{
 
         var newProjectile = {
             position: [this.creature.object.position.x, this.creature.object.position.y, ,this.creature.object.position.z],
-            initVelocity: [0.1 * vectorX, 0.1 * vectorY],
+            initVelocity: [5 * vectorX, 5 * vectorY],
             damageInfo: 0
         };
         newProjectileList.push(newProjectile);

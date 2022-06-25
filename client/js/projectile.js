@@ -23,9 +23,9 @@ class projectile{
         this.object.add(mesh);
     }
 
-    update(){
-        //this.object.translateX(this.initVelocity[0]);
-        //this.object.translateY(this.initVelocity[1]);
+    update(delta){
+        this.object.translateX(this.initVelocity[0] * delta);
+        this.object.translateY(this.initVelocity[1] * delta);
     }
 
     positionChange(projectilePos){

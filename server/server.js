@@ -113,7 +113,7 @@ function newPlayerID(){
 			console.log("exceed max playArray length, double the playArray length!");
 		}
 	}
-	return ID_count;
+	return ID_count;sda
 }
 
 // When Client Is Disconnected
@@ -186,7 +186,6 @@ function getPlayerMapPos2D(playerID){
 var projectileList = [];
 function spawnProjectile(projectileInfo){
 	for (let i = 0; i < projectileInfo.length; i++){
-		console.log(projectileInfo[i]);
 		projectileList.push(projectileInfo[i]);
 	}
 	return projectileInfo;
@@ -194,14 +193,15 @@ function spawnProjectile(projectileInfo){
 
 
 var updateProjectileList = [];
-setInterval(updateProjectile, 10);
+var delta = 10;
+setInterval(updateProjectile, delta);
 function updateProjectile(){
 	updateProjectileList.length = projectileList.length;
 
 	let projectilePos;
 	for (let i = 0; i < projectileList.length; i++){
-		projectileList[i].position[0] += projectileList[i].initVelocity[0];
-		projectileList[i].position[1] += projectileList[i].initVelocity[1];
+		projectileList[i].position[0] += projectileList[i].initVelocity[0] * delta / 1000;
+		projectileList[i].position[1] += projectileList[i].initVelocity[1] * delta / 1000;
 		projectilePos = {
 			x: projectileList[i].position[0],
 			y: projectileList[i].position[1]

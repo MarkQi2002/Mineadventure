@@ -2,6 +2,7 @@
 const groundLevel = 1;
 const gravity = 10;
 var game_map;
+var gameTime = new Date();
 
 // THREE.js Initial Set Up Variable
 const scene = new THREE.Scene();
@@ -71,6 +72,27 @@ document.body.appendChild(stats.dom);
 var clock = new THREE.Clock();
 var delta = 0;
 
+var updateProjectileList = [];
+
+
+//setInterval(updateTimeEvent, 1000);
+
+function updateTimeEvent(){
+	document.dispatchEvent(new Event('frameEvent', {bubbles: true, cancelable: false})); 
+}
+
+
+/*
+setInterval(updateProjectile, 10);
+function updateProjectile(){
+	for (let i = 0; i < projectileList.length; i++){
+        if (projectileList[i] != null){
+            projectileList[i].update(10);
+        }
+
+    }
+}*/
+
 // Animation Function
 function animate() {
     // Beginning Of The Frame
@@ -81,12 +103,11 @@ function animate() {
 
     for (let i = 0; i < projectileList.length; i++){
         if (projectileList[i] != null){
-            projectileList[i].update();
+            projectileList[i].update(delta);
         }
 
     }
-
-    document.dispatchEvent(new Event('frameEvent', {bubbles: true, cancelable: false})); 
+    
 
     renderer.render(scene, camera);
     stats.end();
