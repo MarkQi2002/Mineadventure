@@ -18,19 +18,22 @@ class projectile{
     
     spawnMesh(){
         let geometry = new THREE.SphereGeometry(0.2, 10, 10);
-        let material = new THREE.MeshBasicMaterial({color: 'yellow'});
+        let material = new THREE.MeshPhongMaterial({color: 'yellow'});
         let mesh = new THREE.Mesh(geometry, material);
         this.object.add(mesh);
     }
 
     update(delta){
-        this.object.translateX(this.initVelocity[0] * delta);
-        this.object.translateY(this.initVelocity[1] * delta);
+        //this.object.translateX(this.initVelocity[0] * delta);
+        //this.object.translateY(this.initVelocity[1] * delta);
     }
 
     positionChange(projectilePos){
-        this.object.position.x = projectilePos.x;
-        this.object.position.y = projectilePos.y;
+        if (projectilePos != null){
+            this.object.position.x = projectilePos[0];
+            this.object.position.y = projectilePos[1];
+        }
+
     }
 
 

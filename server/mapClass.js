@@ -158,7 +158,11 @@ class map {
 
     // Return The Block Based On The Block xy Coordinate
     getBlockByQuarter([blockX, blockY], theQuarterMap) {
-        return theQuarterMap.blockList[Math.abs(blockY)][Math.abs(blockX)];
+        if (theQuarterMap != null && theQuarterMap.blockList != null && this.quarterSize2D.x > blockX && this.quarterSize2D.y > blockY){
+            return theQuarterMap.blockList[Math.abs(blockY)][Math.abs(blockX)];
+        } else {
+            return null;
+        }
     }
 
     getBlock([mapX, mapY]){
@@ -171,7 +175,6 @@ class map {
         let unitY = (mapY < 0) ? -mapY - 1 : mapY;
 
         let theBlock = this.getBlockByQuarter(this.unit2DToBlock2D([unitX, unitY]), this.getQuarterMap([mapX, mapY]));
-        console.log(theBlock);
         if (theBlock != null){
             return theBlock.unitList[Math.abs(unitY) % this.blockSize2D.y][Math.abs(unitX) % this.blockSize2D.x];
         }else{

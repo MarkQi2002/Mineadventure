@@ -23,7 +23,6 @@ const initSelf = (severPlayerID, serverPlayerArray, serverMap, projectileList) =
 
 	game_map = new map(serverMap);
 
-
 	spawnProjectile(projectileList);
 };
 
@@ -158,22 +157,40 @@ const clientUpdateBlocks = (blockList) => {
 // Projectile Related
 const spawnProjectile = (projectileInfo) => {
 	for (let i = 0; i < projectileInfo.length; i++){
-		
-		if (projectileInfo[i] != null){
-			var newProjectile = new projectile(projectileInfo[i]);
-			projectileList.push(newProjectile);
+		if (projectileInfo[i] != null && projectileInfo[i][1] != null){
+			var newProjectile = new projectile(projectileInfo[i][1]);
+			if (projectileList.length < projectileInfo[i][0]){
+				projectileList.length === projectileInfo[i][0];
+			}
+			projectileList[projectileInfo[i][0]] = newProjectile;
 		}
-		
 	}
 };
 
 // Update Frame
-const updateFrame = (projectilePosList) => {
+const updateFrame = ([projectilePosList]) => {
+	if (projectileList.length < projectilePosList.length){
+		projectileList.length === projectilePosList.length;
+	}
 	for (let i = 0; i < projectileList.length; i++){
 		if (projectileList[i] != null){
 			projectileList[i].positionChange(projectilePosList[i]);
 		}
 		
+	}
+};
+
+
+
+const deleteProjectile = (deleteProjectileList) => {
+	if (deleteProjectileList != null){
+		for (let i = 0; i < deleteProjectileList.length; i++){
+			if (projectileList[deleteProjectileList[i]] != null){
+				projectileList[deleteProjectileList[i]].delete();
+				projectileList[deleteProjectileList[i]] = null;
+			}
+			
+		}
 	}
 };
 
@@ -208,6 +225,7 @@ const updateFrame = (projectilePosList) => {
 
 	// Update Frame
 	sock.on('updateFrame', updateFrame);
+	sock.on('deleteProjectile', deleteProjectile);
 
 	// Sending My New Position To Server
 	const updatePosition = () => {

@@ -110,7 +110,7 @@ function newPlayerID(){
 		exceedCount++;
 		if (exceedCount >= playerArray.length){// If Exceed Max playerArray Length
 			playerArray.length *= 2;
-			console.log("exceed max playArray length, double the playArray length!");
+			console.log("Exceed max playArray length, double the playArray length! current length:", playerArray.length);
 		}
 	}
 	return ID_count;sda
@@ -182,15 +182,45 @@ function getPlayerMapPos2D(playerID){
 	return pos;
 }
 
+
 // Projectile Related
-var projectileList = [];
-function spawnProjectile(projectileInfo){
-	for (let i = 0; i < projectileInfo.length; i++){
-		projectileList.push(projectileInfo[i]);
+function getNewProjectileID(){
+	let exceedCount = 0;
+	// Stop Untill Get An Projectile ID Corresponding To An Empty Space In Projectile List
+	while (projectileList[projectile_count] != null){
+		projectile_count = (projectile_count + 1) % projectileList.length;
+		exceedCount++;
+		if (exceedCount >= projectileList.length){// If Exceed Max projectileList Length
+			projectileList.length += 10;
+			console.log("Exceed max projectileList length, double the playArray length! current length:", projectileList.length);
+			console.log(projectileList);
+			
+		}
 	}
-	return projectileInfo;
+	return  projectile_count;
 }
 
+var projectile_count = 0;
+var projectileList = [];
+projectileList.length = 2;
+function spawnProjectile(projectileInfo){
+	let projectileSpawnInfo = [];
+	for (let i = 0; i < projectileInfo.length; i++){
+		let newProjectileID = getNewProjectileID()
+		projectileList[newProjectileID] = projectileInfo[i];
+		projectileSpawnInfo.push([newProjectileID, projectileInfo[i]])
+	}
+	return projectileSpawnInfo;
+}
+
+
+function initPlayerProjectile(projectileInfo){
+	let projectileSpawnInfo = [];
+	for (let i = 0; i < projectileInfo.length; i++){
+		projectileSpawnInfo.push([i, projectileInfo[i]])
+	}
+	return projectileSpawnInfo;
+}
 
 var updateProjectileList = [];
 var delta = 10;
@@ -198,21 +228,40 @@ setInterval(updateProjectile, delta);
 function updateProjectile(){
 	updateProjectileList.length = projectileList.length;
 
+	let deleteProjectileList = [];
 	let projectilePos;
+
 	for (let i = 0; i < projectileList.length; i++){
-		projectileList[i].position[0] += projectileList[i].initVelocity[0] * delta / 1000;
-		projectileList[i].position[1] += projectileList[i].initVelocity[1] * delta / 1000;
-		projectilePos = {
-			x: projectileList[i].position[0],
-			y: projectileList[i].position[1]
-		};
-		updateProjectileList[i] = projectilePos;
+		if (projectileList[i] != null){
+			projectileList[i].position[0] += projectileList[i].initVelocity[0] * delta / 1000;
+			projectileList[i].position[1] += projectileList[i].initVelocity[1] * delta / 1000;
+			projectilePos = [
+				projectileList[i].position[0],
+				projectileList[i].position[1]
+			];
+			updateProjectileList[i] = projectilePos;
+
+			let unit = game_map.getUnit([Math.floor(projectileList[i].position[0] + 0.5), Math.floor(projectileList[i].position[1] + 0.5)]);
+			
+			if (unit != null && game_map.unitIDList[unit.ID].collision == true){
+				projectileList[i] = null;
+				updateProjectileList[i] = null;
+				deleteProjectileList.push(i);
+			}
+		}
+		
 	}
+	
+	if (deleteProjectileList.length > 0){
+		console.log(deleteProjectileList);
+		io.emit('deleteProjectile', deleteProjectileList);
+	}
+	
 }
 
 // Update Client Frame
 function ClientFrameUpdate(){
-	return updateProjectileList;
+	return [updateProjectileList];
 }
 
 // -----------Map-------------
@@ -226,7 +275,7 @@ io.on('connection', (sock) => {
 
 	const spawnPos = createSpawnPosition();
 	// Initializing The Player To The Client
-	sock.emit('initSelf', playerID, playerArray, game_map.getInitMap(spawnPos, [1, 1]), projectileList);
+	sock.emit('initSelf', playerID, playerArray, game_map.getInitMap(spawnPos, [1, 1]), initPlayerProjectile(projectileList));
 	console.log("new player joined, ID: ", playerID);
 
 	// Initializing Collectable Item To The Client

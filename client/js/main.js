@@ -62,6 +62,7 @@ var itemArray = [];
 // Projectile Relate
 var newProjectileList = [];
 var projectileList = [];
+var updateProjectileList = [];
 
 // Stats Module
 var stats = new Stats();
@@ -72,13 +73,20 @@ document.body.appendChild(stats.dom);
 var clock = new THREE.Clock();
 var delta = 0;
 
-var updateProjectileList = [];
+
 
 
 //setInterval(updateTimeEvent, 1000);
 
+
+var timeEventCount = 0;
 function updateTimeEvent(){
-	document.dispatchEvent(new Event('frameEvent', {bubbles: true, cancelable: false})); 
+
+    if (timeEventCount >= 3){
+        document.dispatchEvent(new Event('frameEvent', {bubbles: true, cancelable: false}));
+        timeEventCount = 0;
+    }
+	timeEventCount ++;
 }
 
 
@@ -101,13 +109,16 @@ function animate() {
     delta = clock.getDelta();
     player_controller.update(delta);
 
+    /*
     for (let i = 0; i < projectileList.length; i++){
         if (projectileList[i] != null){
             projectileList[i].update(delta);
         }
 
     }
+    */
     
+    updateTimeEvent();
 
     renderer.render(scene, camera);
     stats.end();
