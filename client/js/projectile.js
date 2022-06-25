@@ -1,3 +1,4 @@
+// Projectile Class
 class projectile{
     constructor(projectileInfo) {
         this.object = new THREE.Object3D();
@@ -7,15 +8,13 @@ class projectile{
         
         this.damageInfo = projectileInfo.damageInfo;
 
-
         this.range;
         
-
-
         this.spawnMesh()
         scene.add(this.object);
     }
     
+    // Spawing The Projectile Mesh
     spawnMesh(){
         let geometry = new THREE.SphereGeometry(0.2, 10, 10);
         let material = new THREE.MeshPhongMaterial({color: 'yellow'});
@@ -28,6 +27,7 @@ class projectile{
         //this.object.translateY(this.initVelocity[1] * delta);
     }
 
+    // Updating Projectile Position
     positionChange(projectilePos){
         if (projectilePos != null){
             this.object.position.x = projectilePos[0];
@@ -36,7 +36,7 @@ class projectile{
 
     }
 
-
+    // Removing A Projectile Object
     delete() {
         // Remove All Child Object
         var obj;

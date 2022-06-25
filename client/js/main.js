@@ -73,33 +73,15 @@ document.body.appendChild(stats.dom);
 var clock = new THREE.Clock();
 var delta = 0;
 
-
-
-
-//setInterval(updateTimeEvent, 1000);
-
-
+// Game Event Related
 var timeEventCount = 0;
 function updateTimeEvent(){
-
     if (timeEventCount >= 3){
         document.dispatchEvent(new Event('frameEvent', {bubbles: true, cancelable: false}));
         timeEventCount = 0;
     }
 	timeEventCount ++;
 }
-
-
-/*
-setInterval(updateProjectile, 10);
-function updateProjectile(){
-	for (let i = 0; i < projectileList.length; i++){
-        if (projectileList[i] != null){
-            projectileList[i].update(10);
-        }
-
-    }
-}*/
 
 // Animation Function
 function animate() {
@@ -108,18 +90,11 @@ function animate() {
     //helper.update()
     delta = clock.getDelta();
     player_controller.update(delta);
-
-    /*
-    for (let i = 0; i < projectileList.length; i++){
-        if (projectileList[i] != null){
-            projectileList[i].update(delta);
-        }
-
-    }
-    */
     
+    // Updating Event
     updateTimeEvent();
 
+    // Setting The Renderer Of The Scene And Camera
     renderer.render(scene, camera);
     stats.end();
 

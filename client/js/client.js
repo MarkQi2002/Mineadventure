@@ -180,8 +180,7 @@ const updateFrame = ([projectilePosList]) => {
 	}
 };
 
-
-
+// Removing A Projectile From The Projectile List
 const deleteProjectile = (deleteProjectileList) => {
 	if (deleteProjectileList != null){
 		for (let i = 0; i < deleteProjectileList.length; i++){
@@ -193,7 +192,6 @@ const deleteProjectile = (deleteProjectileList) => {
 		}
 	}
 };
-
 
 (() => {
 	// When Connected To Server, Create A Sock (MySelf)

@@ -192,17 +192,19 @@ function getNewProjectileID(){
 		exceedCount++;
 		if (exceedCount >= projectileList.length){// If Exceed Max projectileList Length
 			projectileList.length += 10;
-			console.log("Exceed max projectileList length, double the playArray length! current length:", projectileList.length);
+			console.log("Exceed max projectileList length, double the projectileList length! current length:", projectileList.length);
 			console.log(projectileList);
-			
 		}
 	}
 	return  projectile_count;
 }
 
+// Projectile Related Variable Declaration
 var projectile_count = 0;
 var projectileList = [];
 projectileList.length = 2;
+
+// Spawning New Projectiles
 function spawnProjectile(projectileInfo){
 	let projectileSpawnInfo = [];
 	for (let i = 0; i < projectileInfo.length; i++){
@@ -213,7 +215,7 @@ function spawnProjectile(projectileInfo){
 	return projectileSpawnInfo;
 }
 
-
+// Initializing Player Projectile
 function initPlayerProjectile(projectileInfo){
 	let projectileSpawnInfo = [];
 	for (let i = 0; i < projectileInfo.length; i++){
@@ -222,9 +224,12 @@ function initPlayerProjectile(projectileInfo){
 	return projectileSpawnInfo;
 }
 
+// Variable Declaration For Updating Projectiles
 var updateProjectileList = [];
 var delta = 10;
 setInterval(updateProjectile, delta);
+
+// Update All Projectiles
 function updateProjectile(){
 	updateProjectileList.length = projectileList.length;
 
