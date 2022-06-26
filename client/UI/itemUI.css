@@ -1,26 +1,34 @@
 /* Left Side Item UI*/
 .itemUI {
-    background-color: rgba(255, 192, 203, 0.5) ;
+    background-color: rgba(255, 192, 203, 0.5);
     overflow: hidden;
     position: fixed;
     top: 20%;
-    width: 6%;
-    height: 60%;
+    width: 12vh;
+    height: 60vh;
     z-index: 1;
 }
 
 /* Item Table Setting*/
 .itemUI table {
-    width: 100%;
-    height: 100%;
+    width: 12vh;
+    height: 60vh;
+    border-collapse: collapse;
 }
 
-.itemTable tr {
+.itemUI tr {
     width: 100%;
     height: 10%;
+
 }
 
-.itemTable td {
-    border: solid 2px black;
-    width: 50%;
+.itemUI td {
+    background-color: red;
+    padding-left: 5%;
+    padding-right: 5%;
+    padding-top: 5%;
+    padding-bottom: 5%;
+    background-clip: content-box;
+    
+    width: 40%
 }

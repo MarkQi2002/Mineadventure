@@ -100,7 +100,7 @@ function lockedCommand(inputArray) {
     }
 }
 
-// Get That The WebPage Is Zoomed
-window.addEventListener('resize', () => {
+// Preventing User From Zooming The WebPage
+/* window.addEventListener('resize', () => {
     alert("This Game Work Best With 100% Scale");
-})
+}) */
