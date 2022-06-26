@@ -25,7 +25,7 @@ command.addEventListener("keypress", function(event) {
   });
 
 // SHA256 Unlock
-var hashKey = "kodiaks";
+var hashKey = "";
 
 function terminalSubmit() {
     // Receiving User Input
@@ -41,6 +41,7 @@ function terminalSubmit() {
     if (md.digest().toHex() != "28713e0f7e8b977dcd866fcf8686d1242413e661162e68c0a02d9084b90d4a53") {
         // Commands That Doesn't Need Cheat
         unlockedCommand(inputArray);
+        lockedCommand(inputArray);
     } else {
         // Commands That Doesn't Need Cheat
         unlockedCommand(inputArray);
@@ -93,6 +94,34 @@ function lockedCommand(inputArray) {
         // Moving The Camera With The Player
         player_controller.camera.position.x = inputArray[1];
         player_controller.camera.position.y = inputArray[2] - carmeraOffsetY;
+
+        // Update Player Position Event
+        var event = new Event('position event', {bubbles: true, cancelable: false}) 
+        document.dispatchEvent(event);
+    } else if (inputArray[0] == "tpa") {
+        // Input Control
+        if (isNaN(parseInt(inputArray[1]))) {
+            console.log("The Player Number Input Is Invalid!");
+            return;
+        }
+
+        if (playerArray[parseInt(inputArray[1])] == null) {
+            console.log("Player Number ", parseInt(inputArray[1]), " Not Found");
+            return;
+        }
+        
+        let xPos = playerArray[parseInt(inputArray[1])].object.position.x;
+        let yPos = playerArray[parseInt(inputArray[1])].object.position.y;
+        // Updating Redenerer Information
+        player_controller.controllerUpdateBlock([xPos, yPos]), game_map.getDirection([xPos, yPos]);
+
+        // Moving Player To New Position
+        player_controller.creature.object.position.x = xPos;
+        player_controller.creature.object.position.y = yPos;
+
+        // Moving The Camera With The Player
+        player_controller.camera.position.x = xPos;
+        player_controller.camera.position.y = yPos - carmeraOffsetY;
 
         // Update Player Position Event
         var event = new Event('position event', {bubbles: true, cancelable: false}) 
