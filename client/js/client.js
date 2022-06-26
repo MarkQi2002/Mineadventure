@@ -180,8 +180,8 @@ const updateFrame = ([projectilePosList]) => {
 	}
 };
 
-// Removing A Projectile From The Projectile List
-const deleteProjectile = (deleteProjectileList) => {
+// Removing A Projectile From The Projectile List, And Remove Unit From Unit List (By Position)
+const deleteEvent = ([deleteProjectileList, deleteUnitList]) => {
 	if (deleteProjectileList != null){
 		for (let i = 0; i < deleteProjectileList.length; i++){
 			if (projectileList[deleteProjectileList[i]] != null){
@@ -191,6 +191,13 @@ const deleteProjectile = (deleteProjectileList) => {
 			
 		}
 	}
+
+	for (let i = 0; i < deleteUnitList.length; i++){
+		if (deleteUnitList[i] != null){
+			game_map.deleteUnit(deleteUnitList[i]);
+		}
+	}
+
 };
 
 (() => {
@@ -223,7 +230,7 @@ const deleteProjectile = (deleteProjectileList) => {
 
 	// Update Frame
 	sock.on('updateFrame', updateFrame);
-	sock.on('deleteProjectile', deleteProjectile);
+	sock.on('deleteEvent', deleteEvent);
 
 	// Sending My New Position To Server
 	const updatePosition = () => {
@@ -266,7 +273,7 @@ const deleteProjectile = (deleteProjectileList) => {
 
 	// Projectile Related
 	const frameUpdate = () => {
-		sock.compress(true).emit('clientFrame', "233");
+		sock.compress(true).emit('clientFrame', null);
 	}
 	document.addEventListener('frameEvent', frameUpdate);
 })();

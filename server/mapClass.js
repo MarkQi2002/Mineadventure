@@ -183,6 +183,9 @@ class map {
         
     }
 
+    
+
+
     getInitMap([mapX, mapY], [blockHalfRangeX, blockHalfRangeY]){
 
         let sendingBlock = [];
@@ -316,6 +319,8 @@ class block{
                 if (Height < 0) {
                     Height = 0;
                     ID = 0;
+                }else if (Height > 3){
+                    Height = 3;
                 }
 
 

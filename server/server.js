@@ -190,7 +190,6 @@ function getNewProjectileID(){
 		if (exceedCount >= projectileList.length){// If Exceed Max projectileList Length
 			projectileList.length += 10;
 			console.log("Exceed max projectileList length, double the projectileList length! current length:", projectileList.length);
-			console.log(projectileList);
 		}
 	}
 	return  projectile_count;
@@ -223,32 +222,68 @@ function initPlayerProjectile(projectileInfo){
 
 // Variable Declaration For Updating Projectiles
 var updateProjectileList = [];
-var delta = 10;
+var delta = 15;
 setInterval(updateProjectile, delta);
+
+let startDate = new Date();
+let endDate = new Date();
 
 // Update All Projectiles
 function updateProjectile(){
 	updateProjectileList.length = projectileList.length;
 
 	let deleteProjectileList = [];
+	let deleteUnitList = [];
 	let projectilePos;
+
+	endDate = new Date();
+
+	let diff = (endDate.getTime() - startDate.getTime()) / 1000;
 
 	for (let i = 0; i < projectileList.length; i++){
 		if (projectileList[i] != null){
-			projectileList[i].position[0] += projectileList[i].initVelocity[0] * delta / 1000;
-			projectileList[i].position[1] += projectileList[i].initVelocity[1] * delta / 1000;
+			projectileList[i].position[0] += projectileList[i].initVelocity[0] * diff;
+			projectileList[i].position[1] += projectileList[i].initVelocity[1] * diff;
 			projectilePos = [
 				projectileList[i].position[0],
 				projectileList[i].position[1]
 			];
 			updateProjectileList[i] = projectilePos;
-
-			let unit = game_map.getUnit([Math.floor(projectileList[i].position[0] + 0.5), Math.floor(projectileList[i].position[1] + 0.5)]);
 			
-			if (unit != null && game_map.unitIDList[unit.ID].collision == true){
+			let newPos = [Math.floor(projectileList[i].position[0] + 0.5), Math.floor(projectileList[i].position[1] + 0.5)];
+			let unit = game_map.getUnit(newPos);
+			
+			if (unit == null){
+				// for delete projectile
 				projectileList[i] = null;
 				updateProjectileList[i] = null;
 				deleteProjectileList.push(i);
+
+				
+			}else{
+				if (game_map.unitIDList[unit.ID].collision == true){
+					
+					// for delete unit
+					let isNotIn = true;
+					for (let ii = 0; ii < deleteUnitList.length; ii++){
+						if (deleteUnitList[ii][0][0] == newPos[0] && deleteUnitList[ii][0][1] == newPos[1]){
+							isNotIn == false;
+						}
+					}
+
+					// check is the unit is already hit
+					if (isNotIn){
+						// for delete projectile
+						projectileList[i] = null;
+						updateProjectileList[i] = null;
+						deleteProjectileList.push(i);
+
+						let newID = 0;
+						unit.ID = newID;
+						unit.Height = 0;
+						deleteUnitList.push([newPos, unit]);
+					}
+				}
 			}
 		}
 		
@@ -256,8 +291,11 @@ function updateProjectile(){
 	
 	if (deleteProjectileList.length > 0){
 		console.log(deleteProjectileList);
-		io.emit('deleteProjectile', deleteProjectileList);
+		io.emit('deleteEvent', [deleteProjectileList, deleteUnitList]);
 	}
+
+	startDate = new Date();
+	
 	
 }
 

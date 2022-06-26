@@ -67,7 +67,7 @@ class map {
         this.geometryList.push(geometry); //0
 
         //******************************************************************
-        geometry = new THREE.BoxGeometry(1, 1, 5); // geometry for all cubes
+        geometry = new THREE.BoxGeometry(1, 1, 6); // geometry for all cubes
         this.geometryList.push(geometry); //1
     }
 
@@ -101,6 +101,35 @@ class map {
             return theBlock.class.unitList[Math.abs(unitY) % this.blockSize.y][Math.abs(unitX) % this.blockSize.x];
         } else {
             return null;
+        }
+        
+    }
+
+    // return true when deletion successful
+    deleteUnit([[mapX, mapY], replaceUnitInfo]){ 
+        let unitX = (mapX < 0) ? -mapX - 1 : mapX;
+        let unitY = (mapY < 0) ? -mapY - 1 : mapY;
+
+        let theBlock = this.getBlockByQuarter(this.unit2DToBlock2D([unitX, unitY]), this.getQuarterMap([mapX, mapY]));
+        if (theBlock != null && theBlock.class != null){
+            let y = Math.abs(unitY) % this.blockSize.y;
+            let x = Math.abs(unitX) % this.blockSize.x;
+            let unit = theBlock.class.unitList[y][x];
+            theBlock.block.remove(unit.mesh);
+
+            if (replaceUnitInfo.ID != null){
+                unit.ID = replaceUnitInfo.ID;
+                unit.Height = replaceUnitInfo.Height;
+                let directionX = mapX > 0 ? 1 : -1;
+                let directionY = mapY > 0 ? 1 : -1;
+                this.spawnUnit(directionX * x, directionY * y, unit, theBlock.block);
+            }else{
+                unit.mesh = null;
+            }
+
+            return true;
+        }else{
+            return false;
         }
         
     }
@@ -156,7 +185,8 @@ class map {
             theQuarterMap.blockList[y][x] = {
                 class: blockClass,
                 block: null,
-                view: false
+                view: false,
+                mesh: null
             };
 
             this.spawnBlockObject(x, y, [direction.x, direction.y]);
@@ -198,12 +228,16 @@ class map {
     spawnUnit(x, y, unitClass, block){
         let geometry = this.geometryList[this.unitIDList[unitClass.ID].geometryType];
         let material = this.materialList[unitClass.ID];
-            
+        
         //new THREE.MeshBasicMaterial({color: new THREE.Color(unitClass.color3D[0] * colorHeight, unitClass.color3D[1] * colorHeight, unitClass.color3D[2] * colorHeight)});
         let mesh = new THREE.Mesh(geometry, material);
         block.add(mesh);
+        unitClass.mesh = mesh;
         mesh.position.set(x, y, unitClass.Height);
     }
+
+
+
 
     // Removing A Block (No Longer Render This Block)
     deleteBlock(block){
@@ -211,8 +245,6 @@ class map {
         var obj;
         for (var i = block.children.length - 1; i >= 0; i--) { 
             obj = block.children[i];
-            //obj.geometry.dispose();
-            //obj.material.dispose();
             block.remove(obj); 
         }
         this.object.remove(block);
