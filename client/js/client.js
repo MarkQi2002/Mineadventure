@@ -47,6 +47,12 @@ const playerPositionUpdate = ([Pos, PlayerID]) => {
 	}
 };
 
+const playerInfoChange = (playerInfo) => {
+	if (playerInfo.ID != clientPlayerID){
+		playerArray[playerInfo.ID].setHealth(playerInfo.health);
+	}
+};
+
 // ------------------Item----------------------
 // Variable Declaration
 var removeItemID;
@@ -171,9 +177,31 @@ const updateFrame = ([projectilePosList]) => {
 	if (projectileList.length < projectilePosList.length){
 		projectileList.length === projectilePosList.length;
 	}
+
+	onHitProjectileList = [];
 	for (let i = 0; i < projectileList.length; i++){
 		if (projectileList[i] != null){
 			projectileList[i].positionChange(projectilePosList[i]);
+
+
+			// local player collision with projectile
+			let diffX = projectileList[i].object.position.x - player_controller.creature.object.position.x;
+			let diffY = projectileList[i].object.position.y - player_controller.creature.object.position.y;
+			if (projectileList[i].damageInfo.attacker != clientPlayerID &&
+				Math.abs(diffX) + Math.abs(diffX) < 2 &&
+				Math.sqrt(diffX * diffX + diffY * diffY) < 0.6){
+
+				
+				player_controller.creature.damage(projectileList[i].damageInfo.amount);
+				document.dispatchEvent(new Event('localPlayerInfo', {bubbles: true, cancelable: false}));
+				onHitProjectileList.push(i);
+				projectileList[i].delete();
+				projectileList[i] = null;
+			}
+
+
+			
+			
 		}
 		
 	}
@@ -214,6 +242,7 @@ const deleteEvent = ([deleteProjectileList, deleteUnitList]) => {
 	sock.on('newPlayer', newPlayer);
 	sock.on('clientPos', playerPositionUpdate);
 	sock.on('clientDisconnect', playerDisconnect);
+	sock.on('playerInfoChange', playerInfoChange);
 
 	sock.on('addBlocks', clientUpdateBlocks);
 
@@ -272,7 +301,17 @@ const deleteEvent = ([deleteProjectileList, deleteUnitList]) => {
 
 	// Projectile Related
 	const frameUpdate = () => {
-		sock.compress(true).emit('clientFrame', null);
+		sock.compress(true).emit('clientFrame', onHitProjectileList);
 	}
 	document.addEventListener('frameEvent', frameUpdate);
+
+
+	// Projectile Related
+	const playerInfo = () => {
+		var newInfo = { ID: clientPlayerID,
+						health: player_controller.creature.health
+					  };
+		sock.compress(true).emit('playerInfo', newInfo);
+	}
+	document.addEventListener('localPlayerInfo', playerInfo);
 })();

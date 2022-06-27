@@ -54,6 +54,7 @@ const CreateNewPlayer = (playerID, playerName, spawnPos) => {
 		// Player Properties
 		// Defensive Properties
 		health: 100,
+		maxHealth: 100,
 		armor: 0,
 
 		// Attack Properties
@@ -241,7 +242,15 @@ function updateProjectile(){
 	let diff = (endDate.getTime() - startDate.getTime()) / 1000;
 
 	for (let i = 0; i < projectileList.length; i++){
-		if (projectileList[i] != null){
+
+
+		if (projectileList[i] == "deletion"){
+			// for delete projectile
+			projectileList[i] = null;
+			updateProjectileList[i] = null;
+			deleteProjectileList.push(i);
+
+		}else if (projectileList[i] != null){
 			projectileList[i].position[0] += projectileList[i].initVelocity[0] * diff;
 			projectileList[i].position[1] += projectileList[i].initVelocity[1] * diff;
 			projectilePos = [
@@ -290,7 +299,6 @@ function updateProjectile(){
 	}
 	
 	if (deleteProjectileList.length > 0){
-		console.log(deleteProjectileList);
 		io.emit('deleteEvent', [deleteProjectileList, deleteUnitList]);
 	}
 
@@ -300,8 +308,20 @@ function updateProjectile(){
 }
 
 // Update Client Frame
-function ClientFrameUpdate(){
+function ClientFrameUpdate(onHitProjectileList){
+	for (let i = 0; i < onHitProjectileList.length; i++){
+		if (projectileList[onHitProjectileList[i]] != null){
+			projectileList[onHitProjectileList[i]] = "deletion";
+		}
+	}
+
 	return [updateProjectileList];
+}
+
+function playerInfoChange(playerInfo){
+	playerArray[playerInfo.ID].health = playerInfo.health;
+
+	return playerInfo;
 }
 
 // -----------Map-------------
@@ -329,6 +349,7 @@ io.on('connection', (sock) => {
 	sock.on('newPos', (Pos) => io.compress(true).emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
 	sock.on('disconnect', (Info) => io.compress(true).emit('clientDisconnect', clientDisconnect(Info, playerID)));
 	sock.on('requireBlock', (blockPosList) => sock.compress(true).emit('addBlocks', game_map.getUpdateBlock(blockPosList)));
+	sock.on('playerInfo', (playerInfo) => io.compress(true).emit('playerInfoChange', playerInfoChange(playerInfo)));
 
 	// Item Related
 	sock.on('newPlayerItemArray', (additionalItem, updatePlayerID) => io.compress(true).emit('clientPlayerItemArray', UpdatePlayerItemArray(additionalItem, updatePlayerID), updatePlayerID));
@@ -339,7 +360,7 @@ io.on('connection', (sock) => {
 	sock.on('newProjectile', (projectileInfo) => io.compress(true).emit('spawnProjectile', spawnProjectile(projectileInfo)));
 
 	// Client Frame Update
-	sock.on('clientFrame', (e) => sock.compress(true).emit('updateFrame', ClientFrameUpdate()));
+	sock.on('clientFrame', (onHitProjectileList) => sock.compress(true).emit('updateFrame', ClientFrameUpdate(onHitProjectileList)));
 });
 
 // Whenever An Error Occur, Log The Error

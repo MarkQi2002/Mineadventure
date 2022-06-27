@@ -1,6 +1,7 @@
 class damage{
-    constructor(amount, damageType) {
-        this.damageType = damageType;
+    constructor(damageType) {
+        this.amount = damageType.amount;
+        this.attacker = damageType.attacker;
         scene.add(this.object);
     }
 

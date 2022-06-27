@@ -7,6 +7,7 @@ class controller{
         this.camera.position.y = this.creature.object.position.y;
         this.cameraOffset = 0;
         this.cameraRange = Math.sqrt((game_map.blockSize.x * game_map.blockSize.x) + (game_map.blockSize.y * game_map.blockSize.y))
+        this.creature.healthBar.visible = false;
         
         this.baseMovementSpeed = 3; // Per Second 
         this.speed = this.baseMovementSpeed; // Per Second 
@@ -49,6 +50,9 @@ class controller{
         document.addEventListener("mousedown", (e) => this.MouseDown(e), false); 
         document.addEventListener("mouseup", (e) => this.MouseUp(e), false); 
         document.addEventListener('mousemove', (e) => this.MouseMove(e), false);
+
+        // Attack Speed
+        this.attackCD = 0;
     } 
  
     // When KeyBoard Is Pressed Down 
@@ -108,7 +112,6 @@ class controller{
         switch ( event.button ) {
             case 0: // left
                 this.mouse.left = true;
-                this.sendProjectile();
                 break;
             case 1: // middle
                 this.mouse.middle = true;
@@ -152,11 +155,15 @@ class controller{
         vectorY = groundY / magnitude;
 
 
+        var newDamageInfo = {
+            amount: this.creature.attackDamage,
+            attacker: clientPlayerID
+        }
 
         var newProjectile = {
             position: [this.creature.object.position.x, this.creature.object.position.y, ,this.creature.object.position.z],
             initVelocity: [5 * vectorX, 5 * vectorY],
-            damageInfo: 0
+            damageInfo: newDamageInfo
         };
         newProjectileList.push(newProjectile);
         var event = new Event('createProjectile', {bubbles: true, cancelable: false}) 
@@ -517,7 +524,9 @@ class controller{
         game_map.newBlockObjectClass = []; 
          
         return blockPosList; 
-    } 
+    }
+
+
  
     // Updating The Position 
     update(delta){ 
@@ -625,6 +634,16 @@ class controller{
             this.camera.position.y = this.creature.object.position.y;
         }
         */
+
+        // Attack
+        if (this.mouse.left == true && this.attackCD <= 0){
+            this.sendProjectile();
+            this.attackCD = 1;
+        }
+
+        if (this.attackCD > 0){
+            this.attackCD -= this.creature.attackSpeed * delta;
+        }
 
     } 
 } 

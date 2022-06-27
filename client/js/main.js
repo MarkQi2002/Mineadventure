@@ -7,6 +7,8 @@ var gameTime = new Date();
 // THREE.js Initial Set Up Variable
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
+scene.add( camera );
+
 //scene.background = new THREE.Color( 0xffffff );
 var cameraAngle = Math.PI / 8
 var carmeraHeight = 10;
@@ -63,6 +65,7 @@ var itemArray = [];
 var newProjectileList = [];
 var projectileList = [];
 var updateProjectileList = [];
+var onHitProjectileList = [];
 
 // Stats Module
 var stats = new Stats();
@@ -93,6 +96,12 @@ function animate() {
     
     // Updating Event
     updateTimeEvent();
+
+    for (let i = 0; i < playerArray.length; i++){
+        if (playerArray[i] != null && i != clientPlayerID){
+            playerArray[i].update();
+        }
+    }
 
     // Setting The Renderer Of The Scene And Camera
     renderer.render(scene, camera);
