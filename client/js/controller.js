@@ -243,13 +243,15 @@ class controller{
             // If Collision Occur, Increment Item Count Using Event 
             if (playerBB.intersectsSphere(itemBB)) { 
                 console.log("Collided With Item", itemArray[itemIndex]); 
- 
-                additionalItem = itemArray[itemIndex]; 
-                var event = new Event('player collected item', {bubbles: true, cancelable: false}) 
-                document.dispatchEvent(event); 
- 
+
+                // Removing The Item Collided With
                 removeItemID = itemIndex; 
                 var event = new Event('remove item', {bubbles: true, cancelable: false}) 
+                document.dispatchEvent(event);
+
+                // Increse Player Item
+                additionalItem = itemArray[itemIndex]; 
+                var event = new Event('player collected item', {bubbles: true, cancelable: false}) 
                 document.dispatchEvent(event); 
 
                 // Indicate Item Collision Occurred 

@@ -127,6 +127,7 @@ const newItem = (itemInfo, itemIndex) => {
 // Removing An Item
 const deleteItem = (itemIndex) => {
 	if (itemArray[itemIndex] != null) {
+		console.log("REMOVING AN ITEM");
 		itemArray[itemIndex].delete();
 		itemArray[itemIndex] = null;
 	}

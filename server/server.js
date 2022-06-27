@@ -157,12 +157,12 @@ const CreateNewItem = (itemName) => {
 };
 
 // When Client Is Disconnected
-const deleteItem = (itemIndex) => {
-	if (itemArray[itemIndex] != null){
-		console.log("Deleting Item ", itemIndex);
-		itemArray[itemIndex] = null;
+const deleteItem = (removeItemID) => {
+	if (itemArray[removeItemID] != null){
+		console.log("Deleting Item ", removeItemID);
+		itemArray[removeItemID] = null;
 	}
-	return itemIndex;
+	return removeItemID;
 };
 
 // Randomly Spawn An Item Every Ten Second
@@ -333,7 +333,7 @@ io.on('connection', (sock) => {
 	// Item Related
 	sock.on('newPlayerItemArray', (additionalItem, updatePlayerID) => io.compress(true).emit('clientPlayerItemArray', UpdatePlayerItemArray(additionalItem, updatePlayerID), updatePlayerID));
 	sock.on('serverNewItem', (itemName) => io.compress(true).emit('clientNewItem', CreateNewItem(itemName), newItemID));
-	sock.on('deleteItem', (itemIndex) => io.compress(true).emit('removeItem', deleteItem(itemIndex)));
+	sock.on('deleteItem', (removeItemID) => io.compress(true).emit('removeItem', deleteItem(removeItemID)));
 
 	// Projectile Related
 	sock.on('newProjectile', (projectileInfo) => io.compress(true).emit('spawnProjectile', spawnProjectile(projectileInfo)));
