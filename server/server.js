@@ -197,7 +197,7 @@ function getNewProjectileID(){
 		projectile_count = (projectile_count + 1) % projectileList.length;
 		exceedCount++;
 		if (exceedCount >= projectileList.length){// If Exceed Max projectileList Length
-			projectileList.length += 10;
+			projectileList.length += 100;
 			console.log("Exceed max projectileList length, double the projectileList length! current length:", projectileList.length);
 		}
 	}
@@ -207,7 +207,7 @@ function getNewProjectileID(){
 // Projectile Related Variable Declaration
 var projectile_count = 0;
 var projectileList = [];
-projectileList.length = 2;
+projectileList.length = 1000;
 
 // Spawning New Projectiles
 function spawnProjectile(projectileInfo){

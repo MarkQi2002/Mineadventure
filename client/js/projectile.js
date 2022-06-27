@@ -1,4 +1,10 @@
 // Projectile Class
+
+var projectileLoader = {
+    geometry: new THREE.SphereGeometry(0.2, 10, 10),
+    material: new THREE.MeshPhongMaterial({color: 'yellow'})
+};
+
 class projectile{
     constructor(projectileInfo) {
         this.object = new THREE.Object3D();
@@ -16,9 +22,7 @@ class projectile{
     
     // Spawing The Projectile Mesh
     spawnMesh(){
-        let geometry = new THREE.SphereGeometry(0.2, 10, 10);
-        let material = new THREE.MeshPhongMaterial({color: 'yellow'});
-        let mesh = new THREE.Mesh(geometry, material);
+        let mesh = new THREE.Mesh(projectileLoader.geometry, projectileLoader.material);
         this.object.add(mesh);
     }
 
@@ -42,8 +46,8 @@ class projectile{
         var obj;
         for(var i = this.object.children.length - 1; i >= 0; i--) { 
             obj = this.object.children[i];
-            obj.geometry.dispose();
-            obj.material.dispose();
+            //obj.geometry.dispose();
+            //obj.material.dispose();
             this.object.remove(obj); 
         }
         scene.remove(this.object);

@@ -111,11 +111,14 @@ class map {
         let unitY = (mapY < 0) ? -mapY - 1 : mapY;
 
         let theBlock = this.getBlockByQuarter(this.unit2DToBlock2D([unitX, unitY]), this.getQuarterMap([mapX, mapY]));
-        if (theBlock != null && theBlock.class != null){
+        if (theBlock != null && theBlock.block != null && theBlock.class != null){
             let y = Math.abs(unitY) % this.blockSize.y;
             let x = Math.abs(unitX) % this.blockSize.x;
             let unit = theBlock.class.unitList[y][x];
+
+
             theBlock.block.remove(unit.mesh);
+            
 
             if (replaceUnitInfo.ID != null){
                 unit.ID = replaceUnitInfo.ID;
@@ -234,6 +237,7 @@ class map {
         block.add(mesh);
         unitClass.mesh = mesh;
         mesh.position.set(x, y, unitClass.Height);
+
     }
 
 
