@@ -166,10 +166,10 @@ const deleteItem = (itemIndex) => {
 };
 
 // Randomly Spawn An Item Every Ten Second
-setInterval(randomSpawnItem, 10000);
+/* setInterval(randomSpawnItem, 10000);
 function randomSpawnItem() {
 	io.emit('clientNewItem', CreateNewItem("Blood Orb"), newItemID);
-}
+} */
 
 // Map Related Function
 function getPlayerMapPos2D(playerID){

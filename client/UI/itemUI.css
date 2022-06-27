@@ -28,6 +28,7 @@
     padding-right: 5%;
     padding-top: 5%;
     padding-bottom: 5%;
+    position: relative;
     background-clip: content-box;
 
     width: 40%;
@@ -36,4 +37,17 @@
 .itemUI img {
     display: block;
     width: 100%;
+}
+
+.bottom-right {
+    position: absolute;
+    bottom: 0vh;
+    right: 0vh;
+    width: 3vh;
+    height: 2vh;
+    line-height: 2vh;
+    font-size: 1vh;
+    text-align: right;
+    -webkit-text-size-adjust: none;
+    overflow: none;
 }

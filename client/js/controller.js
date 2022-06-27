@@ -251,7 +251,7 @@ class controller{
                 removeItemID = itemIndex; 
                 var event = new Event('remove item', {bubbles: true, cancelable: false}) 
                 document.dispatchEvent(event); 
-                 
+
                 // Indicate Item Collision Occurred 
                 return true; 
             } 

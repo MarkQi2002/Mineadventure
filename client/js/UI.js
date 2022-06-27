@@ -236,6 +236,7 @@ function updateItemUI() {
     for ([key, value] of Object.entries(itemUIArray)) {
         if (value.itemName == "Blood Orb") {
             document.getElementById(key).children[0].src="image/UI_Image/Blood_Orb.png";
+            document.getElementById(key).children[1].textContent = value.itemAmount;
         }
     }
 }
