@@ -25,7 +25,7 @@ command.addEventListener("keypress", function(event) {
   });
 
 // SHA256 Unlock
-var hashKey = "";
+var hashKey = "kodiaks";
 
 function terminalSubmit() {
     // Receiving User Input
@@ -41,7 +41,6 @@ function terminalSubmit() {
     if (md.digest().toHex() != "28713e0f7e8b977dcd866fcf8686d1242413e661162e68c0a02d9084b90d4a53") {
         // Commands That Doesn't Need Cheat
         unlockedCommand(inputArray);
-        lockedCommand(inputArray);
     } else {
         // Commands That Doesn't Need Cheat
         unlockedCommand(inputArray);
@@ -66,10 +65,8 @@ function unlockedCommand(inputArray) {
         // For Unlocking Cheat Menu
         if (md.digest().toHex() != "28713e0f7e8b977dcd866fcf8686d1242413e661162e68c0a02d9084b90d4a53") console.log("Hash Failed! No Cheat For You!");
         else console.log("Hash Correctly");
-    }
-
     // Displaying Current Player Location In Console
-    if (inputArray[0] == "location") {
+    } else if (inputArray[0] == "location") {
         console.log(playerArray[clientPlayerID].object.position);
     }
 }
@@ -98,6 +95,7 @@ function lockedCommand(inputArray) {
         // Update Player Position Event
         var event = new Event('position event', {bubbles: true, cancelable: false}) 
         document.dispatchEvent(event);
+    // Teleport To Playe By Player ID
     } else if (inputArray[0] == "tpa") {
         // Input Control
         if (isNaN(parseInt(inputArray[1]))) {
@@ -110,18 +108,53 @@ function lockedCommand(inputArray) {
             return;
         }
         
-        let xPos = playerArray[parseInt(inputArray[1])].object.position.x;
-        let yPos = playerArray[parseInt(inputArray[1])].object.position.y;
+        let xPosOffset = playerArray[parseInt(inputArray[1])].object.position.x + 1;
+        let yPosOffset = playerArray[parseInt(inputArray[1])].object.position.y + 1;
+
         // Updating Redenerer Information
-        player_controller.controllerUpdateBlock([xPos, yPos]), game_map.getDirection([xPos, yPos]);
+        player_controller.controllerUpdateBlock([game_map.map2DToBlock2D([xPosOffset, yPosOffset]), game_map.getDirection([xPosOffset, yPosOffset])]);
 
         // Moving Player To New Position
-        player_controller.creature.object.position.x = xPos;
-        player_controller.creature.object.position.y = yPos;
+        player_controller.creature.object.position.x = xPosOffset;
+        player_controller.creature.object.position.y = yPosOffset;
 
         // Moving The Camera With The Player
-        player_controller.camera.position.x = xPos;
-        player_controller.camera.position.y = yPos - carmeraOffsetY;
+        player_controller.camera.position.x = xPosOffset;
+        player_controller.camera.position.y = yPosOffset - carmeraOffsetY;
+
+        // Update Player Position Event
+        var event = new Event('position event', {bubbles: true, cancelable: false}) 
+        document.dispatchEvent(event);
+    // Teleport To Player By Name
+    } else if (inputArray[0] == "tpn") {
+        let trueIndex = -1;
+        // Input Control
+        for (let playerIndex = 0; playerIndex < playerArray.length; playerIndex++) {
+            if (playerArray[playerIndex] != null && playerArray[playerIndex].name == inputArray[1]) {
+                trueIndex = playerIndex;
+                break;
+            }
+        }
+
+        // Didn't Find The Player
+        if (trueIndex == -1) {
+            console.log("Couldn't Find Player Named: ", inputArray[1]);
+            return;
+        }
+        
+        let xPosOffset = playerArray[trueIndex].object.position.x + 1;
+        let yPosOffset = playerArray[trueIndex].object.position.y + 1;
+
+        // Updating Redenerer Information
+        player_controller.controllerUpdateBlock([game_map.map2DToBlock2D([xPosOffset, yPosOffset]), game_map.getDirection([xPosOffset, yPosOffset])]);
+
+        // Moving Player To New Position
+        player_controller.creature.object.position.x = xPosOffset;
+        player_controller.creature.object.position.y = yPosOffset;
+
+        // Moving The Camera With The Player
+        player_controller.camera.position.x = xPosOffset;
+        player_controller.camera.position.y = yPosOffset - carmeraOffsetY;
 
         // Update Player Position Event
         var event = new Event('position event', {bubbles: true, cancelable: false}) 

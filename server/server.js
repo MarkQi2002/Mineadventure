@@ -2,6 +2,15 @@
 // KEY: kodiaks
 // Hashed Value: 28713e0f7e8b977dcd866fcf8686d1242413e661162e68c0a02d9084b90d4a53
 
+// Unlocked Command
+// unlock: To Unlock The Locked Command
+// location: Return Current Player Location On Console
+
+// Locked Command
+// tp __ __: Teleport To Certain XY Location On Map
+// tpa __: Teleport To Certain Player By Player ID
+// tpn __: Teleport To Certain Player By Player Name
+
 // CommonJS Syntax
 // Hyper Text Transfer Protocol (HTTP)
 // Setting Socket Related Modules
