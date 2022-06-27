@@ -108,11 +108,29 @@ function lockedCommand(inputArray) {
             return;
         }
         
-        let xPosOffset = playerArray[parseInt(inputArray[1])].object.position.x + 1;
-        let yPosOffset = playerArray[parseInt(inputArray[1])].object.position.y + 1;
+        let playerX = Math.floor(playerArray[parseInt(inputArray[1])].object.position.x);
+        let playerY = Math.floor(playerArray[parseInt(inputArray[1])].object.position.y);
 
         // Updating Redenerer Information
-        player_controller.controllerUpdateBlock([game_map.map2DToBlock2D([xPosOffset, yPosOffset]), game_map.getDirection([xPosOffset, yPosOffset])]);
+        player_controller.controllerUpdateBlock([game_map.map2DToBlock2D([playerX, playerY]), game_map.getDirection([playerX, playerY])]);
+
+
+        let xPosOffset, yPosOffset;
+        let count = 0
+        while (count < 10) {
+            xPosOffset = Math.floor((Math.random() < 0.5) ? 1 : -1) + playerX;
+            yPosOffset = Math.floor((Math.random() < 0.5) ? 1 : -1) + playerY;
+            let unit = game_map.getUnit([xPosOffset, yPosOffset]);
+            if ( unit != null && !(game_map.unitIDList[unit.ID].collision)){
+                break;
+            }
+            count ++;
+        }
+        if (count >= 10){
+            xPosOffset = playerX;
+            yPosOffset = playerY;
+        }
+
 
         // Moving Player To New Position
         player_controller.creature.object.position.x = xPosOffset;

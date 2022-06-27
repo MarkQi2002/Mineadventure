@@ -2,15 +2,6 @@
 // KEY: kodiaks
 // Hashed Value: 28713e0f7e8b977dcd866fcf8686d1242413e661162e68c0a02d9084b90d4a53
 
-// Unlocked Command
-// unlock: To Unlock The Locked Command
-// location: Return Current Player Location On Console
-
-// Locked Command
-// tp __ __: Teleport To Certain XY Location On Map
-// tpa __: Teleport To Certain Player By Player ID
-// tpn __: Teleport To Certain Player By Player Name
-
 // CommonJS Syntax
 // Hyper Text Transfer Protocol (HTTP)
 // Setting Socket Related Modules
@@ -42,7 +33,7 @@ var ID_count = 0;
 // find a spawn place without collision
 function createSpawnPosition() {
 	let posX, posY;
-	while (1) {
+	while (1){
 		posX = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.x * game_map.blockSize2D.x);
 		posY = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.y * game_map.blockSize2D.y);
 		let unit = game_map.getUnit([posX, posY]);

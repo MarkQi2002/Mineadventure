@@ -1,11 +1,6 @@
 // Constructing An Player Object And Storing In The Client Side playerArray
 function spawnPlayer(playerInfo){
-	let new_player = new player(playerInfo.name,
-								playerInfo.position,
-								playerInfo.health,
-								playerInfo.armor,
-								playerInfo.attackDamage,
-								playerInfo.attackSpeed);
+	let new_player = new player(playerInfo);
 
 	playerArray[playerInfo.ID] = new_player;
 	return new_player;
