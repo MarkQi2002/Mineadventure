@@ -73,7 +73,7 @@ const playerItemArrayUpdate = (additionalItem, updatePlayerID) => {
 	}
 
 	// Update Item UI
-	appendItemUIArray(additionalItem.name);
+	if (updatePlayerID == clientPlayerID) appendItemUIArray(additionalItem.name);
 
 	// Display Infomration On UI
 	displayPlayerName();
