@@ -184,3 +184,58 @@ function lockedCommand(inputArray) {
 /* window.addEventListener('resize', () => {
     alert("This Game Work Best With 100% Scale");
 }) */
+
+// Item UI
+function itemUIInfo() {
+    this.itemName = "NULL";
+    this.itemAmount = 0;
+}
+var itemUIArray = {item0: new itemUIInfo,
+                    item1: new itemUIInfo,
+                    item2: new itemUIInfo,
+                    item3: new itemUIInfo,
+                    item4: new itemUIInfo,
+                    item5: new itemUIInfo,
+                    item6: new itemUIInfo,
+                    item7: new itemUIInfo,
+                    item8: new itemUIInfo,
+                    item9: new itemUIInfo,
+                    item10: new itemUIInfo,
+                    item11: new itemUIInfo,
+                    item12: new itemUIInfo,
+                    item13: new itemUIInfo,
+                    item14: new itemUIInfo,
+                    item15: new itemUIInfo,
+                    item16: new itemUIInfo,
+                    item17: new itemUIInfo,
+                    item18: new itemUIInfo,
+                    item19: new itemUIInfo};
+
+// Append Item When Pick Up An Item
+function appendItemUIArray(itemName) {
+    for ([key, value] of Object.entries(itemUIArray)) {
+        if (value.itemName == itemName) {
+            value.itemAmount++;
+            updateItemUI();
+            return;
+        }
+    }
+
+    for ([key, value] of Object.entries(itemUIArray)) {
+        if (value.itemName == "NULL") {
+            value.itemName = itemName;
+            value.itemAmount++;
+            updateItemUI();
+            return;
+        }
+    }
+}
+
+// For Updating Item UI Image
+function updateItemUI() {
+    for ([key, value] of Object.entries(itemUIArray)) {
+        if (value.itemName == "Blood Orb") {
+            document.getElementById(key).children[0].src="image/UI_Image/Blood_Orb.png";
+        }
+    }
+}

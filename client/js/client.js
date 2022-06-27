@@ -72,6 +72,9 @@ const playerItemArrayUpdate = (additionalItem, updatePlayerID) => {
 		console.log(playerArray[updatePlayerID].health);
 	}
 
+	// Update Item UI
+	appendItemUIArray(additionalItem.name);
+
 	// Display Infomration On UI
 	displayPlayerName();
 	displayPlayerHealth();
