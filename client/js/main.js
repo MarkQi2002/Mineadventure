@@ -86,6 +86,9 @@ function updateTimeEvent(){
 	timeEventCount ++;
 }
 
+
+let intervalWorker = new Worker('./js/thread.js');
+
 // Animation Function
 function animate() {
     // Beginning Of The Frame
@@ -95,13 +98,14 @@ function animate() {
     player_controller.update(delta);
     
     // Updating Event
-    updateTimeEvent();
+    
 
     for (let i = 0; i < playerArray.length; i++){
         if (playerArray[i] != null && i != clientPlayerID){
             playerArray[i].update();
         }
     }
+
 
     // Setting The Renderer Of The Scene And Camera
     renderer.render(scene, camera);

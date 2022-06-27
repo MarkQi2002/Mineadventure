@@ -162,7 +162,7 @@ class controller{
 
         var newProjectile = {
             position: [this.creature.object.position.x, this.creature.object.position.y, ,this.creature.object.position.z],
-            initVelocity: [5 * vectorX, 5 * vectorY],
+            initVelocity: [8 * vectorX, 8* vectorY],
             damageInfo: newDamageInfo
         };
         newProjectileList.push(newProjectile);
@@ -526,7 +526,10 @@ class controller{
         return blockPosList; 
     }
 
-
+    damage(amount){
+        this.creature.damage(amount);
+        displayPlayerHealth();
+    }
  
     // Updating The Position 
     update(delta){ 

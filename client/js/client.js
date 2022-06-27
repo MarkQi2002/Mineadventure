@@ -37,6 +37,10 @@ const newPlayer = (playerInfo, playerArrayLength) => {
 
 		// Animate The Player
 		animate();
+
+		// thread event
+		intervalWorker.onmessage = updateTimeEvent;
+
 	}
 };
 
@@ -192,7 +196,7 @@ const updateFrame = ([projectilePosList]) => {
 				Math.sqrt(diffX * diffX + diffY * diffY) < 0.6){
 
 				
-				player_controller.creature.damage(projectileList[i].damageInfo.amount);
+				player_controller.damage(projectileList[i].damageInfo.amount);
 				document.dispatchEvent(new Event('localPlayerInfo', {bubbles: true, cancelable: false}));
 				onHitProjectileList.push(i);
 				projectileList[i].delete();

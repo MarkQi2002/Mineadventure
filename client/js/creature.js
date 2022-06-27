@@ -84,6 +84,8 @@ class creature{
             this.object.remove(obj); 
         }
         scene.remove(this.object);
+        this.healthBar.remove(this.healthBar.children);
+        player_controller.camera.remove(this.healthBar);
         delete this;
     }
 }
