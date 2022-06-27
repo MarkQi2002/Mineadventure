@@ -42,7 +42,7 @@ var ID_count = 0;
 // find a spawn place without collision
 function createSpawnPosition() {
 	let posX, posY;
-	while (1){
+	while (1) {
 		posX = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.x * game_map.blockSize2D.x);
 		posY = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.y * game_map.blockSize2D.y);
 		let unit = game_map.getUnit([posX, posY]);

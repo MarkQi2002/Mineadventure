@@ -102,7 +102,6 @@ class map {
         } else {
             return null;
         }
-        
     }
 
     // return true when deletion successful
