@@ -326,6 +326,8 @@ function playerInfoChange(playerInfo){
 				playerArray[playerInfo[i][0]].health = playerInfo[i][2];
 			}else if (playerInfo[i][1] == "attackSpeed"){
 				playerArray[playerInfo[i][0]].attackSpeed = playerInfo[i][2];
+			}else if (playerInfo[i][1] == "attackDamage"){
+				playerArray[playerInfo[i][0]].attackDamage = playerInfo[i][2];
 			}
 		}
 	}

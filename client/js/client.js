@@ -201,15 +201,14 @@ const updateFrame = ([projectilePosList]) => {
 			// local player collision with projectile
 			let diffX = projectileList[i].object.position.x - player_controller.creature.object.position.x;
 			let diffY = projectileList[i].object.position.y - player_controller.creature.object.position.y;
-			if (projectileList[i].damageInfo.attacker != clientPlayerID &&
-				Math.abs(diffX) + Math.abs(diffX) < 2 &&
-				Math.sqrt(diffX * diffX + diffY * diffY) < 0.6){
-
-				
-				player_controller.damage(projectileList[i].damageInfo.amount);
-				onHitProjectileList.push(i);
-				projectileList[i].delete();
-				projectileList[i] = null;
+			if (projectileList[i].damageInfo.attacker != clientPlayerID && Math.abs(diffX) + Math.abs(diffX) < 2){
+				let diffZ = projectileList[i].object.position.z - player_controller.creature.object.position.z;
+				if (Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ) < 0.6){
+					player_controller.damage(projectileList[i].damageInfo.amount);
+					onHitProjectileList.push(i);
+					projectileList[i].delete();
+					projectileList[i] = null;
+				}
 			}
 
 

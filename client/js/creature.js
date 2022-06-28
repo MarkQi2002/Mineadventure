@@ -47,7 +47,10 @@ class creature{
         let scale = this.health / this.maxHealth;
         if (scale < 0){
             scale = 0;
+        }else if(scale > 1){
+            scale = 1;
         }
+        
         this.innerHealthBar.scale.x = scale;
         this.innerHealthBar.position.x = (scale - 1) * 0.05;
     }
