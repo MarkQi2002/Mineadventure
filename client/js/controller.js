@@ -527,14 +527,23 @@ class controller{
     }
 
     damage(amount){
-        this.creature.damage(amount);
-        displayPlayerHealth();
-        changingPlayerInfo.push([clientPlayerID, "health", this.creature.health]);
+        this.setHealth(this.creature.health - amount);
+    }
+
+    setHealth(amount){
+        changingPlayerInfo.push([clientPlayerID, "health", amount]);
+    }
+
+    setMaxHealth(amount){
+        changingPlayerInfo.push([clientPlayerID, "maxHealth", amount]);
     }
  
     setAttackSpeed(amount){
-        this.creature.attackSpeed = amount;
-        changingPlayerInfo.push([clientPlayerID, "attackSpeed", this.creature.attackSpeed]);
+        changingPlayerInfo.push([clientPlayerID, "attackSpeed", amount]);
+    }
+
+    setAttackDamage(amount){
+        changingPlayerInfo.push([clientPlayerID, "attackDamage", amount]);
     }
 
     // Updating The Position 

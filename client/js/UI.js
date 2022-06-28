@@ -15,6 +15,14 @@ function displayPlayerAttackDamage() {
     document.getElementById("playerAttackDamange").innerHTML = "Player Attack Damage: " + playerArray[clientPlayerID].attackDamage;
 }
 
+
+function displayAllUI() {
+    displayPlayerName();
+	displayPlayerHealth();
+	displayPlayerArmor();
+	displayPlayerAttackDamage();
+}
+
 // Terminal Function
 var command = document.getElementById("terminalInput");
 command.addEventListener("keypress", function(event) {
@@ -178,8 +186,33 @@ function lockedCommand(inputArray) {
         var event = new Event('position event', {bubbles: true, cancelable: false}) 
         document.dispatchEvent(event);
 
+    } else if (inputArray[0] == "health") {
+        if (inputArray.length < 3){
+            player_controller.setHealth(inputArray[1]);
+        }else{
+            changingPlayerInfo.push([inputArray[2], "health", inputArray[1]]);
+        }
+
+    } else if (inputArray[0] == "maxhealth") {
+        if (inputArray.length < 3){
+            player_controller.setMaxHealth(inputArray[1]);
+        }else{
+            changingPlayerInfo.push([inputArray[2], "maxHealth", inputArray[1]]);
+        }
+        
     } else if (inputArray[0] == "attackspeed") {
-        player_controller.setAttackSpeed(inputArray[1]);
+        if (inputArray.length < 3){
+            player_controller.setAttackSpeed(inputArray[1]);
+        }else{
+            changingPlayerInfo.push([inputArray[2], "attackSpeed", inputArray[1]]);
+        }
+
+    } else if (inputArray[0] == "attackdamage") {
+        if (inputArray.length < 3){
+            player_controller.setAttackDamage(inputArray[1]);
+        }else{
+            changingPlayerInfo.push([inputArray[2], "attackDamage", inputArray[1]]);
+        }
     }
 
 }

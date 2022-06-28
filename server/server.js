@@ -324,6 +324,8 @@ function playerInfoChange(playerInfo){
 			//[playerID, "type name", amount]
 			if (playerInfo[i][1] == "health"){
 				playerArray[playerInfo[i][0]].health = playerInfo[i][2];
+			}else if (playerInfo[i][1] == "maxHealth"){
+				playerArray[playerInfo[i][0]].maxHealth = playerInfo[i][2];
 			}else if (playerInfo[i][1] == "attackSpeed"){
 				playerArray[playerInfo[i][0]].attackSpeed = playerInfo[i][2];
 			}else if (playerInfo[i][1] == "attackDamage"){

@@ -30,10 +30,7 @@ const newPlayer = (playerInfo, playerArrayLength) => {
 		player_controller = new controller(new_player, camera);
 
 		// Display Infomration On UI
-		displayPlayerName();
-		displayPlayerHealth();
-		displayPlayerArmor();
-		displayPlayerAttackDamage();
+		displayAllUI();
 
 		// Animate The Player
 		animate();
@@ -53,17 +50,29 @@ const playerPositionUpdate = ([Pos, PlayerID]) => {
 };
 
 const playerInfoChange = (playerInfo) => {
+	let updateLocalPlayerUI = false;
 	for (let i = 0; i < playerInfo.length; i++){
-
-		console.log(playerInfo);
 		if (playerArray[playerInfo[i][0]] != null){
+			if (playerInfo[i][0] == clientPlayerID){
+				updateLocalPlayerUI = true;
+			}
+
 			//[playerID, "type name", amount]
 			if (playerInfo[i][1] == "health"){
 				playerArray[playerInfo[i][0]].setHealth(playerInfo[i][2]);
+			}else if (playerInfo[i][1] == "maxHealth"){
+				playerArray[playerInfo[i][0]].setMaxHealth(playerInfo[i][2]);
 			}else if (playerInfo[i][1] == "attackSpeed"){
 				playerArray[playerInfo[i][0]].attackSpeed = playerInfo[i][2];
+			}else if (playerInfo[i][1] == "attackDamage"){
+				playerArray[playerInfo[i][0]].attackDamage = playerInfo[i][2];
 			}
+
+			
 		}
+	}
+	if (updateLocalPlayerUI){
+		displayAllUI();
 	}
 };
 
