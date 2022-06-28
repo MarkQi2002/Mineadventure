@@ -162,7 +162,7 @@ class controller{
 
         var newProjectile = {
             position: [this.creature.object.position.x, this.creature.object.position.y, ,this.creature.object.position.z],
-            initVelocity: [8 * vectorX, 8* vectorY],
+            initVelocity: [8 * vectorX, 8 * vectorY],
             damageInfo: newDamageInfo
         };
         newProjectileList.push(newProjectile);
@@ -529,8 +529,14 @@ class controller{
     damage(amount){
         this.creature.damage(amount);
         displayPlayerHealth();
+        changingPlayerInfo.push([clientPlayerID, "health", this.creature.health]);
     }
  
+    setAttackSpeed(amount){
+        this.creature.attackSpeed = amount;
+        changingPlayerInfo.push([clientPlayerID, "attackSpeed", this.creature.attackSpeed]);
+    }
+
     // Updating The Position 
     update(delta){ 
         // Set camera offset for other calculation

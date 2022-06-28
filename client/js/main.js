@@ -77,17 +77,19 @@ var clock = new THREE.Clock();
 var delta = 0;
 
 // Game Event Related
-var timeEventCount = 0;
 function updateTimeEvent(){
-    if (timeEventCount >= 3){
-        document.dispatchEvent(new Event('frameEvent', {bubbles: true, cancelable: false}));
-        timeEventCount = 0;
+    document.dispatchEvent(new Event('frameEvent', {bubbles: true, cancelable: false}));
+    if (changingPlayerInfo.length > 0){
+        document.dispatchEvent(new Event('changingPlayerInfo', {bubbles: true, cancelable: false}));
     }
-	timeEventCount ++;
+
 }
 
-
+// create thread
 let intervalWorker = new Worker('./js/thread.js');
+
+// using for update player
+var changingPlayerInfo = [];
 
 // Animation Function
 function animate() {

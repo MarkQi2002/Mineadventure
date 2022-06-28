@@ -319,7 +319,16 @@ function ClientFrameUpdate(onHitProjectileList){
 }
 
 function playerInfoChange(playerInfo){
-	playerArray[playerInfo.ID].health = playerInfo.health;
+	for (let i = 0; i < playerInfo.length; i++){
+		if (playerArray[playerInfo[i][0]] != null){
+			//[playerID, "type name", amount]
+			if (playerInfo[i][1] == "health"){
+				playerArray[playerInfo[i][0]].health = playerInfo[i][2];
+			}else if (playerInfo[i][1] == "attackSpeed"){
+				playerArray[playerInfo[i][0]].attackSpeed = playerInfo[i][2];
+			}
+		}
+	}
 
 	return playerInfo;
 }

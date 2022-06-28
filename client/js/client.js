@@ -39,6 +39,7 @@ const newPlayer = (playerInfo, playerArrayLength) => {
 		animate();
 
 		// thread event
+		
 		intervalWorker.onmessage = updateTimeEvent;
 
 	}
@@ -52,8 +53,17 @@ const playerPositionUpdate = ([Pos, PlayerID]) => {
 };
 
 const playerInfoChange = (playerInfo) => {
-	if (playerInfo.ID != clientPlayerID){
-		playerArray[playerInfo.ID].setHealth(playerInfo.health);
+	for (let i = 0; i < playerInfo.length; i++){
+
+		console.log(playerInfo);
+		if (playerArray[playerInfo[i][0]] != null){
+			//[playerID, "type name", amount]
+			if (playerInfo[i][1] == "health"){
+				playerArray[playerInfo[i][0]].setHealth(playerInfo[i][2]);
+			}else if (playerInfo[i][1] == "attackSpeed"){
+				playerArray[playerInfo[i][0]].attackSpeed = playerInfo[i][2];
+			}
+		}
 	}
 };
 
@@ -197,7 +207,6 @@ const updateFrame = ([projectilePosList]) => {
 
 				
 				player_controller.damage(projectileList[i].damageInfo.amount);
-				document.dispatchEvent(new Event('localPlayerInfo', {bubbles: true, cancelable: false}));
 				onHitProjectileList.push(i);
 				projectileList[i].delete();
 				projectileList[i] = null;
@@ -312,10 +321,8 @@ const deleteEvent = ([deleteProjectileList, deleteUnitList]) => {
 
 	// Projectile Related
 	const playerInfo = () => {
-		var newInfo = { ID: clientPlayerID,
-						health: player_controller.creature.health
-					  };
-		sock.compress(true).emit('playerInfo', newInfo);
+		sock.compress(true).emit('playerInfo', changingPlayerInfo);
+		changingPlayerInfo = [];
 	}
-	document.addEventListener('localPlayerInfo', playerInfo);
+	document.addEventListener('changingPlayerInfo', playerInfo);
 })();

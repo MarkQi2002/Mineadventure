@@ -177,7 +177,11 @@ function lockedCommand(inputArray) {
         // Update Player Position Event
         var event = new Event('position event', {bubbles: true, cancelable: false}) 
         document.dispatchEvent(event);
+
+    } else if (inputArray[0] == "attackspeed") {
+        player_controller.setAttackSpeed(inputArray[1]);
     }
+
 }
 
 // Preventing User From Zooming The WebPage
