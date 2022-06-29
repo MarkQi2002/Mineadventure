@@ -1,3 +1,4 @@
+// -------------------Player-------------------
 // Constructing An Player Object And Storing In The Client Side playerArray
 function spawnPlayer(playerInfo){
 	let new_player = new player(playerInfo);
@@ -49,6 +50,7 @@ const playerPositionUpdate = ([Pos, PlayerID]) => {
 	}
 };
 
+// Send Player Property Change To Server And Change At All Other Client
 function sendPlayerPropertyChange(id, propertyList){
 	let isIn = false;
 	for (let i; i < changingPlayerInfo.length; i++){
@@ -60,14 +62,12 @@ function sendPlayerPropertyChange(id, propertyList){
 			break;
 		}
 	}
-	if (!isIn){
-		changingPlayerInfo.push([id, propertyList]);
-	}
-	
+
+	if (!isIn) changingPlayerInfo.push([id, propertyList]);
 }
 
+// Change An Player's Property
 const playerInfoChange = (playerInfo) => {
-
 	let updateLocalPlayerUI = false;
 	for (let i = 0; i < playerInfo.length; i++){
 		if (playerArray[playerInfo[i][0]] != null){
@@ -93,8 +93,9 @@ const playerInfoChange = (playerInfo) => {
 		displayAllUI();
 	}
 };
+// -------------------End Of Player-------------------
 
-// ------------------Item----------------------
+// -------------------Item-------------------
 // Variable Declaration
 var removeItemID;
 var additionalItemID;
@@ -103,37 +104,22 @@ var itemDefaultGeometry = new THREE.SphereGeometry(0.2, 10, 10);
 var itemDefaultMaterial = new THREE.MeshBasicMaterial({color: 'red'});
 var itemDefaultmesh = new THREE.Mesh(itemDefaultGeometry, itemDefaultMaterial);
 
-// For Updating Player Item Array
+// Update Player Property And Player Item Array
 const playerItemArrayUpdate = (additionalItemID, updatePlayerID) => {
+	// Update Player Property Based On Item
 	let playerInfo = [[updatePlayerID, itemInfoArray[additionalItemID][2]]];
 	playerInfoChange(playerInfo);
-	/* playerArray[updatePlayerID].playerItemArray[additionalItem.name]++;
-	console.log("Player ", updatePlayerID, " Item Array: ", playerArray[updatePlayerID].playerItemArray);
 
-	// Player Property Update
-	// Defensive Property Update
-	if (additionalItem.buffType == "Defensive") {
-		playerArray[updatePlayerID].health += additionalItem.health;
-		playerArray[updatePlayerID].armor += additionalItem.armor;
-		console.log(playerArray[updatePlayerID].health);
-	}
+	// Update Server Side Player Item Array
+	if (playerArray[updatePlayerID].playerItemArray[additionalItemID] != null)
+		playerArray[updatePlayerID].playerItemArray[additionalItemID]++;
+	else
+		playerArray[updatePlayerID].playerItemArray[additionalItemID] = 1;
 
-	// Attack Property Update
-	if (additionalItem.buffType == "Attack") {
-		playerArray[updatePlayerID].attackDamage += additionalItem.attackDamage;
-		playerArray[updatePlayerID].attackSpeed += additionalItem.attackSpeed;
-		console.log(playerArray[updatePlayerID].health);
-	}
-
-	// Update Item UI
-	if (updatePlayerID == clientPlayerID) appendItemUIArray(additionalItem.name);
-
-	// Display Infomration On UI
-	displayPlayerName();
-	displayPlayerHealth();
-	displayPlayerArmor();
-	displayPlayerAttackDamage(); */
+	// Return The Additional Item's ID
+	return additionalItemID;
 }
+
 // Initialization Myself And All Future Players
 // Constructing An Player Object And Storing In The Client Side playerArray
 function spawnItem(itemID, itemIndex){
@@ -172,7 +158,9 @@ const deleteItem = (itemIndex) => {
 		itemArray[itemIndex] = null;
 	}
 }
+// -------------------End Of Item-------------------
 
+// -------------------Connection Exception Related-------------------
 // When The Server Shutdown Or An Connection Error Occur, Log The Error And Transfer To index.html
 const connectionError = (error) => {
 	console.log(error);
@@ -186,12 +174,13 @@ const playerDisconnect = (PlayerID) => {
 		playerArray[PlayerID] = null;
 	}
 };
+// -------------------End Of Connection Exception Related-------------------
+
 
 // Update Client Side Block
 const clientUpdateBlocks = (blockList) => {
 	game_map.spawnBlocks(blockList[0]);
 };
-
 
 // Projectile Related
 const spawnProjectile = (projectileInfo) => {
@@ -254,6 +243,7 @@ const deleteEvent = ([deleteProjectileList, deleteUnitList]) => {
 
 };
 
+// -------------------Sending And Receiving Information-------------------
 (() => {
 	// When Connected To Server, Create A Sock (MySelf)
 	const sock = io();
@@ -326,14 +316,14 @@ const deleteEvent = ([deleteProjectileList, deleteUnitList]) => {
 	}
 	document.addEventListener('createProjectile', createProjectile);
 
-	// Projectile Related
+	// Frame Related
 	const frameUpdate = () => {
 		sock.compress(true).emit('clientFrame', onHitProjectileList);
 	}
 	document.addEventListener('frameEvent', frameUpdate);
 
 
-	// Projectile Related
+	// Player Information Related
 	const playerInfo = () => {
 		sock.compress(true).emit('playerInfo', changingPlayerInfo);
 		changingPlayerInfo = [];

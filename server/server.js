@@ -62,11 +62,8 @@ const CreateNewPlayer = (playerID, playerName, spawnPos) => {
 		attackDamage: 10,
 		attackSpeed: 1,
 
-		// Item Array
-		playerItemArray: {
-            "Blood Orb" : 0,
-			"Attack Orb" : 0
-        }
+		// Server Side Player Item Array
+		playerItemArray: {}
 	};
 
 	// Indexing Player Array To Include The New Player
@@ -84,20 +81,6 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 	}
 	return [Pos, playerID];
 };
-
-// Increment Player Item Array
-const UpdatePlayerItemArray = (additionalItemID, updatePlayerID) => {
-	/* if (playerArray[updatePlayerID] != null) {
-		playerArray[updatePlayerID].playerItemArray[additionalItem.name]++;
-	} */
-
-	// Player Property Update
-	// Defensive Property Update
-	let playerInfo = [[updatePlayerID, itemInfoArray[additionalItemID][2]]];
-	playerInfoChange(playerInfo);
-
-	return additionalItemID;
-}
 
 // Get A New Player ID From The Empty Space In PlayArray
 function newPlayerID(){
@@ -123,6 +106,7 @@ const clientDisconnect = (Info, playerID) => {
 	return playerID
 };
 
+// -------------------Item-------------------
 // Item Related Variable Declaration
 var itemArray = [];
 itemArray.length = 256;
@@ -154,7 +138,23 @@ var itemInfoArray = [[{"itemID": 0, "itemName": "Blood Orb", "rarity": "Common",
 					[],
 					[]];
 
-// Function Used To Create A New Item
+// Update Player Property And Player Item Array
+const UpdatePlayerItemArray = (additionalItemID, updatePlayerID) => {
+	// Update Player Property Based On Item
+	let playerInfo = [[updatePlayerID, itemInfoArray[additionalItemID][2]]];
+	playerInfoChange(playerInfo);
+
+	// Update Server Side Player Item Array
+	if (playerArray[updatePlayerID].playerItemArray[additionalItemID] != null)
+		playerArray[updatePlayerID].playerItemArray[additionalItemID]++;
+	else
+		playerArray[updatePlayerID].playerItemArray[additionalItemID] = 1;
+
+	// Return The Additional Item's ID
+	return additionalItemID;
+}
+
+// Creating An Item When Client Send A Request
 const CreateNewItem = (newItemID) => {
 	// Indexing Item Array To Include The New Item
 	for (let itemIndex = 0; itemIndex < itemArray.length; itemIndex++) {
@@ -164,7 +164,7 @@ const CreateNewItem = (newItemID) => {
 			itemArray[itemIndex] = newItemID;
 			
 			// Log The ItemInfo On The Server Side
-			console.log(itemInfoArray[newItemID][0], newItemIndex);
+			console.log(itemInfoArray[newItemID], newItemIndex);
 			break;
 		}
 	}
@@ -173,7 +173,7 @@ const CreateNewItem = (newItemID) => {
 	return newItemID;
 };
 
-// When Client Is Disconnected
+// Removing An Item When Client Send A Request
 const deleteItem = (removeItemID) => {
 	if (itemArray[removeItemID] != null){
 		console.log("Deleting Item ", removeItemID);
@@ -188,16 +188,9 @@ function randomSpawnItem() {
 	io.emit('clientNewItem', CreateNewItem(0), newItemIndex);
 } */
 
-// Map Related Function
-function getPlayerMapPos2D(playerID){
-	let pos = [0, 0];
-	if (playerArray[playerID] != null) {
-		pos = [Math.floor(playerArray[playerID].position[0]), Math.floor(playerArray[playerID].position[1])];
-	}
-	return pos;
-}
+// -------------------End Of Item-------------------
 
-// Projectile Related
+// -------------------Projectile-------------------
 function getNewProjectileID(){
 	let exceedCount = 0;
 	// Stop Untill Get An Projectile ID Corresponding To An Empty Space In Projectile List
@@ -322,6 +315,7 @@ function updateProjectile(){
 	
 	
 }
+// -------------------End Of Projectile-------------------
 
 // Update Client Frame
 function ClientFrameUpdate(onHitProjectileList){
@@ -335,7 +329,6 @@ function ClientFrameUpdate(onHitProjectileList){
 }
 
 function playerInfoChange(playerInfo){
-
 	// example playerInfo = [playerID, {"health": 10, "attackSpeed": 1, ...}]
 	for (let i = 0; i < playerInfo.length; i++){
 		if (playerArray[playerInfo[i][0]] != null){
@@ -356,10 +349,21 @@ function playerInfoChange(playerInfo){
 	return playerInfo;
 }
 
-// -----------Map-------------
+// -------------------Map-------------------
 // Setting The Size Of The Map
 var game_map = new map([12, 12],[20, 20]);
 
+// Get Player's Positon In Map's Coordinate
+function getPlayerMapPos2D(playerID){
+	let pos = [0, 0];
+	if (playerArray[playerID] != null) {
+		pos = [Math.floor(playerArray[playerID].position[0]), Math.floor(playerArray[playerID].position[1])];
+	}
+	return pos;
+}
+// -------------------End Of Map-------------------
+
+// -------------------Sending And Receiving Information-------------------
 // Once A New Player Join, Update To All Other Clients
 io.on('connection', (sock) => {
 	// Setting The New PlayerID

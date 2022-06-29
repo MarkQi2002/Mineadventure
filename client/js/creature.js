@@ -109,10 +109,8 @@ class player extends creature {
         // Calling Parent Constructor
         super(playerInfo)
 
-        this.playerItemArray = {
-            "Blood Orb" : 0,
-            "Attack Orb" : 0
-        }
+        // Player Item Array
+        this.playerItemArray = {}
 
         // Spherical Body
         let geometry = new THREE.SphereGeometry(0.5, 10, 10);
