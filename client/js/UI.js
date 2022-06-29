@@ -188,7 +188,7 @@ function lockedCommand(inputArray) {
 
     } else {
 
-        if (isNaN(parseInt(inputArray[2])) || (inputArray.length > 4 && isNaN(parseInt(inputArray[2])))) {
+        if (isNaN(parseInt(inputArray[2])) || (inputArray.length >= 4 && isNaN(parseInt(inputArray[3])))) {
             console.log("The Number Is Invalid!");
             return;
         }
@@ -203,10 +203,12 @@ function lockedCommand(inputArray) {
             console.log("The Math Symbol Invalid!");
             return;
         }
+
+        let creatureType = (inputArray.length >= 5 && inputArray[4] == "monster") ? "monster" : "player";
         
         let propertyList = {};
         propertyList[inputArray[0]] = [inputArray[1], parseInt(inputArray[2])];
-        sendCreaturePropertyChange(["player", id], propertyList);
+        sendCreaturePropertyChange([creatureType, id], propertyList);
         
     }
 
@@ -221,7 +223,7 @@ function lockedCommand(inputArray) {
 function itemUIInfo() {
     this.itemName = "NULL";
     this.itemAmount = 0;
-};
+}
 
 // UI Array For Item
 var itemUIArray = { item0: new itemUIInfo,

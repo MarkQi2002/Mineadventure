@@ -38,7 +38,7 @@ function properties() {
 	// Attack Properties
 	this["attackDamage"] = 10,
 	this["attackSpeed"] = 1
-};
+}
 
 // -------------------End Of Creature-------------------
 
@@ -116,7 +116,10 @@ function newPlayerID(){
 var monsterArray = [];
 monsterArray.length = 100;
 var monster_ID_Count = 0;
-var monsterInfoArray = [
+var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower",
+						"properties":{"health": 50, "maxHealth": 50, "attackDamage": 1}},
+						{}],
+
 
 						];
 
@@ -135,13 +138,67 @@ function newMonsterID(){
 	return monster_ID_Count;
 }
 
-function spawnMonster(id, position){
+function createNewMonster(ID, spawnPos){
 	let monsterID = newMonsterID();
-	
-	//monsterArray[monsterID] = 
+	let newProperties = new properties;
+	// Add Properties By ID
+	for ([key, value] of Object.entries(monsterInfoArray[ID][0]["properties"])) {
+		newProperties[key] = value;
+	}
 
+	let monsterInfo  = {
+		ID: monsterID,
+		name: monsterInfoArray[ID][0]["name"],
+		position: [spawnPos[0], spawnPos[1], 1],
+		
+		// Monster Properties
+		properties: newProperties,
+	
+		// Server Side Creature Item Array
+		creatureItemArray: {}
+	};
+
+	monsterArray[monsterID] = monsterInfo;
+
+	// Log The MonsterInfo On The Server Side
+	console.log(monsterInfo);
+
+	io.compress(true).emit('newMonster', monsterInfo, monsterArray.length);
+
+	return monsterInfo;
 }
 
+var updateMonsterPos = [];
+function updateMonster(delta){
+	updateMonsterPos.length = monsterArray.length;
+	for(let i = 0; i < monsterArray.length; ++i){
+		if(monsterArray[i] != null){
+			monsterArray[i].position[0] += delta* 0.1;
+			updateMonsterPos[i] = monsterArray[i].position;
+
+			
+			for(let ii = 0; ii < projectileList.length; ++ii){
+				if (projectileList[ii] == null) continue;
+				// Monster Collision With Projectile
+				let diffX = projectileList[ii].position[0] - monsterArray[i].position[0];
+				let diffY = projectileList[ii].position[1] - monsterArray[i].position[1];
+				// Calculate Manhattan Distance
+
+				if (Math.abs(diffX) + Math.abs(diffY) < 2){
+					let diffZ = projectileList[ii].position[2] - monsterArray[i].position[2];
+					// Calculate Distance To Squared
+					if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 1.47){
+						creatureInfoChange([[["monster", i], {"health": ["-", 10]}]]);
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+createNewMonster(0,[2,2]);
 // -------------------End Of Monster-------------------
 
 // -------------------Item-------------------
@@ -183,7 +240,7 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID)
 
 	// Update Player Property Based On Item
-	let playerInfo = [[updatePlayerID, itemInfoArray[additionalItemID][1]]];
+	let playerInfo = [[["player", updatePlayerID], itemInfoArray[additionalItemID][1]]];
 	creatureInfoChange(playerInfo);
 
 	// Update Server Side Player Item Array
@@ -256,7 +313,7 @@ function removeItem(removeItemID) {
 }
 
 // Randomly Spawn An Item Every Half A Minute
-setInterval(randomSpawnItem, 1000);
+setInterval(randomSpawnItem, 30000);
 function randomSpawnItem() {
 	io.emit('clientNewItem', newItem(0, itemDefaultPosition), itemDefaultPosition, newItemIndex);
 }
@@ -306,27 +363,16 @@ function initPlayerProjectile(projectileInfo){
 
 // Variable Declaration For Updating Projectiles
 var updateProjectileList = [];
-var delta = 15;
-setInterval(updateProjectile, delta);
-
-let startDate = new Date();
-let endDate = new Date();
 
 // Update All Projectiles
-function updateProjectile(){
+function updateProjectile(delta){
 	updateProjectileList.length = projectileList.length;
 
 	let deleteProjectileList = [];
 	let deleteUnitList = [];
 	let projectilePos;
 
-	endDate = new Date();
-
-	let diff = (endDate.getTime() - startDate.getTime()) / 1000;
-
 	for (let i = 0; i < projectileList.length; i++){
-
-
 		if (projectileList[i] == "deletion"){
 			// for delete projectile
 			projectileList[i] = null;
@@ -334,8 +380,8 @@ function updateProjectile(){
 			deleteProjectileList.push(i);
 
 		}else if (projectileList[i] != null){
-			projectileList[i].position[0] += projectileList[i].initVelocity[0] * diff;
-			projectileList[i].position[1] += projectileList[i].initVelocity[1] * diff;
+			projectileList[i].position[0] += projectileList[i].initVelocity[0] * delta;
+			projectileList[i].position[1] += projectileList[i].initVelocity[1] * delta;
 			projectilePos = [
 				projectileList[i].position[0],
 				projectileList[i].position[1]
@@ -382,11 +428,25 @@ function updateProjectile(){
 		io.emit('deleteEvent', [deleteProjectileList, deleteUnitList]);
 	}
 
-	startDate = new Date();
-	
 	
 }
 // -------------------End Of Projectile-------------------
+
+// -------------------Server Loop-------------------
+var timeInterval = 15;
+setInterval(serverLoop, timeInterval);
+let startDate = new Date();
+let endDate = new Date();
+
+function serverLoop(){
+	endDate = new Date();
+	let delta = (endDate.getTime() - startDate.getTime()) / 1000;
+	updateProjectile(delta);
+	updateMonster(delta);
+	startDate = new Date();
+}
+
+// -------------------End Of Server Loop-------------------
 
 // Update Client Frame
 function ClientFrameUpdate(onHitProjectileList){
@@ -395,8 +455,8 @@ function ClientFrameUpdate(onHitProjectileList){
 			projectileList[onHitProjectileList[i]] = "deletion";
 		}
 	}
-
-	return [updateProjectileList];
+	
+	return [updateProjectileList, updateMonsterPos];
 }
 
 // Changing Server Creature Information
@@ -419,11 +479,11 @@ function creatureInfoChange(creatureInfo){
 			else if (value[0] == "*") setValue = theCreature.properties[key] * value[1];
 			else if (value[0] == "/") setValue = theCreature.properties[key] / value[1];
 
-
 			theCreature.properties[key] = setValue;
 		}
 	}
-	return creatureInfo;
+
+	io.compress(true).emit('creatureInfoChange', creatureInfo);
 }
 
 // Client Is Disconnected
@@ -452,7 +512,7 @@ io.on('connection', (sock) => {
 
 	const spawnPos = createSpawnPosition();
 	// Initializing The Player To The Client
-	sock.compress(true).emit('initSelf', playerID, playerArray, game_map.getInitMap(spawnPos, [1, 1]), initPlayerProjectile(projectileList));
+	sock.compress(true).emit('initSelf', playerID, playerArray, game_map.getInitMap(spawnPos, [1, 1]), initPlayerProjectile(projectileList), monsterArray);
 	console.log("new player joined, ID: ", playerID);
 
 	// Initializing Collectable Item To The Client
@@ -466,9 +526,9 @@ io.on('connection', (sock) => {
 	sock.on('newPos', (Pos) => io.compress(true).emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
 	sock.on('disconnect', (Info) => io.compress(true).emit('clientDisconnect', clientDisconnect(Info, playerID)));
 	sock.on('requireBlock', (blockPosList) => sock.compress(true).emit('addBlocks', game_map.getUpdateBlock(blockPosList)));
-	
+
 	// Creature Related
-	sock.on('creatureInfo', (creatureInfo) => io.compress(true).emit('creatureInfoChange', creatureInfoChange(creatureInfo)));
+	sock.on('creatureInfo', (creatureInfo) => creatureInfoChange(creatureInfo));
 
 	// Item Related
 	sock.on('serverCreatureItemArray', (additionalItemID, updatePlayerID, removeItemID) => io.compress(true).emit('clientCreatureItemArray', creatureItemArrayUpdate(additionalItemID, updatePlayerID, removeItemID), updatePlayerID, removeItemID));

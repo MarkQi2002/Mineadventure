@@ -8,10 +8,12 @@ function spawnPlayer(playerInfo){
 }
 
 // Initialization Every Player Before You Enter The Game
-const initSelf = (severPlayerID, serverPlayerArray, serverMap, projectileList) => {
+const initSelf = (severPlayerID, serverPlayerArray, serverMap, projectileList, serverMonsterArray) => {
 	clientPlayerID = severPlayerID;
-	playerArray.length = serverPlayerArray.length;
-	for (let i = 0; i < serverPlayerArray.length; i++) {
+	if (playerArray.length < serverPlayerArray.length){
+		playerArray.length = serverPlayerArray.length;
+	}
+	for (let i = 0; i < serverPlayerArray.length; ++i) {
 		if (serverPlayerArray[i] != null){
 			spawnPlayer(serverPlayerArray[i]);
 		}
@@ -20,11 +22,22 @@ const initSelf = (severPlayerID, serverPlayerArray, serverMap, projectileList) =
 	game_map = new map(serverMap);
 
 	spawnProjectile(projectileList);
+
+	if (monsterArray.length < serverMonsterArray.length){
+		monsterArray.length = serverMonsterArray.length;
+	}
+	for (let i = 0; i < monsterArray.length; ++i) {
+		if (serverMonsterArray[i] != null){
+			spawnMonster(serverMonsterArray[i]);
+		}
+	}
 };
 
 // Initialization Myself And All Future Players
 const newPlayer = (playerInfo, playerArrayLength) => {
-	playerArray.length = playerArrayLength;
+	if (playerArray.length < playerArrayLength){
+		playerArray.length = playerArrayLength;
+	}
 	let new_player = spawnPlayer(playerInfo);
 	// Setting The Controller To The Player When First Enter
 	if (playerInfo.ID == clientPlayerID){
@@ -107,6 +120,24 @@ const creatureInfoChange = (creatureInfo) => {
 // -------------------Monster-------------------
 
 var monsterArray = [];
+monsterArray.length = 100;
+
+function spawnMonster(monsterInfo){
+	let new_monster = new monster(monsterInfo);
+
+	monsterArray[monsterInfo.ID] = new_monster;
+	return new_monster;
+}
+
+
+// Initialization Monster
+const newMonster = (monsterInfo, monsterArrayLength) => {
+	if (monsterArray.length < monsterArrayLength){
+		monsterArray.length = monsterArrayLength;
+	}
+	let new_monster = spawnMonster(monsterInfo);
+}
+
 
 // -------------------End Of Monster-------------------
 
@@ -226,7 +257,7 @@ const spawnProjectile = (projectileInfo) => {
 };
 
 // Update Frame
-const updateFrame = ([projectilePosList]) => {
+const updateFrame = ([projectilePosList, monsterPosList]) => {
 	if (projectileList.length < projectilePosList.length){
 		projectileList.length === projectilePosList.length;
 	}
@@ -244,7 +275,7 @@ const updateFrame = ([projectilePosList]) => {
 			if (projectileList[i].damageInfo.attacker != clientPlayerID && Math.abs(diffX) + Math.abs(diffY) < 2){
 				let diffZ = projectileList[i].object.position.z - player_controller.creature.object.position.z;
 				// Calculate Distance To Squared
-				if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
+				if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 1.47){
 					player_controller.damage(projectileList[i].damageInfo.amount);
 					onHitProjectileList.push(i);
 					projectileList[i].delete();
@@ -253,6 +284,16 @@ const updateFrame = ([projectilePosList]) => {
 			}
 		}
 	}
+
+
+
+	for (let i = 0; i < monsterArray.length; i++){
+		if (monsterArray[i] != null){
+			monsterArray[i].object.position.set(monsterPosList[i][0], monsterPosList[i][1], monsterPosList[i][2]); 
+		}
+	}
+
+
 };
 
 // Removing A Projectile From The Projectile List, And Remove Unit From Unit List (By Position)
@@ -298,6 +339,9 @@ const clientUpdateBlocks = (blockList) => {
 	sock.on('newPlayer', newPlayer);
 	sock.on('clientPos', playerPositionUpdate);
 	sock.on('clientDisconnect', playerDisconnect);
+
+	// Monster
+	sock.on('newMonster', newMonster);
 
 	// Creature
 	sock.on('creatureInfoChange', creatureInfoChange);
@@ -366,7 +410,7 @@ const clientUpdateBlocks = (blockList) => {
 
 	// Creature Information Related
 	const creatureInfo = () => {
-		sock.compress(true).emit('creatureInfo', changingCreatureInfo);
+		sock.compress(true).emit('creatudreInfo', changingCreatureInfo);
 		changingCreatureInfo = [];
 	}
 	document.addEventListener('changingCreatureInfo', creatureInfo);

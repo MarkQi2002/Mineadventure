@@ -111,6 +111,13 @@ class player extends creature {
 // Monster Class
 class monster extends creature {
     constructor(monsterInfo) {
+        // Calling Parent Constructor
+        super(monsterInfo);
 
+        // Spherical Body
+        let geometry = new THREE.SphereGeometry(0.5, 3, 3);
+        let material = new THREE.MeshPhongMaterial({color: new THREE.Color(Math.random(), Math.random(), Math.random())});
+        let mesh = new THREE.Mesh(geometry, material);
+        this.object.add(mesh);
     }
 }

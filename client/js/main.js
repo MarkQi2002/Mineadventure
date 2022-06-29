@@ -108,6 +108,12 @@ function animate() {
         }
     }
 
+    for (let i = 0; i < monsterArray.length; i++){
+        if (monsterArray[i] != null){
+            monsterArray[i].update();
+        }
+    }
+
 
     // Setting The Renderer Of The Scene And Camera
     renderer.render(scene, camera);
