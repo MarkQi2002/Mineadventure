@@ -189,6 +189,7 @@ function updateMonster(delta){
 					// Calculate Distance To Squared
 					if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 1.47){
 						creatureInfoChange([[["monster", i], {"health": ["-", 10]}]]);
+						projectileList[ii] = "deletion";
 					}
 				}
 			}
