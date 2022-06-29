@@ -85,23 +85,6 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 	return [Pos, playerID];
 };
 
-// Increment Player Item Array
-const UpdatePlayerItemArray = (additionalItem, updatePlayerID) => {
-	if (playerArray[updatePlayerID] != null) {
-		playerArray[updatePlayerID].playerItemArray[additionalItem.name]++;
-	}
-
-	
-	// Player Property Update
-	// Defensive Property Update
-	if (additionalItem.buffType == "Defensive") {
-		playerArray[updatePlayerID].health += additionalItem.health;
-		console.log(playerArray[updatePlayerID].health);
-	}
-
-	return additionalItem;
-}
-
 // Get A New Player ID From The Empty Space In PlayArray
 function newPlayerID(){
 	let exceedCount = 0;
