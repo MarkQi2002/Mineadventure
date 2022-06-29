@@ -154,7 +154,7 @@ const initItem = (serverItemArray, serverItemInfoArray) => {
 	itemArray.length = serverItemArray.length;
 	for (let itemIndex = 0; itemIndex < serverItemArray.length; itemIndex++) {
 		if (serverItemArray[itemIndex] != null){
-			spawnItem(serverItemArray[itemIndex], itemIndex);
+			spawnItem(serverItemArray[itemIndex].itemID, serverItemArray[itemIndex].itemPosition, itemIndex);
 		}
 	}
 };
