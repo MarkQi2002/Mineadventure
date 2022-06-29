@@ -1,3 +1,4 @@
+// Health Bar THREE Mesh
 var healthBarLoader = {
     innerGeometry: new THREE.PlaneGeometry(0.1, 0.01),
     innerMaterial: new THREE.MeshBasicMaterial({color: 'red', transparent: true, opacity: 0.75}),
@@ -8,15 +9,15 @@ var healthBarLoader = {
 
 // The Most Basic Class, All Other Class (Player, Monster) Will Built Upon This By Inheritance
 class creature{
-    constructor(playerInfo) {
-        this.name = playerInfo.name;
+    constructor(creatureInfo) {
+        // Creating THREE Object
         this.object = new THREE.Object3D();
-        this.object.position.set(playerInfo.position[0], playerInfo.position[1], playerInfo.position[2]);
-        
-        this.properties = playerInfo.properties;
-
+        this.object.position.set(creatureInfo.position[0], creatureInfo.position[1], creatureInfo.position[2]);
         scene.add(this.object);
 
+        // Creature Information
+        this.name = creatureInfo.name;
+        this.properties = creatureInfo.properties;
 
         // HealthBar
         this.healthBar = new THREE.Mesh(healthBarLoader.outerGeometry, healthBarLoader.outerMaterial);
@@ -25,9 +26,6 @@ class creature{
         this.innerHealthBar.position.set(0, 0, 0.0001);
         camera.add(this.healthBar);
         this.healthBar.position.set(0, 0, -1);
-
-        
-        
     }
 
     damage(amount){
@@ -109,5 +107,12 @@ class player extends creature {
         let material = new THREE.MeshPhongMaterial({color: new THREE.Color(Math.random(), Math.random(), Math.random())});
         let mesh = new THREE.Mesh(geometry, material);
         this.object.add(mesh);
+    }
+}
+
+// Monster Class
+class monster extends creature {
+    constructor(monsterInfo) {
+
     }
 }
