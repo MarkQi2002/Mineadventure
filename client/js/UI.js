@@ -4,7 +4,7 @@ function displayPlayerName() {
 }
 
 function displayPlayerHealth() {
-    document.getElementById("playerHealth").innerHTML = "Player Health: " + playerArray[clientPlayerID].properties["health"];
+    document.getElementById("playerHealth").innerHTML = "Player Health: " + playerArray[clientPlayerID].properties["health"] + "/" + playerArray[clientPlayerID].properties["maxHealth"];
 }
 
 function displayPlayerArmor() {
@@ -222,6 +222,8 @@ function itemUIInfo() {
     this.itemName = "NULL";
     this.itemAmount = 0;
 }
+
+// UI Array For Item
 var itemUIArray = { item0: new itemUIInfo,
                     item1: new itemUIInfo,
                     item2: new itemUIInfo,
@@ -248,7 +250,7 @@ function appendItemUIArray(itemName) {
     for ([key, value] of Object.entries(itemUIArray)) {
         if (value.itemName == itemName) {
             value.itemAmount++;
-            updateItemUI();
+            updateItemUI(key);
             return;
         }
     }
@@ -257,18 +259,14 @@ function appendItemUIArray(itemName) {
         if (value.itemName == "NULL") {
             value.itemName = itemName;
             value.itemAmount++;
-            updateItemUI();
+            updateItemUI(key);
             return;
         }
     }
 }
 
 // For Updating Item UI Image
-function updateItemUI() {
-    for ([key, value] of Object.entries(itemUIArray)) {
-        if (value.itemName == "Blood Orb") {
-            document.getElementById(key).children[0].src="image/UI_Image/Blood_Orb.png";
-            document.getElementById(key).children[1].textContent = value.itemAmount;
-        }
-    }
+function updateItemUI(key) {
+    document.getElementById(key).children[0].src="image/UI_Image/" + itemUIArray[key].itemName + ".png";
+    document.getElementById(key).children[1].textContent = itemUIArray[key].itemAmount;
 }

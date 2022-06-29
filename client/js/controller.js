@@ -35,8 +35,6 @@ class controller{
             shift: false, 
         }; 
 
-        
-
         this.mouse = {
             x: 0,
             y: 0,
@@ -431,17 +429,7 @@ class controller{
     // Getting Player's Position And Direction 
     getPlayerBlockPos2D(){ 
         // Calculating Player Position 
-        let mapX, mapY; 
-
-        /*
-        if (this.cameraOffset > this.cameraRange  && this.creature.object != null) { 
-            [mapX, mapY] = [Math.floor(this.creature.object.position.x), Math.floor(this.creature.object.position.y)]; 
-            // console.log(game_map.getUnit([mapX, mapY])); 
-        } else {
-            [mapX, mapY] = [Math.floor(this.camera.position.x), Math.floor(this.camera.position.y)]; 
-        }*/
-
-        [mapX, mapY] = [Math.floor(this.creature.object.position.x), Math.floor(this.creature.object.position.y)]; 
+        let [mapX, mapY] = [Math.floor(this.creature.object.position.x), Math.floor(this.creature.object.position.y)]; 
  
         // Return The Player's Position And The Player's Direction 
         return [game_map.map2DToBlock2D([mapX, mapY]), game_map.getDirection([mapX, mapY])]; 
@@ -557,7 +545,7 @@ class controller{
         let magnitude = Math.sqrt(dx * dx + dy * dy); 
         if (magnitude == 0){//magnitude can't be zero 
             magnitude = 1; 
-        } 
+        }
  
         // Variable Declaration 
         let translateDistance = speedPerFrame / magnitude; 
@@ -597,7 +585,7 @@ class controller{
         } 
  
         // Jump Update 
-        if(this.jumpVelocity > -this.initJumpVelocity){ 
+        if (this.jumpVelocity > -this.initJumpVelocity){ 
             this.jumpVelocity -= gravity*delta; 
         } 
  
@@ -607,37 +595,11 @@ class controller{
         } else { 
             creatureTrans.position.z = groundLevel; 
             this.onGround = true; 
-        } 
- 
-        // Get Controlled Creature's 2D Position From Screen 
-        let screenPos = new THREE.Vector3( 
-            creatureTrans.position.x, 
-            creatureTrans.position.y, 
-            creatureTrans.position.z).project(this.camera); 
+        }
              
-        
-
+        // Updating Camera Position
         this.camera.position.x = this.creature.object.position.x;
         this.camera.position.y = this.creature.object.position.y - carmeraOffsetY;
-        /*
-        // Auto center camera 
-        if (this.cameraOffset <= this.cameraRange){
-            magnitude = Math.sqrt(screenPos.x * screenPos.x + screenPos.y * screenPos.y); 
-            let autoX, autoY; 
-            if (magnitude == 0){//magnitude can't be zero 
-                autoY = 0; 
-                autoX = 0; 
-            } else { 
-                autoY = 2 - Math.abs(screenPos.y / magnitude); 
-                autoX = 2 - Math.abs(screenPos.x / magnitude); 
-            } 
-            this.camera.translateY(screenPos.y * speedPerFrame * autoY * 2); 
-            this.camera.translateX(screenPos.x * speedPerFrame * autoX * 2); 
-        } else {
-            this.camera.position.x = this.creature.object.position.x;
-            this.camera.position.y = this.creature.object.position.y;
-        }
-        */
 
         // Attack
         if (this.mouse.left == true && this.attackCD <= 0){

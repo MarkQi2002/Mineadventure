@@ -68,6 +68,7 @@ function sendPlayerPropertyChange(id, propertyList){
 
 // Change An Player's Property Using Input PlayerInfo
 const playerInfoChange = (playerInfo) => {
+	// Example playerInfo = [playerID, {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
 	let updateLocalPlayerUI = false;
 	for (let i = 0; i < playerInfo.length; i++){
 		if (playerArray[playerInfo[i][0]] != null){
@@ -75,21 +76,16 @@ const playerInfoChange = (playerInfo) => {
 
 			for ([key, value] of Object.entries(playerInfo[i][1])) {
 				let setValue = value[1];
-				if(value[0] == "+"){
-					setValue = playerArray[playerInfo[i][0]].properties[key] + value[1];
-				} else if (value[0] == "-"){
-					setValue = playerArray[playerInfo[i][0]].properties[key] - value[1];
-				} else if (value[0] == "*"){
-					setValue = playerArray[playerInfo[i][0]].properties[key] * value[1];
-				} else if (value[0] == "/"){
-					setValue = playerArray[playerInfo[i][0]].properties[key] / value[1];
-				}
+				if (value[0] == "+") setValue = playerArray[playerInfo[i][0]].properties[key] + value[1];
+				else if (value[0] == "-") setValue = playerArray[playerInfo[i][0]].properties[key] - value[1];
+				else if (value[0] == "*") setValue = playerArray[playerInfo[i][0]].properties[key] * value[1];
+				else if (value[0] == "/") setValue = playerArray[playerInfo[i][0]].properties[key] / value[1];
 
 				if (key == "health"){
 					playerArray[playerInfo[i][0]].setHealth(setValue);
-				}else if (key == "maxHealth"){
+				} else if (key == "maxHealth") {
 					playerArray[playerInfo[i][0]].setMaxHealth(setValue);
-				}else{
+				} else {
 					playerArray[playerInfo[i][0]].properties[key] = setValue;
 				}
 
@@ -192,13 +188,8 @@ const playerDisconnect = (PlayerID) => {
 };
 // -------------------End Of Connection Exception Related-------------------
 
-
-// Update Client Side Block
-const clientUpdateBlocks = (blockList) => {
-	game_map.spawnBlocks(blockList[0]);
-};
-
-// Projectile Related
+// -------------------Projectile-------------------
+// Spawning Projectile
 const spawnProjectile = (projectileInfo) => {
 	for (let i = 0; i < projectileInfo.length; i++){
 		if (projectileInfo[i] != null && projectileInfo[i][1] != null){
@@ -256,8 +247,15 @@ const deleteEvent = ([deleteProjectileList, deleteUnitList]) => {
 			game_map.deleteUnit(deleteUnitList[i]);
 		}
 	}
-
 };
+// -------------------End Of Projectile-------------------
+
+// -------------------Map-------------------
+// Update Client Side Block
+const clientUpdateBlocks = (blockList) => {
+	game_map.spawnBlocks(blockList[0]);
+};
+// -------------------End Of Map-------------------
 
 // -------------------Sending And Receiving Information-------------------
 (() => {

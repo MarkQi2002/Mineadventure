@@ -25,6 +25,8 @@ app.use(express.static(`${__dirname}/../client`));
 const server = http.createServer(app);
 const io = socketio(server);
 
+
+// -------------------Player-------------------
 // Game Related Variable Declaration
 var playerArray = [];
 playerArray.length = 32;
@@ -83,6 +85,7 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 	if (playerArray[playerID] != null) {
 		playerArray[playerID].position = Pos;
 	}
+
 	return [Pos, playerID];
 };
 
@@ -94,25 +97,13 @@ function newPlayerID(){
 		ID_count = (ID_count + 1) % playerArray.length;
 		exceedCount++;
 		if (exceedCount >= playerArray.length){// If Exceed Max playerArray Length
-			playerArray.length *= 2;
-			console.log("Exceed max playArray length, double the playArray length! current length:", playerArray.length);
+			playerArray.length += 32;
+			console.log("Exceed Max PlayArray Length, Double The PlayArray Length! Current Length:", playerArray.length);
 		}
 	}
 	return ID_count;
 }
-
-// Client Is Disconnected
-const clientDisconnect = (Info, playerID) => {
-	// Clear The PlayerID From Player Array
-	if (playerArray[playerID] != null){
-		console.log("Player ID:", playerID, " Name:", playerArray[playerID].name, "is disconnected!  Info:", Info);
-		delete playerArray[playerID];
-		playerArray[playerID] = null;
-	}
-	
-	// Return The ID Of The Player Removed
-	return playerID;
-};
+// -------------------End Of Player-------------------
 
 // -------------------Item-------------------
 // Item Related Variable Declaration
@@ -224,12 +215,14 @@ function randomSpawnItem() {
 function getNewProjectileID(){
 	let exceedCount = 0;
 	// Stop Untill Get An Projectile ID Corresponding To An Empty Space In Projectile List
-	while (projectileList[projectile_count] != null){
+	while (projectileList[projectile_count] != null) {
 		projectile_count = (projectile_count + 1) % projectileList.length;
 		exceedCount++;
-		if (exceedCount >= projectileList.length){// If Exceed Max projectileList Length
+		
+		// If Exceed Max projectileList Length
+		if (exceedCount >= projectileList.length){
 			projectileList.length += 100;
-			console.log("Exceed max projectileList length, double the projectileList length! current length:", projectileList.length);
+			console.log("Exceed Max ProjectileList Length, Double The ProjectileList Length! Current Length:", projectileList.length);
 		}
 	}
 	return  projectile_count;
@@ -306,11 +299,8 @@ function updateProjectile(){
 				projectileList[i] = null;
 				updateProjectileList[i] = null;
 				deleteProjectileList.push(i);
-
-				
-			}else{
+			} else {
 				if (game_map.unitIDList[unit.ID].collision == true){
-					
 					// for delete unit
 					let isNotIn = true;
 					for (let ii = 0; ii < deleteUnitList.length; ii++){
@@ -358,21 +348,17 @@ function ClientFrameUpdate(onHitProjectileList){
 	return [updateProjectileList];
 }
 
+// Changing Server Player Information
 function playerInfoChange(playerInfo){
-	// example playerInfo = [playerID, {"health": 10, "attackSpeed": 1, ...}]
+	// Example playerInfo = [playerID, {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
 	for (let i = 0; i < playerInfo.length; i++){
 		if (playerArray[playerInfo[i][0]] != null){
 			for ([key, value] of Object.entries(playerInfo[i][1])) {
 				let setValue = value[1];
-				if(value[0] == "+"){
-					setValue = playerArray[playerInfo[i][0]].properties[key] + value[1];
-				} else if (value[0] == "-"){
-					setValue = playerArray[playerInfo[i][0]].properties[key] - value[1];
-				} else if (value[0] == "*"){
-					setValue = playerArray[playerInfo[i][0]].properties[key] * value[1];
-				} else if (value[0] == "/"){
-					setValue = playerArray[playerInfo[i][0]].properties[key] / value[1];
-				}
+				if (value[0] == "+") setValue = playerArray[playerInfo[i][0]].properties[key] + value[1];
+				else if (value[0] == "-") setValue = playerArray[playerInfo[i][0]].properties[key] - value[1];
+				else if (value[0] == "*") setValue = playerArray[playerInfo[i][0]].properties[key] * value[1];
+				else if (value[0] == "/") setValue = playerArray[playerInfo[i][0]].properties[key] / value[1];
 
 				playerArray[playerInfo[i][0]].properties[key] = setValue;
 			}
@@ -382,18 +368,22 @@ function playerInfoChange(playerInfo){
 	return playerInfo;
 }
 
+// Client Is Disconnected
+const clientDisconnect = (Info, playerID) => {
+	// Clear The PlayerID From Player Array
+	if (playerArray[playerID] != null){
+		console.log("Player ID:", playerID, " Name:", playerArray[playerID].name, "is disconnected!  Info:", Info);
+		delete playerArray[playerID];
+		playerArray[playerID] = null;
+	}
+	
+	// Return The ID Of The Player Removed
+	return playerID;
+};
+
 // -------------------Map-------------------
 // Setting The Size Of The Map
 var game_map = new map([12, 12],[20, 20]);
-
-// Get Player's Positon In Map's Coordinate
-function getPlayerMapPos2D(playerID){
-	let pos = [0, 0];
-	if (playerArray[playerID] != null) {
-		pos = [Math.floor(playerArray[playerID].position[0]), Math.floor(playerArray[playerID].position[1])];
-	}
-	return pos;
-}
 // -------------------End Of Map-------------------
 
 // -------------------Sending And Receiving Information-------------------
