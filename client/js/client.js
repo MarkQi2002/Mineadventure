@@ -66,14 +66,12 @@ function sendPlayerPropertyChange(id, propertyList){
 	if (!isIn) changingPlayerInfo.push([id, propertyList]);
 }
 
-// Change An Player's Property
+// Change An Player's Property Using Input PlayerInfo
 const playerInfoChange = (playerInfo) => {
 	let updateLocalPlayerUI = false;
 	for (let i = 0; i < playerInfo.length; i++){
 		if (playerArray[playerInfo[i][0]] != null){
-			if (playerInfo[i][0] == clientPlayerID){
-				updateLocalPlayerUI = true;
-			}
+			if (playerInfo[i][0] == clientPlayerID) updateLocalPlayerUI = true;
 
 			for ([key, value] of Object.entries(playerInfo[i][1])) {
 				let setValue = value[1];
@@ -108,8 +106,8 @@ const playerInfoChange = (playerInfo) => {
 
 // -------------------Item-------------------
 // Variable Declaration
-var removeItemID;
 var additionalItemID;
+var removeItemID;
 var itemInfoArray;
 var itemDefaultGeometry = new THREE.SphereGeometry(0.2, 10, 10);
 var itemDefaultMaterial = new THREE.MeshBasicMaterial({color: 'red'});
@@ -127,6 +125,9 @@ const playerItemArrayUpdate = (additionalItemID, updatePlayerID) => {
 	else
 		playerArray[updatePlayerID].playerItemArray[additionalItemID] = 1;
 
+	// Update Item UI
+	if (updatePlayerID == clientPlayerID) appendItemUIArray(itemInfoArray[additionalItemID][0].itemName);
+
 	// Return The Additional Item's ID
 	return additionalItemID;
 }
@@ -134,20 +135,25 @@ const playerItemArrayUpdate = (additionalItemID, updatePlayerID) => {
 // Initialization Myself And All Future Players
 // Constructing An Player Object And Storing In The Client Side playerArray
 function spawnItem(itemID, itemIndex){
-	// Creating The Item Object
+	// Creating Passive Item Object
 	var new_item = new passiveItem(itemInfoArray[itemID][0], itemDefaultmesh, itemInfoArray[itemID][1], itemInfoArray[itemID][2]);
 
+	// Storing Passive Item Object Into itemArray
 	if (itemArray[itemIndex] == null) {
 		itemArray[itemIndex] = new_item;
 		console.log("Spawning", itemInfoArray[itemID], " At ItemIndex: ", itemIndex);
 	}
 
+	// Return The New Item Object
 	return new_item;
 }
 
 // Initialization Every Item Before You Enter The Game
 const initItem = (serverItemArray, serverItemInfoArray) => {
+	// Copy The Sever Item Info Array To Client Item Info Array (The Two Array Are The Same)
 	itemInfoArray = serverItemInfoArray;
+
+	// Format And Copy The Item Array From Server Item Array
 	itemArray.length = serverItemArray.length;
 	for (let itemIndex = 0; itemIndex < serverItemArray.length; itemIndex++) {
 		if (serverItemArray[itemIndex] != null){
@@ -164,7 +170,6 @@ const newItem = (itemID, itemIndex) => {
 // Removing An Item
 const deleteItem = (itemIndex) => {
 	if (itemArray[itemIndex] != null) {
-		console.log("REMOVING AN ITEM");
 		itemArray[itemIndex].delete();
 		itemArray[itemIndex] = null;
 	}

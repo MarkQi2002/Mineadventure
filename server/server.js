@@ -35,7 +35,7 @@ var ID_count = 0;
 // find a spawn place without collision
 function createSpawnPosition() {
 	let posX, posY;
-	while (1){
+	while (1) {
 		posX = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.x * game_map.blockSize2D.x);
 		posY = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.y * game_map.blockSize2D.y);
 		let unit = game_map.getUnit([posX, posY]);
@@ -53,6 +53,7 @@ const CreateNewPlayer = (playerID, playerName, spawnPos) => {
 		ID: playerID,
 		name: playerName,
 		position: [spawnPos[0], spawnPos[1], 1],
+		
 		// Player Properties
 		properties: {
 			// Defensive Properties
@@ -97,30 +98,35 @@ function newPlayerID(){
 			console.log("Exceed max playArray length, double the playArray length! current length:", playerArray.length);
 		}
 	}
-	return ID_count;sda
+	return ID_count;
 }
 
-// When Client Is Disconnected
+// Client Is Disconnected
 const clientDisconnect = (Info, playerID) => {
+	// Clear The PlayerID From Player Array
 	if (playerArray[playerID] != null){
 		console.log("Player ID:", playerID, " Name:", playerArray[playerID].name, "is disconnected!  Info:", Info);
+		delete playerArray[playerID];
 		playerArray[playerID] = null;
 	}
-	return playerID
+	
+	// Return The ID Of The Player Removed
+	return playerID;
 };
 
 // -------------------Item-------------------
 // Item Related Variable Declaration
+var newItemIndex;
+var currentItemIndex = 0;
 var itemArray = [];
 itemArray.length = 256;
-var newItemIndex;
 
 // itemInfoArray Is A 2D Array
 // First Layer: Item ID (Currently 20 Items)
 // Second Layer: itemInfo, itemPosition, propertyInfo
 var itemDefaultPosition = [1, 1, 1];
-var itemInfoArray = [[{"itemID": 0, "itemName": "Blood Orb", "rarity": "Common", "stackType": "Linear", "buffTyle": "Defensive"}, itemDefaultPosition, {"health": 20}],
-					[{"itemID": 1, "itemName": "Attack Orb", "rarity": "Common", "stackType": "Linear", "buffTyle": "Offensive"}, itemDefaultPosition, {"attackDamage": 10}],
+var itemInfoArray = [[{"itemID": 0, "itemName": "Blood Orb", "rarity": "Common", "stackType": "Linear", "buffTyle": "Defensive"}, itemDefaultPosition, {"maxHealth": ["+", 20]}],
+					[{"itemID": 1, "itemName": "Attack Orb", "rarity": "Common", "stackType": "Linear", "buffTyle": "Offensive"}, itemDefaultPosition, {"attackDamage": ["+", 10]}],
 					[],
 					[],
 					[],
@@ -160,36 +166,57 @@ const UpdatePlayerItemArray = (additionalItemID, updatePlayerID) => {
 // Creating An Item When Client Send A Request
 const CreateNewItem = (newItemID) => {
 	// Indexing Item Array To Include The New Item
-	for (let itemIndex = 0; itemIndex < itemArray.length; itemIndex++) {
+	for (let itemIndex = currentItemIndex; itemIndex < itemArray.length; itemIndex++) {
 		if (itemArray[itemIndex] == null) {
+			// Set New Current Item Index
+			currentItemIndex = itemIndex;
+
 			// Save The ItemID Into The Server Item Array
 			newItemIndex = itemIndex;
 			itemArray[itemIndex] = newItemID;
 			
 			// Log The ItemInfo On The Server Side
 			console.log(itemInfoArray[newItemID], newItemIndex);
-			break;
+			
+			// Return newItemID
+			return newItemID;
 		}
 	}
 	
-	// Return newItemID
-	return newItemID;
+	// Indexing Item Array To Include The New Item
+	for (let itemIndex = 0; itemIndex < currentItemIndex; itemIndex++) {
+		if (itemArray[itemIndex] == null) {
+			// Set New Current Item Index
+			currentItemIndex = itemIndex;
+
+			// Save The ItemID Into The Server Item Array
+			newItemIndex = itemIndex;
+			itemArray[itemIndex] = newItemID;
+			
+			// Log The ItemInfo On The Server Side
+			console.log(itemInfoArray[newItemID], newItemIndex);
+			
+			// Return newItemID
+			return newItemID;
+		}
+	}
 };
 
 // Removing An Item When Client Send A Request
 const deleteItem = (removeItemID) => {
 	if (itemArray[removeItemID] != null){
 		console.log("Deleting Item ", removeItemID);
+		delete itemArray[removeItemID];
 		itemArray[removeItemID] = null;
 	}
 	return removeItemID;
 };
 
-// Randomly Spawn An Item Every Ten Second
-/* setInterval(randomSpawnItem, 10000);
+// Randomly Spawn An Item Every Half A Minute
+setInterval(randomSpawnItem, 30000);
 function randomSpawnItem() {
 	io.emit('clientNewItem', CreateNewItem(0), newItemIndex);
-} */
+}
 
 // -------------------End Of Item-------------------
 
