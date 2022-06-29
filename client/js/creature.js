@@ -13,15 +13,7 @@ class creature{
         this.object = new THREE.Object3D();
         this.object.position.set(playerInfo.position[0], playerInfo.position[1], playerInfo.position[2]);
         
-        // Defensive Creature Property
-        this.health = playerInfo.health;
-        this["test"] = 99999;
-        this.maxHealth = playerInfo.maxHealth;
-        this.armor = playerInfo.armor;
-
-        // Attack Creature Property
-        this.attackDamage = playerInfo.attackDamage;
-        this.attackSpeed = playerInfo.attackSpeed;
+        this.properties = playerInfo.properties;
 
         scene.add(this.object);
 
@@ -39,22 +31,22 @@ class creature{
     }
 
     damage(amount){
-        this.setHealth(this.health - amount);
+        this.setHealth(this.properties["health"] - amount);
 
     }
 
     setHealth(amount){
-        this.health = amount;
+        this.properties["health"] = amount;
         this.updateHealthBarPercent();
     }
 
     setMaxHealth(amount){
-        this.maxHealth = amount;
+        this.properties["maxHealth"] = amount;
         this.updateHealthBarPercent();
     }
 
     updateHealthBarPercent(){
-        let scale = this.health / this.maxHealth;
+        let scale = this.properties["health"] / this.properties["maxHealth"];
         if (scale < 0){
             scale = 0;
         }else if(scale > 1){

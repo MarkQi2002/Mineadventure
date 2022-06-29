@@ -11,6 +11,7 @@ const socketio = require('socket.io');
 
 // Map Related Setting
 const map = require('./mapClass.js');
+const e = require('express');
 //const quarterMap = require('./quarterMap.js');
 //const block = require('./block.js');
 
@@ -53,14 +54,16 @@ const CreateNewPlayer = (playerID, playerName, spawnPos) => {
 		name: playerName,
 		position: [spawnPos[0], spawnPos[1], 1],
 		// Player Properties
-		// Defensive Properties
-		health: 100,
-		maxHealth: 100,
-		armor: 0,
+		properties: {
+			// Defensive Properties
+			"health": 100,
+			"maxHealth": 100,
+			"armor": 0,
 
-		// Attack Properties
-		attackDamage: 10,
-		attackSpeed: 1,
+			// Attack Properties
+			"attackDamage": 10,
+			"attackSpeed": 1,
+		},
 
 		// Server Side Player Item Array
 		playerItemArray: {}
@@ -81,6 +84,23 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 	}
 	return [Pos, playerID];
 };
+
+// Increment Player Item Array
+const UpdatePlayerItemArray = (additionalItem, updatePlayerID) => {
+	if (playerArray[updatePlayerID] != null) {
+		playerArray[updatePlayerID].playerItemArray[additionalItem.name]++;
+	}
+
+	
+	// Player Property Update
+	// Defensive Property Update
+	if (additionalItem.buffType == "Defensive") {
+		playerArray[updatePlayerID].health += additionalItem.health;
+		console.log(playerArray[updatePlayerID].health);
+	}
+
+	return additionalItem;
+}
 
 // Get A New Player ID From The Empty Space In PlayArray
 function newPlayerID(){
@@ -333,15 +353,14 @@ function playerInfoChange(playerInfo){
 	for (let i = 0; i < playerInfo.length; i++){
 		if (playerArray[playerInfo[i][0]] != null){
 			for ([key, value] of Object.entries(playerInfo[i][1])) {
-				if (key == "health"){
-					playerArray[playerInfo[i][0]].health = value;
-				}else if (key == "maxHealth"){
-					playerArray[playerInfo[i][0]].maxHealth = value;
-				}else if (key == "attackSpeed"){
-					playerArray[playerInfo[i][0]].attackSpeed = value;
-				}else if (key == "attackDamage"){
-					playerArray[playerInfo[i][0]].attackDamage = value;
+				let setValue = value[1];
+				if(value[0] == "+"){
+					setValue = playerArray[playerInfo[i][0]].properties[key] + value[1];
+				}else if(value[0] == "*"){
+					setValue = playerArray[playerInfo[i][0]].properties[key] * value[1];
 				}
+
+				playerArray[playerInfo[i][0]].properties[key] = setValue;
 			}
 		}
 	}

@@ -156,7 +156,7 @@ class controller{
 
 
         var newDamageInfo = {
-            amount: this.creature.attackDamage,
+            amount: this.creature.properties["attackDamage"],
             attacker: clientPlayerID
         }
 
@@ -526,6 +526,7 @@ class controller{
         return blockPosList; 
     }
 
+    /*
     damage(amount){
         this.setHealth(this.creature.health - amount);
     }
@@ -544,7 +545,7 @@ class controller{
 
     setAttackDamage(amount){
         sendPlayerPropertyChange(clientPlayerID, {"attackDamage": amount});
-    }
+    }*/
 
     // Updating The Position 
     update(delta){ 
@@ -660,7 +661,7 @@ class controller{
         }
 
         if (this.attackCD > 0){
-            this.attackCD -= this.creature.attackSpeed * delta;
+            this.attackCD -= this.creature.properties["attackSpeed"] * delta;
         }
 
     } 

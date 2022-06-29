@@ -54,7 +54,7 @@ const playerPositionUpdate = ([Pos, PlayerID]) => {
 function sendPlayerPropertyChange(id, propertyList){
 	let isIn = false;
 	for (let i; i < changingPlayerInfo.length; i++){
-		if (changingPlayerInfo[0] == id){
+		if (changingPlayerInfo[i][0] == id){
 			isIn = true;
 			for ([key, value] of Object.entries(propertyList)) {
 				changingPlayerInfo[i][1][key] = value;
@@ -76,15 +76,22 @@ const playerInfoChange = (playerInfo) => {
 			}
 
 			for ([key, value] of Object.entries(playerInfo[i][1])) {
-				if (key == "health"){
-					playerArray[playerInfo[i][0]].setHealth(value);
-				}else if (key == "maxHealth"){
-					playerArray[playerInfo[i][0]].setMaxHealth(value);
-				}else if (key == "attackSpeed"){
-					playerArray[playerInfo[i][0]].attackSpeed = value;
-				}else if (key == "attackDamage"){
-					playerArray[playerInfo[i][0]].attackDamage = value;
+				let setValue = value[1];
+				if(value[0] == "+"){
+					setValue = playerArray[playerInfo[i][0]].properties[key] + value[1];
+				}else if(value[0] == "*"){
+					setValue = playerArray[playerInfo[i][0]].properties[key] * value[1];
 				}
+
+				if (key == "health"){
+					playerArray[playerInfo[i][0]].setHealth(setValue);
+				}else if (key == "maxHealth"){
+					playerArray[playerInfo[i][0]].setMaxHealth(setValue);
+				}else{
+					playerArray[playerInfo[i][0]].properties[key] = setValue;
+				}
+
+				
 			}
 		}
 	}

@@ -4,15 +4,15 @@ function displayPlayerName() {
 }
 
 function displayPlayerHealth() {
-    document.getElementById("playerHealth").innerHTML = "Player Health: " + playerArray[clientPlayerID].health;
+    document.getElementById("playerHealth").innerHTML = "Player Health: " + playerArray[clientPlayerID].properties["health"];
 }
 
 function displayPlayerArmor() {
-    document.getElementById("playerArmor").innerHTML = "Player Armor: " + playerArray[clientPlayerID].armor;
+    document.getElementById("playerArmor").innerHTML = "Player Armor: " + playerArray[clientPlayerID].properties["armor"];
 }
 
 function displayPlayerAttackDamage() {
-    document.getElementById("playerAttackDamange").innerHTML = "Player Attack Damage: " + playerArray[clientPlayerID].attackDamage;
+    document.getElementById("playerAttackDamange").innerHTML = "Player Attack Damage: " + playerArray[clientPlayerID].properties["attackDamage"];
 }
 
 
@@ -186,33 +186,23 @@ function lockedCommand(inputArray) {
         var event = new Event('position event', {bubbles: true, cancelable: false}) 
         document.dispatchEvent(event);
 
-    } else if (inputArray[0] == "health") {
-        if (inputArray.length < 3){
-            player_controller.setHealth(inputArray[1]);
-        }else{
-            sendPlayerPropertyChange(inputArray[2], {"health": inputArray[1]})
+    } else {
+
+        if (isNaN(parseInt(inputArray[2])) || (inputArray.length > 4 && isNaN(parseInt(inputArray[2])))) {
+            console.log("The Number Is Invalid!");
+            return;
         }
 
-    } else if (inputArray[0] == "maxhealth") {
-        if (inputArray.length < 3){
-            player_controller.setMaxHealth(inputArray[1]);
-        }else{
-            sendPlayerPropertyChange(inputArray[2], {"maxHealth": inputArray[1]})
+        let id = inputArray.length < 4 ? clientPlayerID : parseInt(inputArray[3]);
+        if (playerArray[id].properties[inputArray[0]] == null) {
+            console.log("The Property Is Invalid!");
+            return;
         }
         
-    } else if (inputArray[0] == "attackspeed") {
-        if (inputArray.length < 3){
-            player_controller.setAttackSpeed(inputArray[1]);
-        }else{
-            sendPlayerPropertyChange(inputArray[2], {"attackSpeed": inputArray[1]})
-        }
-
-    } else if (inputArray[0] == "attackdamage") {
-        if (inputArray.length < 3){
-            player_controller.setAttackDamage(inputArray[1]);
-        }else{
-            sendPlayerPropertyChange(inputArray[2], {"attackDamage": inputArray[1]})
-        }
+        let propertyList = {};
+        propertyList[inputArray[0]] = [inputArray[1], parseInt(inputArray[2])];
+        sendPlayerPropertyChange(id, propertyList);
+        
     }
 
 }
