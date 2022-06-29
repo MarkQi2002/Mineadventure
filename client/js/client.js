@@ -49,7 +49,25 @@ const playerPositionUpdate = ([Pos, PlayerID]) => {
 	}
 };
 
+function sendPlayerPropertyChange(id, propertyList){
+	let isIn = false;
+	for (let i; i < changingPlayerInfo.length; i++){
+		if (changingPlayerInfo[0] == id){
+			isIn = true;
+			for ([key, value] of Object.entries(propertyList)) {
+				changingPlayerInfo[i][1][key] = value;
+			}
+			break;
+		}
+	}
+	if (!isIn){
+		changingPlayerInfo.push([id, propertyList]);
+	}
+	
+}
+
 const playerInfoChange = (playerInfo) => {
+
 	let updateLocalPlayerUI = false;
 	for (let i = 0; i < playerInfo.length; i++){
 		if (playerArray[playerInfo[i][0]] != null){
@@ -57,20 +75,20 @@ const playerInfoChange = (playerInfo) => {
 				updateLocalPlayerUI = true;
 			}
 
-			//[playerID, "type name", amount]
-			if (playerInfo[i][1] == "health"){
-				playerArray[playerInfo[i][0]].setHealth(playerInfo[i][2]);
-			}else if (playerInfo[i][1] == "maxHealth"){
-				playerArray[playerInfo[i][0]].setMaxHealth(playerInfo[i][2]);
-			}else if (playerInfo[i][1] == "attackSpeed"){
-				playerArray[playerInfo[i][0]].attackSpeed = playerInfo[i][2];
-			}else if (playerInfo[i][1] == "attackDamage"){
-				playerArray[playerInfo[i][0]].attackDamage = playerInfo[i][2];
+			for ([key, value] of Object.entries(playerInfo[i][1])) {
+				if (key == "health"){
+					playerArray[playerInfo[i][0]].setHealth(value);
+				}else if (key == "maxHealth"){
+					playerArray[playerInfo[i][0]].setMaxHealth(value);
+				}else if (key == "attackSpeed"){
+					playerArray[playerInfo[i][0]].attackSpeed = value;
+				}else if (key == "attackDamage"){
+					playerArray[playerInfo[i][0]].attackDamage = value;
+				}
 			}
-
-			
 		}
 	}
+
 	if (updateLocalPlayerUI){
 		displayAllUI();
 	}

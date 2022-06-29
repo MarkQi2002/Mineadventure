@@ -15,6 +15,7 @@ class creature{
         
         // Defensive Creature Property
         this.health = playerInfo.health;
+        this["test"] = 99999;
         this.maxHealth = playerInfo.maxHealth;
         this.armor = playerInfo.armor;
 

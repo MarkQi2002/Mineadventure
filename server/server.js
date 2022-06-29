@@ -319,17 +319,20 @@ function ClientFrameUpdate(onHitProjectileList){
 }
 
 function playerInfoChange(playerInfo){
+
+	// example playerInfo = [playerID, {"health": 10, "attackSpeed": 1, ...}]
 	for (let i = 0; i < playerInfo.length; i++){
 		if (playerArray[playerInfo[i][0]] != null){
-			//[playerID, "type name", amount]
-			if (playerInfo[i][1] == "health"){
-				playerArray[playerInfo[i][0]].health = playerInfo[i][2];
-			}else if (playerInfo[i][1] == "maxHealth"){
-				playerArray[playerInfo[i][0]].maxHealth = playerInfo[i][2];
-			}else if (playerInfo[i][1] == "attackSpeed"){
-				playerArray[playerInfo[i][0]].attackSpeed = playerInfo[i][2];
-			}else if (playerInfo[i][1] == "attackDamage"){
-				playerArray[playerInfo[i][0]].attackDamage = playerInfo[i][2];
+			for ([key, value] of Object.entries(playerInfo[i][1])) {
+				if (key == "health"){
+					playerArray[playerInfo[i][0]].health = value;
+				}else if (key == "maxHealth"){
+					playerArray[playerInfo[i][0]].maxHealth = value;
+				}else if (key == "attackSpeed"){
+					playerArray[playerInfo[i][0]].attackSpeed = value;
+				}else if (key == "attackDamage"){
+					playerArray[playerInfo[i][0]].attackDamage = value;
+				}
 			}
 		}
 	}

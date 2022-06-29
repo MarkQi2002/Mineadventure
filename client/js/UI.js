@@ -190,28 +190,28 @@ function lockedCommand(inputArray) {
         if (inputArray.length < 3){
             player_controller.setHealth(inputArray[1]);
         }else{
-            changingPlayerInfo.push([inputArray[2], "health", inputArray[1]]);
+            sendPlayerPropertyChange(inputArray[2], {"health": inputArray[1]})
         }
 
     } else if (inputArray[0] == "maxhealth") {
         if (inputArray.length < 3){
             player_controller.setMaxHealth(inputArray[1]);
         }else{
-            changingPlayerInfo.push([inputArray[2], "maxHealth", inputArray[1]]);
+            sendPlayerPropertyChange(inputArray[2], {"maxHealth": inputArray[1]})
         }
         
     } else if (inputArray[0] == "attackspeed") {
         if (inputArray.length < 3){
             player_controller.setAttackSpeed(inputArray[1]);
         }else{
-            changingPlayerInfo.push([inputArray[2], "attackSpeed", inputArray[1]]);
+            sendPlayerPropertyChange(inputArray[2], {"attackSpeed": inputArray[1]})
         }
 
     } else if (inputArray[0] == "attackdamage") {
         if (inputArray.length < 3){
             player_controller.setAttackDamage(inputArray[1]);
         }else{
-            changingPlayerInfo.push([inputArray[2], "attackDamage", inputArray[1]]);
+            sendPlayerPropertyChange(inputArray[2], {"attackDamage": inputArray[1]})
         }
     }
 
@@ -227,7 +227,7 @@ function itemUIInfo() {
     this.itemName = "NULL";
     this.itemAmount = 0;
 }
-var itemUIArray = {item0: new itemUIInfo,
+var itemUIArray = { item0: new itemUIInfo,
                     item1: new itemUIInfo,
                     item2: new itemUIInfo,
                     item3: new itemUIInfo,

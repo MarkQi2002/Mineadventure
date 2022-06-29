@@ -531,19 +531,19 @@ class controller{
     }
 
     setHealth(amount){
-        changingPlayerInfo.push([clientPlayerID, "health", amount]);
+        sendPlayerPropertyChange(clientPlayerID, {"health": amount});
     }
 
     setMaxHealth(amount){
-        changingPlayerInfo.push([clientPlayerID, "maxHealth", amount]);
+        sendPlayerPropertyChange(clientPlayerID, {"maxHealth": amount});
     }
  
     setAttackSpeed(amount){
-        changingPlayerInfo.push([clientPlayerID, "attackSpeed", amount]);
+        sendPlayerPropertyChange(clientPlayerID, {"attackSpeed": amount});
     }
 
     setAttackDamage(amount){
-        changingPlayerInfo.push([clientPlayerID, "attackDamage", amount]);
+        sendPlayerPropertyChange(clientPlayerID, {"attackDamage": amount});
     }
 
     // Updating The Position 
