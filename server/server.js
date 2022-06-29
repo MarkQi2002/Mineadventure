@@ -339,8 +339,12 @@ function playerInfoChange(playerInfo){
 				let setValue = value[1];
 				if(value[0] == "+"){
 					setValue = playerArray[playerInfo[i][0]].properties[key] + value[1];
-				}else if(value[0] == "*"){
+				} else if (value[0] == "-"){
+					setValue = playerArray[playerInfo[i][0]].properties[key] - value[1];
+				} else if (value[0] == "*"){
 					setValue = playerArray[playerInfo[i][0]].properties[key] * value[1];
+				} else if (value[0] == "/"){
+					setValue = playerArray[playerInfo[i][0]].properties[key] / value[1];
 				}
 
 				playerArray[playerInfo[i][0]].properties[key] = setValue;

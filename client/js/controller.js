@@ -526,26 +526,11 @@ class controller{
         return blockPosList; 
     }
 
-    /*
+    
     damage(amount){
-        this.setHealth(this.creature.health - amount);
+        sendPlayerPropertyChange(clientPlayerID, {"health": ["-", amount]});
     }
 
-    setHealth(amount){
-        sendPlayerPropertyChange(clientPlayerID, {"health": amount});
-    }
-
-    setMaxHealth(amount){
-        sendPlayerPropertyChange(clientPlayerID, {"maxHealth": amount});
-    }
- 
-    setAttackSpeed(amount){
-        sendPlayerPropertyChange(clientPlayerID, {"attackSpeed": amount});
-    }
-
-    setAttackDamage(amount){
-        sendPlayerPropertyChange(clientPlayerID, {"attackDamage": amount});
-    }*/
 
     // Updating The Position 
     update(delta){ 

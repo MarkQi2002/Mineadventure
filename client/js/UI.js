@@ -198,6 +198,11 @@ function lockedCommand(inputArray) {
             console.log("The Property Is Invalid!");
             return;
         }
+
+        if (!(["+", "-", "*", "/", "="].includes(inputArray[1]))) {
+            console.log("The Math Symbol Invalid!");
+            return;
+        }
         
         let propertyList = {};
         propertyList[inputArray[0]] = [inputArray[1], parseInt(inputArray[2])];

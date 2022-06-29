@@ -79,8 +79,12 @@ const playerInfoChange = (playerInfo) => {
 				let setValue = value[1];
 				if(value[0] == "+"){
 					setValue = playerArray[playerInfo[i][0]].properties[key] + value[1];
-				}else if(value[0] == "*"){
+				} else if (value[0] == "-"){
+					setValue = playerArray[playerInfo[i][0]].properties[key] - value[1];
+				} else if (value[0] == "*"){
 					setValue = playerArray[playerInfo[i][0]].properties[key] * value[1];
+				} else if (value[0] == "/"){
+					setValue = playerArray[playerInfo[i][0]].properties[key] / value[1];
 				}
 
 				if (key == "health"){
@@ -219,7 +223,7 @@ const updateFrame = ([projectilePosList]) => {
 			let diffY = projectileList[i].object.position.y - player_controller.creature.object.position.y;
 			if (projectileList[i].damageInfo.attacker != clientPlayerID && Math.abs(diffX) + Math.abs(diffX) < 2){
 				let diffZ = projectileList[i].object.position.z - player_controller.creature.object.position.z;
-				if (Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ) < 0.6){
+				if (Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ) < 0.7){
 					player_controller.damage(projectileList[i].damageInfo.amount);
 					onHitProjectileList.push(i);
 					projectileList[i].delete();
