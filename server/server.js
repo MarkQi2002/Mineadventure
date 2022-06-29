@@ -116,8 +116,8 @@ itemArray.length = 256;
 // First Layer: Item ID (Currently 20 Items)
 // Second Layer: itemInfo, itemPosition, propertyInfo
 var itemDefaultPosition = [1, 1, 1];
-var itemInfoArray = [[{"itemID": 0, "itemName": "Blood Orb", "rarity": "Common", "stackType": "Linear", "buffTyle": "Defensive"}, itemDefaultPosition, {"maxHealth": ["+", 20]}],
-					[{"itemID": 1, "itemName": "Attack Orb", "rarity": "Common", "stackType": "Linear", "buffTyle": "Offensive"}, itemDefaultPosition, {"attackDamage": ["+", 10]}],
+var itemInfoArray = [[{"itemID": 0, "itemName": "Blood Orb", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"maxHealth": ["+", 20]}],
+					[{"itemID": 1, "itemName": "Attack Orb", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Offensive"}, {"attackDamage": ["+", 10]}],
 					[],
 					[],
 					[],
@@ -141,7 +141,7 @@ var itemInfoArray = [[{"itemID": 0, "itemName": "Blood Orb", "rarity": "Common",
 // Update Player Property And Player Item Array
 const UpdatePlayerItemArray = (additionalItemID, updatePlayerID) => {
 	// Update Player Property Based On Item
-	let playerInfo = [[updatePlayerID, itemInfoArray[additionalItemID][2]]];
+	let playerInfo = [[updatePlayerID, itemInfoArray[additionalItemID][1]]];
 	playerInfoChange(playerInfo);
 
 	// Update Server Side Player Item Array
@@ -155,7 +155,7 @@ const UpdatePlayerItemArray = (additionalItemID, updatePlayerID) => {
 }
 
 // Creating An Item When Client Send A Request
-const CreateNewItem = (newItemID) => {
+const CreateNewItem = (newItemID, newItemPosition) => {
 	// Indexing Item Array To Include The New Item
 	for (let itemIndex = currentItemIndex; itemIndex < itemArray.length; itemIndex++) {
 		if (itemArray[itemIndex] == null) {
@@ -164,7 +164,7 @@ const CreateNewItem = (newItemID) => {
 
 			// Save The ItemID Into The Server Item Array
 			newItemIndex = itemIndex;
-			itemArray[itemIndex] = newItemID;
+			itemArray[itemIndex] = {"itemID": newItemID, "itemPosition": newItemPosition};
 			
 			// Log The ItemInfo On The Server Side
 			console.log(itemInfoArray[newItemID], newItemIndex);
@@ -182,7 +182,7 @@ const CreateNewItem = (newItemID) => {
 
 			// Save The ItemID Into The Server Item Array
 			newItemIndex = itemIndex;
-			itemArray[itemIndex] = newItemID;
+			itemArray[itemIndex] = {"itemID": newItemID, "itemPosition": newItemPosition};
 			
 			// Log The ItemInfo On The Server Side
 			console.log(itemInfoArray[newItemID], newItemIndex);
@@ -206,9 +206,8 @@ const deleteItem = (removeItemID) => {
 // Randomly Spawn An Item Every Half A Minute
 setInterval(randomSpawnItem, 30000);
 function randomSpawnItem() {
-	io.emit('clientNewItem', CreateNewItem(0), newItemIndex);
+	io.emit('clientNewItem', CreateNewItem(0, itemDefaultPosition), newItemIndex);
 }
-
 // -------------------End Of Item-------------------
 
 // -------------------Projectile-------------------
@@ -412,7 +411,7 @@ io.on('connection', (sock) => {
 
 	// Item Related
 	sock.on('newPlayerItemArray', (additionalItemID, updatePlayerID) => io.compress(true).emit('clientPlayerItemArray', UpdatePlayerItemArray(additionalItemID, updatePlayerID), updatePlayerID));
-	sock.on('serverNewItem', (newItemID) => io.compress(true).emit('clientNewItem', CreateNewItem(newItemID), newItemIndex));
+	sock.on('serverNewItem', (newItemID, newItemPosition) => io.compress(true).emit('clientNewItem', CreateNewItem(newItemID, newItemPosition), newItemPosition, newItemIndex));
 	sock.on('deleteItem', (removeItemID) => io.compress(true).emit('removeItem', deleteItem(removeItemID)));
 
 	// Projectile Related

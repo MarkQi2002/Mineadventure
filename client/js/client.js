@@ -105,6 +105,7 @@ const playerInfoChange = (playerInfo) => {
 var additionalItemID;
 var removeItemID;
 var itemInfoArray;
+var itemDefaultPosition = [1, 1, 1];
 var itemDefaultGeometry = new THREE.SphereGeometry(0.2, 10, 10);
 var itemDefaultMaterial = new THREE.MeshBasicMaterial({color: 'red'});
 var itemDefaultmesh = new THREE.Mesh(itemDefaultGeometry, itemDefaultMaterial);
@@ -112,7 +113,7 @@ var itemDefaultmesh = new THREE.Mesh(itemDefaultGeometry, itemDefaultMaterial);
 // Update Player Property And Player Item Array
 const playerItemArrayUpdate = (additionalItemID, updatePlayerID) => {
 	// Update Player Property Based On Item
-	let playerInfo = [[updatePlayerID, itemInfoArray[additionalItemID][2]]];
+	let playerInfo = [[updatePlayerID, itemInfoArray[additionalItemID][1]]];
 	playerInfoChange(playerInfo);
 
 	// Update Server Side Player Item Array
@@ -130,9 +131,9 @@ const playerItemArrayUpdate = (additionalItemID, updatePlayerID) => {
 
 // Initialization Myself And All Future Players
 // Constructing An Player Object And Storing In The Client Side playerArray
-function spawnItem(itemID, itemIndex){
+function spawnItem(itemID, itemPosition, itemIndex){
 	// Creating Passive Item Object
-	var new_item = new passiveItem(itemInfoArray[itemID][0], itemDefaultmesh, itemInfoArray[itemID][1], itemInfoArray[itemID][2]);
+	var new_item = new passiveItem(itemInfoArray[itemID][0], itemDefaultmesh, itemPosition, itemInfoArray[itemID][1]);
 
 	// Storing Passive Item Object Into itemArray
 	if (itemArray[itemIndex] == null) {
@@ -159,8 +160,8 @@ const initItem = (serverItemArray, serverItemInfoArray) => {
 };
 
 // Initialization All Future Item
-const newItem = (itemID, itemIndex) => {
-	spawnItem(itemID, itemIndex);
+const newItem = (itemID, itemPosition, itemIndex) => {
+	spawnItem(itemID, itemPosition, itemIndex);
 };
 
 // Removing An Item
@@ -265,7 +266,7 @@ const clientUpdateBlocks = (blockList) => {
 	// Sending Information To Server Only Once
 	// First Parameter Is The Tag, Second Parameter Is What We Send To The Server
 	sock.compress(true).emit('newName', sessionStorage.getItem("playerInitialName"));
-	sock.compress(true).emit('serverNewItem', 0);
+	sock.compress(true).emit('serverNewItem', 0, itemDefaultPosition);
 
 	// Receiving Information From Server
 	// First Parameter Is The Tag, Second Parameter Is The Event/Function To Operate On Information From Server
