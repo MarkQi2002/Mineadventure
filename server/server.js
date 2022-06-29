@@ -75,8 +75,8 @@ const CreateNewPlayer = (playerID, playerName, spawnPos) => {
 		// Player Properties
 		properties: new properties,
 	
-		// Server Side Player Item Array
-		playerItemArray: {}
+		// Server Side Creature Item Array
+		creatureItemArray: {}
 	};
 
 	// Indexing Player Array To Include The New Player
@@ -178,7 +178,7 @@ var itemInfoArray = [[{"itemID": 0, "itemName": "Blood Orb", "rarity": "Common",
 					[]];
 
 // Update Player Property And Player Item Array
-const playerItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
+const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
 	// Remove Item From The Item Array
 	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID)
 
@@ -187,10 +187,10 @@ const playerItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) =
 	creatureInfoChange(playerInfo);
 
 	// Update Server Side Player Item Array
-	if (playerArray[updatePlayerID].playerItemArray[additionalItemID] != null)
-		playerArray[updatePlayerID].playerItemArray[additionalItemID]++;
+	if (playerArray[updatePlayerID].creatureItemArray[additionalItemID] != null)
+		playerArray[updatePlayerID].creatureItemArray[additionalItemID]++;
 	else
-		playerArray[updatePlayerID].playerItemArray[additionalItemID] = 1;
+		playerArray[updatePlayerID].creatureItemArray[additionalItemID] = 1;
 
 	// Return The Additional Item's ID
 	return additionalItemID;
@@ -256,9 +256,9 @@ function removeItem(removeItemID) {
 }
 
 // Randomly Spawn An Item Every Half A Minute
-setInterval(randomSpawnItem, 30000);
+setInterval(randomSpawnItem, 1000);
 function randomSpawnItem() {
-	io.emit('clientNewItem', newItem(0, itemDefaultPosition), newItemIndex);
+	io.emit('clientNewItem', newItem(0, itemDefaultPosition), itemDefaultPosition, newItemIndex);
 }
 // -------------------End Of Item-------------------
 
@@ -471,7 +471,7 @@ io.on('connection', (sock) => {
 	sock.on('creatureInfo', (creatureInfo) => io.compress(true).emit('creatureInfoChange', creatureInfoChange(creatureInfo)));
 
 	// Item Related
-	sock.on('serverPlayerItemArray', (additionalItemID, updatePlayerID, removeItemID) => io.compress(true).emit('clientPlayerItemArray', playerItemArrayUpdate(additionalItemID, updatePlayerID, removeItemID), updatePlayerID, removeItemID));
+	sock.on('serverCreatureItemArray', (additionalItemID, updatePlayerID, removeItemID) => io.compress(true).emit('clientCreatureItemArray', creatureItemArrayUpdate(additionalItemID, updatePlayerID, removeItemID), updatePlayerID, removeItemID));
 	sock.on('serverNewItem', (newItemID, newItemPosition) => io.compress(true).emit('clientNewItem', newItem(newItemID, newItemPosition), newItemPosition, newItemIndex));
 	sock.on('deleteItem', (removeItemID) => io.compress(true).emit('removeItem', deleteItem(removeItemID)));
 

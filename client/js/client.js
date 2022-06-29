@@ -121,7 +121,7 @@ var itemDefaultMaterial = new THREE.MeshBasicMaterial({color: 'red'});
 var itemDefaultmesh = new THREE.Mesh(itemDefaultGeometry, itemDefaultMaterial);
 
 // Update Player Property And Player Item Array
-const playerItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
+const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
 	// Remove Item From The Item Array
 	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID)
 
@@ -130,10 +130,10 @@ const playerItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) =
 	creatureInfoChange(playerInfo);
 
 	// Update Server Side Player Item Array
-	if (playerArray[updatePlayerID].playerItemArray[additionalItemID] != null)
-		playerArray[updatePlayerID].playerItemArray[additionalItemID]++;
+	if (playerArray[updatePlayerID].creatureItemArray[additionalItemID] != null)
+		playerArray[updatePlayerID].creatureItemArray[additionalItemID]++;
 	else
-		playerArray[updatePlayerID].playerItemArray[additionalItemID] = 1;
+		playerArray[updatePlayerID].creatureItemArray[additionalItemID] = 1;
 
 	// Update Item UI
 	if (updatePlayerID == clientPlayerID) appendItemUIArray(itemInfoArray[additionalItemID][0].itemName);
@@ -304,7 +304,7 @@ const clientUpdateBlocks = (blockList) => {
 
 	sock.on('addBlocks', clientUpdateBlocks);
 
-	sock.on('clientPlayerItemArray', playerItemArrayUpdate);
+	sock.on('clientCreatureItemArray', creatureItemArrayUpdate);
 	sock.on('initItem', initItem);
 	sock.on('clientNewItem', newItem);
 	sock.on('removeItem', deleteItem);
@@ -328,7 +328,7 @@ const clientUpdateBlocks = (blockList) => {
 	
 	// Sending New Item List To Server
 	const updateItem = () => {
-		sock.compress(true).emit('serverPlayerItemArray', additionalItemID, clientPlayerID, removeItemID);
+		sock.compress(true).emit('serverCreatureItemArray', additionalItemID, clientPlayerID, removeItemID);
 	}
 	// Removing A Collectable Item
 	const removeItem = () => {

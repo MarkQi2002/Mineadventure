@@ -18,6 +18,7 @@ class creature{
         // Creature Information
         this.name = creatureInfo.name;
         this.properties = creatureInfo.properties;
+        this.creatureItemArray = creatureInfo.creatureItemArray;
 
         // HealthBar
         this.healthBar = new THREE.Mesh(healthBarLoader.outerGeometry, healthBarLoader.outerMaterial);
@@ -97,10 +98,7 @@ class creature{
 class player extends creature {
     constructor(playerInfo) {
         // Calling Parent Constructor
-        super(playerInfo)
-
-        // Player Item Array
-        this.playerItemArray = {}
+        super(playerInfo);
 
         // Spherical Body
         let geometry = new THREE.SphereGeometry(0.5, 10, 10);
