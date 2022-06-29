@@ -6,7 +6,6 @@ class controller{
         this.camera.position.x = this.creature.object.position.x;
         this.camera.position.y = this.creature.object.position.y;
         this.cameraOffset = 0;
-        this.cameraRange = Math.sqrt((game_map.blockSize.x * game_map.blockSize.x) + (game_map.blockSize.y * game_map.blockSize.y))
         this.creature.healthBar.visible = false;
         
         this.baseMovementSpeed = 3; // Per Second 
@@ -521,17 +520,12 @@ class controller{
 
     
     damage(amount){
-        sendPlayerPropertyChange(clientPlayerID, {"health": ["-", amount]});
+        sendCreaturePropertyChange(["player", clientPlayerID], {"health": ["-", amount]});
     }
 
 
     // Updating The Position 
     update(delta){ 
-        // Set camera offset for other calculation
-        let diffX = this.camera.position.x  - this.creature.object.position.x;
-        let diffY = this.camera.position.y  - this.creature.object.position.y;
-        this.cameraOffset = Math.sqrt((diffX * diffX) + (diffY * diffY));
-
         // Change Movement Speed By Shift 
         if (!this.inputs.shift) { 
             // Walk 

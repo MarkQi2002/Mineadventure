@@ -26,6 +26,22 @@ const server = http.createServer(app);
 const io = socketio(server);
 
 
+// -------------------Creature-------------------
+
+// Default Properties For All Creature
+function properties() {
+	// Defensive Properties
+	this["health"] = 100,
+	this["maxHealth"] = 100,
+	this["armor"] = 0,
+
+	// Attack Properties
+	this["attackDamage"] = 10,
+	this["attackSpeed"] = 1
+};
+
+// -------------------End Of Creature-------------------
+
 // -------------------Player-------------------
 // Game Related Variable Declaration
 var playerArray = [];
@@ -57,17 +73,8 @@ const CreateNewPlayer = (playerID, playerName, spawnPos) => {
 		position: [spawnPos[0], spawnPos[1], 1],
 		
 		// Player Properties
-		properties: {
-			// Defensive Properties
-			"health": 100,
-			"maxHealth": 100,
-			"armor": 0,
-
-			// Attack Properties
-			"attackDamage": 10,
-			"attackSpeed": 1,
-		},
-
+		properties: new properties,
+	
 		// Server Side Player Item Array
 		playerItemArray: {}
 	};
@@ -104,6 +111,38 @@ function newPlayerID(){
 	return ID_count;
 }
 // -------------------End Of Player-------------------
+
+// -------------------Monster-------------------
+var monsterArray = [];
+monsterArray.length = 100;
+var monster_ID_Count = 0;
+var monsterInfoArray = [
+
+						];
+
+// Get A New Monster ID From The Empty Space In MonsterArray
+function newMonsterID(){
+	let exceedCount = 0;
+	// Stop Untill Get An monsterID Corresponding To An Empty Space In MonsterArray
+	while (monsterArray[monster_ID_Count] != null){
+		monster_ID_Count = (monster_ID_Count + 1) % monsterArray.length;
+		exceedCount++;
+		if (exceedCount >= monsterArray.length){// If Exceed Max monsterArray Length
+			monsterArray.length += 100;
+			console.log("Exceed Max MonsterArray Length, Double The MonsterArray Length! Current Length:", monsterArray.length);
+		}
+	}
+	return monster_ID_Count;
+}
+
+function spawnMonster(id, position){
+	let monsterID = newMonsterID();
+	
+	//monsterArray[monsterID] = 
+
+}
+
+// -------------------End Of Monster-------------------
 
 // -------------------Item-------------------
 // Item Related Variable Declaration
@@ -145,7 +184,7 @@ const playerItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) =
 
 	// Update Player Property Based On Item
 	let playerInfo = [[updatePlayerID, itemInfoArray[additionalItemID][1]]];
-	playerInfoChange(playerInfo);
+	creatureInfoChange(playerInfo);
 
 	// Update Server Side Player Item Array
 	if (playerArray[updatePlayerID].playerItemArray[additionalItemID] != null)
@@ -249,9 +288,9 @@ projectileList.length = 1000;
 function spawnProjectile(projectileInfo){
 	let projectileSpawnInfo = [];
 	for (let i = 0; i < projectileInfo.length; i++){
-		let newProjectileID = getNewProjectileID()
+		let newProjectileID = getNewProjectileID();
 		projectileList[newProjectileID] = projectileInfo[i];
-		projectileSpawnInfo.push([newProjectileID, projectileInfo[i]])
+		projectileSpawnInfo.push([newProjectileID, projectileInfo[i]]);
 	}
 	return projectileSpawnInfo;
 }
@@ -360,24 +399,31 @@ function ClientFrameUpdate(onHitProjectileList){
 	return [updateProjectileList];
 }
 
-// Changing Server Player Information
-function playerInfoChange(playerInfo){
-	// Example playerInfo = [playerID, {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
-	for (let i = 0; i < playerInfo.length; i++){
-		if (playerArray[playerInfo[i][0]] != null){
-			for ([key, value] of Object.entries(playerInfo[i][1])) {
-				let setValue = value[1];
-				if (value[0] == "+") setValue = playerArray[playerInfo[i][0]].properties[key] + value[1];
-				else if (value[0] == "-") setValue = playerArray[playerInfo[i][0]].properties[key] - value[1];
-				else if (value[0] == "*") setValue = playerArray[playerInfo[i][0]].properties[key] * value[1];
-				else if (value[0] == "/") setValue = playerArray[playerInfo[i][0]].properties[key] / value[1];
+// Changing Server Creature Information
+function creatureInfoChange(creatureInfo){
+	// Example creatureInfo = [[creatureType, id], {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
+	for (let i = 0; i < creatureInfo.length; i++){
+		let theCreature;
+		if (creatureInfo[i][0][0] == "player"){
+			if (playerArray[creatureInfo[i][0][1]] == null) continue;
+			theCreature = playerArray[creatureInfo[i][0][1]];
+		}else{
+			if (monsterArray[creatureInfo[i][0][1]] == null) continue;
+			theCreature = monsterArray[creatureInfo[i][0][1]];
+		}
+		
+		for ([key, value] of Object.entries(creatureInfo[i][1])) {
+			let setValue = value[1];
+			if (value[0] == "+") setValue = theCreature.properties[key] + value[1];
+			else if (value[0] == "-") setValue = theCreature.properties[key] - value[1];
+			else if (value[0] == "*") setValue = theCreature.properties[key] * value[1];
+			else if (value[0] == "/") setValue = theCreature.properties[key] / value[1];
 
-				playerArray[playerInfo[i][0]].properties[key] = setValue;
-			}
+
+			theCreature.properties[key] = setValue;
 		}
 	}
-
-	return playerInfo;
+	return creatureInfo;
 }
 
 // Client Is Disconnected
@@ -402,7 +448,7 @@ var game_map = new map([12, 12],[20, 20]);
 // Once A New Player Join, Update To All Other Clients
 io.on('connection', (sock) => {
 	// Setting The New PlayerID
-	const playerID = newPlayerID(ID_count);
+	const playerID = newPlayerID();
 
 	const spawnPos = createSpawnPosition();
 	// Initializing The Player To The Client
@@ -420,7 +466,9 @@ io.on('connection', (sock) => {
 	sock.on('newPos', (Pos) => io.compress(true).emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
 	sock.on('disconnect', (Info) => io.compress(true).emit('clientDisconnect', clientDisconnect(Info, playerID)));
 	sock.on('requireBlock', (blockPosList) => sock.compress(true).emit('addBlocks', game_map.getUpdateBlock(blockPosList)));
-	sock.on('playerInfo', (playerInfo) => io.compress(true).emit('playerInfoChange', playerInfoChange(playerInfo)));
+	
+	// Creature Related
+	sock.on('creatureInfo', (creatureInfo) => io.compress(true).emit('creatureInfoChange', creatureInfoChange(creatureInfo)));
 
 	// Item Related
 	sock.on('serverPlayerItemArray', (additionalItemID, updatePlayerID, removeItemID) => io.compress(true).emit('clientPlayerItemArray', playerItemArrayUpdate(additionalItemID, updatePlayerID, removeItemID), updatePlayerID, removeItemID));

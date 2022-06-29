@@ -79,8 +79,8 @@ var delta = 0;
 // Game Event Related
 function updateTimeEvent(){
     document.dispatchEvent(new Event('frameEvent', {bubbles: true, cancelable: false}));
-    if (changingPlayerInfo.length > 0){
-        document.dispatchEvent(new Event('changingPlayerInfo', {bubbles: true, cancelable: false}));
+    if (changingCreatureInfo.length > 0){
+        document.dispatchEvent(new Event('changingCreatureInfo', {bubbles: true, cancelable: false}));
     }
 
 }
@@ -89,7 +89,7 @@ function updateTimeEvent(){
 let intervalWorker = new Worker('./js/thread.js');
 
 // using for update player
-var changingPlayerInfo = [];
+var changingCreatureInfo = [];
 
 // Animation Function
 function animate() {

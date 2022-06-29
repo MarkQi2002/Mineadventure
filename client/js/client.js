@@ -50,46 +50,50 @@ const playerPositionUpdate = ([Pos, PlayerID]) => {
 	}
 };
 
-// Send Player Property Change To Server And Change At All Other Client
-function sendPlayerPropertyChange(id, propertyList){
+// Send Creature Property Change To Server And Change At All Other Client
+function sendCreaturePropertyChange([creatureType, id], propertyList){
 	let isIn = false;
-	for (let i; i < changingPlayerInfo.length; i++){
-		if (changingPlayerInfo[i][0] == id){
+	for (let i; i < changingCreatureInfo.length; i++){
+		if (changingCreatureInfo[i][0][0] == creatureType && changingCreatureInfo[i][0][1] == id){
 			isIn = true;
 			for ([key, value] of Object.entries(propertyList)) {
-				changingPlayerInfo[i][1][key] = value;
+				changingCreatureInfo[i][1][key] = value;
 			}
 			break;
 		}
 	}
 
-	if (!isIn) changingPlayerInfo.push([id, propertyList]);
+	if (!isIn) changingCreatureInfo.push([[creatureType, id], propertyList]);
 }
 
-// Change An Player's Property Using Input PlayerInfo
-const playerInfoChange = (playerInfo) => {
-	// Example playerInfo = [playerID, {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
+// Change An Creature's Property Using Input creatureInfo
+const creatureInfoChange = (creatureInfo) => {
+	// Example creatureInfo = [[creatureType, id], {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
 	let updateLocalPlayerUI = false;
-	for (let i = 0; i < playerInfo.length; i++){
-		if (playerArray[playerInfo[i][0]] != null){
-			if (playerInfo[i][0] == clientPlayerID) updateLocalPlayerUI = true;
+	for (let i = 0; i < creatureInfo.length; i++){
+		let theCreature;
+		if (creatureInfo[i][0][0] == "player"){
+			if (playerArray[creatureInfo[i][0][1]] == null) continue;
+			theCreature = playerArray[creatureInfo[i][0][1]];
+			if (creatureInfo[i][0][1] == clientPlayerID) updateLocalPlayerUI = true;
+		}else{
+			if (monsterArray[creatureInfo[i][0][1]] == null) continue;
+			theCreature = monsterArray[creatureInfo[i][0][1]];
+		}
+		
+		for ([key, value] of Object.entries(creatureInfo[i][1])) {
+			let setValue = value[1];
+			if (value[0] == "+") setValue = theCreature.properties[key] + value[1];
+			else if (value[0] == "-") setValue = theCreature.properties[key] - value[1];
+			else if (value[0] == "*") setValue = theCreature.properties[key] * value[1];
+			else if (value[0] == "/") setValue = theCreature.properties[key] / value[1];
 
-			for ([key, value] of Object.entries(playerInfo[i][1])) {
-				let setValue = value[1];
-				if (value[0] == "+") setValue = playerArray[playerInfo[i][0]].properties[key] + value[1];
-				else if (value[0] == "-") setValue = playerArray[playerInfo[i][0]].properties[key] - value[1];
-				else if (value[0] == "*") setValue = playerArray[playerInfo[i][0]].properties[key] * value[1];
-				else if (value[0] == "/") setValue = playerArray[playerInfo[i][0]].properties[key] / value[1];
-
-				if (key == "health"){
-					playerArray[playerInfo[i][0]].setHealth(setValue);
-				} else if (key == "maxHealth") {
-					playerArray[playerInfo[i][0]].setMaxHealth(setValue);
-				} else {
-					playerArray[playerInfo[i][0]].properties[key] = setValue;
-				}
-
-				
+			if (key == "health"){
+				theCreature.setHealth(setValue);
+			} else if (key == "maxHealth") {
+				theCreature.setMaxHealth(setValue);
+			} else {
+				theCreature.properties[key] = setValue;
 			}
 		}
 	}
@@ -99,6 +103,12 @@ const playerInfoChange = (playerInfo) => {
 	}
 };
 // -------------------End Of Player-------------------
+
+// -------------------Monster-------------------
+
+var monsterArray = [];
+
+// -------------------End Of Monster-------------------
 
 // -------------------Item-------------------
 // Variable Declaration
@@ -116,8 +126,8 @@ const playerItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) =
 	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID)
 
 	// Update Player Property Based On Item
-	let playerInfo = [[updatePlayerID, itemInfoArray[additionalItemID][1]]];
-	playerInfoChange(playerInfo);
+	let playerInfo = [[["player", updatePlayerID], itemInfoArray[additionalItemID][1]]];
+	creatureInfoChange(playerInfo);
 
 	// Update Server Side Player Item Array
 	if (playerArray[updatePlayerID].playerItemArray[additionalItemID] != null)
@@ -288,7 +298,9 @@ const clientUpdateBlocks = (blockList) => {
 	sock.on('newPlayer', newPlayer);
 	sock.on('clientPos', playerPositionUpdate);
 	sock.on('clientDisconnect', playerDisconnect);
-	sock.on('playerInfoChange', playerInfoChange);
+
+	// Creature
+	sock.on('creatureInfoChange', creatureInfoChange);
 
 	sock.on('addBlocks', clientUpdateBlocks);
 
@@ -352,10 +364,10 @@ const clientUpdateBlocks = (blockList) => {
 	document.addEventListener('frameEvent', frameUpdate);
 
 
-	// Player Information Related
-	const playerInfo = () => {
-		sock.compress(true).emit('playerInfo', changingPlayerInfo);
-		changingPlayerInfo = [];
+	// Creature Information Related
+	const creatureInfo = () => {
+		sock.compress(true).emit('creatureInfo', changingCreatureInfo);
+		changingCreatureInfo = [];
 	}
-	document.addEventListener('changingPlayerInfo', playerInfo);
+	document.addEventListener('changingCreatureInfo', creatureInfo);
 })();

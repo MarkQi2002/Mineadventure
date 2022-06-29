@@ -206,7 +206,7 @@ function lockedCommand(inputArray) {
         
         let propertyList = {};
         propertyList[inputArray[0]] = [inputArray[1], parseInt(inputArray[2])];
-        sendPlayerPropertyChange(id, propertyList);
+        sendCreaturePropertyChange(["player", id], propertyList);
         
     }
 
@@ -221,7 +221,7 @@ function lockedCommand(inputArray) {
 function itemUIInfo() {
     this.itemName = "NULL";
     this.itemAmount = 0;
-}
+};
 
 // UI Array For Item
 var itemUIArray = { item0: new itemUIInfo,
