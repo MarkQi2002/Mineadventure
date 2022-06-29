@@ -257,7 +257,7 @@ class controller{
                 document.dispatchEvent(event);
 
                 // Increse Player Item
-                additionalItem = itemArray[itemIndex]; 
+                additionalItemID = itemArray[itemIndex].itemInfo.itemID; 
                 var event = new Event('player collected item', {bubbles: true, cancelable: false}) 
                 document.dispatchEvent(event); 
 

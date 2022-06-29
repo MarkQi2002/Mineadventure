@@ -16,6 +16,7 @@ const map = require('./mapClass.js');
 
 // An Express Function
 const app = express();
+
 // Current Directory, Back One Level, Client Folder
 app.use(express.static(`${__dirname}/../client`));
 
@@ -85,19 +86,17 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 };
 
 // Increment Player Item Array
-const UpdatePlayerItemArray = (additionalItem, updatePlayerID) => {
-	if (playerArray[updatePlayerID] != null) {
+const UpdatePlayerItemArray = (additionalItemID, updatePlayerID) => {
+	/* if (playerArray[updatePlayerID] != null) {
 		playerArray[updatePlayerID].playerItemArray[additionalItem.name]++;
-	}
+	} */
 
 	// Player Property Update
 	// Defensive Property Update
-	if (additionalItem.buffType == "Defensive") {
-		playerArray[updatePlayerID].health += additionalItem.health;
-		console.log(playerArray[updatePlayerID].health);
-	}
+	let playerInfo = [[updatePlayerID, itemInfoArray[additionalItemID][2]]];
+	playerInfoChange(playerInfo);
 
-	return additionalItem;
+	return additionalItemID;
 }
 
 // Get A New Player ID From The Empty Space In PlayArray
@@ -127,34 +126,51 @@ const clientDisconnect = (Info, playerID) => {
 // Item Related Variable Declaration
 var itemArray = [];
 itemArray.length = 256;
-var newItemID;
+var newItemIndex;
+
+// itemInfoArray Is A 2D Array
+// First Layer: Item ID (Currently 20 Items)
+// Second Layer: itemInfo, itemPosition, propertyInfo
+var itemDefaultPosition = [1, 1, 1];
+var itemInfoArray = [[{"itemID": 0, "itemName": "Blood Orb", "rarity": "Common", "stackType": "Linear", "buffTyle": "Defensive"}, itemDefaultPosition, {"health": 20}],
+					[{"itemID": 1, "itemName": "Attack Orb", "rarity": "Common", "stackType": "Linear", "buffTyle": "Offensive"}, itemDefaultPosition, {"attackDamage": 10}],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[]];
 
 // Function Used To Create A New Item
-const CreateNewItem = (itemName) => {
-	// Similar To A Struct
-	let itemInfo = {
-		itemName: itemName,
-		itemRarity: "Common",
-		itemStackType: "Linear",
-		itemBuffType: "Defensive",
-		itemPosition: [1, 1, 1]
-	};
-
+const CreateNewItem = (newItemID) => {
 	// Indexing Item Array To Include The New Item
 	for (let itemIndex = 0; itemIndex < itemArray.length; itemIndex++) {
 		if (itemArray[itemIndex] == null) {
-			// Save The Item Into The Item Array
-			itemArray[itemIndex] = itemInfo;
-			newItemID = itemIndex;
+			// Save The ItemID Into The Server Item Array
+			newItemIndex = itemIndex;
+			itemArray[itemIndex] = newItemID;
 			
 			// Log The ItemInfo On The Server Side
-			console.log(itemInfo, newItemID);
+			console.log(itemInfoArray[newItemID][0], newItemIndex);
 			break;
 		}
 	}
 	
-	// Return itemInfo
-	return itemInfo;
+	// Return newItemID
+	return newItemID;
 };
 
 // When Client Is Disconnected
@@ -169,7 +185,7 @@ const deleteItem = (removeItemID) => {
 // Randomly Spawn An Item Every Ten Second
 /* setInterval(randomSpawnItem, 10000);
 function randomSpawnItem() {
-	io.emit('clientNewItem', CreateNewItem("Blood Orb"), newItemID);
+	io.emit('clientNewItem', CreateNewItem(0), newItemIndex);
 } */
 
 // Map Related Function
@@ -355,7 +371,7 @@ io.on('connection', (sock) => {
 	console.log("new player joined, ID: ", playerID);
 
 	// Initializing Collectable Item To The Client
-	sock.compress(true).emit('initItem', itemArray);
+	sock.compress(true).emit('initItem', itemArray, itemInfoArray);
 	
 	// Receiving Information From Client And Calling Function
 	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
@@ -368,8 +384,8 @@ io.on('connection', (sock) => {
 	sock.on('playerInfo', (playerInfo) => io.compress(true).emit('playerInfoChange', playerInfoChange(playerInfo)));
 
 	// Item Related
-	sock.on('newPlayerItemArray', (additionalItem, updatePlayerID) => io.compress(true).emit('clientPlayerItemArray', UpdatePlayerItemArray(additionalItem, updatePlayerID), updatePlayerID));
-	sock.on('serverNewItem', (itemName) => io.compress(true).emit('clientNewItem', CreateNewItem(itemName), newItemID));
+	sock.on('newPlayerItemArray', (additionalItemID, updatePlayerID) => io.compress(true).emit('clientPlayerItemArray', UpdatePlayerItemArray(additionalItemID, updatePlayerID), updatePlayerID));
+	sock.on('serverNewItem', (newItemID) => io.compress(true).emit('clientNewItem', CreateNewItem(newItemID), newItemIndex));
 	sock.on('deleteItem', (removeItemID) => io.compress(true).emit('removeItem', deleteItem(removeItemID)));
 
 	// Projectile Related

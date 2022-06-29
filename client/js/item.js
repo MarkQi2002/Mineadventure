@@ -16,25 +16,15 @@ class item {
     Attack
     Defensive
     */
-    constructor(itemName, itemRarity, itemStackType, itemBuffType, itemPosition) {
-        this.name = itemName;
-        this.rarity = itemRarity;
-        this.stackType = itemStackType;
-        this.buffType = itemBuffType;
+    constructor(itemInfo, itemMesh, itemPosition) {
+        // Basic Item Information
+        this.itemInfo = itemInfo;
 
-        this.position = itemPosition;
+        // Creating The Item Using THREE And Render The Item
         this.object = new THREE.Object3D();
         this.object.position.set(itemPosition[0], itemPosition[1], itemPosition[2]);
-        scene.add( this.object );
-
-        // Item Properties
-        // Defensive Properties
-        this.health = 0;
-        this.armor = 0;
-
-        // Attack Properties
-        this.attackDamage = 0;
-        this.attackSpeed = 0;
+        this.object.add(itemMesh);
+        scene.add(this.object);
     }
 
     delete() {
@@ -53,42 +43,11 @@ class item {
     }
 }
 
-// Blood Orb
-// itemName: "Blood Orb"
-class bloodOrb extends item {
-    constructor(itemName, itemRarity, itemStackType, itemBuffType, itemPosition) {
-        // Calling Parent Constructor
-        super(itemName, itemRarity, itemStackType, itemBuffType, itemPosition)
+// PassiveItem That Improve Player Property
+class passiveItem extends item {
+    constructor(itemInfo, itemMesh, itemPosition, propertyInfo) {
+        super(itemInfo, itemMesh, itemPosition);
 
-        // Spherical Body
-        let geometry = new THREE.SphereGeometry(0.2, 10, 10);
-        let material = new THREE.MeshBasicMaterial({color: 'red'});
-        let mesh = new THREE.Mesh(geometry, material);
-        this.object.add(mesh);
-
-        // Item Properties
-        // Defensive Properties
-        this.health = 20;
-        this.armor = 0;
-    }
-}
-
-// Attack Orb
-// itemName: "Attack Orb"
-class attackOrb extends item {
-    constructor(itemName, itemRarity, itemStackType, itemBuffType, itemPosition) {
-        // Calling Parent Constructor
-        super(itemName, itemRarity, itemStackType, itemBuffType, itemPosition)
-
-        // Spherical Body
-        let geometry = new THREE.SphereGeometry(0.2, 10, 10);
-        let material = new THREE.MeshBasicMaterial({color: 'yellow'});
-        let mesh = new THREE.Mesh(geometry, material);
-        this.object.add(mesh);
-
-        // Item Properties
-        // Attack Properties
-        this.attackDamage = 10;
-        this.attackSpeed = 0;
+        self.propertyInfo = propertyInfo;
     }
 }

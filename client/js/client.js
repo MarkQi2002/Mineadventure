@@ -97,11 +97,17 @@ const playerInfoChange = (playerInfo) => {
 // ------------------Item----------------------
 // Variable Declaration
 var removeItemID;
-var additionalItem;
+var additionalItemID;
+var itemInfoArray;
+var itemDefaultGeometry = new THREE.SphereGeometry(0.2, 10, 10);
+var itemDefaultMaterial = new THREE.MeshBasicMaterial({color: 'red'});
+var itemDefaultmesh = new THREE.Mesh(itemDefaultGeometry, itemDefaultMaterial);
 
 // For Updating Player Item Array
-const playerItemArrayUpdate = (additionalItem, updatePlayerID) => {
-	playerArray[updatePlayerID].playerItemArray[additionalItem.name]++;
+const playerItemArrayUpdate = (additionalItemID, updatePlayerID) => {
+	let playerInfo = [[updatePlayerID, itemInfoArray[additionalItemID][2]]];
+	playerInfoChange(playerInfo);
+	/* playerArray[updatePlayerID].playerItemArray[additionalItem.name]++;
 	console.log("Player ", updatePlayerID, " Item Array: ", playerArray[updatePlayerID].playerItemArray);
 
 	// Player Property Update
@@ -126,38 +132,25 @@ const playerItemArrayUpdate = (additionalItem, updatePlayerID) => {
 	displayPlayerName();
 	displayPlayerHealth();
 	displayPlayerArmor();
-	displayPlayerAttackDamage();
+	displayPlayerAttackDamage(); */
 }
 // Initialization Myself And All Future Players
 // Constructing An Player Object And Storing In The Client Side playerArray
-function spawnItem(itemInfo, itemIndex){
+function spawnItem(itemID, itemIndex){
 	// Creating The Item Object
-	var new_item;
-	if (itemInfo.itemName == "Blood Orb") {
-		new_item = new bloodOrb(itemInfo.itemName,
-								itemInfo.itemRarity,
-								itemInfo.itemStackType,
-								itemInfo.itemBuffType,
-								itemInfo.itemPosition);
-
-	} else if (itemInfo.itemName == "Attack Orb") {
-		new_item = new attackOrb(itemInfo.itemName,
-								itemInfo.itemRarity,
-								itemInfo.itemStackType,
-								itemInfo.itemBuffType,
-								itemInfo.itemPosition);
-	}
+	var new_item = new passiveItem(itemInfoArray[itemID][0], itemDefaultmesh, itemInfoArray[itemID][1], itemInfoArray[itemID][2]);
 
 	if (itemArray[itemIndex] == null) {
 		itemArray[itemIndex] = new_item;
-		console.log("Spawning", itemInfo, " At ItemIndex: ", itemIndex);
+		console.log("Spawning", itemInfoArray[itemID], " At ItemIndex: ", itemIndex);
 	}
 
 	return new_item;
 }
 
 // Initialization Every Item Before You Enter The Game
-const initItem = (serverItemArray) => {
+const initItem = (serverItemArray, serverItemInfoArray) => {
+	itemInfoArray = serverItemInfoArray;
 	itemArray.length = serverItemArray.length;
 	for (let itemIndex = 0; itemIndex < serverItemArray.length; itemIndex++) {
 		if (serverItemArray[itemIndex] != null){
@@ -167,8 +160,8 @@ const initItem = (serverItemArray) => {
 };
 
 // Initialization All Future Item
-const newItem = (itemInfo, itemIndex) => {
-	spawnItem(itemInfo, itemIndex);
+const newItem = (itemID, itemIndex) => {
+	spawnItem(itemID, itemIndex);
 };
 
 // Removing An Item
@@ -237,12 +230,7 @@ const updateFrame = ([projectilePosList]) => {
 					projectileList[i] = null;
 				}
 			}
-
-
-			
-			
 		}
-		
 	}
 };
 
@@ -273,7 +261,7 @@ const deleteEvent = ([deleteProjectileList, deleteUnitList]) => {
 	// Sending Information To Server Only Once
 	// First Parameter Is The Tag, Second Parameter Is What We Send To The Server
 	sock.compress(true).emit('newName', sessionStorage.getItem("playerInitialName"));
-	sock.compress(true).emit('serverNewItem', "Blood Orb");
+	sock.compress(true).emit('serverNewItem', 0);
 
 	// Receiving Information From Server
 	// First Parameter Is The Tag, Second Parameter Is The Event/Function To Operate On Information From Server
@@ -309,7 +297,7 @@ const deleteEvent = ([deleteProjectileList, deleteUnitList]) => {
 	
 	// Sending New Item List To Server
 	const updateItem = () => {
-		sock.compress(true).emit('newPlayerItemArray', additionalItem, clientPlayerID);
+		sock.compress(true).emit('newPlayerItemArray', additionalItemID, clientPlayerID);
 	}
 	// Removing A Collectable Item
 	const removeItem = () => {
