@@ -135,13 +135,16 @@ class controller{
         }
     }
 
+    // When Mouse Move
     MouseMove(event) {
         event.preventDefault();
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     }
 
+    // Sending A Projectile
     sendProjectile(){
+        // Get Unit Vector
         let groundX, groundY;
         groundX = this.mouse.x * window.innerWidth;
         groundY = this.mouse.y * window.innerHeight / Math.cos(cameraAngle);
@@ -152,7 +155,7 @@ class controller{
         vectorX = groundX / magnitude;
         vectorY = groundY / magnitude;
 
-
+        // Setting Projectile Information
         var newDamageInfo = {
             amount: this.creature.properties["attackDamage"],
             attacker: clientPlayerID
@@ -163,6 +166,8 @@ class controller{
             initVelocity: [8 * vectorX, 8 * vectorY],
             damageInfo: newDamageInfo
         };
+
+        // Updating To Projectile List
         newProjectileList.push(newProjectile);
         var event = new Event('createProjectile', {bubbles: true, cancelable: false}) 
         document.dispatchEvent(event); 
@@ -179,25 +184,27 @@ class controller{
         if (this.inputs.forward) predictedPosition.y += translateDistance; 
         if (this.inputs.backward) predictedPosition.y -= translateDistance; 
         if (this.inputs.left) predictedPosition.x -= translateDistance; 
-        if (this.inputs.right) predictedPosition.x += translateDistance; 
- 
-        // Getting Player Bounding Box 
-        let playerBB = new THREE.Sphere(predictedPosition, 0.5); 
+        if (this.inputs.right) predictedPosition.x += translateDistance;
  
         // Checking Collision With Every Other Player 
         for (let playerIndex = 0; playerIndex < playerArray.length; playerIndex++) { 
             // A Few Condition To Skip Collision Detection 
             if (playerArray[playerIndex] == null) continue; 
-            if (clientPlayerID == playerIndex) continue; 
-            if (predictedPosition.manhattanDistanceTo(playerArray[playerIndex].object.position) > 2) continue; 
- 
-            // Getting Other Player's Bounding Box 
-            // console.log(playerArray[playerIndex].object.position); 
-            let otherPlayerBB = new THREE.Sphere(playerArray[playerIndex].object.position, 0.5); 
- 
-            // If Collision Occur, Move In Opposite Direction And Return True 
-            if (playerBB.intersectsSphere(otherPlayerBB)) { 
-                console.log("Collided With Player", playerIndex); 
+            if (clientPlayerID == playerIndex) continue;
+
+            // For Calculating Manhattan Distance
+            let otherPlayerPosition = playerArray[playerIndex].object.position;
+            let diffX = predictedPosition.x - otherPlayerPosition.x;
+			let diffY = predictedPosition.y - otherPlayerPosition.y;
+            if (Math.abs(diffX) + Math.abs(diffY) > 2) continue; 
+            
+
+            // If Collision Occur, Move In Opposite Direction And Return True
+            // Calculate Direct Distance To Squared
+            let diffZ = predictedPosition.z - otherPlayerPosition.z;
+            if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 1) { 
+                console.log("Collided With Player", playerIndex);
+
                 // Sliding The Block 
                 if (this.inputs.forward) creatureTrans.translateY(-translateDistance); 
                 else if (this.inputs.backward) creatureTrans.translateY(translateDistance); 
@@ -221,51 +228,49 @@ class controller{
  
     // Item Collision Detection 
     itemCollision(translateDistance){ 
-        // For Collision Detection 
+        // For Collision Detection
+        let collision = false;
         let creatureTrans = this.creature.object; 
         let predictedPosition = new THREE.Vector3(); 
         predictedPosition.copy(creatureTrans.position); 
  
         // Predicting Future Position 
-        if (this.inputs.forward) predictedPosition.y += translateDistance; 
-        if (this.inputs.backward) predictedPosition.y -= translateDistance; 
-        if (this.inputs.left) predictedPosition.x -= translateDistance; 
-        if (this.inputs.right) predictedPosition.x += translateDistance; 
- 
-        // Getting Player Bounding Box 
-        let playerBB = new THREE.Sphere(predictedPosition, 0.5); 
+        if (this.inputs.forward) predictedPosition.y += translateDistance;
+        if (this.inputs.backward) predictedPosition.y -= translateDistance;
+        if (this.inputs.left) predictedPosition.x -= translateDistance;
+        if (this.inputs.right) predictedPosition.x += translateDistance;
  
         // Checking Collision With Every Collectable Item 
         for (let itemIndex = 0; itemIndex < itemArray.length; itemIndex++) { 
             // A Few Condition To Skip Collision Detection 
             if (itemArray[itemIndex] == null) continue; 
-            if (predictedPosition.manhattanDistanceTo(itemArray[itemIndex].object.position) > 2) continue; 
- 
-            // Getting Item Bounding Box 
-            // console.log(itemArray[itemIndex].object.position); 
-            let itemBB = new THREE.Sphere(itemArray[itemIndex].object.position, 0.2); 
- 
+            // For Calculating Manhattan Distance
+            let itemPosition = itemArray[itemIndex].object.position;
+            let diffX = predictedPosition.x - itemPosition.x;
+			let diffY = predictedPosition.y - itemPosition.y;
+            if (Math.abs(diffX) + Math.abs(diffY) > 2) continue; 
+            
+
             // If Collision Occur, Increment Item Count Using Event 
-            if (playerBB.intersectsSphere(itemBB)) { 
+            // Calculate Direct Distance To Squared
+            let diffZ = predictedPosition.z - itemPosition.z;
+            if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49) { 
                 console.log("Collided With Item", itemArray[itemIndex]); 
 
-                // Removing The Item Collided With
-                removeItemID = itemIndex; 
-                var event = new Event('remove item', {bubbles: true, cancelable: false}) 
-                document.dispatchEvent(event);
-
-                // Increse Player Item
+                // Removing The Item Collided With And Increse Player Item
+                removeItemID = itemIndex;
                 additionalItemID = itemArray[itemIndex].itemInfo.itemID; 
                 var event = new Event('player collected item', {bubbles: true, cancelable: false}) 
                 document.dispatchEvent(event); 
 
                 // Indicate Item Collision Occurred 
-                return true; 
+                collision = true;
+                break;
             } 
         } 
  
-        // No Item Collision Has Occurred 
-        return false; 
+        // Indicate If Item Collision Has Occurred Or Not
+        return collision; 
     } 
  
     // Map Collision Detection

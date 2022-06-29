@@ -139,7 +139,10 @@ var itemInfoArray = [[{"itemID": 0, "itemName": "Blood Orb", "rarity": "Common",
 					[]];
 
 // Update Player Property And Player Item Array
-const UpdatePlayerItemArray = (additionalItemID, updatePlayerID) => {
+const playerItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
+	// Remove Item From The Item Array
+	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID)
+
 	// Update Player Property Based On Item
 	let playerInfo = [[updatePlayerID, itemInfoArray[additionalItemID][1]]];
 	playerInfoChange(playerInfo);
@@ -155,7 +158,7 @@ const UpdatePlayerItemArray = (additionalItemID, updatePlayerID) => {
 }
 
 // Creating An Item When Client Send A Request
-const CreateNewItem = (newItemID, newItemPosition) => {
+const newItem = (newItemID, newItemPosition) => {
 	// Indexing Item Array To Include The New Item
 	for (let itemIndex = currentItemIndex; itemIndex < itemArray.length; itemIndex++) {
 		if (itemArray[itemIndex] == null) {
@@ -203,10 +206,20 @@ const deleteItem = (removeItemID) => {
 	return removeItemID;
 };
 
+// Removing An Item As A Function
+function removeItem(removeItemID) {
+	if (itemArray[removeItemID] != null){
+		console.log("Deleting Item ", removeItemID);
+		delete itemArray[removeItemID];
+		itemArray[removeItemID] = null;
+	}
+	return removeItemID;
+}
+
 // Randomly Spawn An Item Every Half A Minute
 setInterval(randomSpawnItem, 30000);
 function randomSpawnItem() {
-	io.emit('clientNewItem', CreateNewItem(0, itemDefaultPosition), newItemIndex);
+	io.emit('clientNewItem', newItem(0, itemDefaultPosition), newItemIndex);
 }
 // -------------------End Of Item-------------------
 
@@ -410,8 +423,8 @@ io.on('connection', (sock) => {
 	sock.on('playerInfo', (playerInfo) => io.compress(true).emit('playerInfoChange', playerInfoChange(playerInfo)));
 
 	// Item Related
-	sock.on('newPlayerItemArray', (additionalItemID, updatePlayerID) => io.compress(true).emit('clientPlayerItemArray', UpdatePlayerItemArray(additionalItemID, updatePlayerID), updatePlayerID));
-	sock.on('serverNewItem', (newItemID, newItemPosition) => io.compress(true).emit('clientNewItem', CreateNewItem(newItemID, newItemPosition), newItemPosition, newItemIndex));
+	sock.on('serverPlayerItemArray', (additionalItemID, updatePlayerID, removeItemID) => io.compress(true).emit('clientPlayerItemArray', playerItemArrayUpdate(additionalItemID, updatePlayerID, removeItemID), updatePlayerID, removeItemID));
+	sock.on('serverNewItem', (newItemID, newItemPosition) => io.compress(true).emit('clientNewItem', newItem(newItemID, newItemPosition), newItemPosition, newItemIndex));
 	sock.on('deleteItem', (removeItemID) => io.compress(true).emit('removeItem', deleteItem(removeItemID)));
 
 	// Projectile Related

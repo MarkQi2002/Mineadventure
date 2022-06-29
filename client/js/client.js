@@ -111,7 +111,10 @@ var itemDefaultMaterial = new THREE.MeshBasicMaterial({color: 'red'});
 var itemDefaultmesh = new THREE.Mesh(itemDefaultGeometry, itemDefaultMaterial);
 
 // Update Player Property And Player Item Array
-const playerItemArrayUpdate = (additionalItemID, updatePlayerID) => {
+const playerItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
+	// Remove Item From The Item Array
+	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID)
+
 	// Update Player Property Based On Item
 	let playerInfo = [[updatePlayerID, itemInfoArray[additionalItemID][1]]];
 	playerInfoChange(playerInfo);
@@ -164,13 +167,22 @@ const newItem = (itemID, itemPosition, itemIndex) => {
 	spawnItem(itemID, itemPosition, itemIndex);
 };
 
-// Removing An Item
+// Deleting An Item When Server Send A Request
 const deleteItem = (itemIndex) => {
 	if (itemArray[itemIndex] != null) {
 		itemArray[itemIndex].delete();
 		itemArray[itemIndex] = null;
 	}
 }
+
+// Removing An Item When Server Send A Request
+function removeItem(itemIndex) {
+	if (itemArray[itemIndex] != null) {
+		itemArray[itemIndex].delete();
+		itemArray[itemIndex] = null;
+	}
+}
+
 // -------------------End Of Item-------------------
 
 // -------------------Connection Exception Related-------------------
@@ -215,12 +227,14 @@ const updateFrame = ([projectilePosList]) => {
 			projectileList[i].positionChange(projectilePosList[i]);
 
 
-			// local player collision with projectile
+			// Local Player Collision With Projectile
 			let diffX = projectileList[i].object.position.x - player_controller.creature.object.position.x;
 			let diffY = projectileList[i].object.position.y - player_controller.creature.object.position.y;
-			if (projectileList[i].damageInfo.attacker != clientPlayerID && Math.abs(diffX) + Math.abs(diffX) < 2){
+			// Calculate Manhattan Distance
+			if (projectileList[i].damageInfo.attacker != clientPlayerID && Math.abs(diffX) + Math.abs(diffY) < 2){
 				let diffZ = projectileList[i].object.position.z - player_controller.creature.object.position.z;
-				if (Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ) < 0.7){
+				// Calculate Distance To Squared
+				if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
 					player_controller.damage(projectileList[i].damageInfo.amount);
 					onHitProjectileList.push(i);
 					projectileList[i].delete();
@@ -302,7 +316,7 @@ const clientUpdateBlocks = (blockList) => {
 	
 	// Sending New Item List To Server
 	const updateItem = () => {
-		sock.compress(true).emit('newPlayerItemArray', additionalItemID, clientPlayerID);
+		sock.compress(true).emit('serverPlayerItemArray', additionalItemID, clientPlayerID, removeItemID);
 	}
 	// Removing A Collectable Item
 	const removeItem = () => {
