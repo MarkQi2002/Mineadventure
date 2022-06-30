@@ -149,7 +149,7 @@ function createNewMonster(ID, spawnPos){
 	let monsterInfo  = {
 		ID: monsterID,
 		name: monsterInfoArray[ID][0]["name"],
-		position: [spawnPos[0], spawnPos[1], 1],
+		position: [spawnPos[0], spawnPos[1], spawnPos[2]],
 		
 		// Monster Properties
 		properties: newProperties,
@@ -172,25 +172,25 @@ var updateMonsterPos = [];
 function updateMonster(delta){
 	updateMonsterPos.length = monsterArray.length;
 	for(let i = 0; i < monsterArray.length; ++i){
-		if(monsterArray[i] != null){
-			monsterArray[i].position[0] += delta* 0.1;
-			updateMonsterPos[i] = monsterArray[i].position;
+		if(monsterArray[i] == null) continue;
+
+		monsterArray[i].position[0] += delta* 0.1;
+		updateMonsterPos[i] = monsterArray[i].position;
 
 			
-			for(let ii = 0; ii < projectileList.length; ++ii){
-				if (projectileList[ii] == null) continue;
-				// Monster Collision With Projectile
-				let diffX = projectileList[ii].position[0] - monsterArray[i].position[0];
-				let diffY = projectileList[ii].position[1] - monsterArray[i].position[1];
-				// Calculate Manhattan Distance
+		for(let ii = 0; ii < projectileList.length; ++ii){
+			if (projectileList[ii] == null || projectileList[ii] == "deletion") continue;
+			// Monster Collision With Projectile
+			let diffX = projectileList[ii].position[0] - monsterArray[i].position[0];
+			let diffY = projectileList[ii].position[1] - monsterArray[i].position[1];
+			// Calculate Manhattan Distance
 
-				if (Math.abs(diffX) + Math.abs(diffY) < 2){
-					let diffZ = projectileList[ii].position[2] - monsterArray[i].position[2];
-					// Calculate Distance To Squared
-					if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 1.47){
-						creatureInfoChange([[["monster", i], {"health": ["-", 10]}]]);
-						projectileList[ii] = "deletion";
-					}
+			if (Math.abs(diffX) + Math.abs(diffY) < 2){
+				let diffZ = projectileList[ii].position[2] - monsterArray[i].position[2];
+				// Calculate Distance To Squared
+				if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 1.47){
+					creatureInfoChange([[["monster", i], {"health": ["-", 10]}]]);
+					projectileList[ii] = "deletion";
 				}
 			}
 		}
@@ -199,7 +199,7 @@ function updateMonster(delta){
 
 
 
-createNewMonster(0,[2,2]);
+
 // -------------------End Of Monster-------------------
 
 // -------------------Item-------------------
@@ -553,3 +553,11 @@ server.on('error', (err) => {
 server.listen(8080, () => {
   	console.log('server is ready');
 });
+
+
+
+for(let i = 0; i < 500; ++i){
+	posX = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.x * game_map.blockSize2D.x);
+	posY = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.y * game_map.blockSize2D.y);
+	createNewMonster(0,[posX,posY,1]);
+}

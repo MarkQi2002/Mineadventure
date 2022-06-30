@@ -93,6 +93,8 @@ const creatureInfoChange = (creatureInfo) => {
 			if (monsterArray[creatureInfo[i][0][1]] == null) continue;
 			theCreature = monsterArray[creatureInfo[i][0][1]];
 		}
+
+		console.log(222222);
 		
 		for ([key, value] of Object.entries(creatureInfo[i][1])) {
 			let setValue = value[1];
@@ -275,7 +277,7 @@ const updateFrame = ([projectilePosList, monsterPosList]) => {
 			if (projectileList[i].damageInfo.attacker != clientPlayerID && Math.abs(diffX) + Math.abs(diffY) < 2){
 				let diffZ = projectileList[i].object.position.z - player_controller.creature.object.position.z;
 				// Calculate Distance To Squared
-				if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 1.47){
+				if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
 					player_controller.damage(projectileList[i].damageInfo.amount);
 					onHitProjectileList.push(i);
 					projectileList[i].delete();
@@ -410,7 +412,7 @@ const clientUpdateBlocks = (blockList) => {
 
 	// Creature Information Related
 	const creatureInfo = () => {
-		sock.compress(true).emit('creatudreInfo', changingCreatureInfo);
+		sock.compress(true).emit('creatureInfo', changingCreatureInfo);
 		changingCreatureInfo = [];
 	}
 	document.addEventListener('changingCreatureInfo', creatureInfo);
