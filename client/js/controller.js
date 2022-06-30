@@ -428,7 +428,7 @@ class controller{
             // Variable Declaration For Checking Collision
             // Center Of The Circle
             let cx = predictedPosition.x + 0.5;
-            let cy = predictedPosition.y;
+            let cy = predictedPosition.y + 0.5;
             predictedMapX = Math.floor(cx + 1);
             predictedMapY = Math.floor(cy);
 
@@ -610,8 +610,10 @@ class controller{
         } 
         
         // Move To Nearest Integer
-        if (Math.abs(Math.round(creatureTrans.position.x) - creatureTrans.position.x) <= 0.03) creatureTrans.position.x = Math.round(creatureTrans.position.x);
-        if (Math.abs(Math.round(creatureTrans.position.y) - creatureTrans.position.y) <= 0.03) creatureTrans.position.y = Math.round(creatureTrans.position.y);
+        if (this.forwardCollision || this.backwardCollision || this.leftCollision || this.rightCollision) {
+            if (Math.abs(Math.round(creatureTrans.position.x) - creatureTrans.position.x) <= 0.03) creatureTrans.position.x = Math.round(creatureTrans.position.x);
+            if (Math.abs(Math.round(creatureTrans.position.y) - creatureTrans.position.y) <= 0.03) creatureTrans.position.y = Math.round(creatureTrans.position.y);    
+        }
 
         // Apply Item Collision 
         this.itemCollision(translateDistance); 
