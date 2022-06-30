@@ -102,8 +102,9 @@ class player extends creature {
 
         // Spherical Body
         let geometry = new THREE.SphereGeometry(0.5, 10, 10);
-        let material = new THREE.MeshPhongMaterial({color: new THREE.Color(Math.random(), Math.random(), Math.random())});
+        let material = new THREE.MeshPhongMaterial({color: new THREE.Color(Math.random(), Math.random(), Math.random(), 0.4)});
         let mesh = new THREE.Mesh(geometry, material);
+
         this.object.add(mesh);
     }
 }

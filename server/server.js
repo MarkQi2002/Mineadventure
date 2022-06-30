@@ -238,7 +238,7 @@ var itemInfoArray = [[{"itemID": 0, "itemName": "Blood Orb", "rarity": "Common",
 // Update Player Property And Player Item Array
 const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
 	// Remove Item From The Item Array
-	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID)
+	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID);
 
 	// Update Player Property Based On Item
 	let playerInfo = [[["player", updatePlayerID], itemInfoArray[additionalItemID][1]]];
@@ -291,6 +291,8 @@ const newItem = (newItemID, newItemPosition) => {
 			return newItemID;
 		}
 	}
+
+	newItemIndex = -1;
 };
 
 // Removing An Item When Client Send A Request

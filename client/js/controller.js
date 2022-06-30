@@ -284,147 +284,187 @@ class controller{
         this.rightCollision = false;
 
         // Initialize Position Array
-        let predictedPosition = [];
-        predictedPosition.length = 9;
+        let predictedPosition = new THREE.Vector3();
+        predictedPosition.copy(creatureTrans.position);
 
-        // Copy Array And Predict Next Location
-        for (let positionIndex = 0; positionIndex < predictedPosition.length; positionIndex++) {
-            // Copy Current Position
-            predictedPosition[positionIndex] = new THREE.Vector3();
-            predictedPosition[positionIndex].copy(creatureTrans.position);
-
-            if (positionIndex == 0) {
-                predictedPosition[positionIndex].x += 0.15;
-                predictedPosition[positionIndex].y += 0.85;
-                continue;
-            } else if (positionIndex == 2) {
-                predictedPosition[positionIndex].x += 0.85;
-                predictedPosition[positionIndex].y += 0.85;
-                continue;
-            } else if (positionIndex == 6) {
-                predictedPosition[positionIndex].x += 0.15;
-                predictedPosition[positionIndex].y += 0.15;
-                continue;
-            } else if (positionIndex == 8) {
-                predictedPosition[positionIndex].x += 0.85;
-                predictedPosition[positionIndex].y += 0.15;
-                continue;
-            }
-
-            // Shift Position
-            if (positionIndex % 3 == 1) predictedPosition[positionIndex].x += 0.5;
-            if (positionIndex % 3 == 2) predictedPosition[positionIndex].x += 0.9999;
-            if (Math.floor(positionIndex / 3) == 0) predictedPosition[positionIndex].y += 0.9999;
-            if (Math.floor(positionIndex / 3) == 1) predictedPosition[positionIndex].y += 0.5;
-        }
+        let predictedMapX;
+        let predictedMapY;
         
         // Forward Collision
-        for (let positionIndex = 0; positionIndex < predictedPosition.length; positionIndex++) {
-            // Distance To Shift
-            var shiftDistance = 0;
-            if (this.inputs.forward) shiftDistance = translateDistance
+        if (this.inputs.forward) {
+            predictedPosition.y += translateDistance;
+            // Variable Declaration For Checking Collision
+            // Center Of The Circle
+            let cx = predictedPosition.x + 0.5;
+            let cy = predictedPosition.y + 0.5;
+            predictedMapX = Math.floor(cx);
+            predictedMapY = Math.floor(cy + 1);
 
-            // Get Unit
-            let unit = game_map.getUnit([Math.floor(predictedPosition[positionIndex].x), Math.floor(predictedPosition[positionIndex].y + shiftDistance)]);
+            for (let mapShift = -1; mapShift <= 1; mapShift++) {
+                let unit = game_map.getUnit([predictedMapX + mapShift, predictedMapY]);
+                // Check If Hit A Border
+                if (unit == null) {
+                    this.forwardCollision = true;
+                    break;
+                }
 
-            // Check If Hit A Border
-            if (unit == null) {
-                //console.log("Map Border!!!");
-                this.forwardCollision = true;
-                break;
+                // Bottom Left Of The Square
+                let rx = predictedMapX + mapShift;
+                let ry = predictedMapY;
+
+                // Getting Which Edge Or Corner The Circle Is Closest To
+                let testX = cx;
+                let testY = cy;
+
+                if (testX < rx) testX = rx;
+                else if (testX > rx + 1) testX = rx + 1;
+                if (testY < ry) testY = ry;
+                else if (testY > ry + 1) testY = ry + 1;
+                
+                // Getting Difference In Distance
+                let distX = cx - testX;
+                let distY = cy - testY;
+
+                // Collision Has Occur
+                if (distX * distX + distY * distY < 0.25 && game_map.unitIDList[unit.ID].collision) {
+                    this.forwardCollision = true;
+                    break;
+                }
             }
-
-            // Check If Collide With A Wall
-            if (game_map.unitIDList[unit.ID].collision) {
-                //console.log("Collided With Wall", unit); 
-                //console.log("Player Position: ", creatureTrans.position); 
-                 
-                // Indicate Collision Occurred 
-                this.forwardCollision = true;
-                break;  
-            } 
         }
+        if (this.inputs.forward) predictedPosition.y -= translateDistance;
         
         // Backward Collision
-        for (let positionIndex = 0; positionIndex < predictedPosition.length; positionIndex++) {
-            // Distance To Shift
-            var shiftDistance = 0;
-            if (this.inputs.backward) shiftDistance = translateDistance
+        if (this.inputs.backward) {
+            predictedPosition.y -= translateDistance;
+            // Variable Declaration For Checking Collision
+            // Center Of The Circle
+            let cx = predictedPosition.x + 0.5;
+            let cy = predictedPosition.y + 0.5;
+            predictedMapX = Math.floor(cx);
+            predictedMapY = Math.floor(cy - 1);
 
-            // Get Unit
-            let unit = game_map.getUnit([Math.floor(predictedPosition[positionIndex].x), Math.floor(predictedPosition[positionIndex].y - shiftDistance)]);
+            for (let mapShift = -1; mapShift <= 1; mapShift++) {
+                let unit = game_map.getUnit([predictedMapX + mapShift, predictedMapY]);
+                // Check If Hit A Border
+                if (unit == null) {
+                    this.backwardCollision = true;
+                    break;
+                }
 
-            // Check If Hit A Border
-            if (unit == null) {
-                //console.log("Map Border!!!");
-                this.backwardCollision = true;
-                break;
+                // Bottom Left Of The Square
+                let rx = predictedMapX + mapShift;
+                let ry = predictedMapY;
+
+                // Getting Which Edge Or Corner The Circle Is Closest To
+                let testX = cx;
+                let testY = cy;
+
+                if (testX < rx) testX = rx;
+                else if (testX > rx + 1) testX = rx + 1;
+                if (testY < ry) testY = ry;
+                else if (testY > ry + 1) testY = ry + 1;
+                
+                // Getting Difference In Distance
+                let distX = cx - testX;
+                let distY = cy - testY;
+
+                // Collision Has Occur
+                if (distX * distX + distY * distY < 0.25 && game_map.unitIDList[unit.ID].collision) {
+                    this.backwardCollision = true;
+                    break;
+                }
             }
-
-            // Check If Collide With A Wall
-            if (game_map.unitIDList[unit.ID].collision) {
-                //console.log("Collided With Wall", unit); 
-                //console.log("Player Position: ", creatureTrans.position); 
-                 
-                // Indicate Collision Occurred 
-                this.backwardCollision = true;
-                break;  
-            } 
         }
+        if (this.inputs.backward) predictedPosition.y += translateDistance;
 
         // Left Collision
-        for (let positionIndex = 0; positionIndex < predictedPosition.length; positionIndex++) {
-            // Distance To Shift
-            var shiftDistance = 0;
-            if (this.inputs.left) shiftDistance = translateDistance
+        if (this.inputs.left) {
+            predictedPosition.x -= translateDistance;
+            // Variable Declaration For Checking Collision
+            // Center Of The Circle
+            let cx = predictedPosition.x + 0.5;
+            let cy = predictedPosition.y + 0.5;
+            predictedMapX = Math.floor(cx - 1);
+            predictedMapY = Math.floor(cy);
 
-            // Get Unit
-            let unit = game_map.getUnit([Math.floor(predictedPosition[positionIndex].x - shiftDistance), Math.floor(predictedPosition[positionIndex].y)]);
+            for (let mapShift = -1; mapShift <= 1; mapShift++) {
+                let unit = game_map.getUnit([predictedMapX, predictedMapY + mapShift]);
+                // Check If Hit A Border
+                if (unit == null) {
+                    this.leftCollision = true;
+                    break;
+                }
 
-            // Check If Hit A Border
-            if (unit == null) {
-                //console.log("Map Border!!!");
-                this.leftCollision = true;
-                break;
+                // Bottom Left Of The Square
+                let rx = predictedMapX;
+                let ry = predictedMapY + mapShift;
+
+                // Getting Which Edge Or Corner The Circle Is Closest To
+                let testX = cx;
+                let testY = cy;
+
+                if (testX < rx) testX = rx;
+                else if (testX > rx + 1) testX = rx + 1;
+                if (testY < ry) testY = ry;
+                else if (testY > ry + 1) testY = ry + 1;
+                
+                // Getting Difference In Distance
+                let distX = cx - testX;
+                let distY = cy - testY;
+                
+                // Collision Has Occur
+                if (distX * distX + distY * distY < 0.25 && game_map.unitIDList[unit.ID].collision) {
+                    this.leftCollision = true;
+                    break;
+                }
             }
-
-            // Check If Collide With A Wall
-            if (game_map.unitIDList[unit.ID].collision) {
-                //console.log("Collided With Wall", unit); 
-                //console.log("Player Position: ", creatureTrans.position); 
-                 
-                // Indicate Collision Occurred 
-                this.leftCollision = true;
-                break;  
-            } 
         }
+        if (this.inputs.left) predictedPosition.x += translateDistance;
 
         // Right Collision
-        for (let positionIndex = 0; positionIndex < predictedPosition.length; positionIndex++) {
-            // Distance To Shift
-            var shiftDistance = 0;
-            if (this.inputs.right) shiftDistance = translateDistance
+        if (this.inputs.right) {
+            predictedPosition.x += translateDistance;
+            // Variable Declaration For Checking Collision
+            // Center Of The Circle
+            let cx = predictedPosition.x + 0.5;
+            let cy = predictedPosition.y;
+            predictedMapX = Math.floor(cx + 1);
+            predictedMapY = Math.floor(cy);
 
-            // Get Unit
-            let unit = game_map.getUnit([Math.floor(predictedPosition[positionIndex].x + shiftDistance), Math.floor(predictedPosition[positionIndex].y)]);
+            for (let mapShift = -1; mapShift <= 1; mapShift++) {
+                let unit = game_map.getUnit([predictedMapX, predictedMapY + mapShift]);
+                // Check If Hit A Border
+                if (unit == null) {
+                    this.rightCollision = true;
+                    break;
+                }
 
-            // Check If Hit A Border
-            if (unit == null) {
-                //console.log("Map Border!!!");
-                this.rightCollision = true;
-                break;
+                // Bottom Left Of The Square
+                let rx = predictedMapX;
+                let ry = predictedMapY + mapShift;
+
+                // Getting Which Edge Or Corner The Circle Is Closest To
+                let testX = cx;
+                let testY = cy;
+
+                if (testX < rx) testX = rx;
+                else if (testX > rx + 1) testX = rx + 1;
+                if (testY < ry) testY = ry;
+                else if (testY > ry + 1) testY = ry + 1;
+                
+                // Getting Difference In Distance
+                let distX = cx - testX;
+                let distY = cy - testY;
+
+                // Collision Has Occur
+                if (distX * distX + distY * distY < 0.25 && game_map.unitIDList[unit.ID].collision) {
+                    this.rightCollision = true;
+                    break;
+                }
             }
-
-            // Check If Collide With A Wall
-            if (game_map.unitIDList[unit.ID].collision) {
-                //console.log("Collided With Wall", unit); 
-                //console.log("Player Position: ", creatureTrans.position); 
-                 
-                // Indicate Collision Occurred 
-                this.rightCollision = true;
-                break;  
-            } 
         }
+        if (this.inputs.right) predictedPosition.x -= translateDistance;
 
         // No Map Collision Has Occurred 
         return false; 

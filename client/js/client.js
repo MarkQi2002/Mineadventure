@@ -147,6 +147,7 @@ const newMonster = (monsterInfo, monsterArrayLength) => {
 // Variable Declaration
 var additionalItemID;
 var removeItemID;
+var itemArray = [];
 var itemInfoArray;
 var itemDefaultPosition = [1, 1, 1];
 var itemDefaultGeometry = new THREE.SphereGeometry(0.2, 10, 10);
@@ -156,7 +157,7 @@ var itemDefaultmesh = new THREE.Mesh(itemDefaultGeometry, itemDefaultMaterial);
 // Update Player Property And Player Item Array
 const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
 	// Remove Item From The Item Array
-	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID)
+	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID);
 
 	// Update Player Property Based On Item
 	let playerInfo = [[["player", updatePlayerID], itemInfoArray[additionalItemID][1]]];
@@ -179,8 +180,9 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 // Constructing An Player Object And Storing In The Client Side playerArray
 function spawnItem(itemID, itemPosition, itemIndex){
 	// Creating Passive Item Object
-	var new_item = new passiveItem(itemInfoArray[itemID][0], itemDefaultmesh, itemPosition, itemInfoArray[itemID][1]);
-
+	if (itemIndex >= 0 && itemIndex < itemArray.length) var new_item = new passiveItem(itemInfoArray[itemID][0], itemDefaultmesh, itemPosition, itemInfoArray[itemID][1]);
+	else return;
+	
 	// Storing Passive Item Object Into itemArray
 	if (itemArray[itemIndex] == null) {
 		itemArray[itemIndex] = new_item;
