@@ -84,21 +84,25 @@ function lockedCommand(inputArray) {
     // Teleport The Player
     if (inputArray[0] == "tp") {
         // Input Control
-        if (isNaN(parseInt(inputArray[1])) || isNaN(parseInt(inputArray[2]))) {
+        let [playerX, playerY] = [parseInt(inputArray[1]), parseInt(inputArray[2])];
+
+        player_controller.controllerUpdateBlock([game_map.map2DToBlock2D([playerX, playerY]), game_map.getDirection([playerX, playerY])]);
+
+
+        if (isNaN(parseInt(playerX)) || isNaN(parseInt(playerY))) {
             console.log("The TP Location Is Invalid!");
             return;
         }
 
         // Updating Redenerer Information
-        player_controller.controllerUpdateBlock([game_map.map2DToBlock2D([inputArray[1], inputArray[2]]), game_map.getDirection([inputArray[1], inputArray[2]])]);
 
         // Moving Player To New Position
-        player_controller.creature.object.position.x = inputArray[1];
-        player_controller.creature.object.position.y = inputArray[2];
+        player_controller.creature.object.position.x = playerX;
+        player_controller.creature.object.position.y = playerY;
 
         // Moving The Camera With The Player
-        player_controller.camera.position.x = inputArray[1];
-        player_controller.camera.position.y = inputArray[2] - carmeraOffsetY;
+        player_controller.camera.position.x = playerX;
+        player_controller.camera.position.y = playerY - carmeraOffsetY;
 
         // Update Player Position Event
         var event = new Event('position event', {bubbles: true, cancelable: false}) 
