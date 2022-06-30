@@ -177,20 +177,31 @@ function updateMonster(delta){
 		monsterArray[i].position[0] += delta* 0.1;
 		updateMonsterPos[i] = monsterArray[i].position;
 
-			
-		for(let ii = 0; ii < projectileList.length; ++ii){
-			if (projectileList[ii] == null || projectileList[ii] == "deletion") continue;
+		let [mapX, mapY] = [Math.floor(monsterArray[i].position[0] + 0.5), Math.floor(monsterArray[i].position[1] + 0.5)];
+		let unitX = (mapX < 0) ? -mapX - 1 : mapX;
+		let unitY = (mapY < 0) ? -mapY - 1 : mapY;
+		let theBlock = game_map.getBlockByQuarter(game_map.unit2DToBlock2D([unitX, unitY]), game_map.getQuarterMap([mapX, mapY]));
+		
+		if (theBlock == null) continue;
+
+		let blockProjectileList = theBlock.projectileList;
+
+		for(let ii = 0; ii < blockProjectileList.length; ++ii){
+
+			let index = blockProjectileList[ii];
+
+			if (projectileList[index] == null || projectileList[index] == "deletion") continue;
 			// Monster Collision With Projectile
-			let diffX = projectileList[ii].position[0] - monsterArray[i].position[0];
-			let diffY = projectileList[ii].position[1] - monsterArray[i].position[1];
+			let diffX = projectileList[index].position[0] - monsterArray[i].position[0];
+			let diffY = projectileList[index].position[1] - monsterArray[i].position[1];
 			// Calculate Manhattan Distance
 
 			if (Math.abs(diffX) + Math.abs(diffY) < 2){
-				let diffZ = projectileList[ii].position[2] - monsterArray[i].position[2];
+				let diffZ = projectileList[index].position[2] - monsterArray[i].position[2];
 				// Calculate Distance To Squared
 				if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 1.47){
-					creatureInfoChange([[["monster", i], {"health": ["-", 10]}]]);
-					projectileList[ii] = "deletion";
+					creatureInfoChange([[["monster", i], {"health": ["-", projectileList[index].damageInfo.amount]}]]);
+					projectileList[index] = "deletion";
 				}
 			}
 		}
@@ -366,6 +377,7 @@ function initPlayerProjectile(projectileInfo){
 
 // Variable Declaration For Updating Projectiles
 var updateProjectileList = [];
+var clearBlockProjectileList = [];
 
 // Update All Projectiles
 function updateProjectile(delta){
@@ -374,6 +386,19 @@ function updateProjectile(delta){
 	let deleteProjectileList = [];
 	let deleteUnitList = [];
 	let projectilePos;
+
+
+
+	
+	for (let i = 0; i < clearBlockProjectileList.length; i++){
+		let [mapX, mapY] = clearBlockProjectileList[i];
+		let unitX = (mapX < 0) ? -mapX - 1 : mapX;
+		let unitY = (mapY < 0) ? -mapY - 1 : mapY;
+		let theBlock = game_map.getBlockByQuarter(game_map.unit2DToBlock2D([unitX, unitY]), game_map.getQuarterMap([mapX, mapY]));
+		theBlock.projectileList = [];
+	}
+
+	clearBlockProjectileList = [];
 
 	for (let i = 0; i < projectileList.length; i++){
 		if (projectileList[i] == "deletion"){
@@ -391,20 +416,31 @@ function updateProjectile(delta){
 			];
 			updateProjectileList[i] = projectilePos;
 			
-			let newPos = [Math.floor(projectileList[i].position[0] + 0.5), Math.floor(projectileList[i].position[1] + 0.5)];
-			let unit = game_map.getUnit(newPos);
+			let [mapX, mapY] = [Math.floor(projectileList[i].position[0] + 0.5), Math.floor(projectileList[i].position[1] + 0.5)];
+
+			let unitX = (mapX < 0) ? -mapX - 1 : mapX;
+			let unitY = (mapY < 0) ? -mapY - 1 : mapY;
+
+			let theBlock = game_map.getBlockByQuarter(game_map.unit2DToBlock2D([unitX, unitY]), game_map.getQuarterMap([mapX, mapY]));
+
+			let unit = null;
+			if (theBlock != null){
+				unit = theBlock.unitList[Math.abs(unitY) % game_map.blockSize2D.y][Math.abs(unitX) % game_map.blockSize2D.x];
+			}
+
 			
 			if (unit == null){
 				// for delete projectile
 				projectileList[i] = null;
 				updateProjectileList[i] = null;
 				deleteProjectileList.push(i);
+				continue;
 			} else {
 				if (game_map.unitIDList[unit.ID].collision == true){
 					// for delete unit
 					let isNotIn = true;
 					for (let ii = 0; ii < deleteUnitList.length; ii++){
-						if (deleteUnitList[ii][0][0] == newPos[0] && deleteUnitList[ii][0][1] == newPos[1]){
+						if (deleteUnitList[ii][0][0] == mapX && deleteUnitList[ii][0][1] == mapY){
 							isNotIn == false;
 						}
 					}
@@ -419,10 +455,16 @@ function updateProjectile(delta){
 						let newID = 0;
 						unit.ID = newID;
 						unit.Height = 0;
-						deleteUnitList.push([newPos, unit]);
+						deleteUnitList.push([[mapX, mapY], unit]);
+						continue;
 					}
 				}
 			}
+
+
+			theBlock.projectileList.push(i);
+			clearBlockProjectileList.push([mapX, mapY]);
+
 		}
 		
 	}
@@ -433,6 +475,9 @@ function updateProjectile(delta){
 
 	
 }
+
+
+
 // -------------------End Of Projectile-------------------
 
 // -------------------Server Loop-------------------

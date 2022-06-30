@@ -206,7 +206,7 @@ class map {
                         x: blockX,
                         y: blockY,
                         direction: theQuarterMap.direction,
-                        block: theQuarterMap.blockList[blockY][blockX]
+                        block: {unitList: theQuarterMap.blockList[blockY][blockX].unitList}
                     }
                     sendingBlock.push(blockInfo);
                 }
@@ -228,7 +228,7 @@ class map {
                     x: blockX,
                     y: blockY,
                     direction: theQuarterMap.direction,
-                    block: theQuarterMap.blockList[blockY][blockX]
+                    block: {unitList: theQuarterMap.blockList[blockY][blockX].unitList}
                 }
                 sendingBlock.push(blockInfo);
 
@@ -291,6 +291,7 @@ class quarterMap{
 class block{
     constructor(x, y, direction, blockSize2D, PerlinNoise) {
         this.unitList = [];
+        this.projectileList = [];
         this.makeBlock(blockSize2D[0], blockSize2D[1]);
         this.initBlock(x, y, direction, PerlinNoise);
     }

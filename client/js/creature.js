@@ -27,6 +27,8 @@ class creature{
         this.innerHealthBar.position.set(0, 0, 0.0001);
         camera.add(this.healthBar);
         this.healthBar.position.set(0, 0, -1);
+
+        this.updateHealthBarPercent();
     }
 
     damage(amount){

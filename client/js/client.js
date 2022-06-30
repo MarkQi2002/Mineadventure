@@ -93,8 +93,6 @@ const creatureInfoChange = (creatureInfo) => {
 			if (monsterArray[creatureInfo[i][0][1]] == null) continue;
 			theCreature = monsterArray[creatureInfo[i][0][1]];
 		}
-
-		console.log(222222);
 		
 		for ([key, value] of Object.entries(creatureInfo[i][1])) {
 			let setValue = value[1];
@@ -125,6 +123,7 @@ var monsterArray = [];
 monsterArray.length = 100;
 
 function spawnMonster(monsterInfo){
+	console.log(monsterInfo);
 	let new_monster = new monster(monsterInfo);
 
 	monsterArray[monsterInfo.ID] = new_monster;
