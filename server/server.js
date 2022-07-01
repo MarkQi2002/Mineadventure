@@ -681,10 +681,10 @@ server.listen(8080, () => {
 
 
 // Spawning 500 Monsters Randomly Throughout The Map
-for (let i = 0; i < 1000; ++i){
-	posX = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.x * game_map.blockSize2D.x);
-	posY = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.y * game_map.blockSize2D.y);
-	createNewMonster(0, [posX, posY, 1]);
+for (let i = 0; i < 500; ++i){
+
+	let [newPosX, newPosY] = createSpawnPosition();
+	createNewMonster(0, [newPosX, newPosY, 1]);
 }
 
 //createNewMonster(0, [0, 0, 1]);
