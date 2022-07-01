@@ -125,7 +125,7 @@ var monsterArray = [];
 monsterArray.length = 100;
 var monster_ID_Count = 0;
 var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower",
-						"properties":{"health": 50, "maxHealth": 50, "attackDamage": 1}},
+						"properties":{"health": 50, "maxHealth": 50, "attackDamage": 1, "moveSpeed": 4}},
 						{}],
 
 
@@ -185,6 +185,9 @@ function createNewMonster(ID, spawnPos){
 	// Send Information To Client To Generate A New Monster
 	io.compress(true).emit('newMonster', monsterInfo, monsterArray.length);
 
+	
+
+
 	// Return The Monster Information
 	return monsterInfo;
 }
@@ -198,7 +201,9 @@ function updateMonster(delta){
 
 		theMonster = AI_controllerList[i].creature;
 
-		AI_controllerList[i].update(delta);
+		goal = playerArray[0] != null ? [Math.floor(playerArray[0].position[0]), Math.floor(playerArray[0].position[1])] : [0,0];
+
+		AI_controllerList[i].update(delta, game_map, goal);
 		updateMonsterPos[i] = theMonster.position;
 
 		let [mapX, mapY] = [Math.floor(theMonster.position[0] + 0.5), Math.floor(theMonster.position[1] + 0.5)];
@@ -673,9 +678,13 @@ server.listen(8080, () => {
   	console.log('server is ready');
 });
 
+
+
 // Spawning 500 Monsters Randomly Throughout The Map
-for (let i = 0; i < 500; ++i){
+for (let i = 0; i < 1000; ++i){
 	posX = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.x * game_map.blockSize2D.x);
 	posY = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.y * game_map.blockSize2D.y);
 	createNewMonster(0, [posX, posY, 1]);
 }
+
+//createNewMonster(0, [0, 0, 1]);

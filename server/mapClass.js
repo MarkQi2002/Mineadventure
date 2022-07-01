@@ -106,6 +106,33 @@ class map {
     }
 
 
+    neighbors([mapX, mapY]){
+        let neighborList = [];
+        let theUnit;
+
+        theUnit = this.getUnit([mapX + 1, mapY]);
+        if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+            neighborList.push([mapX + 1, mapY]);
+        }
+
+        theUnit = this.getUnit([mapX - 1, mapY]);
+        if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+            neighborList.push([mapX - 1, mapY]);
+        }
+
+        theUnit = this.getUnit([mapX, mapY + 1]);
+        if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+            neighborList.push([mapX, mapY + 1]);
+        }
+
+        theUnit = this.getUnit([mapX, mapY - 1]);
+        if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+            neighborList.push([mapX, mapY - 1]);
+        }
+
+        return neighborList;
+    }
+
     // set UnitIDInfo by (texture url address, collision bool)
     setUnitIDInfo(texture, collision, geometryType){
         var unitIDInfo = {
