@@ -290,8 +290,8 @@ Attack
 Defensive
 */
 var itemDefaultPosition = [1, 1, 1];
-var itemInfoArray = [[{"itemID": 0, "itemName": "Blood Orb", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"maxHealth": ["+", 20]}],
-					[{"itemID": 1, "itemName": "Attack Orb", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Offensive"}, {"attackDamage": ["+", 10]}],
+var itemInfoArray = [[{"itemID": 0, "itemName": "Bison Steak", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"maxHealth": ["+", 25], "health": ["+", 25]}],
+					[{"itemID": 1, "itemName": "Armor Piercing Rounds", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Offensive"}, {"attackDamage": ["+", 10]}],
 					[],
 					[],
 					[],
