@@ -155,6 +155,7 @@ function createNewMonster(ID, spawnPos){
 		newProperties[key] = value;
 	}
 
+	// Monster Information Struct
 	let monsterInfo  = {
 		ID: monsterID,
 		name: monsterInfoArray[ID][0]["name"],
@@ -167,20 +168,24 @@ function createNewMonster(ID, spawnPos){
 		creatureItemArray: {}
 	};
 
+	// Saving Monster Info To Monster Array
 	monsterArray[monsterID] = monsterInfo;
 
+	// If The AI_contollerList Is Not Long Enought Increment It
 	if (monsterID >= AI_controllerList.length){
 		AI_controllerList.length = monsterID + 1;
 	}
 
+	// Creating A New AI Controller Based On MonsterInfo
 	AI_controllerList[monsterID] = new AI_controller(monsterInfo);
-
 
 	// Log The MonsterInfo On The Server Side
 	console.log(monsterInfo);
 
+	// Send Information To Client To Generate A New Monster
 	io.compress(true).emit('newMonster', monsterInfo, monsterArray.length);
 
+	// Return The Monster Information
 	return monsterInfo;
 }
 
@@ -232,6 +237,24 @@ function updateMonster(delta){
 
 // Deleting A Monster Based On The Input Monster ID
 function deleteMonster(monsterID){
+	// When The MonsterArray Corresponding To MonsterID Is Not NULL Spawn An Item
+	if (monsterArray[monsterID] != null) {
+		// Variable Declaration For Spawning Item After Monster Dead
+		let newItemID;
+		let newItemPosition = monsterArray[monsterID].position;
+		
+		// Randomly Generating An Item ID Based On Rarity Distribution
+		let randomNumber = Math.random();
+		if (randomNumber < 0.60) newItemID = itemRarityArray[0][Math.floor(Math.random() * itemRarityArray[0].length)];
+		else if (randomNumber < 0.85) newItemID = itemRarityArray[1][Math.floor(Math.random() * itemRarityArray[1].length)];
+		else if (randomNumber < 0.95) newItemID = itemRarityArray[2][Math.floor(Math.random() * itemRarityArray[2].length)];
+		else if (randomNumber < 1.00) newItemID = itemRarityArray[3][Math.floor(Math.random() * itemRarityArray[3].length)];
+
+		// Spawning The Actual Item
+		if (newItemID != null && typeof newItemID != "undefined") io.emit('clientNewItem', newItem(newItemID, newItemPosition), newItemPosition, newItemIndex);
+	}
+
+	// Deleting Everything Relating To The Particular Monster Being Deleted
 	delete monsterArray[monsterID];
 	delete AI_controllerList[monsterID];
 	monsterArray[monsterID] = null;
@@ -250,6 +273,22 @@ itemArray.length = 256;
 // itemInfoArray Is A 2D Array
 // First Layer: Item ID (Currently 20 Items)
 // Second Layer: itemInfo, itemPosition, propertyInfo
+// itemName - Name Of The Item
+/* itemRarity - How Rare Is The Item
+White (Common) (60%)
+Green (Uncommon) (25%)
+Orange (Suprior) (10%)
+Red (Legendary) (5%)
+*/
+/* itemStackType - Show How Multiple Items Increase Its Property
+Linear Stacking
+Hyperbolic Stacking
+Exponential Stacking
+*/
+/* itemBuffType - What Type Of Buff The Item Gives
+Attack
+Defensive
+*/
 var itemDefaultPosition = [1, 1, 1];
 var itemInfoArray = [[{"itemID": 0, "itemName": "Blood Orb", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"maxHealth": ["+", 20]}],
 					[{"itemID": 1, "itemName": "Attack Orb", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Offensive"}, {"attackDamage": ["+", 10]}],
@@ -272,6 +311,17 @@ var itemInfoArray = [[{"itemID": 0, "itemName": "Blood Orb", "rarity": "Common",
 					[],
 					[],
 					[]];
+
+/* itemRarity - How Rare Is The Item
+White (Common) (60%) Index: 0
+Green (Uncommon) (25%) Index: 1
+Orange (Suprior) (10%) Index: 2
+Red (Legendary) (5%) Index: 3
+*/
+var itemRarityArray = [[0, 1], 
+						[],
+						[],
+						[]];
 
 // Update Player Property And Player Item Array
 const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
@@ -627,5 +677,5 @@ server.listen(8080, () => {
 for (let i = 0; i < 500; ++i){
 	posX = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.x * game_map.blockSize2D.x);
 	posY = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.y * game_map.blockSize2D.y);
-	createNewMonster(0, [posX,posY, 1]);
+	createNewMonster(0, [posX, posY, 1]);
 }

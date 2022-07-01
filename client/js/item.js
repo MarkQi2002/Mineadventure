@@ -1,21 +1,6 @@
 // The Entire Item Class
 class item {
-    // itemName - Name Of The Item
-    /* itemRarity - How Rare Is The Item
-    White (Common) (60%)
-    Green (Uncommon) (25%)
-    Orange (Suprior) (10%)
-    Red (Legendary) (5%)
-    */
-    /* itemStackType - Show How Multiple Items Increase Its Property
-    Linear Stacking
-    Hyperbolic Stacking
-    Exponential Stacking
-    */
-    /* itemBuffType - What Type Of Buff The Item Gives
-    Attack
-    Defensive
-    */
+    // Item Constructor
     constructor(itemInfo, itemMesh, itemPosition) {
         // Basic Item Information
         this.itemInfo = itemInfo;
@@ -27,6 +12,7 @@ class item {
         scene.add(this.object);
     }
 
+    // Completely Removing An Item From The Class
     delete() {
         // Remove All Child Object
         var obj;

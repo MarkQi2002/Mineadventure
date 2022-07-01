@@ -156,7 +156,6 @@ var itemInfoArray;
 var itemDefaultPosition = [1, 1, 1];
 var itemDefaultGeometry = new THREE.SphereGeometry(0.2, 10, 10);
 var itemDefaultMaterial = new THREE.MeshBasicMaterial({color: 'red'});
-var itemDefaultmesh = new THREE.Mesh(itemDefaultGeometry, itemDefaultMaterial);
 
 // Update Player Property And Player Item Array
 const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
@@ -184,7 +183,9 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 // Constructing An Player Object And Storing In The Client Side playerArray
 function spawnItem(itemID, itemPosition, itemIndex){
 	// Creating Passive Item Object
-	if (itemIndex >= 0 && itemIndex < itemArray.length) var new_item = new passiveItem(itemInfoArray[itemID][0], itemDefaultmesh, itemPosition, itemInfoArray[itemID][1]);
+	var new_item;
+	var itemDefaultmesh = new THREE.Mesh(itemDefaultGeometry, itemDefaultMaterial);
+	if (itemIndex >= 0 && itemIndex < itemArray.length) new_item = new passiveItem(itemInfoArray[itemID][0], itemDefaultmesh, itemPosition, itemInfoArray[itemID][1]);
 	else return;
 	
 	// Storing Passive Item Object Into itemArray
