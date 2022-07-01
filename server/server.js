@@ -11,6 +11,7 @@ const socketio = require('socket.io');
 
 // Map Related Setting
 const map = require('./mapClass.js');
+const AI_controller = require('./AI_controller.js');
 const e = require('express');
 //const quarterMap = require('./quarterMap.js');
 //const block = require('./block.js');
@@ -26,6 +27,7 @@ const server = http.createServer(app);
 const io = socketio(server);
 
 
+
 // -------------------Creature-------------------
 
 // Default Properties For All Creature
@@ -38,6 +40,9 @@ function properties() {
 	// Attack Properties
 	this["attackDamage"] = 10,
 	this["attackSpeed"] = 1
+
+	// Other Properties
+	this["moveSpeed"] = 3
 }
 
 // -------------------End Of Creature-------------------
@@ -113,6 +118,9 @@ function newPlayerID(){
 // -------------------End Of Player-------------------
 
 // -------------------Monster-------------------
+var AI_controllerList = [];
+AI_controllerList.length = 100;
+
 var monsterArray = [];
 monsterArray.length = 100;
 var monster_ID_Count = 0;
@@ -160,6 +168,13 @@ function createNewMonster(ID, spawnPos){
 
 	monsterArray[monsterID] = monsterInfo;
 
+	if (monsterID >= AI_controllerList.length){
+		AI_controllerList.length = monsterID + 1;
+	}
+
+	AI_controllerList[monsterID] = new AI_controller(monsterInfo);
+
+
 	// Log The MonsterInfo On The Server Side
 	console.log(monsterInfo);
 
@@ -171,13 +186,19 @@ function createNewMonster(ID, spawnPos){
 var updateMonsterPos = [];
 function updateMonster(delta){
 	updateMonsterPos.length = monsterArray.length;
-	for(let i = 0; i < monsterArray.length; ++i){
-		if(monsterArray[i] == null) continue;
+	for(let i = 0; i < AI_controllerList.length; ++i){
 
-		monsterArray[i].position[0] += delta* 0.1;
-		updateMonsterPos[i] = monsterArray[i].position;
+		
 
-		let [mapX, mapY] = [Math.floor(monsterArray[i].position[0] + 0.5), Math.floor(monsterArray[i].position[1] + 0.5)];
+		if(AI_controllerList[i] == null) continue;
+
+		theMonster = AI_controllerList[i].creature;
+
+		AI_controllerList[i].update(delta);
+		updateMonsterPos[i] = theMonster.position;
+
+
+		let [mapX, mapY] = [Math.floor(theMonster.position[0] + 0.5), Math.floor(theMonster.position[1] + 0.5)];
 		let unitX = (mapX < 0) ? -mapX - 1 : mapX;
 		let unitY = (mapY < 0) ? -mapY - 1 : mapY;
 		let theBlock = game_map.getBlockByQuarter(game_map.unit2DToBlock2D([unitX, unitY]), game_map.getQuarterMap([mapX, mapY]));
@@ -192,22 +213,33 @@ function updateMonster(delta){
 
 			if (projectileList[index] == null || projectileList[index] == "deletion") continue;
 			// Monster Collision With Projectile
-			let diffX = projectileList[index].position[0] - monsterArray[i].position[0];
-			let diffY = projectileList[index].position[1] - monsterArray[i].position[1];
+			let diffX = projectileList[index].position[0] - theMonster.position[0];
+			let diffY = projectileList[index].position[1] - theMonster.position[1];
 			// Calculate Manhattan Distance
 
 			if (Math.abs(diffX) + Math.abs(diffY) < 2){
-				let diffZ = projectileList[index].position[2] - monsterArray[i].position[2];
+				let diffZ = projectileList[index].position[2] - theMonster.position[2];
 				// Calculate Distance To Squared
 				if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 1.47){
 					creatureInfoChange([[["monster", i], {"health": ["-", projectileList[index].damageInfo.amount]}]]);
 					projectileList[index] = "deletion";
+					if (theMonster.properties["health"] <= 0){
+						deleteMonster(i);
+					}
 				}
 			}
 		}
 	}
 }
 
+
+function deleteMonster(monsterID){
+	delete monsterArray[monsterID];
+	delete AI_controllerList[monsterID];
+	monsterArray[monsterID] = null;
+	AI_controllerList[monsterID] = null;
+	io.compress(true).emit('deleteMonster', monsterID);
+}
 
 
 
@@ -386,8 +418,6 @@ function updateProjectile(delta){
 	let deleteProjectileList = [];
 	let deleteUnitList = [];
 	let projectilePos;
-
-
 
 	
 	for (let i = 0; i < clearBlockProjectileList.length; i++){

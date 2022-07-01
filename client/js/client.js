@@ -139,6 +139,14 @@ const newMonster = (monsterInfo, monsterArrayLength) => {
 	let new_monster = spawnMonster(monsterInfo);
 }
 
+// Delete Monster
+const deleteMonster = (monsterID) => {
+	if (monsterArray[monsterID] != null){
+		monsterArray[monsterID].delete();
+		monsterArray[monsterID] = null;
+	}
+}
+
 
 // -------------------End Of Monster-------------------
 
@@ -345,6 +353,7 @@ const clientUpdateBlocks = (blockList) => {
 
 	// Monster
 	sock.on('newMonster', newMonster);
+	sock.on('deleteMonster', deleteMonster);
 
 	// Creature
 	sock.on('creatureInfoChange', creatureInfoChange);

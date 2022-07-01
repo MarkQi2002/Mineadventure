@@ -8,8 +8,7 @@ class controller{
         this.cameraOffset = 0;
         this.creature.healthBar.visible = false;
         
-        this.baseMovementSpeed = 3; // Per Second 
-        this.speed = this.baseMovementSpeed; // Per Second 
+        this.speed = this.creature.properties["moveSpeed"]; // Per Second 
  
         this.initJumpVelocity = 1; // Per Second 
         this.jumpVelocity = 0; // Per Second 
@@ -150,9 +149,8 @@ class controller{
 
         let magnitude = Math.sqrt(groundX * groundX + groundY * groundY);
 
-        let vectorX, vectorY;
-        vectorX = groundX / magnitude;
-        vectorY = groundY / magnitude;
+        let vectorX = groundX / magnitude;
+        let vectorY = groundY / magnitude;
 
         // Setting Projectile Information
         var newDamageInfo = {
@@ -569,10 +567,10 @@ class controller{
         // Change Movement Speed By Shift 
         if (!this.inputs.shift) { 
             // Walk 
-            this.speed = this.baseMovementSpeed 
+            this.speed = this.creature.properties["moveSpeed"];
         } else { 
             // Run 
-            this.speed = this.baseMovementSpeed * 1.5 
+            this.speed = this.creature.properties["moveSpeed"] * 1.5;
         } 
  
         // Correct Speed With Frame 
