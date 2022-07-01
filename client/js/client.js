@@ -118,10 +118,10 @@ const creatureInfoChange = (creatureInfo) => {
 // -------------------End Of Player-------------------
 
 // -------------------Monster-------------------
-
 var monsterArray = [];
 monsterArray.length = 100;
 
+// Function Used To Spawn A Monster
 function spawnMonster(monsterInfo){
 	console.log(monsterInfo);
 	let new_monster = new monster(monsterInfo);
@@ -129,7 +129,6 @@ function spawnMonster(monsterInfo){
 	monsterArray[monsterInfo.ID] = new_monster;
 	return new_monster;
 }
-
 
 // Initialization Monster
 const newMonster = (monsterInfo, monsterArrayLength) => {
@@ -146,8 +145,6 @@ const deleteMonster = (monsterID) => {
 		monsterArray[monsterID] = null;
 	}
 }
-
-
 // -------------------End Of Monster-------------------
 
 // -------------------Item-------------------

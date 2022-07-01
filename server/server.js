@@ -146,6 +146,7 @@ function newMonsterID(){
 	return monster_ID_Count;
 }
 
+// Creating A New Monster
 function createNewMonster(ID, spawnPos){
 	let monsterID = newMonsterID();
 	let newProperties = new properties;
@@ -184,19 +185,16 @@ function createNewMonster(ID, spawnPos){
 }
 
 var updateMonsterPos = [];
+// Updating Monster Position Frame
 function updateMonster(delta){
 	updateMonsterPos.length = monsterArray.length;
-	for(let i = 0; i < AI_controllerList.length; ++i){
-
-		
-
+	for (let i = 0; i < AI_controllerList.length; ++i) {
 		if(AI_controllerList[i] == null) continue;
 
 		theMonster = AI_controllerList[i].creature;
 
 		AI_controllerList[i].update(delta);
 		updateMonsterPos[i] = theMonster.position;
-
 
 		let [mapX, mapY] = [Math.floor(theMonster.position[0] + 0.5), Math.floor(theMonster.position[1] + 0.5)];
 		let unitX = (mapX < 0) ? -mapX - 1 : mapX;
@@ -207,7 +205,7 @@ function updateMonster(delta){
 
 		let blockProjectileList = theBlock.projectileList;
 
-		for(let ii = 0; ii < blockProjectileList.length; ++ii){
+		for (let ii = 0; ii < blockProjectileList.length; ++ii) {
 
 			let index = blockProjectileList[ii];
 
@@ -232,7 +230,7 @@ function updateMonster(delta){
 	}
 }
 
-
+// Deleting A Monster Based On The Input Monster ID
 function deleteMonster(monsterID){
 	delete monsterArray[monsterID];
 	delete AI_controllerList[monsterID];
@@ -240,9 +238,6 @@ function deleteMonster(monsterID){
 	AI_controllerList[monsterID] = null;
 	io.compress(true).emit('deleteMonster', monsterID);
 }
-
-
-
 // -------------------End Of Monster-------------------
 
 // -------------------Item-------------------
@@ -505,9 +500,6 @@ function updateProjectile(delta){
 
 	
 }
-
-
-
 // -------------------End Of Projectile-------------------
 
 // -------------------Server Loop-------------------
@@ -516,6 +508,7 @@ setInterval(serverLoop, timeInterval);
 let startDate = new Date();
 let endDate = new Date();
 
+// Looping Certain Functions Per Server Frame
 function serverLoop(){
 	endDate = new Date();
 	let delta = (endDate.getTime() - startDate.getTime()) / 1000;
@@ -523,7 +516,6 @@ function serverLoop(){
 	updateMonster(delta);
 	startDate = new Date();
 }
-
 // -------------------End Of Server Loop-------------------
 
 // Update Client Frame
@@ -631,10 +623,9 @@ server.listen(8080, () => {
   	console.log('server is ready');
 });
 
-
-
-for(let i = 0; i < 500; ++i){
+// Spawning 500 Monsters Randomly Throughout The Map
+for (let i = 0; i < 500; ++i){
 	posX = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.x * game_map.blockSize2D.x);
 	posY = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.y * game_map.blockSize2D.y);
-	createNewMonster(0,[posX,posY,1]);
+	createNewMonster(0, [posX,posY, 1]);
 }
