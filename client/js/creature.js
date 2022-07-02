@@ -7,6 +7,10 @@ var healthBarLoader = {
     outerMaterial: new THREE.MeshBasicMaterial({color: 'white', transparent: true, opacity: 0.5})
 };
 
+var creatureLoader = {
+    geometry: new THREE.SphereGeometry(0.5, 3, 3)
+};
+
 // The Most Basic Class, All Other Class (Player, Monster) Will Built Upon This By Inheritance
 class creature{
     constructor(creatureInfo) {
@@ -118,9 +122,8 @@ class monster extends creature {
         super(monsterInfo);
 
         // Spherical Body
-        let geometry = new THREE.SphereGeometry(0.5, 3, 3);
         let material = new THREE.MeshPhongMaterial({color: new THREE.Color(Math.random(), Math.random(), Math.random())});
-        let mesh = new THREE.Mesh(geometry, material);
+        let mesh = new THREE.Mesh(creatureLoader.geometry, material);
         this.object.add(mesh);
     }
 }

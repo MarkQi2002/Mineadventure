@@ -110,25 +110,70 @@ class map {
         let neighborList = [];
         let theUnit;
 
+        let dirSwitch = [false, false, false, false];
+
         theUnit = this.getUnit([mapX + 1, mapY]);
         if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
             neighborList.push([mapX + 1, mapY]);
+            dirSwitch[0] = true;
+
         }
 
         theUnit = this.getUnit([mapX - 1, mapY]);
         if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
             neighborList.push([mapX - 1, mapY]);
+            dirSwitch[1] = true;
         }
 
         theUnit = this.getUnit([mapX, mapY + 1]);
         if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
             neighborList.push([mapX, mapY + 1]);
+            dirSwitch[2] = true;
         }
 
         theUnit = this.getUnit([mapX, mapY - 1]);
         if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
             neighborList.push([mapX, mapY - 1]);
+            dirSwitch[3] = true;
         }
+
+
+
+
+
+        if (dirSwitch[0]){
+            if (dirSwitch[2]){
+                theUnit = this.getUnit([mapX + 1, mapY + 1]);
+                if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+                    neighborList.push([mapX + 1, mapY + 1]);
+                }
+            }
+
+            if (dirSwitch[3]){
+                theUnit = this.getUnit([mapX + 1, mapY - 1]);
+                if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+                    neighborList.push([mapX + 1, mapY - 1]);
+                }
+            }
+        }
+
+        
+        if (dirSwitch[1]){
+            if (dirSwitch[2]){
+                theUnit = this.getUnit([mapX - 1, mapY + 1]);
+                if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+                    neighborList.push([mapX - 1, mapY + 1]);
+                }
+            }
+    
+            if (dirSwitch[3]){
+                theUnit = this.getUnit([mapX - 1, mapY - 1]);
+                if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+                    neighborList.push([mapX - 1, mapY - 1]);
+                }
+            }
+        }
+        
 
         return neighborList;
     }

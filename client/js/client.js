@@ -154,8 +154,7 @@ var removeItemID;
 var itemArray = [];
 var itemInfoArray;
 var itemDefaultPosition = [1, 1, 1];
-var itemDefaultGeometry = new THREE.SphereGeometry(0.2, 10, 10);
-var itemDefaultMaterial = new THREE.MeshBasicMaterial({color: 'red'});
+var itemLoader;
 
 // Update Player Property And Player Item Array
 const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
@@ -184,8 +183,7 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 function spawnItem(itemID, itemPosition, itemIndex){
 	// Creating Passive Item Object
 	var new_item;
-	var itemDefaultmesh = new THREE.Mesh(itemDefaultGeometry, itemDefaultMaterial);
-	if (itemIndex >= 0 && itemIndex < itemArray.length) new_item = new passiveItem(itemInfoArray[itemID][0], itemDefaultmesh, itemPosition, itemInfoArray[itemID][1]);
+	if (itemIndex >= 0 && itemIndex < itemArray.length) new_item = new passiveItem(itemInfoArray[itemID][0], itemPosition, itemInfoArray[itemID][1]);
 	else return;
 	
 	// Storing Passive Item Object Into itemArray
@@ -202,6 +200,10 @@ function spawnItem(itemID, itemPosition, itemIndex){
 const initItem = (serverItemArray, serverItemInfoArray) => {
 	// Copy The Sever Item Info Array To Client Item Info Array (The Two Array Are The Same)
 	itemInfoArray = serverItemInfoArray;
+	itemLoader = {
+		geometry: new THREE.PlaneGeometry(0.4, 0.4),
+		material: loadItemMaterials()
+	};
 
 	// Format And Copy The Item Array From Server Item Array
 	itemArray.length = serverItemArray.length;

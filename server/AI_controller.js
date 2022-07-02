@@ -3,14 +3,15 @@ class AI_controller {
         this.creature = creatureInfo;
         this.targetPositionList = [];
         this.routeCount = 0;
+        this.searchRange = 32;
     }
 
 
 
     heuristic([fx, fy], [cx, cy]){
-        //return (Math.abs(fx - cx) + Math.abs(fy - cy)) * 5;
-        let [dx, dy] = [fx - cx, fy - cy]
-        return Math.sqrt(dx * dx + dy * dy) * 10;
+        return (Math.abs(fx - cx) + Math.abs(fy - cy)) * 10;
+        //let [dx, dy] = [fx - cx, fy - cy]
+        //return (dx * dx + dy * dy) * 10;
     }
 
 
@@ -23,7 +24,7 @@ class AI_controller {
         
         let current;
         let count = 0;
-        while (!frontier.isEmpty() && count < 1000){
+        while (!frontier.isEmpty() && count < 100){
             current = frontier.dequeue().element;
 
             if (current.x == goal[0] && current.y == goal[1]) return current;
@@ -31,6 +32,9 @@ class AI_controller {
             let neighbors = theMap.neighbors([current.x, current.y]);
             for (let i = 0; i < neighbors.length; ++i){
                 let next = neighbors[i];
+
+                if (Math.abs(start[0] - next[0]) + Math.abs(start[1] - next[1]) > this.searchRange) continue;
+
                 let new_cost = current.cost + 1;
 
                 let existData = frontier.isIn(next);
@@ -102,7 +106,7 @@ class AI_controller {
 
 
         
-        if (this.routeCount > 10 && Math.abs(goal[0] - this.creature.position[0]) + Math.abs(goal[1] - this.creature.position[1]) < 16){
+        if (this.routeCount > 10 && Math.abs(goal[0] - this.creature.position[0]) + Math.abs(goal[1] - this.creature.position[1]) < this.searchRange){
             let newRoute = this.getRoute(theMap, goal);
 		    this.targetPositionList = newRoute;
             this.routeCount = 0;

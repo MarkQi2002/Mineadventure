@@ -147,8 +147,13 @@ function newMonsterID(){
 }
 
 // Creating A New Monster
-function createNewMonster(ID, spawnPos){
-	let monsterID = newMonsterID();
+function createNewMonster(ID, spawnPos, monsterID){
+	if (monsterID == null){
+		monsterID = newMonsterID();
+	}else if (monsterArray[monsterID] != null){
+		deleteMonster(monsterID);
+	}
+	
 	let newProperties = new properties;
 	// Add Properties By ID
 	for ([key, value] of Object.entries(monsterInfoArray[ID][0]["properties"])) {
@@ -159,7 +164,7 @@ function createNewMonster(ID, spawnPos){
 	let monsterInfo  = {
 		ID: monsterID,
 		name: monsterInfoArray[ID][0]["name"],
-		position: [spawnPos[0], spawnPos[1], spawnPos[2]],
+		position: [spawnPos[0], spawnPos[1], 1],
 		
 		// Monster Properties
 		properties: newProperties,
@@ -197,7 +202,10 @@ var updateMonsterPos = [];
 function updateMonster(delta){
 	updateMonsterPos.length = monsterArray.length;
 	for (let i = 0; i < AI_controllerList.length; ++i) {
-		if(AI_controllerList[i] == null) continue;
+		if(AI_controllerList[i] == null){
+			createNewMonster(0, createSpawnPosition(), i);
+			continue;
+		};
 
 		theMonster = AI_controllerList[i].creature;
 
@@ -682,9 +690,7 @@ server.listen(8080, () => {
 
 // Spawning 500 Monsters Randomly Throughout The Map
 for (let i = 0; i < 500; ++i){
-
-	let [newPosX, newPosY] = createSpawnPosition();
-	createNewMonster(0, [newPosX, newPosY, 1]);
+	createNewMonster(0, createSpawnPosition());
 }
 
 //createNewMonster(0, [0, 0, 1]);
