@@ -8,7 +8,7 @@ var projectileLoader = {
 class projectile{
     constructor(projectileInfo) {
         this.object = new THREE.Object3D();
-        this.object.position.set(projectileInfo.position[0], projectileInfo.position[1], projectileInfo.position[3]);
+        this.object.position.set(projectileInfo.position[0], projectileInfo.position[1], projectileInfo.position[2]);
         
         this.initVelocity = projectileInfo.initVelocity;
         

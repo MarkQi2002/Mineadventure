@@ -201,7 +201,7 @@ const initItem = (serverItemArray, serverItemInfoArray) => {
 	// Copy The Sever Item Info Array To Client Item Info Array (The Two Array Are The Same)
 	itemInfoArray = serverItemInfoArray;
 	itemLoader = {
-		geometry: new THREE.PlaneGeometry(0.4, 0.4),
+		geometry: new THREE.PlaneGeometry(0.6, 0.6),
 		material: loadItemMaterials()
 	};
 
@@ -282,8 +282,10 @@ const updateFrame = ([projectilePosList, monsterPosList]) => {
 			// Local Player Collision With Projectile
 			let diffX = projectileList[i].object.position.x - player_controller.creature.object.position.x;
 			let diffY = projectileList[i].object.position.y - player_controller.creature.object.position.y;
+			
 			// Calculate Manhattan Distance
-			if (projectileList[i].damageInfo.attacker != clientPlayerID && Math.abs(diffX) + Math.abs(diffY) < 2){
+			if (!(projectileList[i].damageInfo.attacker[0] == "player" && projectileList[i].damageInfo.attacker[1] == clientPlayerID) && Math.abs(diffX) + Math.abs(diffY) < 2){
+				
 				let diffZ = projectileList[i].object.position.z - player_controller.creature.object.position.z;
 				// Calculate Distance To Squared
 				if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){

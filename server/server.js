@@ -124,9 +124,7 @@ AI_controllerList.length = 100;
 var monsterArray = [];
 monsterArray.length = 100;
 var monster_ID_Count = 0;
-var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower",
-						"properties":{"health": 50, "maxHealth": 50, "attackDamage": 1, "moveSpeed": 4}},
-						{}],
+var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower", "properties":{"health": 50, "maxHealth": 50, "attackDamage": 10, "attackSpeed": 0.5, "moveSpeed": 4}},{}],
 
 
 						];
@@ -211,7 +209,7 @@ function updateMonster(delta){
 
 		goal = playerArray[0] != null ? [Math.floor(playerArray[0].position[0]), Math.floor(playerArray[0].position[1])] : [0,0];
 
-		AI_controllerList[i].update(delta, game_map, goal);
+		AI_controllerList[i].update(delta, game_map, goal, spawnProjectile);
 		updateMonsterPos[i] = theMonster.position;
 
 		let [mapX, mapY] = [Math.floor(theMonster.position[0] + 0.5), Math.floor(theMonster.position[1] + 0.5)];
@@ -233,10 +231,10 @@ function updateMonster(delta){
 			let diffY = projectileList[index].position[1] - theMonster.position[1];
 			// Calculate Manhattan Distance
 
-			if (Math.abs(diffX) + Math.abs(diffY) < 2){
+			if (projectileList[index].damageInfo.attacker[0] != "monster" && Math.abs(diffX) + Math.abs(diffY) < 2){
 				let diffZ = projectileList[index].position[2] - theMonster.position[2];
 				// Calculate Distance To Squared
-				if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 1.47){
+				if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
 					creatureInfoChange([[["monster", i], {"health": ["-", projectileList[index].damageInfo.amount]}]]);
 					projectileList[index] = "deletion";
 					if (theMonster.properties["health"] <= 0){
@@ -304,7 +302,7 @@ Defensive
 */
 var itemDefaultPosition = [1, 1, 1];
 var itemInfoArray = [[{"itemID": 0, "itemName": "Bison Steak", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"maxHealth": ["+", 25], "health": ["+", 25]}],
-					[{"itemID": 1, "itemName": "Armor Piercing Rounds", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Offensive"}, {"attackDamage": ["+", 10]}],
+					[{"itemID": 1, "itemName": "Armor Piercing Rounds", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Offensive"}, {"attackDamage": ["+", 5]}],
 					[],
 					[],
 					[],
@@ -453,7 +451,8 @@ function spawnProjectile(projectileInfo){
 		projectileList[newProjectileID] = projectileInfo[i];
 		projectileSpawnInfo.push([newProjectileID, projectileInfo[i]]);
 	}
-	return projectileSpawnInfo;
+
+	io.compress(true).emit('spawnProjectile', projectileSpawnInfo);
 }
 
 // Initializing Player Projectile
@@ -669,7 +668,7 @@ io.on('connection', (sock) => {
 	sock.on('deleteItem', (removeItemID) => io.compress(true).emit('removeItem', deleteItem(removeItemID)));
 
 	// Projectile Related
-	sock.on('newProjectile', (projectileInfo) => io.compress(true).emit('spawnProjectile', spawnProjectile(projectileInfo)));
+	sock.on('newProjectile', (projectileInfo) => spawnProjectile(projectileInfo));
 
 	// Client Frame Update
 	sock.on('clientFrame', (onHitProjectileList) => sock.compress(true).emit('updateFrame', ClientFrameUpdate(onHitProjectileList)));
@@ -694,3 +693,4 @@ for (let i = 0; i < 500; ++i){
 }
 
 //createNewMonster(0, [0, 0, 1]);
+

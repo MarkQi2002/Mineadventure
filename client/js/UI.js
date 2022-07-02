@@ -6,7 +6,7 @@ function displayPlayerName() {
 function displayPlayerHealth() {
     document.getElementById("playerHealth").innerHTML = "Player Health: " + playerArray[clientPlayerID].properties["health"] + "/" + playerArray[clientPlayerID].properties["maxHealth"];
     document.getElementById("playerHealthInfo").innerHTML = playerArray[clientPlayerID].properties["health"] + "/" + playerArray[clientPlayerID].properties["maxHealth"];
-    document.getElementById("playerHealthBar").style.width = (70 * playerArray[clientPlayerID].properties["health"] / playerArray[clientPlayerID].properties["maxHealth"]).toString() + '%';
+    document.getElementById("playerHealthBar").style.width = (98 * playerArray[clientPlayerID].properties["health"] / playerArray[clientPlayerID].properties["maxHealth"]).toString() + '%';
 }
 
 function displayPlayerArmor() {

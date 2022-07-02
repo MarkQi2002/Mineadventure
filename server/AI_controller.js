@@ -4,6 +4,34 @@ class AI_controller {
         this.targetPositionList = [];
         this.routeCount = 0;
         this.searchRange = 32;
+
+        // Attack Speed
+        this.attackCD = 0;
+    }
+
+
+    sendProjectile(goal){
+        // Get Unit Vector
+        let [diffX, diffY] = [goal[0] - this.creature.position[0], goal[1] - this.creature.position[1]];
+        let magnitude = Math.sqrt(diffX * diffX + diffY * diffY);
+
+        let vectorX = diffX / magnitude;
+        let vectorY = diffY / magnitude;
+
+        // Setting Projectile Information
+        var newDamageInfo = {
+            amount: this.creature.properties["attackDamage"],
+            attacker: ["monster", this.creature.ID]
+        }
+
+        var newProjectile = {
+            position: [this.creature.position[0], this.creature.position[1], this.creature.position[2]],
+            initVelocity: [8 * vectorX, 8 * vectorY],
+            damageInfo: newDamageInfo
+        };
+
+        // Updating To Projectile List
+        return newProjectile;
     }
 
 
@@ -101,7 +129,7 @@ class AI_controller {
         }
     }
 
-    update(delta, theMap, goal){
+    update(delta, theMap, goal, spawnProjectile){
 
 
 
@@ -112,9 +140,23 @@ class AI_controller {
             this.routeCount = 0;
         }
         this.routeCount++;
-
-
         this.moveToPosition(delta);
+
+
+        // Attack
+        if ( this.targetPositionList.length > 0 && this.attackCD <= 0){
+            spawnProjectile([this.sendProjectile(goal)]);
+            this.attackCD = 1;
+        }
+
+        if (this.attackCD > 0){
+            this.attackCD -= this.creature.properties["attackSpeed"] * delta;
+        }
+
+        
+
+
+
     }
 
 

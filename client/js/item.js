@@ -5,7 +5,7 @@ function loadItemMaterials(){
     for (let i = 0; i < itemMaterialsArray.length; i++) {
         if (itemInfoArray[i].length > 0){
             let texture = game_map.loader.load("image/UI_Image/" + itemInfoArray[i][0].itemName + ".png");
-            itemMaterialsArray[i] =  new THREE.MeshPhongMaterial({map: texture});
+            itemMaterialsArray[i] =  new THREE.MeshBasicMaterial({map: texture, transparent: true});
         }
     }
     return itemMaterialsArray;
@@ -23,6 +23,7 @@ class item {
         this.object.position.set(itemPosition[0], itemPosition[1], itemPosition[2]);
 
         let itemMesh = new THREE.Mesh(itemLoader.geometry, itemLoader.material[ this.itemInfo.itemID]);
+        itemMesh.rotation.x = cameraAngle;
         this.object.add(itemMesh);
         scene.add(this.object);
     }

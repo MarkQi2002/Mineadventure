@@ -155,11 +155,11 @@ class controller{
         // Setting Projectile Information
         var newDamageInfo = {
             amount: this.creature.properties["attackDamage"],
-            attacker: clientPlayerID
+            attacker: ["player", clientPlayerID]
         }
 
         var newProjectile = {
-            position: [this.creature.object.position.x, this.creature.object.position.y, ,this.creature.object.position.z],
+            position: [this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z],
             initVelocity: [8 * vectorX, 8 * vectorY],
             damageInfo: newDamageInfo
         };
@@ -251,7 +251,7 @@ class controller{
             // If Collision Occur, Increment Item Count Using Event 
             // Calculate Direct Distance To Squared
             let diffZ = predictedPosition.z - itemPosition.z;
-            if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49) { 
+            if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.64) { 
                 console.log("Collided With Item", itemArray[itemIndex]); 
 
                 // Removing The Item Collided With And Increse Player Item

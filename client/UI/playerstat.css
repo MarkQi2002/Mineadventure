@@ -34,6 +34,16 @@
 .playerStat #playerHealthBar {
     background-color: red;
     position: relative;
+    margin-left: 1%;
+    top: 5%;
+    
+    width: 98%;
+    height: 90%;
+}
+
+.playerStat #playerHealthBackground {
+    background-color: rgba(0.25, 0.25, 0.25, 0.5);
+    position: relative;
     margin-left: 30%;
     top: 10%;
     
