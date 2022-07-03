@@ -599,7 +599,9 @@ function ClientFrameUpdate(onHitProjectileList){
 }
 
 // Changing Server Creature Information
-function creatureInfoChange(creatureInfo){
+function creatureInfoChange(theCreatureInfo){
+
+	let creatureInfo = theCreatureInfo.slice();
 	// Example creatureInfo = [[creatureType, id], {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
 	for (let i = 0; i < creatureInfo.length; i++){
 		let theCreature;
@@ -618,7 +620,17 @@ function creatureInfoChange(creatureInfo){
 			else if (value[0] == "*") setValue = theCreature.properties[key] * value[1];
 			else if (value[0] == "/") setValue = theCreature.properties[key] / value[1];
 
-			theCreature.properties[key] = setValue;
+			if (key == "health"){
+				if (setValue > theCreature.properties.maxHealth){
+					theCreature.properties.health = theCreature.properties.maxHealth;
+					creatureInfo[i][1].health = ["=", theCreature.properties.maxHealth];
+				}else{
+					theCreature.properties.health = setValue;
+				}
+			}else{
+				theCreature.properties[key] = setValue;
+			}
+			
 		}
 	}
 

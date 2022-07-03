@@ -6,7 +6,13 @@ function displayPlayerName() {
 function displayPlayerHealth() {
     document.getElementById("playerHealth").innerHTML = "Player Health: " + playerArray[clientPlayerID].properties["health"] + "/" + playerArray[clientPlayerID].properties["maxHealth"];
     document.getElementById("playerHealthInfo").innerHTML = playerArray[clientPlayerID].properties["health"] + "/" + playerArray[clientPlayerID].properties["maxHealth"];
-    document.getElementById("playerHealthBar").style.width = (98 * playerArray[clientPlayerID].properties["health"] / playerArray[clientPlayerID].properties["maxHealth"]).toString() + '%';
+    let scale = playerArray[clientPlayerID].properties["health"] / playerArray[clientPlayerID].properties["maxHealth"];
+    if (scale < 0){
+        scale = 0;
+    }else if (scale > 1){
+        scale = 1;
+    }
+    document.getElementById("playerHealthBar").style.width = (98 * scale).toString() + '%';
 }
 
 function displayPlayerArmor() {
@@ -24,6 +30,84 @@ function displayAllUI() {
 	displayPlayerArmor();
 	displayPlayerAttackDamage();
 }
+
+
+class damageText{
+    constructor(damageInfo, position) {
+        this.deleteTimer = 1;
+        this.position = position;
+        this.size = 80 / Math.PI * Math.atan(Math.abs(damageInfo.amount) / 100) + 10;
+        this.sqrtSize = Math.sqrt(this.size);
+        this.rate = this.deleteTimer / (2 * this.sqrtSize);
+
+        this.text = document.createElement('div');
+        this.text.style.position = 'absolute';
+        this.text.style.textAlign = "center";
+        this.text.style.width = 100;
+        this.text.style.height = 100;
+        this.text.innerHTML = Math.abs(damageInfo.amount);
+        this.text.style.fontSize = this.size + "px";
+
+        if (damageInfo.amount >= 0){
+            this.text.style.color = "red";
+        }else{
+            this.text.style.color = "green";
+        }
+        this.text.style.opacity = 0.75;
+
+        let [posX, posY] = this.toXYCoords(this.position);
+        this.text.style.top = posY + 'px';
+        this.text.style.left = posX + 'px';
+        document.body.appendChild(this.text);
+
+        
+
+
+
+        damageTextList.push(this);
+
+    }
+
+    toXYCoords(pos) {
+        var vector = new THREE.Vector3(pos[0], pos[1], pos[2]).project(player_controller.camera);
+        vector.x = (vector.x + 1)/2 * window.innerWidth;
+        vector.y = -(vector.y - 1)/2 * window.innerHeight;
+        return [vector.x, vector.y];
+    }
+
+    update(delta, index){
+        let [posX, posY] = this.toXYCoords(this.position);
+        let num = this.deleteTimer / this.rate - this.sqrtSize;
+        this.text.style.top = posY - (this.size - num * num) + 'px';
+        this.text.style.left = posX + 'px';
+
+
+        if (this.deleteTimer < 0){
+            this.delete(index);
+        }
+        this.deleteTimer -= delta;
+
+    }
+
+
+    delete(index){
+        damageTextList.splice(index, 1);
+        document.body.removeChild(this.text);
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
 
 // Terminal Function
 var command = document.getElementById("terminalInput");

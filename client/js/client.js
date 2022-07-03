@@ -102,6 +102,7 @@ const creatureInfoChange = (creatureInfo) => {
 			else if (value[0] == "/") setValue = theCreature.properties[key] / value[1];
 
 			if (key == "health"){
+				new damageText({amount: Math.abs(value[1]) * (theCreature.properties.health < setValue ? -1 : 1)}, [theCreature.object.position.x , theCreature.object.position.y, theCreature.object.position.z]);
 				theCreature.setHealth(setValue);
 			} else if (key == "maxHealth") {
 				theCreature.setMaxHealth(setValue);
@@ -155,15 +156,12 @@ var itemArray = [];
 var itemInfoArray;
 var itemDefaultPosition = [1, 1, 1];
 var itemLoader;
+var damageTextList = [];
 
 // Update Player Property And Player Item Array
 const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
 	// Remove Item From The Item Array
 	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID);
-
-	// Update Player Property Based On Item
-	let playerInfo = [[["player", updatePlayerID], itemInfoArray[additionalItemID][1]]];
-	creatureInfoChange(playerInfo);
 
 	// Update Server Side Player Item Array
 	if (playerArray[updatePlayerID].creatureItemArray[additionalItemID] != null)
