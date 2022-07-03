@@ -1,6 +1,6 @@
 /* Left Side Item UI*/
 .itemUI {
-    background-color: rgba(255, 192, 203, 0.5);
+    background-color: rgba(0, 0, 0, 0.25);
     overflow: hidden;
     position: fixed;
     top: 20%;
@@ -23,7 +23,7 @@
 }
 
 .itemUI td {
-    background-color: rgba(233, 150, 122, 0.5);
+    background-color: rgba(150, 150, 150, 0.5);
     padding-left: 5%;
     padding-right: 5%;
     padding-top: 5%;
@@ -42,9 +42,9 @@
 .bottom-right {
     position: absolute;
     bottom: 0vh;
-    right: 0vh;
-    width: 3vh;
-    height: 2vh;
+    right: 15%;
+    width: 100%;
+    height: 40%;
     line-height: 2vh;
     font-size: 1vh;
     text-align: right;

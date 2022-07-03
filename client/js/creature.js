@@ -36,22 +36,23 @@ class creature{
     }
 
     damage(amount){
-        this.setHealth(this.properties["health"] - amount);
+        this.setHealth(this.properties.health - amount);
 
     }
 
     setHealth(amount){
-        this.properties["health"] = amount;
+        this.properties.health = amount;
+        if (this.properties.health > this.properties.maxHealth) this.properties.health = this.properties.maxHealth;
         this.updateHealthBarPercent();
     }
 
     setMaxHealth(amount){
-        this.properties["maxHealth"] = amount;
+        this.properties.maxHealth = amount;
         this.updateHealthBarPercent();
     }
 
     updateHealthBarPercent(){
-        let scale = this.properties["health"] / this.properties["maxHealth"];
+        let scale = this.properties.health / this.properties.maxHealth;
         if (scale < 0){
             scale = 0;
         }else if(scale > 1){

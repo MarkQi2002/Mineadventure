@@ -124,7 +124,7 @@ AI_controllerList.length = 100;
 var monsterArray = [];
 monsterArray.length = 100;
 var monster_ID_Count = 0;
-var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower", "properties":{"health": 50, "maxHealth": 50, "attackDamage": 10, "attackSpeed": 0.5, "moveSpeed": 4}},{}],
+var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower", "properties":{"health": 50, "maxHealth": 50, "attackDamage": 10, "attackSpeed": 0.5, "moveSpeed": 3}},{}],
 
 
 						];
@@ -303,9 +303,9 @@ Defensive
 var itemDefaultPosition = [1, 1, 1];
 var itemInfoArray = [[{"itemID": 0, "itemName": "Bison Steak", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"maxHealth": ["+", 25], "health": ["+", 25]}],
 					[{"itemID": 1, "itemName": "Armor Piercing Rounds", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Offensive"}, {"attackDamage": ["+", 5]}],
-					[],
-					[],
-					[],
+					[{"itemID": 2, "itemName": "Small Recovery Potion", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"health": ["+", 10]}],
+					[{"itemID": 3, "itemName": "Mediuml Recovery Potion", "rarity": "Uncommon", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"health": ["+", 100]}],
+					[{"itemID": 4, "itemName": "Large Recovery Potion", "rarity": "Suprior", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"health": ["+", 1000]}],
 					[],
 					[],
 					[],
@@ -329,10 +329,17 @@ Green (Uncommon) (25%) Index: 1
 Orange (Suprior) (10%) Index: 2
 Red (Legendary) (5%) Index: 3
 */
-var itemRarityArray = [[0, 1], 
-						[],
-						[],
-						[]];
+var itemRarityArray = [[], [], [], []];
+
+for (let i = 0; i < itemInfoArray.length; ++i){
+	if (itemInfoArray[i].length <= 0) continue;
+	if (itemInfoArray[i][0].rarity == "Common")itemRarityArray[0].push(itemInfoArray[i][0].itemID);
+	else if (itemInfoArray[i][0].rarity == "Uncommon")itemRarityArray[1].push(itemInfoArray[i][0].itemID);
+	else if (itemInfoArray[i][0].rarity == "Suprior")itemRarityArray[2].push(itemInfoArray[i][0].itemID);
+	else if (itemInfoArray[i][0].rarity == "Legendary")itemRarityArray[3].push(itemInfoArray[i][0].itemID);
+}
+
+
 
 // Update Player Property And Player Item Array
 const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
