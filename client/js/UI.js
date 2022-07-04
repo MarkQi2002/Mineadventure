@@ -1,3 +1,5 @@
+const menuHtml = document.querySelector('#noSelect');
+
 // Button UI Function
 function displayPlayerName() {
     document.getElementById("playerName").innerHTML = "Player Name: " + playerArray[clientPlayerID].name;
@@ -67,7 +69,7 @@ class damageText{
         let [posX, posY] = this.toXYCoords(this.position);
         this.text.style.top = posY + 'px';
         this.text.style.left = posX + 'px';
-        document.body.appendChild(this.text);
+        menuHtml.appendChild(this.text);
 
         
 
@@ -101,16 +103,70 @@ class damageText{
 
     delete(index){
         damageTextList.splice(index, 1);
-        document.body.removeChild(this.text);
+        menuHtml.removeChild(this.text);
+        delete this;
     }
-
-
 
 }
 
 
 
 
+class creatureUI{
+    constructor(creature) {
+        this.creature = creature;
+
+        this.UI = document.createElement('div');
+        this.name = document.createElement('div');
+
+        /*
+        document.querySelector('#content').insertAdjacentHTML(
+            'afterbegin',
+            `<div class="row">
+              <input type="text" name="name" value="" />
+              <input type="text" name="value" value="" />
+              <label><input type="checkbox" name="check" value="1" />Checked?</label>
+              <input type="button" value="-" onclick="removeRow(this)">
+            </div>`      
+        )*/
+
+
+        this.name.style.position = 'absolute';
+        this.name.style.textAlign = "center";
+        this.name.style.width = 100;
+        this.name.style.height = 100;
+        this.name.innerHTML = this.creature.name;
+		this.name.style.color = "white";
+        this.name.style.fontSize = 20 + "px";
+        this.name.style.opacity = 1;
+
+        let [posX, posY] = this.toXYCoords([this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z]);
+        this.name.style.top = posY + 'px';
+        this.name.style.left = posX + 'px';
+        this.UI.appendChild(this.name);
+        menuHtml.appendChild(this.UI);
+    }
+
+    toXYCoords(pos) {
+        var vector = new THREE.Vector3(pos[0], pos[1], pos[2]).project(camera);
+        vector.x = (vector.x + 1)/2 * window.innerWidth;
+        vector.y = -(vector.y - 1)/2 * window.innerHeight;
+        return [vector.x, vector.y];
+    }
+
+    update(delta){
+        let [posX, posY] = this.toXYCoords([this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z]);
+        this.name.style.top = posY - 50 + 'px';
+        this.name.style.left = posX + 'px';
+    }
+
+
+    delete(){
+        menuHtml.removeChild(this.UI);
+        delete this;
+    }
+
+}
 
 
 

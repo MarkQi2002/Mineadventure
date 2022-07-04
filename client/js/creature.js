@@ -33,6 +33,8 @@ class creature{
         this.healthBar.position.set(0, 0, -1);
 
         this.updateHealthBarPercent();
+
+        this.onHeadUI = new creatureUI(this);
     }
 
     damage(amount){
@@ -70,10 +72,10 @@ class creature{
             Math.abs(localPlayerObject.position.y - this.object.position.y) < game_map.blockSize.y){
                 this.healthBar.visible = true;
                 this.updateHealthBar();
+                this.onHeadUI.update(delta);
         }else{
             this.healthBar.visible = false;
         }
-
     }
     
     updateHealthBar(){
@@ -85,6 +87,8 @@ class creature{
 
 
     delete() {
+        this.onHeadUI.delete();
+
         // Remove All Child Object
         var obj;
         for(var i = this.object.children.length - 1; i >= 0; i--) { 
