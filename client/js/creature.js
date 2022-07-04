@@ -42,7 +42,6 @@ class creature{
 
     setHealth(amount){
         this.properties.health = amount;
-        //if (this.properties.health > this.properties.maxHealth) this.properties.health = this.properties.maxHealth;
         this.updateHealthBarPercent();
     }
 

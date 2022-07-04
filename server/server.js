@@ -74,6 +74,7 @@ const CreateNewPlayer = (playerID, playerName, spawnPos) => {
 	// Similar To A Struct
 	let playerInfo  = {
 		ID: playerID,
+		creatureType: "player",
 		name: playerName,
 		position: [spawnPos[0], spawnPos[1], 1],
 		
@@ -91,6 +92,14 @@ const CreateNewPlayer = (playerID, playerName, spawnPos) => {
 	console.log(playerInfo);
 	return playerInfo;
 };
+
+function updatePlayer(delta){
+	for (let i = 0; i < playerArray.length; ++i) {
+		if (playerArray[i] != null){
+			creatureOnHit(playerArray[i]);
+		}
+	}
+}
 
 // Pos Is An Array Of Size 3 (XYZ)
 const UpdatePlayerPosition = (Pos, playerID) => {
@@ -161,6 +170,7 @@ function createNewMonster(ID, spawnPos, monsterID){
 	// Monster Information Struct
 	let monsterInfo  = {
 		ID: monsterID,
+		creatureType: "monster",
 		name: monsterInfoArray[ID][0]["name"],
 		position: [spawnPos[0], spawnPos[1], 1],
 		
@@ -212,37 +222,7 @@ function updateMonster(delta){
 		AI_controllerList[i].update(delta, game_map, goal, spawnProjectile);
 		updateMonsterPos[i] = theMonster.position;
 
-		let [mapX, mapY] = [Math.floor(theMonster.position[0] + 0.5), Math.floor(theMonster.position[1] + 0.5)];
-		let unitX = (mapX < 0) ? -mapX - 1 : mapX;
-		let unitY = (mapY < 0) ? -mapY - 1 : mapY;
-		let theBlock = game_map.getBlockByQuarter(game_map.unit2DToBlock2D([unitX, unitY]), game_map.getQuarterMap([mapX, mapY]));
-		
-		if (theBlock == null) continue;
-
-		let blockProjectileList = theBlock.projectileList;
-
-		for (let ii = 0; ii < blockProjectileList.length; ++ii) {
-
-			let index = blockProjectileList[ii];
-
-			if (projectileList[index] == null || projectileList[index] == "deletion") continue;
-			// Monster Collision With Projectile
-			let diffX = projectileList[index].position[0] - theMonster.position[0];
-			let diffY = projectileList[index].position[1] - theMonster.position[1];
-			// Calculate Manhattan Distance
-
-			if (projectileList[index].damageInfo.attacker[0] != "monster" && Math.abs(diffX) + Math.abs(diffY) < 2){
-				let diffZ = projectileList[index].position[2] - theMonster.position[2];
-				// Calculate Distance To Squared
-				if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
-					creatureInfoChange([[["monster", i], {"health": ["-", projectileList[index].damageInfo.amount]}]]);
-					projectileList[index] = "deletion";
-					if (theMonster.properties["health"] <= 0){
-						deleteMonster(i);
-					}
-				}
-			}
-		}
+		creatureOnHit(theMonster);
 	}
 }
 
@@ -272,6 +252,46 @@ function deleteMonster(monsterID){
 	AI_controllerList[monsterID] = null;
 	io.compress(true).emit('deleteMonster', monsterID);
 }
+
+function creatureOnHit(creatureInfo){
+	let [mapX, mapY] = [Math.floor(creatureInfo.position[0] + 0.5), Math.floor(creatureInfo.position[1] + 0.5)];
+	let unitX = (mapX < 0) ? -mapX - 1 : mapX;
+	let unitY = (mapY < 0) ? -mapY - 1 : mapY;
+	let theBlock = game_map.getBlockByQuarter(game_map.unit2DToBlock2D([unitX, unitY]), game_map.getQuarterMap([mapX, mapY]));
+	
+	if (theBlock == null) return;
+
+	let blockProjectileList = theBlock.projectileList;
+
+	for (let ii = 0; ii < blockProjectileList.length; ++ii) {
+
+		let index = blockProjectileList[ii];
+
+		if (projectileList[index] == null || projectileList[index] == "deletion") continue;
+		// Creature Collision With Projectile
+		let diffX = projectileList[index].position[0] - creatureInfo.position[0];
+		let diffY = projectileList[index].position[1] - creatureInfo.position[1];
+		// Calculate Manhattan Distance
+		if (creatureInfo.creatureType == "player"){
+			if (projectileList[index].damageInfo.attacker[1] == creatureInfo.ID) continue;
+		}else{
+			if (projectileList[index].damageInfo.attacker[0] == creatureInfo.creatureType) continue;
+		}
+
+		if (Math.abs(diffX) + Math.abs(diffY) < 2){
+			let diffZ = projectileList[index].position[2] - creatureInfo.position[2];
+			// Calculate Distance To Squared
+			if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
+				creatureInfoChange([[[creatureInfo.creatureType, creatureInfo.ID], {"health": ["-", projectileList[index].damageInfo.amount]}]]);
+				projectileList[index] = "deletion";
+				if (creatureInfo.properties["health"] <= 0){
+					deleteMonster(creatureInfo.ID);
+				}
+			}
+		}
+	}
+}
+
 // -------------------End Of Monster-------------------
 
 // -------------------Item-------------------
@@ -346,8 +366,10 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 	// Remove Item From The Item Array
 	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID);
 
+	let itemAddProperty = Object.assign({}, itemInfoArray[additionalItemID][1]);
+
 	// Update Player Property Based On Item
-	let playerInfo = [[["player", updatePlayerID], itemInfoArray[additionalItemID][1]]];
+	let playerInfo = [[["player", updatePlayerID], itemAddProperty]];
 	creatureInfoChange(playerInfo);
 
 	// Update Server Side Player Item Array
@@ -582,26 +604,20 @@ function serverLoop(){
 	endDate = new Date();
 	let delta = (endDate.getTime() - startDate.getTime()) / 1000;
 	updateProjectile(delta);
+	updatePlayer(delta);
 	updateMonster(delta);
 	startDate = new Date();
 }
 // -------------------End Of Server Loop-------------------
 
 // Update Client Frame
-function ClientFrameUpdate(onHitProjectileList){
-	for (let i = 0; i < onHitProjectileList.length; i++){
-		if (projectileList[onHitProjectileList[i]] != null){
-			projectileList[onHitProjectileList[i]] = "deletion";
-		}
-	}
-	
+function ClientFrameUpdate(){
 	return [updateProjectileList, updateMonsterPos];
 }
 
 // Changing Server Creature Information
-function creatureInfoChange(theCreatureInfo){
+function creatureInfoChange(creatureInfo){
 
-	let creatureInfo = theCreatureInfo.slice();
 	// Example creatureInfo = [[creatureType, id], {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
 	for (let i = 0; i < creatureInfo.length; i++){
 		let theCreature;
@@ -622,10 +638,12 @@ function creatureInfoChange(theCreatureInfo){
 
 			if (key == "health"){
 				if (setValue > theCreature.properties.maxHealth){
-					theCreature.properties.health = theCreature.properties.maxHealth;
-					creatureInfo[i][1].health = ["=", theCreature.properties.maxHealth];
+					creatureInfo[i][1].health = ["+", theCreature.properties.maxHealth - theCreature.properties.health];
+					theCreature.properties.health += theCreature.properties.maxHealth - theCreature.properties.health;
+					console.log("test",[key, value], theCreature.properties.maxHealth, theCreature.properties.health);
 				}else{
 					theCreature.properties.health = setValue;
+					console.log("test2",[key, value], theCreature.properties.maxHealth, theCreature.properties.health);
 				}
 			}else{
 				theCreature.properties[key] = setValue;
@@ -690,7 +708,7 @@ io.on('connection', (sock) => {
 	sock.on('newProjectile', (projectileInfo) => spawnProjectile(projectileInfo));
 
 	// Client Frame Update
-	sock.on('clientFrame', (onHitProjectileList) => sock.compress(true).emit('updateFrame', ClientFrameUpdate(onHitProjectileList)));
+	sock.on('clientFrame', () => sock.compress(true).emit('updateFrame', ClientFrameUpdate()));
 });
 
 // Whenever An Error Occur, Log The Error

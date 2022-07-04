@@ -102,7 +102,9 @@ const creatureInfoChange = (creatureInfo) => {
 			else if (value[0] == "/") setValue = theCreature.properties[key] / value[1];
 
 			if (key == "health"){
-				new damageText({amount: Math.abs(value[1]) * (theCreature.properties.health < setValue ? -1 : 1)}, [theCreature.object.position.x , theCreature.object.position.y, theCreature.object.position.z]);
+				if (Math.abs(theCreature.object.position.x - player_controller.camera.position.x) + Math.abs(theCreature.object.position.y - player_controller.camera.position.y) < game_map.blockSize.x + game_map.blockSize.y){
+					new damageText({amount: Math.abs(value[1]) * (theCreature.properties.health < setValue ? -1 : 1)}, [theCreature.object.position.x , theCreature.object.position.y, theCreature.object.position.z]);
+				}
 				theCreature.setHealth(setValue);
 			} else if (key == "maxHealth") {
 				theCreature.setMaxHealth(setValue);
@@ -271,28 +273,9 @@ const updateFrame = ([projectilePosList, monsterPosList]) => {
 		projectileList.length === projectilePosList.length;
 	}
 
-	onHitProjectileList = [];
 	for (let i = 0; i < projectileList.length; i++){
 		if (projectileList[i] != null){
 			projectileList[i].positionChange(projectilePosList[i]);
-
-
-			// Local Player Collision With Projectile
-			let diffX = projectileList[i].object.position.x - player_controller.creature.object.position.x;
-			let diffY = projectileList[i].object.position.y - player_controller.creature.object.position.y;
-			
-			// Calculate Manhattan Distance
-			if (!(projectileList[i].damageInfo.attacker[0] == "player" && projectileList[i].damageInfo.attacker[1] == clientPlayerID) && Math.abs(diffX) + Math.abs(diffY) < 2){
-				
-				let diffZ = projectileList[i].object.position.z - player_controller.creature.object.position.z;
-				// Calculate Distance To Squared
-				if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
-					player_controller.damage(projectileList[i].damageInfo.amount);
-					onHitProjectileList.push(i);
-					projectileList[i].delete();
-					projectileList[i] = null;
-				}
-			}
 		}
 	}
 
@@ -415,7 +398,7 @@ const clientUpdateBlocks = (blockList) => {
 
 	// Frame Related
 	const frameUpdate = () => {
-		sock.compress(true).emit('clientFrame', onHitProjectileList);
+		sock.compress(true).emit('clientFrame', null);
 	}
 	document.addEventListener('frameEvent', frameUpdate);
 

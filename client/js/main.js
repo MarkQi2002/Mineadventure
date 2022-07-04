@@ -65,7 +65,6 @@ var itemArray = [];
 var newProjectileList = [];
 var projectileList = [];
 var updateProjectileList = [];
-var onHitProjectileList = [];
 
 // Stats Module
 var stats = new Stats();
