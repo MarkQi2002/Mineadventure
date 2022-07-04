@@ -20,8 +20,9 @@ class AI_controller {
 
         // Setting Projectile Information
         var newDamageInfo = {
-            amount: this.creature.properties["attackDamage"],
-            attacker: ["monster", this.creature.ID]
+            type: {"true": 1, "normal": this.creature.properties.attackDamage},
+            attacker: ["monster", this.creature.ID],
+            properties: this.creature.properties
         }
 
         var newProjectile = {

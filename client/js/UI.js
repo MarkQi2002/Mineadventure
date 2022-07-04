@@ -33,26 +33,35 @@ function displayAllUI() {
 
 
 class damageText{
-    constructor(damageInfo, position) {
+    constructor(type, amount, position) {
         this.deleteTimer = 1;
-        this.position = position;
-        this.size = 80 / Math.PI * Math.atan(Math.abs(damageInfo.amount) / 100) + 10;
-        this.sqrtSize = Math.sqrt(this.size);
-        this.rate = this.deleteTimer / (2 * this.sqrtSize);
+        this.position = [position[0] + Math.random() - 0.5, position[1] + Math.random() - 0.5, position[2] + Math.random() - 0.5];
 
         this.text = document.createElement('div');
         this.text.style.position = 'absolute';
         this.text.style.textAlign = "center";
         this.text.style.width = 100;
         this.text.style.height = 100;
-        this.text.innerHTML = Math.abs(damageInfo.amount);
+        this.text.innerHTML = Math.abs(amount);
+
+        this.size = 80 / Math.PI * Math.atan(Math.abs(amount) / 100) + 10;
+        
+
+        if (type == "true"){
+			this.text.style.color = "white";
+		}else if(type == "normal"){
+			this.text.style.color = "#AB4100";
+        }else if(type == "criticalNormal"){
+            this.text.style.color = "red";
+            this.size *= 2;
+		}else if(type == "heal"){
+			this.text.style.color = "green";
+		}
+
+        this.sqrtSize = Math.sqrt(this.size);
+        this.rate = this.deleteTimer / (2 * this.sqrtSize);
         this.text.style.fontSize = this.size + "px";
 
-        if (damageInfo.amount >= 0){
-            this.text.style.color = "red";
-        }else{
-            this.text.style.color = "green";
-        }
         this.text.style.opacity = 0.75;
 
         let [posX, posY] = this.toXYCoords(this.position);
@@ -339,7 +348,7 @@ var itemUIArray = { item0: new itemUIInfo,
 
 // Append Item When Pick Up An Item
 function appendItemUIArray(itemName) {
-    for ([key, value] of Object.entries(itemUIArray)) {
+    for (let [key, value] of Object.entries(itemUIArray)) {
         if (value.itemName == itemName) {
             value.itemAmount++;
             updateItemUI(key);
@@ -347,7 +356,7 @@ function appendItemUIArray(itemName) {
         }
     }
 
-    for ([key, value] of Object.entries(itemUIArray)) {
+    for (let [key, value] of Object.entries(itemUIArray)) {
         if (value.itemName == "NULL") {
             value.itemName = itemName;
             value.itemAmount++;

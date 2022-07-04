@@ -13,6 +13,7 @@ const socketio = require('socket.io');
 const map = require('./mapClass.js');
 const AI_controller = require('./AI_controller.js');
 const e = require('express');
+const { count } = require('console');
 //const quarterMap = require('./quarterMap.js');
 //const block = require('./block.js');
 
@@ -35,14 +36,16 @@ function properties() {
 	// Defensive Properties
 	this["health"] = 100,
 	this["maxHealth"] = 100,
-	this["armor"] = 0,
+	this["armor"] = 10,
 
 	// Attack Properties
 	this["attackDamage"] = 10,
-	this["attackSpeed"] = 1
+	this["attackSpeed"] = 1,
+	this["criticalRate"] = 0.01;
 
 	// Other Properties
 	this["moveSpeed"] = 3
+
 }
 
 // -------------------End Of Creature-------------------
@@ -282,10 +285,14 @@ function creatureOnHit(creatureInfo){
 			let diffZ = projectileList[index].position[2] - creatureInfo.position[2];
 			// Calculate Distance To Squared
 			if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
-				creatureInfoChange([[[creatureInfo.creatureType, creatureInfo.ID], {"health": ["-", projectileList[index].damageInfo.amount]}]]);
+				creatureInfoChange([[[creatureInfo.creatureType, creatureInfo.ID], {"damage": projectileList[index].damageInfo}]]);
 				projectileList[index] = "deletion";
 				if (creatureInfo.properties["health"] <= 0){
-					deleteMonster(creatureInfo.ID);
+					if (creatureInfo.creatureType == "player"){
+
+					}else{
+						deleteMonster(creatureInfo.ID);
+					}
 				}
 			}
 		}
@@ -320,12 +327,19 @@ Exponential Stacking
 Attack
 Defensive
 */
+function itemHealing(amount) {
+	// Defensive Properties
+	this.attacker = "item",
+	this.type = {"heal": amount},
+	this.properties = new properties()
+}
+
 var itemDefaultPosition = [1, 1, 1];
-var itemInfoArray = [[{"itemID": 0, "itemName": "Bison Steak", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"maxHealth": ["+", 25], "health": ["+", 25]}],
+var itemInfoArray = [[{"itemID": 0, "itemName": "Bison Steak", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"maxHealth": ["+", 25], "damage": new itemHealing(25)}],
 					[{"itemID": 1, "itemName": "Armor Piercing Rounds", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Offensive"}, {"attackDamage": ["+", 5]}],
-					[{"itemID": 2, "itemName": "Small Recovery Potion", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"health": ["+", 10]}],
-					[{"itemID": 3, "itemName": "Mediuml Recovery Potion", "rarity": "Uncommon", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"health": ["+", 100]}],
-					[{"itemID": 4, "itemName": "Large Recovery Potion", "rarity": "Suprior", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"health": ["+", 1000]}],
+					[{"itemID": 2, "itemName": "Small Recovery Potion", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"damage": new itemHealing(10)}],
+					[{"itemID": 3, "itemName": "Mediuml Recovery Potion", "rarity": "Uncommon", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"damage": new itemHealing(100)}],
+					[{"itemID": 4, "itemName": "Large Recovery Potion", "rarity": "Suprior", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"damage": new itemHealing(1000)}],
 					[],
 					[],
 					[],
@@ -629,30 +643,55 @@ function creatureInfoChange(creatureInfo){
 			theCreature = monsterArray[creatureInfo[i][0][1]];
 		}
 		
-		for ([key, value] of Object.entries(creatureInfo[i][1])) {
-			let setValue = value[1];
-			if (value[0] == "+") setValue = theCreature.properties[key] + value[1];
-			else if (value[0] == "-") setValue = theCreature.properties[key] - value[1];
-			else if (value[0] == "*") setValue = theCreature.properties[key] * value[1];
-			else if (value[0] == "/") setValue = theCreature.properties[key] / value[1];
-
-			if (key == "health"){
-				if (setValue > theCreature.properties.maxHealth){
-					creatureInfo[i][1].health = ["+", theCreature.properties.maxHealth - theCreature.properties.health];
-					theCreature.properties.health += theCreature.properties.maxHealth - theCreature.properties.health;
-					console.log("test",[key, value], theCreature.properties.maxHealth, theCreature.properties.health);
-				}else{
-					theCreature.properties.health = setValue;
-					console.log("test2",[key, value], theCreature.properties.maxHealth, theCreature.properties.health);
-				}
+		for (let [key, value] of Object.entries(creatureInfo[i][1])) {
+			if (key == "damage"){
+				creatureInfo[i][1].damage = [damagefunction(value, theCreature), value];
 			}else{
+				let setValue = value[1];
+				if (value[0] == "+") setValue = theCreature.properties[key] + value[1];
+				else if (value[0] == "-") setValue = theCreature.properties[key] - value[1];
+				else if (value[0] == "*") setValue = theCreature.properties[key] * value[1];
+				else if (value[0] == "/") setValue = theCreature.properties[key] / value[1];
+
 				theCreature.properties[key] = setValue;
+			}
+		}
+	}
+
+	io.compress(true).emit('creatureInfoChange', creatureInfo);
+}
+
+function damagefunction(damageInfo, defender){
+	let criticalAttack = false;
+	if (damageInfo.properties.criticalRate >= Math.random()) criticalAttack = true;
+
+	for (let [key, value] of Object.entries(damageInfo.type)) {
+		if (value < 0) continue;
+
+		if (key == "true"){
+			defender.properties.health -= value;
+		}else if(key == "normal"){
+			let amount = Math.floor(value * (1 - 2 / Math.PI * Math.atan(defender.properties.armor / 500)));
+			if (criticalAttack){
+				amount *= 2;
+				damageInfo.type["criticalNormal"] = amount;
+				delete damageInfo.type["normal"];
+			}else{
+				damageInfo.type.normal = amount;
+			}
+			defender.properties.health -= amount;
+			
+		}else if(key == "heal"){
+			defender.properties.health += value;
+			if (defender.properties.health > defender.properties.maxHealth){
+				damageInfo.type.heal = value - (defender.properties.health - defender.properties.maxHealth);
+				defender.properties.health = defender.properties.maxHealth;
 			}
 			
 		}
 	}
 
-	io.compress(true).emit('creatureInfoChange', creatureInfo);
+	return defender.properties.health;
 }
 
 // Client Is Disconnected

@@ -94,22 +94,24 @@ const creatureInfoChange = (creatureInfo) => {
 			theCreature = monsterArray[creatureInfo[i][0][1]];
 		}
 		
-		for ([key, value] of Object.entries(creatureInfo[i][1])) {
-			let setValue = value[1];
-			if (value[0] == "+") setValue = theCreature.properties[key] + value[1];
-			else if (value[0] == "-") setValue = theCreature.properties[key] - value[1];
-			else if (value[0] == "*") setValue = theCreature.properties[key] * value[1];
-			else if (value[0] == "/") setValue = theCreature.properties[key] / value[1];
+		for (let [key, value] of Object.entries(creatureInfo[i][1])) {
+			if (key == "damage"){
+				createDamageTextList(value[1], theCreature);
+				theCreature.setHealth(value[0]);
+			}else{
+				let setValue = value[1];
+				if (value[0] == "+") setValue = theCreature.properties[key] + value[1];
+				else if (value[0] == "-") setValue = theCreature.properties[key] - value[1];
+				else if (value[0] == "*") setValue = theCreature.properties[key] * value[1];
+				else if (value[0] == "/") setValue = theCreature.properties[key] / value[1];
 
-			if (key == "health"){
-				if (Math.abs(theCreature.object.position.x - player_controller.camera.position.x) + Math.abs(theCreature.object.position.y - player_controller.camera.position.y) < game_map.blockSize.x + game_map.blockSize.y){
-					new damageText({amount: Math.abs(value[1]) * (theCreature.properties.health < setValue ? -1 : 1)}, [theCreature.object.position.x , theCreature.object.position.y, theCreature.object.position.z]);
+				if (key == "health"){
+					theCreature.setHealth(setValue);
+				} else if (key == "maxHealth") {
+					theCreature.setMaxHealth(setValue);
+				} else {
+					theCreature.properties[key] = setValue;
 				}
-				theCreature.setHealth(setValue);
-			} else if (key == "maxHealth") {
-				theCreature.setMaxHealth(setValue);
-			} else {
-				theCreature.properties[key] = setValue;
 			}
 		}
 	}
@@ -118,6 +120,15 @@ const creatureInfoChange = (creatureInfo) => {
 		displayAllUI();
 	}
 };
+
+function createDamageTextList(damageInfo, theCreature){
+	if (Math.abs(theCreature.object.position.x - player_controller.camera.position.x) + Math.abs(theCreature.object.position.y - player_controller.camera.position.y) < game_map.blockSize.x + game_map.blockSize.y){
+		for (let [key, value] of Object.entries(damageInfo.type)) {
+			new damageText(key, value, [theCreature.object.position.x , theCreature.object.position.y, theCreature.object.position.z]);
+		}
+	}
+
+}
 // -------------------End Of Player-------------------
 
 // -------------------Monster-------------------
@@ -126,7 +137,6 @@ monsterArray.length = 100;
 
 // Function Used To Spawn A Monster
 function spawnMonster(monsterInfo){
-	console.log(monsterInfo);
 	let new_monster = new monster(monsterInfo);
 
 	monsterArray[monsterInfo.ID] = new_monster;
