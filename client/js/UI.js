@@ -151,14 +151,14 @@ class creatureUI{
 
         this.updateSize();
 
+        this.UI.style.visibility = 'hidden';
+
         let [posX, posY] = this.toXYCoords([this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z]);
         this.UI.style.top = posY + 'px';
         this.UI.style.left = posX + 'px';
         this.UI.appendChild(this.name);
         this.UI.appendChild(this.healthBackground);
         menuHtml.appendChild(this.UI);
-
-        this.UI.style.visibility = 'hidden';
     }
 
     toXYCoords(pos) {

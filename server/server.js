@@ -33,6 +33,16 @@ const io = socketio(server);
 
 // Default Properties For All Creature
 function properties() {
+	this["level"] = 1,
+	this["experience"] = 0, // level * 100 * e ^ ((level - 1) / 15)   need 93745637 exp to get level 100
+	
+	this["maxHealthGrowth"] = 50,
+	this["armorGrowth"] = 5,
+
+	this["attackDamageGrowth"] = 5,
+	this["attackSpeedGrowth"] = 0.05,
+	this["criticalRateGrowth"] = 0.005,
+
 	// Defensive Properties
 	this["health"] = 100,
 	this["maxHealth"] = 100,
@@ -709,7 +719,7 @@ const clientDisconnect = (Info, playerID) => {
 
 // -------------------Map-------------------
 // Setting The Size Of The Map
-var game_map = new map([12, 12],[20, 20]);
+var game_map = new map([10, 10],[20, 20]);
 // -------------------End Of Map-------------------
 
 // -------------------Sending And Receiving Information-------------------

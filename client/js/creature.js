@@ -52,11 +52,17 @@ class creature{
         // Close To Local Player Event
         if (Math.abs(localPlayerObject.position.x - this.object.position.x) < game_map.blockSize.x &&
             Math.abs(localPlayerObject.position.y - this.object.position.y) < game_map.blockSize.y){
+                if (this.object.visible == false){
+                    this.object.visible = true;
+                }
                 if (this.onHeadUI.UI.style.visibility == 'hidden'){
                     this.onHeadUI.UI.style.visibility = 'visible';
                 }
                 this.onHeadUI.update(delta);
         }else{
+            if (this.object.visible == true){
+                this.object.visible = false;
+            }
             if (this.onHeadUI.UI.style.visibility == 'visible'){
                 this.onHeadUI.UI.style.visibility = 'hidden';
             }
