@@ -46,7 +46,7 @@ class damageText{
         this.text.style.height = 100;
         this.text.innerHTML = Math.abs(amount);
 
-        this.size = 80 / Math.PI * Math.atan(Math.abs(amount) / 100) + 10;
+        this.size = (8 / Math.PI * Math.atan(Math.abs(amount) / 100) + 1) * 0.01 *  window.innerHeight;
         
 
         if (type == "true"){
@@ -62,7 +62,7 @@ class damageText{
 
         this.sqrtSize = Math.sqrt(this.size);
         this.rate = this.deleteTimer / (2 * this.sqrtSize);
-        this.text.style.fontSize = this.size + "px";
+        this.text.style.fontSize = this.size + 'px';
 
         this.text.style.opacity = 0.75;
 
@@ -114,9 +114,12 @@ class damageText{
 
 class creatureUI{
     constructor(creature) {
+        this.scale = 1;
         this.creature = creature;
 
         this.UI = document.createElement('div');
+        this.UI.style.position = 'absolute';
+
         this.name = document.createElement('div');
 
         /*
@@ -130,34 +133,71 @@ class creatureUI{
             </div>`      
         )*/
 
-
-        this.name.style.position = 'absolute';
-        this.name.style.textAlign = "center";
-        this.name.style.width = 100;
-        this.name.style.height = 100;
+        this.name.style.position = 'relative';
+        this.name.style.textAlign = 'center';
         this.name.innerHTML = this.creature.name;
-		this.name.style.color = "white";
-        this.name.style.fontSize = 20 + "px";
+		this.name.style.color = 'white';
         this.name.style.opacity = 1;
 
+        this.healthBackground = document.createElement('div');
+        this.healthBackground.style.position = 'relative';
+        this.healthBackground.style.backgroundColor = "rgba(255,255,255,0.5)";
+
+        this.healthBar = document.createElement('div');
+        this.healthBackground.appendChild(this.healthBar);
+        this.healthBar.style.position = 'relative';
+        this.healthBar.style.backgroundColor = "rgba(255,0,0,1)";
+        this.healthBar.style.opacity = 1;
+
+        this.updateSize();
+
         let [posX, posY] = this.toXYCoords([this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z]);
-        this.name.style.top = posY + 'px';
-        this.name.style.left = posX + 'px';
+        this.UI.style.top = posY + 'px';
+        this.UI.style.left = posX + 'px';
         this.UI.appendChild(this.name);
+        this.UI.appendChild(this.healthBackground);
         menuHtml.appendChild(this.UI);
+
+        this.UI.style.visibility = 'hidden';
     }
 
     toXYCoords(pos) {
         var vector = new THREE.Vector3(pos[0], pos[1], pos[2]).project(camera);
         vector.x = (vector.x + 1)/2 * window.innerWidth;
         vector.y = -(vector.y - 1)/2 * window.innerHeight;
-        return [vector.x, vector.y];
+        return [vector.x - this.UI.clientWidth / 2, vector.y - this.UI.clientHeight / 2  - window.innerWidth * 0.03];
+    }
+
+    setScale(scale){
+        this.scale = scale;
+        this.healthBar.style.width = window.innerHeight * 0.1 * scale + 'px';
+    }
+
+    updateSize(){
+        this.UI.style.width = window.innerHeight * 0.2 + "px";
+        this.UI.style.height = window.innerHeight * 0.05  + "px";
+
+        this.name.style.width = window.innerHeight * 0.2 + 'px';
+        this.name.style.height = window.innerHeight * 0.025 + 'px';
+        this.name.style.fontSize = window.innerHeight * 0.02 + 'px';
+        this.name.style.top = 0 + 'px';
+        this.name.style.left = 0 + 'px';
+
+        this.healthBackground.style.width = window.innerHeight * 0.105 + 'px';
+        this.healthBackground.style.height = window.innerHeight * 0.015 + 'px';
+        this.healthBackground.style.top = window.innerHeight * 0.005 + 'px';
+        this.healthBackground.style.left = window.innerHeight * 0.05 + 'px';
+
+        this.setScale(this.scale);
+        this.healthBar.style.height = window.innerHeight * 0.01 + 'px';
+        this.healthBar.style.top = window.innerHeight * 0.0025 + 'px';
+        this.healthBar.style.left = window.innerHeight * 0.0025 + 'px';
     }
 
     update(delta){
         let [posX, posY] = this.toXYCoords([this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z]);
-        this.name.style.top = posY - 50 + 'px';
-        this.name.style.left = posX + 'px';
+        this.UI.style.top = posY + 'px';
+        this.UI.style.left = posX + 'px';
     }
 
 

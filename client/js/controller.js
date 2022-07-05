@@ -6,7 +6,6 @@ class controller{
         this.camera.position.x = this.creature.object.position.x;
         this.camera.position.y = this.creature.object.position.y;
         this.cameraOffset = 0;
-        this.creature.healthBar.visible = false;
         
         this.speed = this.creature.properties["moveSpeed"]; // Per Second 
  

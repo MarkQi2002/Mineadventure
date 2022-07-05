@@ -42,7 +42,7 @@
 }
 
 .playerStat #playerHealthBackground {
-    background-color: rgba(0.25, 0.25, 0.25, 0.5);
+    background-color: rgba(25, 25, 25, 0.5);
     position: relative;
     margin-left: 30%;
     top: 10%;

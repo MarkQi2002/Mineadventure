@@ -1,12 +1,3 @@
-// Health Bar THREE Mesh
-var healthBarLoader = {
-    innerGeometry: new THREE.PlaneGeometry(0.1, 0.01),
-    innerMaterial: new THREE.MeshBasicMaterial({color: 'red', transparent: true, opacity: 0.75}),
-
-    outerGeometry: new THREE.PlaneGeometry(0.105, 0.015),
-    outerMaterial: new THREE.MeshBasicMaterial({color: 'white', transparent: true, opacity: 0.5})
-};
-
 var creatureLoader = {
     geometry: new THREE.SphereGeometry(0.5, 3, 3)
 };
@@ -15,6 +6,7 @@ var creatureLoader = {
 class creature{
     constructor(creatureInfo) {
         // Creating THREE Object
+        this.ID = creatureInfo.ID;
         this.object = new THREE.Object3D();
         this.object.position.set(creatureInfo.position[0], creatureInfo.position[1], creatureInfo.position[2]);
         scene.add(this.object);
@@ -24,17 +16,9 @@ class creature{
         this.properties = creatureInfo.properties;
         this.creatureItemArray = creatureInfo.creatureItemArray;
 
-        // HealthBar
-        this.healthBar = new THREE.Mesh(healthBarLoader.outerGeometry, healthBarLoader.outerMaterial);
-        this.innerHealthBar = new THREE.Mesh(healthBarLoader.innerGeometry, healthBarLoader.innerMaterial);        
-        this.healthBar.add(this.innerHealthBar);
-        this.innerHealthBar.position.set(0, 0, 0.0001);
-        camera.add(this.healthBar);
-        this.healthBar.position.set(0, 0, -1);
-
-        this.updateHealthBarPercent();
-
+        // On Head UI
         this.onHeadUI = new creatureUI(this);
+        this.updateHealthBarPercent();
     }
 
     damage(amount){
@@ -59,9 +43,7 @@ class creature{
         }else if(scale > 1){
             scale = 1;
         }
-        this.innerHealthBar.scale.x = scale;
-        this.innerHealthBar.position.x = (scale - 1) * 0.05;
-
+        this.onHeadUI.setScale(scale);
     }
 
 
@@ -70,21 +52,17 @@ class creature{
         // Close To Local Player Event
         if (Math.abs(localPlayerObject.position.x - this.object.position.x) < game_map.blockSize.x &&
             Math.abs(localPlayerObject.position.y - this.object.position.y) < game_map.blockSize.y){
-                this.healthBar.visible = true;
-                this.updateHealthBar();
+                if (this.onHeadUI.UI.style.visibility == 'hidden'){
+                    this.onHeadUI.UI.style.visibility = 'visible';
+                }
                 this.onHeadUI.update(delta);
         }else{
-            this.healthBar.visible = false;
+            if (this.onHeadUI.UI.style.visibility == 'visible'){
+                this.onHeadUI.UI.style.visibility = 'hidden';
+            }
         }
     }
     
-    updateHealthBar(){
-        let normal3D = new THREE.Vector3(this.object.position.x, this.object.position.y, this.object.position.z);
-        normal3D.project(player_controller.camera);
-        this.healthBar.position.x = normal3D.x * 0.78 * window.innerWidth / window.innerHeight;
-        this.healthBar.position.y = normal3D.y * 0.78 + 0.05;
-    }
-
 
     delete() {
         this.onHeadUI.delete();
@@ -98,8 +76,6 @@ class creature{
             this.object.remove(obj); 
         }
         scene.remove(this.object);
-        this.healthBar.remove(this.healthBar.children);
-        player_controller.camera.remove(this.healthBar);
         delete this;
     }
 }
