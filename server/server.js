@@ -285,10 +285,11 @@ function creatureOnHit(creatureInfo){
 		let diffX = projectileList[index].position[0] - creatureInfo.position[0];
 		let diffY = projectileList[index].position[1] - creatureInfo.position[1];
 		// Calculate Manhattan Distance
+		let attackerInfo = projectileList[index].damageInfo.attacker;
 		if (creatureInfo.creatureType == "player"){
-			if (projectileList[index].damageInfo.attacker[1] == creatureInfo.ID) continue;
+			if (attackerInfo[1] == creatureInfo.ID) continue;
 		}else{
-			if (projectileList[index].damageInfo.attacker[0] == creatureInfo.creatureType) continue;
+			if (attackerInfo[0] == creatureInfo.creatureType) continue;
 		}
 
 		if (Math.abs(diffX) + Math.abs(diffY) < 2){
@@ -302,11 +303,30 @@ function creatureOnHit(creatureInfo){
 
 					}else{
 						deleteMonster(creatureInfo.ID);
+						if (attackerInfo[0] == "player"){
+							levelUp(playerArray[attackerInfo[1]], creatureInfo.properties.level * 100);
+						}
+						
 					}
 				}
 			}
 		}
 	}
+}
+
+function experienceRequire(level){
+	return Math.floor(level * 100 * Math.exp((level - 1) / 15));
+}
+
+function levelUp(creatureInfo, experience){
+	creatureInfo.properties.experience += experience;
+	let nextLevelEXP = experienceRequire(creatureInfo.properties.level);
+	while (creatureInfo.properties.experience >= nextLevelEXP){
+		creatureInfo.properties.level += 1;
+		creatureInfo.properties.experience -= nextLevelEXP;
+		nextLevelEXP = experienceRequire(creatureInfo.properties.level);
+	}
+	io.compress(true).emit('creatureInfoChange', [[[creatureInfo.creatureType, creatureInfo.ID], {"level": ["=", creatureInfo.properties.level], "experience": ["=", creatureInfo.properties.experience]}]]);
 }
 
 // -------------------End Of Monster-------------------
@@ -390,7 +410,11 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 	// Remove Item From The Item Array
 	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID);
 
-	let itemAddProperty = Object.assign({}, itemInfoArray[additionalItemID][1]);
+	let itemAddProperty = {};
+	for (let [key, value] of Object.entries(itemInfoArray[additionalItemID][1])) {
+		itemAddProperty[key] = value;
+	}
+
 
 	// Update Player Property Based On Item
 	let playerInfo = [[["player", updatePlayerID], itemAddProperty]];
@@ -697,7 +721,7 @@ function damagefunction(damageInfo, defender){
 				damageInfo.type.heal = value - (defender.properties.health - defender.properties.maxHealth);
 				defender.properties.health = defender.properties.maxHealth;
 			}
-			
+			console.log(value,defender.properties.health, defender.properties.maxHealth);
 		}
 	}
 

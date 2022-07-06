@@ -83,6 +83,7 @@ function sendCreaturePropertyChange([creatureType, id], propertyList){
 const creatureInfoChange = (creatureInfo) => {
 	// Example creatureInfo = [[creatureType, id], {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
 	let updateLocalPlayerUI = false;
+	let updateOnlyHealthUI = true;
 	for (let i = 0; i < creatureInfo.length; i++){
 		let theCreature;
 		if (creatureInfo[i][0][0] == "player"){
@@ -98,6 +99,7 @@ const creatureInfoChange = (creatureInfo) => {
 			if (key == "damage"){
 				createDamageTextList(value[1], theCreature);
 				theCreature.setHealth(value[0]);
+				
 			}else{
 				let setValue = value[1];
 				if (value[0] == "+") setValue = theCreature.properties[key] + value[1];
@@ -110,6 +112,7 @@ const creatureInfoChange = (creatureInfo) => {
 				} else if (key == "maxHealth") {
 					theCreature.setMaxHealth(setValue);
 				} else {
+					if (updateLocalPlayerUI) updateOnlyHealthUI = false;
 					theCreature.properties[key] = setValue;
 				}
 			}
@@ -117,7 +120,11 @@ const creatureInfoChange = (creatureInfo) => {
 	}
 
 	if (updateLocalPlayerUI){
-		displayAllUI();
+		if (updateOnlyHealthUI){
+			displayPlayerHealth();
+		}else{
+			displayAllUI();
+		}
 	}
 };
 

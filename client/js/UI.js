@@ -25,12 +25,22 @@ function displayPlayerAttackDamage() {
     document.getElementById("playerAttackDamange").innerHTML = "Player Attack Damage: " + playerArray[clientPlayerID].properties["attackDamage"];
 }
 
+function displayCreatureProperties() {
+    let propertiesSTR = "";
+    for (let [key, value] of Object.entries(player_controller.creature.properties)) {
+        propertiesSTR += key + ": " + value + "<br>";
+    }
+    document.getElementById("creatureName").innerHTML = propertiesSTR;
+}
+
 
 function displayAllUI() {
     displayPlayerName();
 	displayPlayerHealth();
 	displayPlayerArmor();
 	displayPlayerAttackDamage();
+
+    displayCreatureProperties();
 }
 
 

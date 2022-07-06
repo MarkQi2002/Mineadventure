@@ -50,3 +50,13 @@
     height: 50%;
     font-size: 2.5vh;
 }
+
+.creatureInfo {
+    background-color: rgba(255, 192, 203, 0.5) ;
+    overflow: hidden;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 20vw;
+    height: 80vh;
+}
