@@ -1,12 +1,10 @@
 const menuHtml = document.querySelector('#noSelect');
+const creatureInfoUI = document.querySelector("#creatureInfo");
+var creatureInfoUIList = {};
 
 // Button UI Function
-function displayPlayerName() {
-    document.getElementById("playerName").innerHTML = "Player Name: " + playerArray[clientPlayerID].name;
-}
-
 function displayPlayerHealth() {
-    document.getElementById("playerHealth").innerHTML = "Player Health: " + playerArray[clientPlayerID].properties["health"] + "/" + playerArray[clientPlayerID].properties["maxHealth"];
+    creatureInfoUIList.health.update(playerArray[clientPlayerID].properties["health"]);
     document.getElementById("playerHealthInfo").innerHTML = playerArray[clientPlayerID].properties["health"] + "/" + playerArray[clientPlayerID].properties["maxHealth"];
     let scale = playerArray[clientPlayerID].properties["health"] / playerArray[clientPlayerID].properties["maxHealth"];
     if (scale < 0){
@@ -17,30 +15,51 @@ function displayPlayerHealth() {
     document.getElementById("playerHealthBar").style.width = (98 * scale).toString() + '%';
 }
 
-function displayPlayerArmor() {
-    document.getElementById("playerArmor").innerHTML = "Player Armor: " + playerArray[clientPlayerID].properties["armor"];
-}
-
-function displayPlayerAttackDamage() {
-    document.getElementById("playerAttackDamange").innerHTML = "Player Attack Damage: " + playerArray[clientPlayerID].properties["attackDamage"];
-}
 
 function displayCreatureProperties() {
-    let propertiesSTR = "";
     for (let [key, value] of Object.entries(player_controller.creature.properties)) {
-        propertiesSTR += key + ": " + value + "<br>";
+        creatureInfoUIList[key].update(value);
     }
-    document.getElementById("creatureName").innerHTML = propertiesSTR;
+}
+
+function createCreaturePropertiesUI() {
+    for (let [key, value] of Object.entries(player_controller.creature.properties)) {
+        creatureInfoUIList[key] = new propertiesUI(key, value);
+    }
 }
 
 
 function displayAllUI() {
-    displayPlayerName();
 	displayPlayerHealth();
-	displayPlayerArmor();
-	displayPlayerAttackDamage();
-
     displayCreatureProperties();
+}
+
+class propertiesUI{
+    constructor(key, value) {
+        this.key = key;
+        this.text = document.createElement('div');
+        this.text.style.position = 'relative';
+        this.text.style.width = 100 + 'vw';
+        this.text.style.height = 5 + 'vh';
+        this.text.innerHTML = this.key + ": " + value;
+
+        this.setSize();
+
+        //this.text.style.opacity = 1;
+        this.text.style.top = 2 + 'vh';
+        this.text.style.left = 2 + 'vw';
+        creatureInfoUI.appendChild(this.text);
+
+    }
+
+    setSize(){
+        this.text.style.fontSize = window.innerHeight * 0.02 + 'px';
+    }
+
+    update(value){
+        this.text.innerHTML = this.key + ": " + value;
+    }
+
 }
 
 

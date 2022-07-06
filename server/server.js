@@ -325,8 +325,24 @@ function levelUp(creatureInfo, experience){
 		creatureInfo.properties.level += 1;
 		creatureInfo.properties.experience -= nextLevelEXP;
 		nextLevelEXP = experienceRequire(creatureInfo.properties.level);
+
+		creatureInfo.properties.health += creatureInfo.properties.maxHealthGrowth;
+		creatureInfo.properties.maxHealth += creatureInfo.properties.maxHealthGrowth;
+		creatureInfo.properties.attackDamage += creatureInfo.properties.attackDamageGrowth;
+		creatureInfo.properties.attackSpeed += creatureInfo.properties.attackSpeedGrowth;
+		creatureInfo.properties.criticalRate += creatureInfo.properties.criticalRateGrowth;
 	}
-	io.compress(true).emit('creatureInfoChange', [[[creatureInfo.creatureType, creatureInfo.ID], {"level": ["=", creatureInfo.properties.level], "experience": ["=", creatureInfo.properties.experience]}]]);
+
+
+	let levelUpInfo = { "level": ["=", creatureInfo.properties.level],
+						"experience": ["=", creatureInfo.properties.experience],
+						"health": ["=", creatureInfo.properties.health],
+						"maxHealth": ["=", creatureInfo.properties.maxHealth],
+						"attackDamage": ["=", creatureInfo.properties.attackDamage],
+						"attackSpeed": ["=", creatureInfo.properties.attackSpeed],
+						"criticalRate": ["=", creatureInfo.properties.criticalRate]
+					};
+	io.compress(true).emit('creatureInfoChange', [[[creatureInfo.creatureType, creatureInfo.ID], levelUpInfo]]);
 }
 
 // -------------------End Of Monster-------------------
@@ -412,7 +428,7 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 
 	let itemAddProperty = {};
 	for (let [key, value] of Object.entries(itemInfoArray[additionalItemID][1])) {
-		itemAddProperty[key] = value;
+		itemAddProperty[key] = JSON.parse(JSON.stringify(value));
 	}
 
 
@@ -679,7 +695,7 @@ function creatureInfoChange(creatureInfo){
 		
 		for (let [key, value] of Object.entries(creatureInfo[i][1])) {
 			if (key == "damage"){
-				creatureInfo[i][1].damage = [damagefunction(value, theCreature), value];
+				creatureInfo[i][1]["health"] = ["=", damagefunction(value, theCreature)];
 			}else{
 				let setValue = value[1];
 				if (value[0] == "+") setValue = theCreature.properties[key] + value[1];

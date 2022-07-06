@@ -44,6 +44,7 @@ const newPlayer = (playerInfo, playerArrayLength) => {
 		player_controller = new controller(new_player, camera);
 
 		// Display Infomration On UI
+		createCreaturePropertiesUI();
 		displayAllUI();
 
 		// Animate The Player
@@ -97,9 +98,7 @@ const creatureInfoChange = (creatureInfo) => {
 		
 		for (let [key, value] of Object.entries(creatureInfo[i][1])) {
 			if (key == "damage"){
-				createDamageTextList(value[1], theCreature);
-				theCreature.setHealth(value[0]);
-				
+				createDamageTextList(value, theCreature);
 			}else{
 				let setValue = value[1];
 				if (value[0] == "+") setValue = theCreature.properties[key] + value[1];

@@ -52,7 +52,7 @@
 }
 
 .creatureInfo {
-    background-color: rgba(255, 192, 203, 0.5) ;
+    background-color: rgba(50, 50, 50, 0.25) ;
     overflow: hidden;
     position: fixed;
     bottom: 0;

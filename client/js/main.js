@@ -36,6 +36,10 @@ const resizeWindow = () => {
             monsterArray[i].onHeadUI.updateSize();
         }
     }
+
+    for (let [key, value] of Object.entries(creatureInfoUIList)) {
+        creatureInfoUIList[key].setSize();
+    }
 };
 
 // Fix window size event
