@@ -17,6 +17,7 @@ class item {
     constructor(itemInfo, itemPosition) {
         // Basic Item Information
         this.itemInfo = itemInfo;
+        this.collected = false;
 
         // Creating The Item Using THREE And Render The Item
         this.object = new THREE.Object3D();

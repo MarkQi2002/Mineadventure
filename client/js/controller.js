@@ -241,6 +241,7 @@ class controller{
         for (let itemIndex = 0; itemIndex < itemArray.length; itemIndex++) { 
             // A Few Condition To Skip Collision Detection 
             if (itemArray[itemIndex] == null) continue; 
+            if (itemArray[itemIndex].collected) continue;
             // For Calculating Manhattan Distance
             let itemPosition = itemArray[itemIndex].object.position;
             let diffX = predictedPosition.x - itemPosition.x;
@@ -252,7 +253,9 @@ class controller{
             // Calculate Direct Distance To Squared
             let diffZ = predictedPosition.z - itemPosition.z;
             if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.64) { 
-                console.log("Collided With Item", itemArray[itemIndex]); 
+                console.log("Collided With Item", itemArray[itemIndex]);
+
+                itemArray[itemIndex].collected = true;
 
                 // Removing The Item Collided With And Increse Player Item
                 removeItemID = itemIndex;
