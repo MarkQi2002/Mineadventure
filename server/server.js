@@ -737,7 +737,6 @@ function damagefunction(damageInfo, defender){
 				damageInfo.type.heal = value - (defender.properties.health - defender.properties.maxHealth);
 				defender.properties.health = defender.properties.maxHealth;
 			}
-			console.log(value,defender.properties.health, defender.properties.maxHealth);
 		}
 	}
 

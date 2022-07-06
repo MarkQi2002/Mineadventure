@@ -26,6 +26,17 @@ function createCreaturePropertiesUI() {
     for (let [key, value] of Object.entries(player_controller.creature.properties)) {
         creatureInfoUIList[key] = new propertiesUI(key, value);
     }
+
+    var coll = document.querySelector('#creaturePropertiesButton');
+    coll.addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.display === "block") {
+          content.style.display = "none";
+        } else {
+          content.style.display = "block";
+        }
+    });
 }
 
 
