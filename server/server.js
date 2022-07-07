@@ -88,7 +88,7 @@ const CreateNewPlayer = (playerID, playerName, spawnPos) => {
 	let playerInfo  = {
 		ID: playerID,
 		creatureType: "player",
-		name: playerName,
+		name: playerName != '' ? playerName : "player_" + playerID,
 		position: [spawnPos[0], spawnPos[1], 1],
 		
 		// Player Properties
@@ -797,6 +797,9 @@ io.on('connection', (sock) => {
 
 	// Client Frame Update
 	sock.on('clientFrame', () => sock.compress(true).emit('updateFrame', ClientFrameUpdate()));
+
+	// New Message From Client
+	sock.on('newMessage', (clientMessage) => io.compress(true).emit('serverMessage', clientMessage));
 });
 
 // Whenever An Error Occur, Log The Error

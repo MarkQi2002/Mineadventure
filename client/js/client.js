@@ -44,7 +44,7 @@ const newPlayer = (playerInfo, playerArrayLength) => {
 		player_controller = new controller(new_player, camera);
 
 		// Display Infomration On UI
-		createCreaturePropertiesUI();
+		initUI();
 		displayAllUI();
 
 		// Animate The Player
@@ -55,6 +55,7 @@ const newPlayer = (playerInfo, playerArrayLength) => {
 		intervalWorker.onmessage = updateTimeEvent;
 
 	}
+	new messageUI("System", playerInfo.name + " joined the game.", "yellow");
 };
 
 // Update Every Player's Position
@@ -263,6 +264,7 @@ const connectionError = (error) => {
 // When A Player Is Disconnected
 const playerDisconnect = (PlayerID) => {
 	if (playerArray[PlayerID] != null){
+		new messageUI("System", playerArray[PlayerID].name + " left the game.", "yellow");
 		playerArray[PlayerID].delete();
 		playerArray[PlayerID] = null;
 	}
@@ -326,6 +328,13 @@ const deleteEvent = ([deleteProjectileList, deleteUnitList]) => {
 };
 // -------------------End Of Projectile-------------------
 
+// -------------------Message-------------------
+const newServerMessage = ([name, newMessageFromServer]) => {
+	new messageUI(name, newMessageFromServer, "white");
+};
+
+// -------------------End Of Message-------------------
+
 // -------------------Map-------------------
 // Update Client Side Block
 const clientUpdateBlocks = (blockList) => {
@@ -372,6 +381,9 @@ const clientUpdateBlocks = (blockList) => {
 	// Update Frame
 	sock.on('updateFrame', updateFrame);
 	sock.on('deleteEvent', deleteEvent);
+
+	// New Server Message
+	sock.on('serverMessage', newServerMessage);
 
 	// Sending My New Position To Server
 	const updatePosition = () => {
@@ -425,4 +437,10 @@ const clientUpdateBlocks = (blockList) => {
 		changingCreatureInfo = [];
 	}
 	document.addEventListener('changingCreatureInfo', creatureInfo);
+
+	// Send A Message To Server
+	const SendClientMessage = () => {
+		sock.compress(true).emit('newMessage', sendingMessage);
+	}
+	document.addEventListener('sendMessage', SendClientMessage);
 })();

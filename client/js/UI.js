@@ -1,5 +1,7 @@
 const menuHtml = document.querySelector('#noSelect');
 const creatureInfoUI = document.querySelector("#creatureInfo");
+const chatBoxUI = document.querySelector("#chatBox");
+const terminalInput = document.getElementById("terminalInput");
 var creatureInfoUIList = {};
 
 // Button UI Function
@@ -22,7 +24,7 @@ function displayCreatureProperties() {
     }
 }
 
-function createCreaturePropertiesUI() {
+function initUI() {
     for (let [key, value] of Object.entries(player_controller.creature.properties)) {
         creatureInfoUIList[key] = new propertiesUI(key, value);
     }
@@ -36,6 +38,22 @@ function createCreaturePropertiesUI() {
         } else {
           content.style.display = "block";
         }
+    });
+
+    coll = document.querySelector('#messageDisplayButton');
+    coll.addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = chatBoxUI;
+        if (content.style.maxHeight === "70%") {
+          content.style.maxHeight = "10%";
+          content.style.overflowY = "hidden";
+          coll.innerHTML = " ^ ";
+        } else {
+          content.style.maxHeight= "70%";
+          content.style.overflowY = "scroll";
+          coll.innerHTML = " v ";
+        }
+        content.scrollTo(0, content.scrollHeight);
     });
 }
 
@@ -59,6 +77,7 @@ class propertiesUI{
         //this.text.style.opacity = 1;
         this.text.style.top = 2 + 'vh';
         this.text.style.left = 2 + 'vw';
+
         creatureInfoUI.appendChild(this.text);
 
     }
@@ -73,6 +92,27 @@ class propertiesUI{
 
 }
 
+class messageUI{
+    constructor(name, text, color) {
+        this.name = name;
+        this.text = document.createElement('div');
+        this.text.classList.add("messageClass");
+        this.text.innerHTML = this.name + ": " + text;
+        this.text.style.color = color;
+        chatBoxUI.appendChild(this.text);
+        chatBoxUI.scrollTo(0, chatBoxUI.scrollHeight);
+
+    }
+
+    setSize(){
+        this.text.style.fontSize = window.innerHeight * 0.02 + 'px';
+    }
+
+    update(value){
+        this.text.innerHTML = this.key + ": " + value;
+    }
+
+}
 
 class damageText{
     constructor(type, amount, position) {
@@ -266,9 +306,11 @@ command.addEventListener("keypress", function(event) {
 // SHA256 Unlock
 var hashKey = "kodiaks";
 
+
+var sendingMessage = ["System", "Init Message"];
 function terminalSubmit() {
     // Receiving User Input
-    var inputCommand = document.getElementById("terminalInput").value;
+    var inputCommand = terminalInput.value;
     var inputArray = inputCommand.split(' ');
 
     // Forge Instance Initialized SHA-256
@@ -285,7 +327,16 @@ function terminalSubmit() {
         unlockedCommand(inputArray);
 
         // Commands That Need Cheat
-        lockedCommand(inputArray);
+
+        if (inputArray[0][0] == "/"){
+            inputArray[0] = inputArray[0].substr(1, inputArray[0].length - 1);
+            lockedCommand(inputArray);
+        }else if (inputCommand !=''){
+            sendingMessage = [player_controller.creature.name, inputCommand];
+            document.dispatchEvent(new Event('sendMessage', {bubbles: true, cancelable: false}));
+            terminalInput.value = '';
+        }
+        
     }
 }
 
