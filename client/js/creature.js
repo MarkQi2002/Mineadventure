@@ -1,3 +1,4 @@
+// Loading Creature THREE Geometry
 var creatureLoader = {
     geometry: new THREE.SphereGeometry(0.5, 3, 3)
 };
@@ -22,33 +23,34 @@ class creature{
         this.updateHealthBarPercent();
     }
 
-    damage(amount){
+    // Damage Handler
+    damage(amount) {
         this.setHealth(this.properties.health - amount);
-
     }
 
-    setHealth(amount){
+    // Health Handler
+    setHealth(amount) {
         this.properties.health = amount;
         this.updateHealthBarPercent();
     }
 
-    setMaxHealth(amount){
+    // Max Health Handler
+    setMaxHealth(amount) {
         this.properties.maxHealth = amount;
         this.updateHealthBarPercent();
     }
 
-    updateHealthBarPercent(){
+    // Updating Health Bar UI
+    updateHealthBarPercent() {
         let scale = this.properties.health / this.properties.maxHealth;
-        if (scale < 0){
-            scale = 0;
-        }else if(scale > 1){
-            scale = 1;
-        }
+        if (scale < 0) scale = 0;
+        else if(scale > 1) scale = 1;
+
         this.onHeadUI.setScale(scale);
     }
 
-
-    update(delta){
+    // Update For Creature
+    update(delta) {
         let localPlayerObject = player_controller.creature.object;
         // Close To Local Player Event
         if (Math.abs(localPlayerObject.position.x - this.object.position.x) < game_map.blockSize.x &&
@@ -60,7 +62,7 @@ class creature{
                     this.onHeadUI.UI.style.visibility = 'visible';
                 }
                 this.onHeadUI.update(delta);
-        }else{
+        } else {
             if (this.object.visible == true){
                 this.object.visible = false;
             }
@@ -70,7 +72,7 @@ class creature{
         }
     }
     
-
+    // Destructor
     delete() {
         this.onHeadUI.delete();
 

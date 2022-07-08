@@ -537,7 +537,7 @@ class controller{
         return blockPosList; 
     }
 
-    
+    // Damge Handler
     damage(amount){
         sendCreaturePropertyChange(["player", clientPlayerID], {"health": ["-", amount]});
     }
@@ -627,9 +627,9 @@ class controller{
             this.attackCD = 1;
         }
 
+        // Attack CoolDown (CD)
         if (this.attackCD > 0){
             this.attackCD -= this.creature.properties["attackSpeed"] * delta;
         }
-
     } 
 } 

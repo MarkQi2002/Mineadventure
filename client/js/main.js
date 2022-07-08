@@ -97,7 +97,6 @@ function updateTimeEvent(){
     if (changingCreatureInfo.length > 0){
         document.dispatchEvent(new Event('changingCreatureInfo', {bubbles: true, cancelable: false}));
     }
-
 }
 
 // create thread
@@ -115,8 +114,6 @@ function animate() {
     player_controller.update(delta);
     
     // Updating Event
-    
-
     for (let i = 0; i < playerArray.length; i++){
         if (playerArray[i] != null && i != clientPlayerID){
             playerArray[i].update();

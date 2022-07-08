@@ -3,51 +3,47 @@
 // blockSize - The Size Of The Block (Number Of Unit)
 class map {
     constructor(blockNumber, blockSize) {
+        // Set Unit ID List Information
         this.unitIDList = [
-
             this.setUnitIDInfo(["image/unit_material/0_ground.jpg"], false, 0),
-
             this.setUnitIDInfo(["image/unit_material/0_ground.jpg",
                                 "image/unit_material/0_ground.jpg",
                                 "image/unit_material/0_ground.jpg",
                                 "image/unit_material/0_ground.jpg",
                                 "image/unit_material/1_wall.jpg",
                                 "image/unit_material/1_wall.jpg"], true, 1)
-            
-
-
-
         ];
 
-        // Save The Block Size
+        // Save Block Size
         this.blockSize = {
             x: blockSize[0],
             y: blockSize[1],
         };
-
+        
+        // Save Block Number
         this.blockNumber = {
             x: blockNumber[0],
             y: blockNumber[1],
         };
 
-
+        // Save Map Level (Multiple Map Level)
         this.mapLevel = [new mapLevel(this.blockNumber, this.blockSize)
                         ];
     }
 
-
-    neighbors([mapX, mapY],mapLevelIndex){
+    // Find Neighboring Map Blocks
+    neighbors([mapX, mapY], mapLevelIndex){
         let neighborList = [];
         
         let theUnit;
 
         let dirSwitch = [false, false, false, false];
 
+        // Get Direction Switch
         theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX + 1, mapY]);
         if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
             neighborList.push([mapX + 1, mapY]);
             dirSwitch[0] = true;
-
         }
 
         theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX - 1, mapY]);
@@ -68,10 +64,7 @@ class map {
             dirSwitch[3] = true;
         }
 
-
-
-
-
+        // Seting neighborList Based On Direction Switch
         if (dirSwitch[0]){
             if (dirSwitch[2]){
                 theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX + 1, mapY + 1]);
@@ -88,7 +81,7 @@ class map {
             }
         }
 
-        
+        // Setting neightborList Based On Direction Switch
         if (dirSwitch[1]){
             if (dirSwitch[2]){
                 theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX - 1, mapY + 1]);
@@ -105,12 +98,12 @@ class map {
             }
         }
         
-
+        // Return neightborList To Caller
         return neighborList;
     }
 
     // set UnitIDInfo by (texture url address, collision bool)
-    setUnitIDInfo(texture, collision, geometryType){
+    setUnitIDInfo(texture, collision, geometryType) {
         var unitIDInfo = {
             texture: texture, // texture url address
             collision: collision, //true or false
@@ -119,7 +112,8 @@ class map {
         return unitIDInfo
     }
 
-    getInitMap([mapX, mapY], mapLevelIndex, [blockHalfRangeX, blockHalfRangeY]){
+    // Function To Initialize The Block And Package It To Send To Client
+    getInitMap([mapX, mapY], mapLevelIndex, [blockHalfRangeX, blockHalfRangeY]) {
         let  [centerBlockX, centerBlockY] = [mapX / this.blockSize.x >> 0, mapY / this.blockSize.y >> 0];
         let sendingBlock = [];
         let theBlock;
@@ -146,7 +140,8 @@ class map {
         return [sendingBlock, this.blockNumber, this.blockSize, this.unitIDList];
     }
 
-    getUpdateBlock(blockPosList, mapLevelIndex){
+    // Function To Get Required Block Based On Client Request
+    getUpdateBlock(blockPosList, mapLevelIndex) {
         let theBlock;
         let sendingBlock = [];
         for (let i = 0; i < blockPosList.length; i++) {
@@ -169,7 +164,7 @@ class map {
 }
 
 // Map level
-class mapLevel{
+class mapLevel {
     constructor(blockNumber, blockSize) {
         this.blockList = [];
         this.blockNumber = blockNumber;
@@ -259,6 +254,7 @@ class mapLevel{
         }
     }
 
+    // Return The Block Based On xy Coordinate
     getBlock([mapX, mapY]){
         let [floatBlockX, floatBlockY] = [mapX / this.blockSize.x, mapY / this.blockSize.y];
         if (this.blockNumber.x <= floatBlockX || 0 > floatBlockX || this.blockNumber.y <= floatBlockY || 0 > floatBlockY) return null;
@@ -275,7 +271,7 @@ class mapLevel{
 }
 
 // Map Block Class
-class block{
+class block {
     constructor(x, y, blockSize, PerlinNoise) {
         this.unitList = [];
         this.projectileList = [];
@@ -291,7 +287,7 @@ class block{
     }
 
     // To Create The Units Inside The Block
-    initBlock(x, y, PerlinNoise){
+    initBlock(x, y, PerlinNoise) {
         for (let y_Axis = 0; y_Axis < this.unitList.length; y_Axis++) {
             for (let x_Axis = 0; x_Axis < this.unitList[y_Axis].length; x_Axis++) {
                 var ID = 1;
@@ -301,7 +297,7 @@ class block{
                 if (Height < 0) {
                     Height = 0;
                     ID = 0;
-                }else if (Height > 3){
+                } else if (Height > 3) {
                     Height = 3;
                 }
 

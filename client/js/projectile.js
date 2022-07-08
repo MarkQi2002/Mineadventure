@@ -1,10 +1,10 @@
-// Projectile Class
-
+// Loading Projectile THREE Geometry And Mesh
 var projectileLoader = {
     geometry: new THREE.SphereGeometry(0.2, 10, 10),
     material: new THREE.MeshPhongMaterial({color: 'yellow'})
 };
 
+// Projectile Class
 class projectile{
     constructor(projectileInfo) {
         this.object = new THREE.Object3D();

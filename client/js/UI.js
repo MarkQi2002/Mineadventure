@@ -17,13 +17,14 @@ function displayPlayerHealth() {
     document.getElementById("playerHealthBar").style.width = (98 * scale).toString() + '%';
 }
 
-
+// Displaying Creature Properties UI
 function displayCreatureProperties() {
     for (let [key, value] of Object.entries(player_controller.creature.properties)) {
         creatureInfoUIList[key].update(value);
     }
 }
 
+// Initialize The UI
 function initUI() {
     for (let [key, value] of Object.entries(player_controller.creature.properties)) {
         creatureInfoUIList[key] = new propertiesUI(key, value);
@@ -57,13 +58,14 @@ function initUI() {
     });
 }
 
-
+// Function To Display The UI
 function displayAllUI() {
 	displayPlayerHealth();
     displayCreatureProperties();
 }
 
-class propertiesUI{
+// Properties UI Class
+class propertiesUI {
     constructor(key, value) {
         this.key = key;
         this.text = document.createElement('div');
@@ -82,16 +84,19 @@ class propertiesUI{
 
     }
 
-    setSize(){
+    // Setting UI Size
+    setSize() {
         this.text.style.fontSize = window.innerHeight * 0.02 + 'px';
     }
 
-    update(value){
+    // Setting UI Information
+    update(value) {
         this.text.innerHTML = this.key + ": " + value;
     }
 
 }
 
+// Message UI Class
 class messageUI{
     constructor(name, text, color) {
         this.name = name;
@@ -104,17 +109,21 @@ class messageUI{
 
     }
 
+    // Setting UI Size
     setSize(){
         this.text.style.fontSize = window.innerHeight * 0.02 + 'px';
     }
 
+    // Setting UI Information
     update(value){
         this.text.innerHTML = this.key + ": " + value;
     }
 
 }
 
+// Damage Text Class
 class damageText{
+    // Damage Text Class Constructor
     constructor(type, amount, position) {
         this.deleteTimer = 1;
         this.position = [position[0] + Math.random() - 0.5, position[1] + Math.random() - 0.5, position[2] + Math.random() - 0.5];
@@ -129,14 +138,14 @@ class damageText{
         this.size = (8 / Math.PI * Math.atan(Math.abs(amount) / 100) + 1) * 0.01 *  window.innerHeight;
         
 
-        if (type == "true"){
+        if (type == "true") {
 			this.text.style.color = "white";
-		}else if(type == "normal"){
+		} else if(type == "normal") {
 			this.text.style.color = "#AB4100";
-        }else if(type == "criticalNormal"){
+        } else if(type == "criticalNormal") {
             this.text.style.color = "red";
             this.size *= 2;
-		}else if(type == "heal"){
+		} else if(type == "heal") {
 			this.text.style.color = "green";
 		}
 
@@ -151,14 +160,11 @@ class damageText{
         this.text.style.left = posX + 'px';
         menuHtml.appendChild(this.text);
 
-        
-
-
-
+        // Pushing To damageTextList
         damageTextList.push(this);
-
     }
 
+    // Converting To xy Coordinate
     toXYCoords(pos) {
         var vector = new THREE.Vector3(pos[0], pos[1], pos[2]).project(player_controller.camera);
         vector.x = (vector.x + 1)/2 * window.innerWidth;
@@ -166,6 +172,7 @@ class damageText{
         return [vector.x, vector.y];
     }
 
+    // Updating Damage Text Location
     update(delta, index){
         let [posX, posY] = this.toXYCoords(this.position);
         let num = this.deleteTimer / this.rate - this.sqrtSize;
@@ -180,13 +187,12 @@ class damageText{
 
     }
 
-
+    // Removing Damage Text
     delete(index){
         damageTextList.splice(index, 1);
         menuHtml.removeChild(this.text);
         delete this;
     }
-
 }
 
 
@@ -288,12 +294,6 @@ class creatureUI{
 
 }
 
-
-
-
-
-
-
 // Terminal Function
 var command = document.getElementById("terminalInput");
 command.addEventListener("keypress", function(event) {
@@ -305,9 +305,8 @@ command.addEventListener("keypress", function(event) {
 
 // SHA256 Unlock
 var hashKey = "kodiaks";
-
-
 var sendingMessage = ["System", "Init Message"];
+
 function terminalSubmit() {
     // Receiving User Input
     var inputCommand = terminalInput.value;

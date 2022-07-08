@@ -1,4 +1,6 @@
+// AI Controller Class
 class AI_controller {
+    // Constructor
     constructor(creatureInfo) {
         this.creature = creatureInfo;
         this.targetPositionList = [];
@@ -9,12 +11,13 @@ class AI_controller {
         this.attackCD = 0;
     }
 
-
-    sendProjectile(goal){
+    // Sending A Projectile To Goal Location
+    sendProjectile(goal) {
         // Get Unit Vector
         let [diffX, diffY] = [goal[0] - this.creature.position[0], goal[1] - this.creature.position[1]];
         let magnitude = Math.sqrt(diffX * diffX + diffY * diffY);
 
+        // Calculate Unit Vector
         let vectorX = diffX / magnitude;
         let vectorY = diffY / magnitude;
 
@@ -25,6 +28,7 @@ class AI_controller {
             properties: this.creature.properties
         }
 
+        // Generating A New Projectile Based On Input
         var newProjectile = {
             position: [this.creature.position[0], this.creature.position[1], this.creature.position[2]],
             initVelocity: [8 * vectorX, 8 * vectorY],
@@ -35,16 +39,12 @@ class AI_controller {
         return newProjectile;
     }
 
-
-
+    // Mahattan Heuristic Algorithm
     heuristic([fx, fy], [cx, cy]){
         return (Math.abs(fx - cx) + Math.abs(fy - cy)) * 10;
-        //let [dx, dy] = [fx - cx, fy - cy]
-        //return (dx * dx + dy * dy) * 10;
     }
 
-
-
+    // Using A Star As The Path Finding Algorithm
     aStarAlgorithm(theMap, goal){
         let start = [Math.floor(this.creature.position[0]), Math.floor(this.creature.position[1])];
         
@@ -68,10 +68,10 @@ class AI_controller {
 
                 let existData = frontier.isIn(next);
 
-                if ( existData == null){
+                if ( existData == null) {
                     let priority = new_cost + this.heuristic(goal, next);
                     frontier.enqueue({x: next[0], y: next[1], cost: new_cost, last: current}, priority);
-                } else if(new_cost < existData.element.cost){
+                } else if(new_cost < existData.element.cost) {
                     let priority = new_cost + this.heuristic(goal, next);
                     frontier.remove(existData[1]);
                     frontier.enqueue({x: existData[0].element.x, y: existData[0].element.y, cost: new_cost, last: current}, priority);
@@ -80,13 +80,13 @@ class AI_controller {
             count ++;
         }
 
-
-
+        // Return Null
         return null;
     }
 
-
-    getRoute(theMap, goal){
+    // Function To Generate An Optimal Path From Current Location To A Goal Location
+    // Return The Route To As A List Of Points
+    getRoute(theMap, goal) {
         let routePoints = [];
 
         let current = this.aStarAlgorithm(theMap, goal);
@@ -99,14 +99,10 @@ class AI_controller {
         routePoints.shift();
 
         return routePoints;
-
     }
 
-
-
-
-
-    moveToPosition(delta){
+    // Moving The Controlled Object To A New Location
+    moveToPosition(delta) {
         if (this.targetPositionList.length <= 0) return;
 
         let targetPosition = this.targetPositionList[0];
@@ -130,11 +126,9 @@ class AI_controller {
         }
     }
 
-    update(delta, theMap, goal, spawnProjectile){
-
-
-
-        
+    // Update Function
+    update(delta, theMap, goal, spawnProjectile) {
+        // Get Path Using The Path Finding Algorithm
         if (this.routeCount > 10 && Math.abs(goal[0] - this.creature.position[0]) + Math.abs(goal[1] - this.creature.position[1]) < this.searchRange){
             let newRoute = this.getRoute(theMap, goal);
 		    this.targetPositionList = newRoute;
@@ -150,25 +144,12 @@ class AI_controller {
             this.attackCD = 1;
         }
 
+        // Attack CoolDown (CD)
         if (this.attackCD > 0){
             this.attackCD -= this.creature.properties["attackSpeed"] * delta;
         }
-
-        
-
-
-
     }
-
-
-
-
 }
-
-
-
-
-
 
 // User defined class
 // to store element and its priority
@@ -182,53 +163,51 @@ class QElement {
  
 // PriorityQueue class
 class PriorityQueue {
- 
     // An array is used to implement priority
-    constructor()
-    {
+    constructor() {
         this.items = [];
     }
     
-    get(index){
+    // Get Element From The Array
+    get(index) {
         return this.items[index];
     }
 
-    // functions to be implemented
+    // Enqueue An Element To The Priority Queue
     // enqueue(item, priority)
-    enqueue(element, priority){
-        // creating object from queue element
+    enqueue(element, priority) {
+        // Creating Object From Queue Element
         var qElement = new QElement(element, priority);
         var contain = false;
     
-        // iterating through the entire
-        // item array to add element at the
-        // correct location of the Queue
+        // Iterating Through The Entire
+        // Item Array To Add Element At The
+        // Correct Location Of The Queue
         for (var i = 0; i < this.items.length; i++) {
             if (this.items[i].priority > qElement.priority) {
                 // Once the correct location is found it is
-                // enqueued
+                // Enqueued
                 this.items.splice(i, 0, qElement);
                 contain = true;
                 break;
             }
         }
     
-        // if the element have the highest priority
-        // it is added at the end of the queue
+        // If The Element Have The Highest Priority
+        // It Is Added At The End Of The Queue
         if (!contain) {
             this.items.push(qElement);
         }
     }
 
     // dequeue()
-    // dequeue method to remove
-    // element from the queue
-    dequeue()
-    {
-        // return the dequeued element
-        // and remove it.
-        // if the queue is empty
-        // returns Underflow
+    // Dequeue Method To Remove
+    // Element From The Queue
+    dequeue() {
+        // Return The Dequeued Element
+        // And Remove It.
+        // If The Queue Is Empty
+        // Returns Underflow
         if (this.isEmpty())
             return "Underflow";
         return this.items.shift();
@@ -239,11 +218,10 @@ class PriorityQueue {
     }
 
     // front()
-    // front function
-    front()
-    {
-        // returns the highest priority element
-        // in the Priority queue without removing it.
+    // Front Function
+    front() {
+        // Returns The Highest Priority Element
+        // In The Priority Queue Without Removing It.
         if (this.isEmpty())
             return "No elements in Queue";
         return this.items[0];
@@ -251,8 +229,8 @@ class PriorityQueue {
 
     // rear function
     rear(){
-        // returns the lowest priority
-        // element of the queue
+        // Returns The Lowest Priority
+        // Element Of The Queue
         if (this.isEmpty())
             return "No elements in Queue";
         return this.items[this.items.length - 1];
@@ -260,7 +238,7 @@ class PriorityQueue {
 
     // isEmpty()
     isEmpty(){
-        // return true if the queue is empty.
+        // Return True If The Queue Is Empty.
         return this.items.length == 0;
     }
 
@@ -282,15 +260,6 @@ class PriorityQueue {
         return str;
     }
 }
-
-
-
-
-
-
-
-
-
 
 // Required Because server.js Uses This JavaScript File
 module.exports = AI_controller;

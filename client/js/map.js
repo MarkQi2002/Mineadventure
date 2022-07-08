@@ -30,7 +30,7 @@ class map {
         scene.add(this.object);
     }
 
-    // for each unit ID, load materials
+    // For Each Unit ID, Load Materials
     loadMaterials(){
 
         this.materialList.length = this.unitIDList.length;
@@ -51,6 +51,7 @@ class map {
         }
     }
 
+    // Load THREE Geometry For Map
     loadGeometry(){
         var geometry;
         geometry = new THREE.PlaneGeometry(1, 1); // geometry for all plane
@@ -61,16 +62,19 @@ class map {
         this.geometryList.push(geometry); //1
     }
 
+    // Generating A Completely Empty Map
     createEmptyMap() {
         for (let i = 0; i < this.blockNumber.y; i++) {
             this.blockList.push(new Array(this.blockNumber.x));
         }
     }
 
+    // Converting xy Coordinate To Block Coordinate
     mapPosToBlockPos([mapX, mapY]){
         return [mapY / this.blockSize.y >> 0, mapX / this.blockSize.x >> 0];
     }
 
+    // Return Block Based On xy Coordinate
     getBlock([mapX, mapY]){
         let [floatBlockX, floatBlockY] = [mapX / this.blockSize.x, mapY / this.blockSize.y];
         if (this.blockNumber.x <= floatBlockX || 0 > floatBlockX || this.blockNumber.y <= floatBlockY || 0 > floatBlockY) return null;

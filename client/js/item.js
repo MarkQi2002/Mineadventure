@@ -1,4 +1,4 @@
-
+// Function To Load Item Image As THREE Material Mesh
 function loadItemMaterials(){
     let itemMaterialsArray = [];
     itemMaterialsArray.length = itemInfoArray.length;

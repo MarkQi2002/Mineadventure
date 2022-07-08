@@ -100,7 +100,7 @@ const creatureInfoChange = (creatureInfo) => {
 		for (let [key, value] of Object.entries(creatureInfo[i][1])) {
 			if (key == "damage"){
 				createDamageTextList(value, theCreature);
-			}else{
+			} else {
 				let setValue = value[1];
 				if (value[0] == "+") setValue = theCreature.properties[key] + value[1];
 				else if (value[0] == "-") setValue = theCreature.properties[key] - value[1];
@@ -119,15 +119,16 @@ const creatureInfoChange = (creatureInfo) => {
 		}
 	}
 
-	if (updateLocalPlayerUI){
-		if (updateOnlyHealthUI){
+	if (updateLocalPlayerUI) {
+		if (updateOnlyHealthUI) {
 			displayPlayerHealth();
-		}else{
+		} else {
 			displayAllUI();
 		}
 	}
 };
 
+// Creating Damage Text List
 function createDamageTextList(damageInfo, theCreature){
 	if (Math.abs(theCreature.object.position.x - player_controller.camera.position.x) + Math.abs(theCreature.object.position.y - player_controller.camera.position.y) < game_map.blockSize.x + game_map.blockSize.y){
 		for (let [key, value] of Object.entries(damageInfo.type)) {
@@ -297,15 +298,11 @@ const updateFrame = ([projectilePosList, monsterPosList]) => {
 		}
 	}
 
-
-
 	for (let i = 0; i < monsterArray.length; i++){
 		if (monsterArray[i] != null){
 			monsterArray[i].object.position.set(monsterPosList[i][0], monsterPosList[i][1], monsterPosList[i][2]); 
 		}
 	}
-
-
 };
 
 // Removing A Projectile From The Projectile List, And Remove Unit From Unit List (By Position)
