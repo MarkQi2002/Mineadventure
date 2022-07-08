@@ -72,9 +72,9 @@ class map {
     }
 
     getBlock([mapX, mapY]){
-        let [blockX, blockY] = [mapX / this.blockSize.x >> 0, mapY / this.blockSize.y >> 0];
-        if (this.blockNumber.x <= blockX || 0 > blockX || this.blockNumber.y <= blockY || 0 > blockY) return null;
-        return this.blockList[blockY][blockX];
+        let [floatBlockX, floatBlockY] = [mapX / this.blockSize.x, mapY / this.blockSize.y];
+        if (this.blockNumber.x <= floatBlockX || 0 > floatBlockX || this.blockNumber.y <= floatBlockY || 0 > floatBlockY) return null;
+        return this.blockList[floatBlockY >> 0][floatBlockX >> 0];
     }
 
     // Return The Unit Based On xy Coordinate
@@ -88,16 +88,19 @@ class map {
     deleteUnit([[mapX, mapY], replaceUnitInfo]){ 
 
         let theBlock = this.getBlock([mapX, mapY]);
-        if (theBlock != null && theBlock.block != null && theBlock.class != null){
+        if (theBlock != null && theBlock.class != null){
             let [x, y] = [mapX % this.blockSize.x, mapY % this.blockSize.y];
             let unit = theBlock.class.unitList[y][x];
 
-            theBlock.block.remove(unit.mesh);
+
+            if (theBlock.block != null){
+                theBlock.block.remove(unit.mesh);
+            }
         
             if (replaceUnitInfo.ID != null){
                 unit.ID = replaceUnitInfo.ID;
                 unit.Height = replaceUnitInfo.Height;
-                this.spawnUnit(x, y, unit, theBlock.block);
+                if (theBlock.block != null) this.spawnUnit(x, y, unit, theBlock.block);
             }else{
                 unit.mesh = null;
             }

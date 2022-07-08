@@ -58,7 +58,7 @@ class AI_controller {
 
             if (current.x == goal[0] && current.y == goal[1]) return current;
 
-            let neighbors = theMap.neighbors([current.x, current.y]);
+            let neighbors = theMap.neighbors([current.x, current.y], 0);
             for (let i = 0; i < neighbors.length; ++i){
                 let next = neighbors[i];
 

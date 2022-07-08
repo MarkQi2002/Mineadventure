@@ -170,42 +170,20 @@ function newPlayerID(){
 }
 // -------------------End Of Player-------------------
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // -------------------Monster-------------------
 var AI_controllerList = [];
 AI_controllerList.length = 100;
 var monsterArray = [];
 monsterArray.length = 100;
 var monster_ID_Count = 0;
-var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower", "properties":{"health": 50, "maxHealth": 50, "attackDamage": 10, "attackSpeed": 0.5, "moveSpeed": 3}},{}],
+var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower", "properties":{"health": 50, "maxHealth": 50, "attackDamage": 10, "attackSpeed": 10, "moveSpeed": 3}},{}],
+
+
+
+
+
+
+
 
 
 						];
@@ -279,7 +257,7 @@ function updateMonster(delta){
 
 		goal = playerArray[0] != null ? [Math.floor(playerArray[0].position[0]), Math.floor(playerArray[0].position[1])] : [0,0];
 
-		//AI_controllerList[i].update(delta, game_map, goal, spawnProjectile);
+		AI_controllerList[i].update(delta, game_map, goal, spawnProjectile);
 		updateMonsterPos[i] = theMonster.position;
 
 		creatureOnHit(theMonster);
@@ -766,7 +744,7 @@ const clientDisconnect = (Info, playerID) => {
 
 // -------------------Map-------------------
 // Setting The Size Of The Map
-var game_map = new map([10, 10],[2, 2]);
+var game_map = new map([20, 20],[20, 20]);
 // -------------------End Of Map-------------------
 
 // -------------------Sending And Receiving Information-------------------
@@ -824,7 +802,7 @@ server.listen(8080, () => {
 
 
 // Spawning 500 Monsters Randomly Throughout The Map
-for (let i = 0; i < 0; ++i){
+for (let i = 0; i < 500; ++i){
 	createNewMonster(0, createSpawnPosition(0));
 }
 

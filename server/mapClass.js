@@ -36,33 +36,33 @@ class map {
     }
 
 
-    neighbors([mapX, mapY]){
+    neighbors([mapX, mapY],mapLevelIndex){
         let neighborList = [];
-        /*
+        
         let theUnit;
 
         let dirSwitch = [false, false, false, false];
 
-        theUnit = this.getUnit([mapX + 1, mapY]);
+        theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX + 1, mapY]);
         if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
             neighborList.push([mapX + 1, mapY]);
             dirSwitch[0] = true;
 
         }
 
-        theUnit = this.getUnit([mapX - 1, mapY]);
+        theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX - 1, mapY]);
         if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
             neighborList.push([mapX - 1, mapY]);
             dirSwitch[1] = true;
         }
 
-        theUnit = this.getUnit([mapX, mapY + 1]);
+        theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX, mapY + 1]);
         if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
             neighborList.push([mapX, mapY + 1]);
             dirSwitch[2] = true;
         }
 
-        theUnit = this.getUnit([mapX, mapY - 1]);
+        theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX, mapY - 1]);
         if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
             neighborList.push([mapX, mapY - 1]);
             dirSwitch[3] = true;
@@ -74,14 +74,14 @@ class map {
 
         if (dirSwitch[0]){
             if (dirSwitch[2]){
-                theUnit = this.getUnit([mapX + 1, mapY + 1]);
+                theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX + 1, mapY + 1]);
                 if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
                     neighborList.push([mapX + 1, mapY + 1]);
                 }
             }
 
             if (dirSwitch[3]){
-                theUnit = this.getUnit([mapX + 1, mapY - 1]);
+                theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX + 1, mapY - 1]);
                 if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
                     neighborList.push([mapX + 1, mapY - 1]);
                 }
@@ -91,20 +91,20 @@ class map {
         
         if (dirSwitch[1]){
             if (dirSwitch[2]){
-                theUnit = this.getUnit([mapX - 1, mapY + 1]);
+                theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX - 1, mapY + 1]);
                 if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
                     neighborList.push([mapX - 1, mapY + 1]);
                 }
             }
     
             if (dirSwitch[3]){
-                theUnit = this.getUnit([mapX - 1, mapY - 1]);
+                theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX - 1, mapY - 1]);
                 if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
                     neighborList.push([mapX - 1, mapY - 1]);
                 }
             }
         }
-        */
+        
 
         return neighborList;
     }
@@ -128,7 +128,6 @@ class map {
 
                 let [blockX, blockY] = [centerBlockX + x_Axis, centerBlockY + y_Axis];
 
-                console.log(blockX, blockY, this.mapLevel[mapLevelIndex].blockList)
                 if (blockX < 0 || blockX >= this.blockNumber.x || blockY < 0 || blockY >= this.blockNumber.y) continue;
                 
                 theBlock = this.mapLevel[mapLevelIndex].blockList[blockY][blockX];
@@ -261,9 +260,9 @@ class mapLevel{
     }
 
     getBlock([mapX, mapY]){
-        let [blockX, blockY] = [mapX / this.blockSize.x >> 0, mapY / this.blockSize.y >> 0];
-        if (this.blockNumber.x <= blockX || 0 > blockX || this.blockNumber.y <= blockY || 0 > blockY) return null;
-        return this.blockList[blockY][blockX];
+        let [floatBlockX, floatBlockY] = [mapX / this.blockSize.x, mapY / this.blockSize.y];
+        if (this.blockNumber.x <= floatBlockX || 0 > floatBlockX || this.blockNumber.y <= floatBlockY || 0 > floatBlockY) return null;
+        return this.blockList[floatBlockY >> 0][floatBlockX >> 0];
     }
 
     // Return The Unit Based On xy Coordinate
