@@ -18,10 +18,7 @@ class controller{
         this.leftCollision = false;
         this.rightCollision = false;
         
-        this.lastBlockPos = { 
-            position: [0, 0], 
-            direction: [1, 1] 
-        } 
+        this.lastBlockPos = [0, 0];
  
         this.inputs = { 
             forward: false, 
@@ -471,26 +468,20 @@ class controller{
         return false; 
     } 
  
-    // Getting Player's Position And Direction 
+    // Getting The Creature's Block Position
     getPlayerBlockPos2D(){ 
-        // Calculating Player Position 
-        let [mapX, mapY] = [Math.floor(this.creature.object.position.x), Math.floor(this.creature.object.position.y)]; 
- 
-        // Return The Player's Position And The Player's Direction 
-        return [game_map.map2DToBlock2D([mapX, mapY]), game_map.getDirection([mapX, mapY])]; 
+        return [(this.creature.object.position.x / game_map.blockSize.x) >> 0,
+                (this.creature.object.position.y / game_map.blockSize.y) >> 0]; 
  
     } 
  
     // Updating Client Block If Moving Between Blocks 
-    controllerUpdateBlock([blockPos, direction]){ 
+    controllerUpdateBlock([blockX,blockY]){ 
  
-        if (blockPos[0] != this.lastBlockPos.position[0] || 
-            blockPos[1] != this.lastBlockPos.position[1] || 
-            direction[0] != this.lastBlockPos.direction[0] || 
-            direction[1] != this.lastBlockPos.direction[1]){ 
+        if (blockX != this.lastBlockPos[0] || 
+            blockY != this.lastBlockPos[1]){ 
  
-            this.lastBlockPos.position = blockPos; 
-            this.lastBlockPos.direction = direction; 
+            this.lastBlockPos = [blockX,blockY]; 
              
             // Sending Update Block Command As An Event 
             var event = new Event('updateBlock', {bubbles: true, cancelable: false}) 
@@ -510,32 +501,19 @@ class controller{
         for (let y_Axis = -blockHalfRangeY; y_Axis <= blockHalfRangeY; y_Axis++) { 
             for (let x_Axis = -blockHalfRangeX; x_Axis <= blockHalfRangeX; x_Axis++) { 
                 // Variable Declaration 
-                let BlockX = this.lastBlockPos.position[0] + x_Axis; 
-                let BlockY = this.lastBlockPos.position[1] + y_Axis; 
-                if (game_map.quarterSize2D.x > BlockX && game_map.quarterSize2D.y > BlockY){
-                    let dirX = this.lastBlockPos.direction[0]; 
-                    let dirY = this.lastBlockPos.direction[1]; 
-                    if (BlockX < 0) { 
-                        dirX *= -1; 
-                        BlockX = -BlockX-1; 
-                    } 
-    
-                    if (BlockY < 0) { 
-                        dirY *= -1; 
-                        BlockY = -BlockY-1; 
-                    } 
-    
+                let BlockX = this.lastBlockPos[0] + x_Axis; 
+                let BlockY = this.lastBlockPos[1] + y_Axis; 
+                if (game_map.blockNumber.x > BlockX && 0 <= BlockX && game_map.blockNumber.y > BlockY && 0 <= BlockY){
+
                     var blockPos = { 
-                        position: [BlockX,BlockY], 
-                        direction: [dirX,dirY] 
+                        position: [BlockX,BlockY]
                     }; 
     
     
-                    let theQuarterMap = game_map.getQuarterMap([dirX,dirY]); 
-                    if (theQuarterMap.blockList[BlockY][BlockX] == null){ 
+                    if (game_map.blockList[BlockY][BlockX] == null){ 
                         blockPosList.push(blockPos); 
                     } else { 
-                        game_map.spawnBlockObject(BlockX, BlockY, [dirX, dirY]); 
+                        game_map.spawnBlockObject(BlockX, BlockY); 
                     } 
                 }
             } 

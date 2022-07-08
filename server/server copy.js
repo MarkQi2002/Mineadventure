@@ -14,6 +14,8 @@ const map = require('./mapClass.js');
 const AI_controller = require('./AI_controller.js');
 const e = require('express');
 const { count } = require('console');
+//const quarterMap = require('./quarterMap.js');
+//const block = require('./block.js');
 
 // An Express Function
 const app = express();
@@ -31,84 +33,29 @@ const io = socketio(server);
 
 // Default Properties For All Creature
 function properties() {
-	this["level"] = 1;
-	this["experience"] = 0; // level * 100 * e ^ ((level - 1) / 15)   need 93745637 exp to get level 100
+	this["level"] = 1,
+	this["experience"] = 0, // level * 100 * e ^ ((level - 1) / 15)   need 93745637 exp to get level 100
 	
-	this["maxHealthGrowth"] = 50;
-	this["armorGrowth"] = 5;
+	this["maxHealthGrowth"] = 50,
+	this["armorGrowth"] = 5,
 
-	this["attackDamageGrowth"] = 5;
-	this["attackSpeedGrowth"] = 0.05;
-	this["criticalRateGrowth"] = 0.005;
+	this["attackDamageGrowth"] = 5,
+	this["attackSpeedGrowth"] = 0.05,
+	this["criticalRateGrowth"] = 0.005,
 
 	// Defensive Properties
-	this["health"] = 100;
-	this["maxHealth"] = 100;
-	this["armor"] = 10;
+	this["health"] = 100,
+	this["maxHealth"] = 100,
+	this["armor"] = 10,
 
 	// Attack Properties
-	this["attackDamage"] = 10;
-	this["attackSpeed"] = 1;
+	this["attackDamage"] = 10,
+	this["attackSpeed"] = 1,
 	this["criticalRate"] = 0.01;
 
 	// Other Properties
-	this["moveSpeed"] = 3;
-}
+	this["moveSpeed"] = 3
 
-function creatureInfoClass(ID, creatureType, name, initPos) {
-	this["ID"] = ID;
-	this["creatureType"] = creatureType;
-	this["name"] = name;
-	this["position"] =  initPos;
-		
-	// Player Properties
-	this["properties"] = new properties;
-	
-	// Server Side Creature Item Array
-	this["creatureItemArray"] = {};
-}
-
-// find a spawn place without collision
-function createSpawnPosition(mapLevelIndex) {
-	let mapX, mapY;
-	while (1) {
-		mapX = (Math.random() * game_map.blockNumber.x * game_map.blockSize.x) >> 0;
-		mapY = (Math.random() * game_map.blockNumber.y * game_map.blockSize.y) >> 0;
-		let unit = game_map.mapLevel[mapLevelIndex].getUnit([mapX, mapY]);
-		if (unit != null && !(game_map.unitIDList[unit.ID].collision)) break;
-	}
-	return [mapX, mapY];
-}
-
-function experienceRequire(level){
-	return Math.floor(level * 100 * Math.exp((level - 1) / 15));
-}
-
-function levelUp(creatureInfo, experience){
-	creatureInfo.properties.experience += experience;
-	let nextLevelEXP = experienceRequire(creatureInfo.properties.level);
-	while (creatureInfo.properties.experience >= nextLevelEXP){
-		creatureInfo.properties.level += 1;
-		creatureInfo.properties.experience -= nextLevelEXP;
-		nextLevelEXP = experienceRequire(creatureInfo.properties.level);
-
-		creatureInfo.properties.health += creatureInfo.properties.maxHealthGrowth;
-		creatureInfo.properties.maxHealth += creatureInfo.properties.maxHealthGrowth;
-		creatureInfo.properties.attackDamage += creatureInfo.properties.attackDamageGrowth;
-		creatureInfo.properties.attackSpeed += creatureInfo.properties.attackSpeedGrowth;
-		creatureInfo.properties.criticalRate += creatureInfo.properties.criticalRateGrowth;
-	}
-
-
-	let levelUpInfo = { "level": ["=", creatureInfo.properties.level],
-						"experience": ["=", creatureInfo.properties.experience],
-						"health": ["=", creatureInfo.properties.health],
-						"maxHealth": ["=", creatureInfo.properties.maxHealth],
-						"attackDamage": ["=", creatureInfo.properties.attackDamage],
-						"attackSpeed": ["=", creatureInfo.properties.attackSpeed],
-						"criticalRate": ["=", creatureInfo.properties.criticalRate]
-					};
-	io.compress(true).emit('creatureInfoChange', [[[creatureInfo.creatureType, creatureInfo.ID], levelUpInfo]]);
 }
 
 // -------------------End Of Creature-------------------
@@ -121,13 +68,35 @@ playerArray.length = 32;
 // ID Of Player
 var ID_count = 0;
 
+// find a spawn place without collision
+function createSpawnPosition() {
+	let posX, posY;
+	while (1) {
+		posX = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.x * game_map.blockSize2D.x);
+		posY = Math.floor((Math.random() * 2 - 1) * game_map.quarterSize2D.y * game_map.blockSize2D.y);
+		let unit = game_map.getUnit([posX, posY]);
+		if ( unit != null && !(game_map.unitIDList[unit.ID].collision)){
+			break;
+		}
+	}
+	return [posX, posY];
+}
+
 // Function Used To Create A New Player Using Two Parameters
 const CreateNewPlayer = (playerID, playerName, spawnPos) => {
 	// Similar To A Struct
-	let playerInfo  = new creatureInfoClass(playerID,
-											"player",
-											playerName != '' ? playerName : "player_" + playerID,
-											[spawnPos[0], spawnPos[1], 1]);
+	let playerInfo  = {
+		ID: playerID,
+		creatureType: "player",
+		name: playerName != '' ? playerName : "player_" + playerID,
+		position: [spawnPos[0], spawnPos[1], 1],
+		
+		// Player Properties
+		properties: new properties,
+	
+		// Server Side Creature Item Array
+		creatureItemArray: {}
+	};
 
 	// Indexing Player Array To Include The New Player
 	playerArray[playerID] = playerInfo;
@@ -170,38 +139,10 @@ function newPlayerID(){
 }
 // -------------------End Of Player-------------------
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // -------------------Monster-------------------
 var AI_controllerList = [];
 AI_controllerList.length = 100;
+
 var monsterArray = [];
 monsterArray.length = 100;
 var monster_ID_Count = 0;
@@ -232,17 +173,26 @@ function createNewMonster(ID, spawnPos, monsterID){
 	}else if (monsterArray[monsterID] != null){
 		deleteMonster(monsterID);
 	}
-
-	// Monster Information Struct
-	let monsterInfo  = new creatureInfoClass(monsterID,
-											"monster",
-											monsterInfoArray[ID][0]["name"],
-											[spawnPos[0], spawnPos[1], 1]);
-											
+	
+	let newProperties = new properties;
 	// Add Properties By ID
 	for ([key, value] of Object.entries(monsterInfoArray[ID][0]["properties"])) {
-		monsterInfo.properties[key] = value;
+		newProperties[key] = value;
 	}
+
+	// Monster Information Struct
+	let monsterInfo  = {
+		ID: monsterID,
+		creatureType: "monster",
+		name: monsterInfoArray[ID][0]["name"],
+		position: [spawnPos[0], spawnPos[1], 1],
+		
+		// Monster Properties
+		properties: newProperties,
+	
+		// Server Side Creature Item Array
+		creatureItemArray: {}
+	};
 
 	// Saving Monster Info To Monster Array
 	monsterArray[monsterID] = monsterInfo;
@@ -261,6 +211,9 @@ function createNewMonster(ID, spawnPos, monsterID){
 	// Send Information To Client To Generate A New Monster
 	io.compress(true).emit('newMonster', monsterInfo, monsterArray.length);
 
+	
+
+
 	// Return The Monster Information
 	return monsterInfo;
 }
@@ -271,7 +224,7 @@ function updateMonster(delta){
 	updateMonsterPos.length = monsterArray.length;
 	for (let i = 0; i < AI_controllerList.length; ++i) {
 		if(AI_controllerList[i] == null){
-			//createNewMonster(0, createSpawnPosition(0), i);
+			createNewMonster(0, createSpawnPosition(), i);
 			continue;
 		};
 
@@ -279,7 +232,7 @@ function updateMonster(delta){
 
 		goal = playerArray[0] != null ? [Math.floor(playerArray[0].position[0]), Math.floor(playerArray[0].position[1])] : [0,0];
 
-		//AI_controllerList[i].update(delta, game_map, goal, spawnProjectile);
+		AI_controllerList[i].update(delta, game_map, goal, spawnProjectile);
 		updateMonsterPos[i] = theMonster.position;
 
 		creatureOnHit(theMonster);
@@ -314,9 +267,10 @@ function deleteMonster(monsterID){
 }
 
 function creatureOnHit(creatureInfo){
-
-	let theBlock = game_map.mapLevel[0].getBlock([(creatureInfo.position[0] + 0.5) >> 0,
-												  (creatureInfo.position[1] + 0.5) >> 0]);
+	let [mapX, mapY] = [Math.floor(creatureInfo.position[0] + 0.5), Math.floor(creatureInfo.position[1] + 0.5)];
+	let unitX = (mapX < 0) ? -mapX - 1 : mapX;
+	let unitY = (mapY < 0) ? -mapY - 1 : mapY;
+	let theBlock = game_map.getBlockByQuarter(game_map.unit2DToBlock2D([unitX, unitY]), game_map.getQuarterMap([mapX, mapY]));
 	
 	if (theBlock == null) return;
 
@@ -358,6 +312,37 @@ function creatureOnHit(creatureInfo){
 			}
 		}
 	}
+}
+
+function experienceRequire(level){
+	return Math.floor(level * 100 * Math.exp((level - 1) / 15));
+}
+
+function levelUp(creatureInfo, experience){
+	creatureInfo.properties.experience += experience;
+	let nextLevelEXP = experienceRequire(creatureInfo.properties.level);
+	while (creatureInfo.properties.experience >= nextLevelEXP){
+		creatureInfo.properties.level += 1;
+		creatureInfo.properties.experience -= nextLevelEXP;
+		nextLevelEXP = experienceRequire(creatureInfo.properties.level);
+
+		creatureInfo.properties.health += creatureInfo.properties.maxHealthGrowth;
+		creatureInfo.properties.maxHealth += creatureInfo.properties.maxHealthGrowth;
+		creatureInfo.properties.attackDamage += creatureInfo.properties.attackDamageGrowth;
+		creatureInfo.properties.attackSpeed += creatureInfo.properties.attackSpeedGrowth;
+		creatureInfo.properties.criticalRate += creatureInfo.properties.criticalRateGrowth;
+	}
+
+
+	let levelUpInfo = { "level": ["=", creatureInfo.properties.level],
+						"experience": ["=", creatureInfo.properties.experience],
+						"health": ["=", creatureInfo.properties.health],
+						"maxHealth": ["=", creatureInfo.properties.maxHealth],
+						"attackDamage": ["=", creatureInfo.properties.attackDamage],
+						"attackSpeed": ["=", creatureInfo.properties.attackSpeed],
+						"criticalRate": ["=", creatureInfo.properties.criticalRate]
+					};
+	io.compress(true).emit('creatureInfoChange', [[[creatureInfo.creatureType, creatureInfo.ID], levelUpInfo]]);
 }
 
 // -------------------End Of Monster-------------------
@@ -586,7 +571,11 @@ function updateProjectile(delta){
 
 	
 	for (let i = 0; i < clearBlockProjectileList.length; i++){
-		game_map.mapLevel[0].getBlock(clearBlockProjectileList[i]).projectileList = [];
+		let [mapX, mapY] = clearBlockProjectileList[i];
+		let unitX = (mapX < 0) ? -mapX - 1 : mapX;
+		let unitY = (mapY < 0) ? -mapY - 1 : mapY;
+		let theBlock = game_map.getBlockByQuarter(game_map.unit2DToBlock2D([unitX, unitY]), game_map.getQuarterMap([mapX, mapY]));
+		theBlock.projectileList = [];
 	}
 
 	clearBlockProjectileList = [];
@@ -607,13 +596,16 @@ function updateProjectile(delta){
 			];
 			updateProjectileList[i] = projectilePos;
 			
-			let [mapX, mapY] = [(projectileList[i].position[0] + 0.5) >> 0, (projectileList[i].position[1] + 0.5) >> 0];
+			let [mapX, mapY] = [Math.floor(projectileList[i].position[0] + 0.5), Math.floor(projectileList[i].position[1] + 0.5)];
 
-			let theBlock = game_map.mapLevel[0].getBlock([mapX, mapY]);
+			let unitX = (mapX < 0) ? -mapX - 1 : mapX;
+			let unitY = (mapY < 0) ? -mapY - 1 : mapY;
+
+			let theBlock = game_map.getBlockByQuarter(game_map.unit2DToBlock2D([unitX, unitY]), game_map.getQuarterMap([mapX, mapY]));
 
 			let unit = null;
 			if (theBlock != null){
-				unit = theBlock.unitList[mapY % game_map.blockSize.y][mapX % game_map.blockSize.x];
+				unit = theBlock.unitList[Math.abs(unitY) % game_map.blockSize2D.y][Math.abs(unitX) % game_map.blockSize2D.x];
 			}
 
 			
@@ -766,7 +758,7 @@ const clientDisconnect = (Info, playerID) => {
 
 // -------------------Map-------------------
 // Setting The Size Of The Map
-var game_map = new map([10, 10],[2, 2]);
+var game_map = new map([10, 10],[20, 20]);
 // -------------------End Of Map-------------------
 
 // -------------------Sending And Receiving Information-------------------
@@ -775,9 +767,9 @@ io.on('connection', (sock) => {
 	// Setting The New PlayerID
 	const playerID = newPlayerID();
 
-	const spawnPos = createSpawnPosition(0);
+	const spawnPos = createSpawnPosition();
 	// Initializing The Player To The Client
-	sock.compress(true).emit('initSelf', playerID, playerArray, game_map.getInitMap(spawnPos, 0, [1, 1]), initPlayerProjectile(projectileList), monsterArray);
+	sock.compress(true).emit('initSelf', playerID, playerArray, game_map.getInitMap(spawnPos, [1, 1]), initPlayerProjectile(projectileList), monsterArray);
 	console.log("new player joined, ID: ", playerID);
 
 	// Initializing Collectable Item To The Client
@@ -790,7 +782,7 @@ io.on('connection', (sock) => {
 	sock.on('newName', (playerName) => io.compress(true).emit('newPlayer', CreateNewPlayer(playerID, playerName, spawnPos), playerArray.length));
 	sock.on('newPos', (Pos) => io.compress(true).emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
 	sock.on('disconnect', (Info) => io.compress(true).emit('clientDisconnect', clientDisconnect(Info, playerID)));
-	sock.on('requireBlock', (blockPosList) => sock.compress(true).emit('addBlocks', game_map.getUpdateBlock(blockPosList, 0)));
+	sock.on('requireBlock', (blockPosList) => sock.compress(true).emit('addBlocks', game_map.getUpdateBlock(blockPosList)));
 
 	// Creature Related
 	sock.on('creatureInfo', (creatureInfo) => creatureInfoChange(creatureInfo));
@@ -824,8 +816,8 @@ server.listen(8080, () => {
 
 
 // Spawning 500 Monsters Randomly Throughout The Map
-for (let i = 0; i < 0; ++i){
-	createNewMonster(0, createSpawnPosition(0));
+for (let i = 0; i < 500; ++i){
+	createNewMonster(0, createSpawnPosition());
 }
 
 //createNewMonster(0, [0, 0, 1]);

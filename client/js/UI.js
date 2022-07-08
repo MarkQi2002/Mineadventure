@@ -368,7 +368,7 @@ function lockedCommand(inputArray) {
         // Input Control
         let [playerX, playerY] = [parseInt(inputArray[1]), parseInt(inputArray[2])];
 
-        player_controller.controllerUpdateBlock([game_map.map2DToBlock2D([playerX, playerY]), game_map.getDirection([playerX, playerY])]);
+        player_controller.controllerUpdateBlock(game_map.mapPosToBlockPos([playerX, playerY]));
 
 
         if (isNaN(parseInt(playerX)) || isNaN(parseInt(playerY))) {
@@ -406,7 +406,7 @@ function lockedCommand(inputArray) {
         let playerY = Math.floor(playerArray[parseInt(inputArray[1])].object.position.y);
 
         // Updating Redenerer Information
-        player_controller.controllerUpdateBlock([game_map.map2DToBlock2D([playerX, playerY]), game_map.getDirection([playerX, playerY])]);
+        player_controller.controllerUpdateBlock(game_map.mapPosToBlockPos([playerX, playerY]));
 
 
         let xPosOffset, yPosOffset;
@@ -458,7 +458,7 @@ function lockedCommand(inputArray) {
         let yPosOffset = playerArray[trueIndex].object.position.y + 1;
 
         // Updating Redenerer Information
-        player_controller.controllerUpdateBlock([game_map.map2DToBlock2D([xPosOffset, yPosOffset]), game_map.getDirection([xPosOffset, yPosOffset])]);
+        player_controller.controllerUpdateBlock(game_map.mapPosToBlockPos([playerX, playerY]));
 
         // Moving Player To New Position
         player_controller.creature.object.position.x = xPosOffset;
