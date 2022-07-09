@@ -97,7 +97,8 @@ class propertiesUI {
 }
 
 // Message UI Class
-class messageUI{
+class messageUI {
+    // messageUI Constructor
     constructor(name, text, color) {
         this.name = name;
         this.text = document.createElement('div');
@@ -118,7 +119,6 @@ class messageUI{
     update(value){
         this.text.innerHTML = this.key + ": " + value;
     }
-
 }
 
 // Damage Text Class
@@ -128,6 +128,7 @@ class damageText{
         this.deleteTimer = 1;
         this.position = [position[0] + Math.random() - 0.5, position[1] + Math.random() - 0.5, position[2] + Math.random() - 0.5];
 
+        // Dynamic Text CSS
         this.text = document.createElement('div');
         this.text.style.position = 'absolute';
         this.text.style.textAlign = "center";
@@ -137,7 +138,7 @@ class damageText{
 
         this.size = (8 / Math.PI * Math.atan(Math.abs(amount) / 100) + 1) * 0.01 *  window.innerHeight;
         
-
+        // Check Damage Type
         if (type == "true") {
 			this.text.style.color = "white";
 		} else if(type == "normal") {
@@ -149,12 +150,14 @@ class damageText{
 			this.text.style.color = "green";
 		}
 
+        // Damage Text Timer
         this.sqrtSize = Math.sqrt(this.size);
         this.rate = this.deleteTimer / (2 * this.sqrtSize);
         this.text.style.fontSize = this.size + 'px';
 
         this.text.style.opacity = 0.75;
-
+        
+        // Damage Text Locatoin Update
         let [posX, posY] = this.toXYCoords(this.position);
         this.text.style.top = posY + 'px';
         this.text.style.left = posX + 'px';
@@ -174,17 +177,17 @@ class damageText{
 
     // Updating Damage Text Location
     update(delta, index){
+        // Update Position
         let [posX, posY] = this.toXYCoords(this.position);
         let num = this.deleteTimer / this.rate - this.sqrtSize;
         this.text.style.top = posY - (this.size - num * num) + 'px';
         this.text.style.left = posX + 'px';
-
-
-        if (this.deleteTimer < 0){
-            this.delete(index);
-        }
+        
+        // Decrement Timer
         this.deleteTimer -= delta;
 
+        // Remove Text If Enough Time Passed
+        if (this.deleteTimer < 0) this.delete(index);
     }
 
     // Removing Damage Text
@@ -195,29 +198,19 @@ class damageText{
     }
 }
 
-
-
-
+// Creature UI Class
 class creatureUI{
+    // Creature UI Constructor
     constructor(creature) {
         this.scale = 1;
         this.creature = creature;
 
+        // DIV CSS
         this.UI = document.createElement('div');
         this.UI.style.position = 'absolute';
 
+        // Name DIV CSS
         this.name = document.createElement('div');
-
-        /*
-        document.querySelector('#content').insertAdjacentHTML(
-            'afterbegin',
-            `<div class="row">
-              <input type="text" name="name" value="" />
-              <input type="text" name="value" value="" />
-              <label><input type="checkbox" name="check" value="1" />Checked?</label>
-              <input type="button" value="-" onclick="removeRow(this)">
-            </div>`      
-        )*/
 
         this.name.style.position = 'relative';
         this.name.style.textAlign = 'center';
@@ -225,20 +218,24 @@ class creatureUI{
 		this.name.style.color = 'white';
         this.name.style.opacity = 1;
 
+        // Background CSS
         this.healthBackground = document.createElement('div');
         this.healthBackground.style.position = 'relative';
         this.healthBackground.style.backgroundColor = "rgba(255,255,255,0.5)";
 
+        // HealthBar CSS
         this.healthBar = document.createElement('div');
         this.healthBackground.appendChild(this.healthBar);
         this.healthBar.style.position = 'relative';
         this.healthBar.style.backgroundColor = "rgba(255,0,0,1)";
         this.healthBar.style.opacity = 1;
 
+        // Adjusting Size Based On Scale
         this.updateSize();
 
         this.UI.style.visibility = 'hidden';
 
+        // Position
         let [posX, posY] = this.toXYCoords([this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z]);
         this.UI.style.top = posY + 'px';
         this.UI.style.left = posX + 'px';
@@ -247,6 +244,7 @@ class creatureUI{
         menuHtml.appendChild(this.UI);
     }
 
+    // Conversion To XY Coordinate
     toXYCoords(pos) {
         var vector = new THREE.Vector3(pos[0], pos[1], pos[2]).project(camera);
         vector.x = (vector.x + 1)/2 * window.innerWidth;
@@ -254,12 +252,14 @@ class creatureUI{
         return [vector.x - this.UI.clientWidth / 2, vector.y - this.UI.clientHeight / 2  - window.innerWidth * 0.03];
     }
 
-    setScale(scale){
+    // Setting Scale Based On Window Size
+    setScale(scale) {
         this.scale = scale;
         this.healthBar.style.width = window.innerHeight * 0.1 * scale + 'px';
     }
 
-    updateSize(){
+    // Update CSS Size Based On Window Size
+    updateSize() {
         this.UI.style.width = window.innerHeight * 0.2 + "px";
         this.UI.style.height = window.innerHeight * 0.05  + "px";
 
@@ -280,18 +280,18 @@ class creatureUI{
         this.healthBar.style.left = window.innerHeight * 0.0025 + 'px';
     }
 
+    // Update Function
     update(delta){
         let [posX, posY] = this.toXYCoords([this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z]);
         this.UI.style.top = posY + 'px';
         this.UI.style.left = posX + 'px';
     }
 
-
+    // Deletion Function
     delete(){
         menuHtml.removeChild(this.UI);
         delete this;
     }
-
 }
 
 // Terminal Function

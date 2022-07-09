@@ -304,6 +304,7 @@ class mapLevel {
 
 // Map Block Class
 class block {
+    // Block Class Constructor
     constructor(x, y, blockSize, PerlinNoise) {
         this.unitList = [];
         this.projectileList = [];

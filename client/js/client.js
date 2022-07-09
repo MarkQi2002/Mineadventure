@@ -89,17 +89,22 @@ const creatureInfoChange = (creatureInfo) => {
 	// Example creatureInfo = [[creatureType, id], {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
 	let updateLocalPlayerUI = false;
 	let updateOnlyHealthUI = true;
+
+	// Loop Through creatureInfo
 	for (let i = 0; i < creatureInfo.length; i++){
 		let theCreature;
-		if (creatureInfo[i][0][0] == "player"){
+
+		// Check If Target Is Player Or Monster
+		if (creatureInfo[i][0][0] == "player") {
 			if (playerArray[creatureInfo[i][0][1]] == null) continue;
 			theCreature = playerArray[creatureInfo[i][0][1]];
 			if (creatureInfo[i][0][1] == clientPlayerID) updateLocalPlayerUI = true;
-		}else{
+		} else {
 			if (monsterArray[creatureInfo[i][0][1]] == null) continue;
 			theCreature = monsterArray[creatureInfo[i][0][1]];
 		}
 		
+		// Loop Through Properties Update
 		for (let [key, value] of Object.entries(creatureInfo[i][1])) {
 			if (key == "damage"){
 				createDamageTextList(value, theCreature);
@@ -122,6 +127,7 @@ const creatureInfoChange = (creatureInfo) => {
 		}
 	}
 
+	// Updating Player Health UI
 	if (updateLocalPlayerUI) {
 		if (updateOnlyHealthUI) {
 			displayPlayerHealth();
@@ -158,7 +164,8 @@ const newMonster = (monsterInfo, monsterArrayLength) => {
 	if (monsterArray.length < monsterArrayLength){
 		monsterArray.length = monsterArrayLength;
 	}
-	let new_monster = spawnMonster(monsterInfo);
+	
+	spawnMonster(monsterInfo);
 }
 
 // Delete Monster
@@ -367,13 +374,16 @@ const clientUpdateBlocks = (blockList) => {
 	// Creature
 	sock.on('creatureInfoChange', creatureInfoChange);
 
+	// Map
 	sock.on('addBlocks', clientUpdateBlocks);
 
+	// Item
 	sock.on('clientCreatureItemArray', creatureItemArrayUpdate);
 	sock.on('initItem', initItem);
 	sock.on('clientNewItem', newItem);
 	sock.on('removeItem', deleteItem);
 
+	// Connection
 	sock.on('connect_error', connectionError);
 	
 	// Projectile Related
