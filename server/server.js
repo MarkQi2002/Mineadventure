@@ -1,6 +1,10 @@
 // SHA256
 // KEY: kodiaks
 // Hashed Value: 28713e0f7e8b977dcd866fcf8686d1242413e661162e68c0a02d9084b90d4a53
+// Used For Client Side Unlock Command
+
+// Certain Acronym Used
+// EXP -> Experience
 
 // CommonJS Syntax
 // Hyper Text Transfer Protocol (HTTP)
@@ -25,15 +29,18 @@ app.use(express.static(`${__dirname}/../client`));
 const server = http.createServer(app);
 const io = socketio(server);
 
-
-
 // -------------------Creature-------------------
-
 // Default Properties For All Creature
 function properties() {
+	// Level Related Properties
+	// Exp Required To Level Up Is Increased Exponentially
+	// Exp Function: level * 100 * e ^ ((level - 1) / 15)
+	// Need 93745637 Exp To Get To Level 100
 	this["level"] = 1;
-	this["experience"] = 0; // level * 100 * e ^ ((level - 1) / 15)   need 93745637 exp to get level 100
+	this["experience"] = 0;
 	
+	// Level Up Growth Amount
+	// Growth Is Linearly Scaled
 	this["maxHealthGrowth"] = 50;
 	this["armorGrowth"] = 5;
 
@@ -51,51 +58,63 @@ function properties() {
 	this["attackSpeed"] = 1;
 	this["criticalRate"] = 0.01;
 
-	// Other Properties
+	// Movement Properties
 	this["moveSpeed"] = 3;
 }
 
-// Default Creature Information
+// Default Creature Information Class
 function creatureInfoClass(ID, creatureType, name, initPos, mapLevel) {
+	// Creature Identification Information
 	this["ID"] = ID;
 	this["creatureType"] = creatureType;
 	this["name"] = name;
 	this["position"] =  initPos;
 	this["mapLevel"] =  mapLevel;
 		
-	// Player Properties
-	this["properties"] = new properties;
+	// Creature Properties Information
+	this["properties"] = new properties();
 	
-	// Server Side Creature Item Array
+	// Creature Item Array
 	this["creatureItemArray"] = {};
 }
 
-// find a spawn place without collision
+// Generate Spawn Position Without Collision With Wall
 function createSpawnPosition(mapLevelIndex) {
+	// Variable Declaration
 	let mapX, mapY;
-	while (1) {
+
+	// Randomly Generate XY Coordinate Until Found One That Doesn't Collide With The Wall
+	while (true) {
 		mapX = (Math.random() * game_map.blockNumber.x * game_map.blockSize.x) >> 0;
 		mapY = (Math.random() * game_map.blockNumber.y * game_map.blockSize.y) >> 0;
 		let unit = game_map.mapLevel[mapLevelIndex].getUnit([mapX, mapY]);
 		if (unit != null && !(game_map.unitIDList[unit.ID].collision)) break;
 	}
+
+	// Return Valid Position XY Coordinate
 	return [mapX, mapY];
 }
 
 // Exponential Level Up Function
 function experienceRequire(level) {
+	// Calculate EXP Required To Level Up
 	return Math.floor(level * 100 * Math.exp((level - 1) / 15));
 }
 
-// Linear Growth For Player Properties When Level Up
+// This Function Is Called When Creature Gain EXP
 function levelUp(creatureInfo, experience) {
+	// Add EXP Gained And Calculate Required EXP To Level Up
 	creatureInfo.properties.experience += experience;
 	let nextLevelEXP = experienceRequire(creatureInfo.properties.level);
+
+	// Continuously Level Up Creature Until Not Enough EXP To Level Up Further More
 	while (creatureInfo.properties.experience >= nextLevelEXP){
+		// Level Up And Remove EXP
 		creatureInfo.properties.level += 1;
 		creatureInfo.properties.experience -= nextLevelEXP;
 		nextLevelEXP = experienceRequire(creatureInfo.properties.level);
 
+		// Increase Creature Properties Based On Level Up Growth Rate
 		creatureInfo.properties.health += creatureInfo.properties.maxHealthGrowth;
 		creatureInfo.properties.maxHealth += creatureInfo.properties.maxHealthGrowth;
 		creatureInfo.properties.attackDamage += creatureInfo.properties.attackDamageGrowth;
@@ -103,7 +122,7 @@ function levelUp(creatureInfo, experience) {
 		creatureInfo.properties.criticalRate += creatureInfo.properties.criticalRateGrowth;
 	}
 
-	// Level Up Information
+	// Package Level Up Information
 	let levelUpInfo = { "level": ["=", creatureInfo.properties.level],
 						"experience": ["=", creatureInfo.properties.experience],
 						"health": ["=", creatureInfo.properties.health],
@@ -112,77 +131,85 @@ function levelUp(creatureInfo, experience) {
 						"attackSpeed": ["=", creatureInfo.properties.attackSpeed],
 						"criticalRate": ["=", creatureInfo.properties.criticalRate]
 					};
-
+	
+	// Sending Package To All Clients
 	io.compress(true).emit('creatureInfoChange', [[[creatureInfo.creatureType, creatureInfo.ID], levelUpInfo]]);
 }
 
 // -------------------End Of Creature-------------------
 
 // -------------------Player-------------------
-// Game Related Variable Declaration
+// Player Related Variable Declaration
 var playerArray = [];
 playerArray.length = 32;
 
 // ID Of Player
-var ID_count = 0;
+var ID_Count = 0;
 
 // Function Used To Create A New Player Using Two Parameters
 const CreateNewPlayer = (playerID, playerName, spawnPos, mapLevel) => {
-	// Similar To A Struct
+	// Creating PlayerInfo Object
 	let playerInfo  = new creatureInfoClass(playerID,
 											"player",
 											playerName != '' ? playerName : "player_" + playerID,
 											[spawnPos[0], spawnPos[1], 1],
 											mapLevel);
 
-	// Indexing Player Array To Include The New Player
+	// Store PlayerInfo Object Into playerArray
 	playerArray[playerID] = playerInfo;
 
-	// Log The PlayerInfo On The Server Side
+	// Print PlayerInfo
 	console.log(playerInfo);
 
-	// Add Player Into mapLevel
+	// Add Player To mapLevel
 	game_map.mapLevel[mapLevel].levelPlayerArray.push(playerInfo);
 
-	// Send To all player in Same Level
+	// Send To All Clients in Same Level
+	// io.to -> To Individual SocketID
 	io.to("level " + mapLevel).compress(true).emit('newPlayer', playerInfo, playerArray.length);
 };
 
-// Update Player Based On delta
+// Update Player Based On delta And theMapLevel
 function updatePlayer(delta, theMapLevel) {
 	let thePlayer;
+	// Loop Through All Player Within theMapLevel
 	for (let i = 0; i < theMapLevel.levelPlayerArray.length; ++i) {
 		thePlayer = theMapLevel.levelPlayerArray[i];
-		if (thePlayer != null){
-			creatureOnHit(thePlayer, theMapLevel);
-		}
+		// Check Player Collision With Projectile
+		if (thePlayer != null) creatureOnHit(thePlayer, theMapLevel);
 	}
 }
 
 // Pos Is An Array Of Size 3 (XYZ)
 const UpdatePlayerPosition = (Pos, playerID) => {
+	// Updating Player Position
 	if (playerArray[playerID] != null) {
 		playerArray[playerID].position = Pos;
 
-		// Send To all player in Same Level
+		// Send To All Player On Same Level
 		io.to("level " + playerArray[playerID].mapLevel).compress(true).emit('clientPos', [Pos, playerID]);
 	}
 };
 
 // Get A New Player ID From The Empty Space In PlayArray
-function newPlayerID(){
+function newPlayerID() {
 	let exceedCount = 0;
 	// Stop Untill Get An playerID Corresponding To An Empty Space In PlayArray
-	while (playerArray[ID_count] != null){
-		ID_count = (ID_count + 1) % playerArray.length;
+	while (playerArray[ID_Count] != null) {
+		ID_Count = (ID_Count + 1) % playerArray.length;
 		exceedCount++;
-		if (exceedCount >= playerArray.length){// If Exceed Max playerArray Length
+
+		// If Exceed Max playerArray Length
+		if (exceedCount >= playerArray.length) {
 			playerArray.length += 32;
-			console.log("Exceed Max PlayArray Length, Double The PlayArray Length! Current Length:", playerArray.length);
+			console.log("Exceed Max PlayArray Length, Double The PlayArray Length! Current Length: ", playerArray.length);
 		}
 	}
-	return ID_count;
+
+	// Return ID_Count
+	return ID_Count;
 }
+
 // -------------------End Of Player-------------------
 
 // -------------------Monster-------------------
@@ -195,29 +222,32 @@ var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower", "properties":{
 						];
 
 // Get A New Monster ID From The Empty Space In MonsterArray
-function newMonsterID(){
+function newMonsterID() {
 	let exceedCount = 0;
+
 	// Stop Untill Get An monsterID Corresponding To An Empty Space In MonsterArray
 	while (monsterArray[monster_ID_Count] != null){
 		monster_ID_Count = (monster_ID_Count + 1) % monsterArray.length;
 		exceedCount++;
-		if (exceedCount >= monsterArray.length){// If Exceed Max monsterArray Length
+
+		// If Exceed Max monsterArray Length
+		if (exceedCount >= monsterArray.length) {
 			monsterArray.length += 100;
-			console.log("Exceed Max MonsterArray Length, Double The MonsterArray Length! Current Length:", monsterArray.length);
+			console.log("Exceed Max MonsterArray Length, Double The MonsterArray Length! Current Length: ", monsterArray.length);
 		}
 	}
+
+	// Return monster_ID_Count
 	return monster_ID_Count;
 }
 
 // Creating A New Monster
-function createNewMonster(ID, spawnPos, mapLevel, monsterID){
-	if (monsterID == null){
-		monsterID = newMonsterID();
-	} else if (monsterArray[monsterID] != null) {
-		deleteMonster(monsterID);
-	}
+function createNewMonster(ID, spawnPos, mapLevel, monsterID) {
+	// Input Control
+	if (monsterID == null) monsterID = newMonsterID();
+	else if (monsterArray[monsterID] != null) deleteMonster(monsterID);
 
-	// Monster Information Struct
+	// Monster Information
 	let monsterInfo  = new creatureInfoClass(monsterID,
 											"monster",
 											monsterInfoArray[ID][0]["name"],
@@ -253,32 +283,34 @@ function createNewMonster(ID, spawnPos, mapLevel, monsterID){
 	return monsterInfo;
 }
 
-
-// Updating Monster Position Frame
-function updateMonster(delta, theMapLevel){
+// Updating Monster
+function updateMonster(delta, theMapLevel) {
+	// Variable Declaration
 	let monsterID;
 	theMapLevel.updateMonsterPos = [];
-	for (let i = 0; i < theMapLevel.levelMonsterArray.length; ++i) {
-		monsterID = theMapLevel.levelMonsterArray[i].ID;
 
-		if(AI_controllerList[monsterID] == null){
-			//createNewMonster(0, createSpawnPosition(0), i);
-			continue;
-		};
+	// Loop Through All Monster Within theMapLevel
+	for (let monsterIndex = 0; monsterIndex < theMapLevel.levelMonsterArray.length; ++monsterIndex) {
+		monsterID = theMapLevel.levelMonsterArray[monsterIndex].ID;
+		
+		// If Monster Is Empty Continue
+		if (AI_controllerList[monsterID] == null) continue;
 
+		// Extract The Creature
 		theMonster = AI_controllerList[monsterID].creature;
 
+		// Monster Path Finding To Goal
 		goal = playerArray[0] != null ? [Math.floor(playerArray[0].position[0]), Math.floor(playerArray[0].position[1])] : [0,0];
-
 		AI_controllerList[monsterID].update(delta, game_map, goal, spawnProjectile);
 		theMapLevel.updateMonsterPos.push([theMonster.position, monsterID]);
 
+		// Check Monster Collision With Projectile
 		creatureOnHit(theMonster, theMapLevel);
 	}
 }
 
 // Deleting A Monster Based On The Input Monster ID
-function deleteMonster(monsterID){
+function deleteMonster(monsterID) {
 	// When The MonsterArray Corresponding To MonsterID Is Not NULL Spawn An Item
 	if (monsterArray[monsterID] != null) {
 		// Variable Declaration For Spawning Item After Monster Dead
@@ -292,24 +324,21 @@ function deleteMonster(monsterID){
 		else if (randomNumber < 0.95) newItemID = itemRarityArray[2][Math.floor(Math.random() * itemRarityArray[2].length)];
 		else if (randomNumber < 1.00) newItemID = itemRarityArray[3][Math.floor(Math.random() * itemRarityArray[3].length)];
 
-		
 		// Spawning The Actual Item
 		if (newItemID != null && typeof newItemID != "undefined") io.emit('clientNewItem', newItem(newItemID, newItemPosition), newItemPosition, newItemIndex);
 		
+		// Get Which Map Level The Monster Is In
 		let mapLevelIndex = monsterArray[monsterID].mapLevel;
 
 		// Remove The Monster From mapLevel
 		let index = game_map.mapLevel[mapLevelIndex].levelMonsterArray.indexOf(monsterArray[monsterID]);
-		if (index > -1) { // only splice array when item is found
-			game_map.mapLevel[mapLevelIndex].levelMonsterArray.splice(index, 1); // 2nd parameter means remove one item only
+		if (index > -1) { // Only Splice Array When Item Is Found
+			game_map.mapLevel[mapLevelIndex].levelMonsterArray.splice(index, 1); // 2nd Parameter Means Remove One Item Only
 		}
 
 		// Send Deletion Info To All Client In Same Level
 		io.to("level " + monsterArray[monsterID].mapLevel).compress(true).emit('deleteMonster', monsterID);
 	}
-
-
-	
 
 	// Deleting Everything Relating To The Particular Monster Being Deleted
 	delete monsterArray[monsterID];
@@ -318,51 +347,67 @@ function deleteMonster(monsterID){
 	AI_controllerList[monsterID] = null;
 }
 
-// Function To Call If A Creature Has Been Hit
+// Check Whether Creature Has Been Hit Or Not
 function creatureOnHit(creatureInfo, theMapLevel) {
+	// Get The Block The Creature Located Within
 	let theBlock = theMapLevel.getBlock([(creatureInfo.position[0] + 0.5) >> 0,
 										 (creatureInfo.position[1] + 0.5) >> 0]);
 	
+	// If Outside Border Return
 	if (theBlock == null) return;
 
+	// Extract All Projectiles Within The Block
 	let blockProjectileList = theBlock.projectileList;
 
+	// Variable Declaration
 	let theProjectile;
-	for (let ii = 0; ii < blockProjectileList.length; ++ii) {
+
+	// Loop Through All Projectiles Within blockProjectileList
+	for (let projectileIndex = 0; projectileIndex < blockProjectileList.length; ++projectileIndex) {
 		// Get The Projectile
-		theProjectile = theMapLevel.levelProjectileArray[blockProjectileList[ii]];
+		theProjectile = theMapLevel.levelProjectileArray[blockProjectileList[projectileIndex]];
+
+		// If The Index Is Empty Or The Projectile Is In The Process Of Deletion, Continue
 		if (theProjectile == null || theProjectile == "deletion") continue;
-		// Creature Collision With Projectile
+
+		// Calculate XY Coordinate Difference
 		let diffX = theProjectile.position[0] - creatureInfo.position[0];
 		let diffY = theProjectile.position[1] - creatureInfo.position[1];
-		// Calculate Manhattan Distance
+
+		// Check Attacker Information
 		let attackerInfo = theProjectile.damageInfo.attacker;
+
 		if (creatureInfo.creatureType == "player"){
-			if (attackerInfo[1] == creatureInfo.ID) continue;
+			if (attackerInfo[1] == creatureInfo.ID) continue; // Attacker Is Creature Itself
 		} else {
-			if (attackerInfo[0] == creatureInfo.creatureType) continue;
+			if (attackerInfo[0] == creatureInfo.creatureType) continue; // Monster Is Attacking Monster
 		}
 
+		// Calculate Manhattan Distance
 		if (Math.abs(diffX) + Math.abs(diffY) < 2){
+			// Calculate Z Coordinate Difference
 			let diffZ = theProjectile.position[2] - creatureInfo.position[2];
+			
 			// Calculate Distance To Squared
 			if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
+				// Updating Creature Information
 				creatureInfoChange([[[creatureInfo.creatureType, creatureInfo.ID], {"damage": theProjectile.damageInfo}]]);
-				theMapLevel.levelProjectileArray[blockProjectileList[ii]] = "deletion";
+
+				// Set Projectile Deletion Tag
+				theMapLevel.levelProjectileArray[blockProjectileList[projectileIndex]] = "deletion";
+
+				// Creature On Hit Health Below 0
 				if (creatureInfo.properties["health"] <= 0){
 					if (creatureInfo.creatureType == "player"){
 						// Do Nothing
 					} else {
+						// Monster Creature, Delete Monster And Give Attacker EXP
 						deleteMonster(creatureInfo.ID);
-						if (attackerInfo[0] == "player"){
-							levelUp(playerArray[attackerInfo[1]], creatureInfo.properties.level * 100);
-						}
-						
+						if (attackerInfo[0] == "player") levelUp(playerArray[attackerInfo[1]], creatureInfo.properties.level * 100);	
 					}
 				}
 			}
 		}
-
 	}
 }
 
@@ -436,12 +481,15 @@ Red (Legendary) (5%) Index: 3
 var itemRarityArray = [[], [], [], []];
 
 // Pushing Item Into itemRarityArray
-for (let i = 0; i < itemInfoArray.length; ++i){
-	if (itemInfoArray[i].length <= 0) continue;
-	if (itemInfoArray[i][0].rarity == "Common")itemRarityArray[0].push(itemInfoArray[i][0].itemID);
-	else if (itemInfoArray[i][0].rarity == "Uncommon")itemRarityArray[1].push(itemInfoArray[i][0].itemID);
-	else if (itemInfoArray[i][0].rarity == "Suprior")itemRarityArray[2].push(itemInfoArray[i][0].itemID);
-	else if (itemInfoArray[i][0].rarity == "Legendary")itemRarityArray[3].push(itemInfoArray[i][0].itemID);
+for (let itemInfoIndex = 0; itemInfoIndex < itemInfoArray.length; ++itemInfoIndex){
+	// Input Control
+	if (itemInfoArray[itemInfoIndex].length <= 0) continue;
+
+	// Push ItemID To Array
+	if (itemInfoArray[itemInfoIndex][0].rarity == "Common") itemRarityArray[0].push(itemInfoArray[itemInfoIndex][0].itemID);
+	else if (itemInfoArray[itemInfoIndex][0].rarity == "Uncommon") itemRarityArray[1].push(itemInfoArray[itemInfoIndex][0].itemID);
+	else if (itemInfoArray[itemInfoIndex][0].rarity == "Suprior") itemRarityArray[2].push(itemInfoArray[itemInfoIndex][0].itemID);
+	else if (itemInfoArray[itemInfoIndex][0].rarity == "Legendary") itemRarityArray[3].push(itemInfoArray[itemInfoIndex][0].itemID);
 }
 
 // Update Player Property And Player Item Array
@@ -453,7 +501,6 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 	for (let [key, value] of Object.entries(itemInfoArray[additionalItemID][1])) {
 		itemAddProperty[key] = JSON.parse(JSON.stringify(value));
 	}
-
 
 	// Update Player Property Based On Item
 	let playerInfo = [[["player", updatePlayerID], itemAddProperty]];
@@ -561,7 +608,6 @@ function initPlayerProjectile(mapLevelIndex){
 	}
 	return projectileSpawnInfo;
 }
-
 
 // Update All Projectiles
 function updateProjectile(delta, mapLevelIndex){
@@ -671,15 +717,14 @@ function serverLoop(){
 	startDate = new Date();
 }
 // -------------------End Of Server Loop-------------------
-
 // Update Client Frame
-function ClientFrameUpdate(mapLevelIndex){
+function ClientFrameUpdate(mapLevelIndex) {
 	return [game_map.mapLevel[mapLevelIndex].updateProjectileArray, game_map.mapLevel[mapLevelIndex].updateMonsterPos];
 }
 
 // Changing Server Creature Information
-function creatureInfoChange(creatureInfo){
-	// Example creatureInfo = [[creatureType, id], {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
+function creatureInfoChange(creatureInfo) {
+	// Example -> creatureInfo = [[creatureType, id], {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
 	// Input Control (There Can By Multiple Change Requested)
 	for (let i = 0; i < creatureInfo.length; i++){
 		let theCreature;
@@ -707,30 +752,36 @@ function creatureInfoChange(creatureInfo){
 		}
 	}
 
+	// Sending CreatureInfoChange To All Clients
 	io.compress(true).emit('creatureInfoChange', creatureInfo);
 }
 
+// Function To Handle Damage
 function damagefunction(damageInfo, defender){
+	// Check Critical Attack By A Factor
 	let criticalAttack = false;
 	if (damageInfo.properties.criticalRate >= Math.random()) criticalAttack = true;
-
+	
 	for (let [key, value] of Object.entries(damageInfo.type)) {
+		// Input Control
 		if (value < 0) continue;
 
+		// True Damage (Ignores Armor)
 		if (key == "true"){
 			defender.properties.health -= value;
-		}else if(key == "normal"){
+		// Normal Attack
+		} else if (key == "normal") {
 			let amount = Math.floor(value * (1 - 2 / Math.PI * Math.atan(defender.properties.armor / 500)));
-			if (criticalAttack){
+			if (criticalAttack) {
 				amount *= 2;
 				damageInfo.type["criticalNormal"] = amount;
 				delete damageInfo.type["normal"];
-			}else{
+			} else {
 				damageInfo.type.normal = amount;
 			}
 			defender.properties.health -= amount;
-			
-		}else if(key == "heal"){
+		// Healing Attack
+		} else if (key == "heal") {
 			defender.properties.health += value;
 			if (defender.properties.health > defender.properties.maxHealth){
 				damageInfo.type.heal = value - (defender.properties.health - defender.properties.maxHealth);
@@ -739,6 +790,7 @@ function damagefunction(damageInfo, defender){
 		}
 	}
 
+	// Return Defender Health
 	return defender.properties.health;
 }
 
@@ -825,12 +877,7 @@ server.listen(8080, () => {
   	console.log('server is ready');
 });
 
-
-
 // Spawning 500 Monsters Randomly Throughout The Map
-for (let i = 0; i < 500; ++i){
+for (let monsterIndex = 0; monsterIndex < 500; ++monsterIndex){
 	createNewMonster(0, createSpawnPosition(0), 0);
 }
-
-//createNewMonster(0, [0, 0, 1]);
-
