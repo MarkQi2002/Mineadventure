@@ -1,3 +1,4 @@
+// Variable Declaration
 const menuHtml = document.querySelector('#noSelect');
 const creatureInfoUI = document.querySelector("#creatureInfo");
 const chatBoxUI = document.querySelector("#chatBox");
