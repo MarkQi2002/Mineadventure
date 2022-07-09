@@ -27,7 +27,8 @@ class map {
         };
 
         // Save Map Level (Multiple Map Level)
-        this.mapLevel = [new mapLevel(this.blockNumber, this.blockSize)
+        this.mapLevel = [new mapLevel(this.blockNumber, this.blockSize),
+                         new mapLevel(this.blockNumber, this.blockSize)
                         ];
     }
 
@@ -170,6 +171,22 @@ class mapLevel {
         this.blockNumber = blockNumber;
         this.blockSize = blockSize;
 
+        // Player In the Level
+        this.levelPlayerArray = [];
+
+        // Monster In the Level
+        this.levelMonsterArray = [];
+        this.updateMonsterPos = [];
+
+         // Projectile In the Level
+        this.levelProjectileArray = [];
+        this.levelProjectileArray.length = 1000;
+        this.projectile_count = 0;
+
+        // Variable Declaration For Updating Projectiles
+        this.updateProjectileArray = [];
+        this.clearBlockProjectileArray = [];
+
         // This PerlinNoise Function Is Imported From Outside Source
         this.PerlinNoise = new function() {
             // Similar To A Randomized Seed For PerlinNoise
@@ -268,6 +285,21 @@ class mapLevel {
         return theBlock.unitList[mapY % this.blockSize.y][mapX % this.blockSize.x];
     }
 
+    getNewProjectileID(){
+        let exceedCount = 0;
+        // Stop Untill Get An Projectile ID Corresponding To An Empty Space In LevelProjectileArray
+        while (this.levelProjectileArray[this.projectile_count] != null) {
+            this.projectile_count = (this.projectile_count + 1) % this.levelProjectileArray.length;
+            exceedCount++;
+            
+            // If Exceed Max LevelProjectileArray Length
+            if (exceedCount >= this.levelProjectileArray.length){
+                this.levelProjectileArray.length += 100;
+                console.log("Exceed Max LevelProjectileArray Length, Double The LevelProjectileArray Length! Current Length:", this.levelProjectileArray.length);
+            }
+        }
+        return this.projectile_count;
+    }
 }
 
 // Map Block Class

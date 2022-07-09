@@ -56,11 +56,12 @@ function properties() {
 }
 
 // Default Creature Information
-function creatureInfoClass(ID, creatureType, name, initPos) {
+function creatureInfoClass(ID, creatureType, name, initPos, mapLevel) {
 	this["ID"] = ID;
 	this["creatureType"] = creatureType;
 	this["name"] = name;
 	this["position"] =  initPos;
+	this["mapLevel"] =  mapLevel;
 		
 	// Player Properties
 	this["properties"] = new properties;
@@ -126,26 +127,34 @@ playerArray.length = 32;
 var ID_count = 0;
 
 // Function Used To Create A New Player Using Two Parameters
-const CreateNewPlayer = (playerID, playerName, spawnPos) => {
+const CreateNewPlayer = (playerID, playerName, spawnPos, mapLevel) => {
 	// Similar To A Struct
 	let playerInfo  = new creatureInfoClass(playerID,
 											"player",
 											playerName != '' ? playerName : "player_" + playerID,
-											[spawnPos[0], spawnPos[1], 1]);
+											[spawnPos[0], spawnPos[1], 1],
+											mapLevel);
 
 	// Indexing Player Array To Include The New Player
 	playerArray[playerID] = playerInfo;
 
 	// Log The PlayerInfo On The Server Side
 	console.log(playerInfo);
-	return playerInfo;
+
+	// Add Player Into mapLevel
+	game_map.mapLevel[mapLevel].levelPlayerArray.push(playerInfo);
+
+	// Send To all player in Same Level
+	io.to("level " + mapLevel).compress(true).emit('newPlayer', playerInfo, playerArray.length);
 };
 
 // Update Player Based On delta
-function updatePlayer(delta) {
-	for (let i = 0; i < playerArray.length; ++i) {
-		if (playerArray[i] != null){
-			creatureOnHit(playerArray[i]);
+function updatePlayer(delta, theMapLevel) {
+	let thePlayer;
+	for (let i = 0; i < theMapLevel.levelPlayerArray.length; ++i) {
+		thePlayer = theMapLevel.levelPlayerArray[i];
+		if (thePlayer != null){
+			creatureOnHit(thePlayer, theMapLevel);
 		}
 	}
 }
@@ -154,9 +163,10 @@ function updatePlayer(delta) {
 const UpdatePlayerPosition = (Pos, playerID) => {
 	if (playerArray[playerID] != null) {
 		playerArray[playerID].position = Pos;
-	}
 
-	return [Pos, playerID];
+		// Send To all player in Same Level
+		io.to("level " + playerArray[playerID].mapLevel).compress(true).emit('clientPos', [Pos, playerID]);
+	}
 };
 
 // Get A New Player ID From The Empty Space In PlayArray
@@ -181,7 +191,7 @@ AI_controllerList.length = 100;
 var monsterArray = [];
 monsterArray.length = 100;
 var monster_ID_Count = 0;
-var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower", "properties":{"health": 50, "maxHealth": 50, "attackDamage": 10, "attackSpeed": 10, "moveSpeed": 3}},{}],
+var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower", "properties":{"health": 50, "maxHealth": 50, "attackDamage": 10, "attackSpeed": 0.5, "moveSpeed": 3}},{}],
 						];
 
 // Get A New Monster ID From The Empty Space In MonsterArray
@@ -200,7 +210,7 @@ function newMonsterID(){
 }
 
 // Creating A New Monster
-function createNewMonster(ID, spawnPos, monsterID){
+function createNewMonster(ID, spawnPos, mapLevel, monsterID){
 	if (monsterID == null){
 		monsterID = newMonsterID();
 	} else if (monsterArray[monsterID] != null) {
@@ -211,7 +221,8 @@ function createNewMonster(ID, spawnPos, monsterID){
 	let monsterInfo  = new creatureInfoClass(monsterID,
 											"monster",
 											monsterInfoArray[ID][0]["name"],
-											[spawnPos[0], spawnPos[1], 1]);
+											[spawnPos[0], spawnPos[1], 1],
+											mapLevel);
 											
 	// Add Properties By ID
 	for ([key, value] of Object.entries(monsterInfoArray[ID][0]["properties"])) {
@@ -232,31 +243,37 @@ function createNewMonster(ID, spawnPos, monsterID){
 	// Log The MonsterInfo On The Server Side
 	console.log(monsterInfo);
 
+	// Add Monster Into mapLevel
+	game_map.mapLevel[mapLevel].levelMonsterArray.push(monsterInfo);
+
 	// Send Information To Client To Generate A New Monster
-	io.compress(true).emit('newMonster', monsterInfo, monsterArray.length);
+	io.to("level " + mapLevel).compress(true).emit('newMonster', monsterInfo, monsterArray.length);
 
 	// Return The Monster Information
 	return monsterInfo;
 }
 
-var updateMonsterPos = [];
+
 // Updating Monster Position Frame
-function updateMonster(delta){
-	updateMonsterPos.length = monsterArray.length;
-	for (let i = 0; i < AI_controllerList.length; ++i) {
-		if(AI_controllerList[i] == null){
+function updateMonster(delta, theMapLevel){
+	let monsterID;
+	theMapLevel.updateMonsterPos = [];
+	for (let i = 0; i < theMapLevel.levelMonsterArray.length; ++i) {
+		monsterID = theMapLevel.levelMonsterArray[i].ID;
+
+		if(AI_controllerList[monsterID] == null){
 			//createNewMonster(0, createSpawnPosition(0), i);
 			continue;
 		};
 
-		theMonster = AI_controllerList[i].creature;
+		theMonster = AI_controllerList[monsterID].creature;
 
 		goal = playerArray[0] != null ? [Math.floor(playerArray[0].position[0]), Math.floor(playerArray[0].position[1])] : [0,0];
 
-		AI_controllerList[i].update(delta, game_map, goal, spawnProjectile);
-		updateMonsterPos[i] = theMonster.position;
+		AI_controllerList[monsterID].update(delta, game_map, goal, spawnProjectile);
+		theMapLevel.updateMonsterPos.push([theMonster.position, monsterID]);
 
-		creatureOnHit(theMonster);
+		creatureOnHit(theMonster, theMapLevel);
 	}
 }
 
@@ -275,37 +292,51 @@ function deleteMonster(monsterID){
 		else if (randomNumber < 0.95) newItemID = itemRarityArray[2][Math.floor(Math.random() * itemRarityArray[2].length)];
 		else if (randomNumber < 1.00) newItemID = itemRarityArray[3][Math.floor(Math.random() * itemRarityArray[3].length)];
 
+		
 		// Spawning The Actual Item
 		if (newItemID != null && typeof newItemID != "undefined") io.emit('clientNewItem', newItem(newItemID, newItemPosition), newItemPosition, newItemIndex);
+		
+		let mapLevelIndex = monsterArray[monsterID].mapLevel;
+
+		// Remove The Monster From mapLevel
+		let index = game_map.mapLevel[mapLevelIndex].levelMonsterArray.indexOf(monsterArray[monsterID]);
+		if (index > -1) { // only splice array when item is found
+			game_map.mapLevel[mapLevelIndex].levelMonsterArray.splice(index, 1); // 2nd parameter means remove one item only
+		}
+
+		// Send Deletion Info To All Client In Same Level
+		io.to("level " + monsterArray[monsterID].mapLevel).compress(true).emit('deleteMonster', monsterID);
 	}
+
+
+	
 
 	// Deleting Everything Relating To The Particular Monster Being Deleted
 	delete monsterArray[monsterID];
 	delete AI_controllerList[monsterID];
 	monsterArray[monsterID] = null;
 	AI_controllerList[monsterID] = null;
-	io.compress(true).emit('deleteMonster', monsterID);
 }
 
 // Function To Call If A Creature Has Been Hit
-function creatureOnHit(creatureInfo) {
-	let theBlock = game_map.mapLevel[0].getBlock([(creatureInfo.position[0] + 0.5) >> 0,
-												  (creatureInfo.position[1] + 0.5) >> 0]);
+function creatureOnHit(creatureInfo, theMapLevel) {
+	let theBlock = theMapLevel.getBlock([(creatureInfo.position[0] + 0.5) >> 0,
+										 (creatureInfo.position[1] + 0.5) >> 0]);
 	
 	if (theBlock == null) return;
 
 	let blockProjectileList = theBlock.projectileList;
 
+	let theProjectile;
 	for (let ii = 0; ii < blockProjectileList.length; ++ii) {
-		// Get Index
-		let index = blockProjectileList[ii];
-
-		if (projectileList[index] == null || projectileList[index] == "deletion") continue;
+		// Get The Projectile
+		theProjectile = theMapLevel.levelProjectileArray[blockProjectileList[ii]];
+		if (theProjectile == null || theProjectile == "deletion") continue;
 		// Creature Collision With Projectile
-		let diffX = projectileList[index].position[0] - creatureInfo.position[0];
-		let diffY = projectileList[index].position[1] - creatureInfo.position[1];
+		let diffX = theProjectile.position[0] - creatureInfo.position[0];
+		let diffY = theProjectile.position[1] - creatureInfo.position[1];
 		// Calculate Manhattan Distance
-		let attackerInfo = projectileList[index].damageInfo.attacker;
+		let attackerInfo = theProjectile.damageInfo.attacker;
 		if (creatureInfo.creatureType == "player"){
 			if (attackerInfo[1] == creatureInfo.ID) continue;
 		} else {
@@ -313,11 +344,11 @@ function creatureOnHit(creatureInfo) {
 		}
 
 		if (Math.abs(diffX) + Math.abs(diffY) < 2){
-			let diffZ = projectileList[index].position[2] - creatureInfo.position[2];
+			let diffZ = theProjectile.position[2] - creatureInfo.position[2];
 			// Calculate Distance To Squared
 			if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
-				creatureInfoChange([[[creatureInfo.creatureType, creatureInfo.ID], {"damage": projectileList[index].damageInfo}]]);
-				projectileList[index] = "deletion";
+				creatureInfoChange([[[creatureInfo.creatureType, creatureInfo.ID], {"damage": theProjectile.damageInfo}]]);
+				theMapLevel.levelProjectileArray[blockProjectileList[ii]] = "deletion";
 				if (creatureInfo.properties["health"] <= 0){
 					if (creatureInfo.creatureType == "player"){
 						// Do Nothing
@@ -507,96 +538,78 @@ function randomSpawnItem() {
 // -------------------End Of Item-------------------
 
 // -------------------Projectile-------------------
-function getNewProjectileID(){
-	let exceedCount = 0;
-	// Stop Untill Get An Projectile ID Corresponding To An Empty Space In Projectile List
-	while (projectileList[projectile_count] != null) {
-		projectile_count = (projectile_count + 1) % projectileList.length;
-		exceedCount++;
-		
-		// If Exceed Max projectileList Length
-		if (exceedCount >= projectileList.length){
-			projectileList.length += 100;
-			console.log("Exceed Max ProjectileList Length, Double The ProjectileList Length! Current Length:", projectileList.length);
-		}
-	}
-	return  projectile_count;
-}
-
-// Projectile Related Variable Declaration
-var projectile_count = 0;
-var projectileList = [];
-projectileList.length = 1000;
-
 // Spawning New Projectiles
-function spawnProjectile(projectileInfo){
+function spawnProjectile([projectileInfo, mapLevelIndex]){
 	let projectileSpawnInfo = [];
+	let theMapLevel = game_map.mapLevel[mapLevelIndex];
+	let newProjectileID;
 	for (let i = 0; i < projectileInfo.length; i++){
-		let newProjectileID = getNewProjectileID();
-		projectileList[newProjectileID] = projectileInfo[i];
+		newProjectileID = theMapLevel.getNewProjectileID();
+		theMapLevel.levelProjectileArray[newProjectileID] = projectileInfo[i];
 		projectileSpawnInfo.push([newProjectileID, projectileInfo[i]]);
 	}
 
-	io.compress(true).emit('spawnProjectile', projectileSpawnInfo);
+	io.to("level " + mapLevelIndex).compress(true).emit('spawnProjectile', projectileSpawnInfo);
 }
 
 // Initializing Player Projectile
-function initPlayerProjectile(projectileInfo){
+function initPlayerProjectile(mapLevelIndex){
 	let projectileSpawnInfo = [];
-	for (let i = 0; i < projectileInfo.length; i++){
-		projectileSpawnInfo.push([i, projectileInfo[i]])
+	let theMapLevel = game_map.mapLevel[mapLevelIndex];
+	for (let i = 0; i < theMapLevel.levelProjectileArray.length; i++){
+		projectileSpawnInfo.push([i, theMapLevel.levelProjectileArray[i]])
 	}
 	return projectileSpawnInfo;
 }
 
-// Variable Declaration For Updating Projectiles
-var updateProjectileList = [];
-var clearBlockProjectileList = [];
 
 // Update All Projectiles
-function updateProjectile(delta){
-	updateProjectileList.length = projectileList.length;
+function updateProjectile(delta, mapLevelIndex){
+	let theMapLevel = game_map.mapLevel[mapLevelIndex];
+	theMapLevel.updateProjectileArray.length = theMapLevel.levelProjectileArray.length;
 
 	let deleteProjectileList = [];
 	let deleteUnitList = [];
 	let projectilePos;
 
-	for (let i = 0; i < clearBlockProjectileList.length; i++){
-		game_map.mapLevel[0].getBlock(clearBlockProjectileList[i]).projectileList = [];
+	for (let i = 0; i < theMapLevel.clearBlockProjectileArray.length; i++){
+		game_map.mapLevel[0].getBlock(theMapLevel.clearBlockProjectileArray[i]).projectileList = [];
 	}
 
-	clearBlockProjectileList = [];
+	theMapLevel.clearBlockProjectileArray = [];
 
+	let projectileArray, unit, theBlock, mapX, mapY;
 	// Check All Projectile List
-	for (let i = 0; i < projectileList.length; i++) {
-		if (projectileList[i] == "deletion"){
+	for (let i = 0; i < theMapLevel.levelProjectileArray.length; i++) {
+		projectileArray = theMapLevel.levelProjectileArray[i];
+		if (projectileArray == "deletion"){
 			// For Delete Projectile
-			projectileList[i] = null;
-			updateProjectileList[i] = null;
+			theMapLevel.levelProjectileArray[i] = null;
+			theMapLevel.updateProjectileArray[i] = null;
 			deleteProjectileList.push(i);
 
-		} else if (projectileList[i] != null) {
-			projectileList[i].position[0] += projectileList[i].initVelocity[0] * delta;
-			projectileList[i].position[1] += projectileList[i].initVelocity[1] * delta;
+		} else if (projectileArray != null) {
+			projectileArray.position[0] += projectileArray.initVelocity[0] * delta;
+			projectileArray.position[1] += projectileArray.initVelocity[1] * delta;
 			projectilePos = [
-				projectileList[i].position[0],
-				projectileList[i].position[1]
+				projectileArray.position[0],
+				projectileArray.position[1]
 			];
-			updateProjectileList[i] = projectilePos;
+			theMapLevel.updateProjectileArray[i] = projectilePos;
 			
-			let [mapX, mapY] = [(projectileList[i].position[0] + 0.5) >> 0, (projectileList[i].position[1] + 0.5) >> 0];
+			[mapX, mapY] = [(projectileArray.position[0] + 0.5) >> 0, (projectileArray.position[1] + 0.5) >> 0];
 
-			let theBlock = game_map.mapLevel[0].getBlock([mapX, mapY]);
+			theBlock = theMapLevel.getBlock([mapX, mapY]);
 
-			let unit = null;
+			unit = null;
 			if (theBlock != null){
 				unit = theBlock.unitList[mapY % game_map.blockSize.y][mapX % game_map.blockSize.x];
 			}
 			
 			if (unit == null){
 				// For Delete Projectile
-				projectileList[i] = null;
-				updateProjectileList[i] = null;
+				theMapLevel.levelProjectileArray[i] = null;
+				theMapLevel.updateProjectileArray[i] = null;
 				deleteProjectileList.push(i);
 				continue;
 			} else {
@@ -612,8 +625,8 @@ function updateProjectile(delta){
 					// Check Is The Unit Is Already Hit
 					if (isNotIn){
 						// For Delete Projectile
-						projectileList[i] = null;
-						updateProjectileList[i] = null;
+						theMapLevel.levelProjectileArray[i] = null;
+						theMapLevel.updateProjectileArray[i] = null;
 						deleteProjectileList.push(i);
 
 						let newID = 0;
@@ -627,15 +640,16 @@ function updateProjectile(delta){
 
 			// Pushing Information To The Lists
 			theBlock.projectileList.push(i);
-			clearBlockProjectileList.push([mapX, mapY]);
+			theMapLevel.clearBlockProjectileArray.push([mapX, mapY]);
 		}
 	}
 	
 	// Sending Deletion Event To Clients
 	if (deleteProjectileList.length > 0){
-		io.emit('deleteEvent', [deleteProjectileList, deleteUnitList]);
+		io.to("level " + mapLevelIndex).emit('deleteEvent', [deleteProjectileList, deleteUnitList]);
 	}
 }
+
 // -------------------End Of Projectile-------------------
 
 // -------------------Server Loop-------------------
@@ -648,16 +662,19 @@ let endDate = new Date();
 function serverLoop(){
 	endDate = new Date();
 	let delta = (endDate.getTime() - startDate.getTime()) / 1000;
-	updateProjectile(delta);
-	updatePlayer(delta);
-	updateMonster(delta);
+	//For Each MapLevel
+	for (let i = 0; i < game_map.mapLevel.length; ++i){
+		updateProjectile(delta, i);
+		updatePlayer(delta, game_map.mapLevel[i]);
+		updateMonster(delta, game_map.mapLevel[i]);
+	}
 	startDate = new Date();
 }
 // -------------------End Of Server Loop-------------------
 
 // Update Client Frame
-function ClientFrameUpdate(){
-	return [updateProjectileList, updateMonsterPos];
+function ClientFrameUpdate(mapLevelIndex){
+	return [game_map.mapLevel[mapLevelIndex].updateProjectileArray, game_map.mapLevel[mapLevelIndex].updateMonsterPos];
 }
 
 // Changing Server Creature Information
@@ -729,13 +746,22 @@ function damagefunction(damageInfo, defender){
 const clientDisconnect = (Info, playerID) => {
 	// Clear The PlayerID From Player Array
 	if (playerArray[playerID] != null){
+		let mapLevelIndex = playerArray[playerID].mapLevel;
+
+		// Send To All Player In Same Level
+		io.to("level " + mapLevelIndex).compress(true).emit('clientDisconnect', playerID);
+
+		// Remove The Player From mapLevel
+		let index = game_map.mapLevel[mapLevelIndex].levelPlayerArray.indexOf(playerArray[playerID]);
+		if (index > -1) { // only splice array when item is found
+			game_map.mapLevel[mapLevelIndex].levelPlayerArray.splice(index, 1); // 2nd parameter means remove one item only
+		}
+
+		// Delete This Player's Info
 		console.log("Player ID:", playerID, " Name:", playerArray[playerID].name, "is disconnected!  Info:", Info);
 		delete playerArray[playerID];
 		playerArray[playerID] = null;
 	}
-	
-	// Return The ID Of The Player Removed
-	return playerID;
 };
 
 // -------------------Map-------------------
@@ -748,10 +774,14 @@ var game_map = new map([20, 20],[20, 20]);
 io.on('connection', (sock) => {
 	// Setting The New PlayerID
 	const playerID = newPlayerID();
-
-	const spawnPos = createSpawnPosition(0);
+	let initMapLevel = playerID;
+	let spawnPos = createSpawnPosition(initMapLevel);
+	sock.join("level " + initMapLevel);
 	// Initializing The Player To The Client
-	sock.compress(true).emit('initSelf', playerID, playerArray, game_map.getInitMap(spawnPos, 0, [1, 1]), initPlayerProjectile(projectileList), monsterArray);
+	sock.compress(true).emit('initSelf', playerID, game_map.mapLevel[initMapLevel].levelPlayerArray, playerArray.length,
+							 game_map.getInitMap(spawnPos, initMapLevel, [1, 1]), initPlayerProjectile(initMapLevel),
+							 game_map.mapLevel[initMapLevel].levelMonsterArray, monsterArray.length, initMapLevel);
+
 	console.log("new player joined, ID: ", playerID);
 
 	// Initializing Collectable Item To The Client
@@ -761,10 +791,10 @@ io.on('connection', (sock) => {
 	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
 	// First Parameter Data Name (Same As Client Side), Second Parameter The Actual Data
 	// Player Related
-	sock.on('newName', (playerName) => io.compress(true).emit('newPlayer', CreateNewPlayer(playerID, playerName, spawnPos), playerArray.length));
-	sock.on('newPos', (Pos) => io.compress(true).emit('clientPos', UpdatePlayerPosition(Pos, playerID)));
-	sock.on('disconnect', (Info) => io.compress(true).emit('clientDisconnect', clientDisconnect(Info, playerID)));
-	sock.on('requireBlock', (blockPosList) => sock.compress(true).emit('addBlocks', game_map.getUpdateBlock(blockPosList, 0)));
+	sock.on('newName', (playerName) => CreateNewPlayer(playerID, playerName, spawnPos, initMapLevel));
+	sock.on('newPos', (Pos) => UpdatePlayerPosition(Pos, playerID));
+	sock.on('disconnect', (Info) => clientDisconnect(Info, playerID));
+	sock.on('requireBlock', (blockPosList) => sock.compress(true).emit('addBlocks', game_map.getUpdateBlock(blockPosList, playerArray[playerID].mapLevel)));
 
 	// Creature Related
 	sock.on('creatureInfo', (creatureInfo) => creatureInfoChange(creatureInfo));
@@ -775,10 +805,10 @@ io.on('connection', (sock) => {
 	sock.on('deleteItem', (removeItemID) => io.compress(true).emit('removeItem', deleteItem(removeItemID)));
 
 	// Projectile Related
-	sock.on('newProjectile', (projectileInfo) => spawnProjectile(projectileInfo));
+	sock.on('newProjectile', (projectileSpawnInfo) => spawnProjectile(projectileSpawnInfo));
 
 	// Client Frame Update
-	sock.on('clientFrame', () => sock.compress(true).emit('updateFrame', ClientFrameUpdate()));
+	sock.on('clientFrame', () => sock.compress(true).emit('updateFrame', ClientFrameUpdate(playerArray[playerID].mapLevel)));
 
 	// New Message From Client
 	sock.on('newMessage', (clientMessage) => io.compress(true).emit('serverMessage', clientMessage));
@@ -799,7 +829,7 @@ server.listen(8080, () => {
 
 // Spawning 500 Monsters Randomly Throughout The Map
 for (let i = 0; i < 500; ++i){
-	createNewMonster(0, createSpawnPosition(0));
+	createNewMonster(0, createSpawnPosition(0), 0);
 }
 
 //createNewMonster(0, [0, 0, 1]);

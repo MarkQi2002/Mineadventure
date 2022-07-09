@@ -6,7 +6,6 @@ var creatureLoader = {
 // The Most Basic Class, All Other Class (Player, Monster) Will Built Upon This By Inheritance
 class creature{
     constructor(creatureInfo) {
-        console.log(creatureInfo)
         // Creating THREE Object
         this.ID = creatureInfo.ID;
         this.object = new THREE.Object3D();

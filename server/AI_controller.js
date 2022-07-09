@@ -140,7 +140,7 @@ class AI_controller {
 
         // Attack
         if ( this.targetPositionList.length > 0 && this.attackCD <= 0){
-            spawnProjectile([this.sendProjectile(goal)]);
+            spawnProjectile([[this.sendProjectile(goal)], this.creature.mapLevel]);
             this.attackCD = 1;
         }
 

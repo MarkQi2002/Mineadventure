@@ -3,6 +3,7 @@ const groundLevel = 1;
 const gravity = 10;
 var game_map;
 var gameTime = new Date();
+var gameMapLevel;
 
 // THREE.js Initial Set Up Variable
 const scene = new THREE.Scene();

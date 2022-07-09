@@ -8,10 +8,11 @@ function spawnPlayer(playerInfo){
 }
 
 // Initialization Every Player Before You Enter The Game
-const initSelf = (severPlayerID, serverPlayerArray, serverMap, projectileList, serverMonsterArray) => {
+const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap,
+				  projectileList, serverMonsterArray, monsterArrayLength, initMapLevel) => {
 	clientPlayerID = severPlayerID;
-	if (playerArray.length < serverPlayerArray.length){
-		playerArray.length = serverPlayerArray.length;
+	if (playerArray.length < playerArrayLength){
+		playerArray.length = playerArrayLength;
 	}
 	for (let i = 0; i < serverPlayerArray.length; ++i) {
 		if (serverPlayerArray[i] != null){
@@ -19,14 +20,16 @@ const initSelf = (severPlayerID, serverPlayerArray, serverMap, projectileList, s
 		}
 	}
 
+	gameMapLevel = initMapLevel;
+
 	game_map = new map(serverMap);
 
 	spawnProjectile(projectileList);
 
-	if (monsterArray.length < serverMonsterArray.length){
-		monsterArray.length = serverMonsterArray.length;
+	if (monsterArray.length < monsterArrayLength){
+		monsterArray.length = monsterArrayLength;
 	}
-	for (let i = 0; i < monsterArray.length; ++i) {
+	for (let i = 0; i < serverMonsterArray.length; ++i) {
 		if (serverMonsterArray[i] != null){
 			spawnMonster(serverMonsterArray[i]);
 		}
@@ -146,7 +149,6 @@ monsterArray.length = 100;
 // Function Used To Spawn A Monster
 function spawnMonster(monsterInfo){
 	let new_monster = new monster(monsterInfo);
-
 	monsterArray[monsterInfo.ID] = new_monster;
 	return new_monster;
 }
@@ -298,9 +300,11 @@ const updateFrame = ([projectilePosList, monsterPosList]) => {
 		}
 	}
 
-	for (let i = 0; i < monsterArray.length; i++){
-		if (monsterArray[i] != null){
-			monsterArray[i].object.position.set(monsterPosList[i][0], monsterPosList[i][1], monsterPosList[i][2]); 
+	let theMonster;
+	for (let i = 0; i < monsterPosList.length; i++){
+		theMonster = monsterArray[monsterPosList[i][1]];
+		if (theMonster != null){
+			theMonster.object.position.set(monsterPosList[i][0][0], monsterPosList[i][0][1], monsterPosList[i][0][2]); 
 		}
 	}
 };
@@ -416,7 +420,7 @@ const clientUpdateBlocks = (blockList) => {
 
 	// Projectile Related
 	const createProjectile = () => {
-		sock.compress(true).emit('newProjectile', newProjectileList);
+		sock.compress(true).emit('newProjectile', [newProjectileList, gameMapLevel]);
 		newProjectileList = [];
 	}
 	document.addEventListener('createProjectile', createProjectile);
