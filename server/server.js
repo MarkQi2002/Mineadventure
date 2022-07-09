@@ -318,11 +318,12 @@ function deleteMonster(monsterID) {
 		let newItemPosition = monsterArray[monsterID].position;
 		
 		// Randomly Generating An Item ID Based On Rarity Distribution
+		let monsterDropRate = 1.00;
 		let randomNumber = Math.random();
-		if (randomNumber < 0.60) newItemID = itemRarityArray[0][Math.floor(Math.random() * itemRarityArray[0].length)];
-		else if (randomNumber < 0.85) newItemID = itemRarityArray[1][Math.floor(Math.random() * itemRarityArray[1].length)];
-		else if (randomNumber < 0.95) newItemID = itemRarityArray[2][Math.floor(Math.random() * itemRarityArray[2].length)];
-		else if (randomNumber < 1.00) newItemID = itemRarityArray[3][Math.floor(Math.random() * itemRarityArray[3].length)];
+		if (randomNumber < 0.60 * monsterDropRate) newItemID = itemRarityArray[0][Math.floor(Math.random() * itemRarityArray[0].length)];
+		else if (randomNumber < 0.85 * monsterDropRate) newItemID = itemRarityArray[1][Math.floor(Math.random() * itemRarityArray[1].length)];
+		else if (randomNumber < 0.95 * monsterDropRate) newItemID = itemRarityArray[2][Math.floor(Math.random() * itemRarityArray[2].length)];
+		else if (randomNumber < 1.00 * monsterDropRate) newItemID = itemRarityArray[3][Math.floor(Math.random() * itemRarityArray[3].length)];
 
 		// Spawning The Actual Item
 		if (newItemID != null && typeof newItemID != "undefined") io.emit('clientNewItem', newItem(newItemID, newItemPosition), newItemPosition, newItemIndex);
@@ -761,7 +762,7 @@ function damagefunction(damageInfo, defender){
 	// Check Critical Attack By A Factor
 	let criticalAttack = false;
 	if (damageInfo.properties.criticalRate >= Math.random()) criticalAttack = true;
-	
+
 	for (let [key, value] of Object.entries(damageInfo.type)) {
 		// Input Control
 		if (value < 0) continue;
