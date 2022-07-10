@@ -2,4 +2,4 @@
 // Setting Interval
 setInterval(() => {
     postMessage(null);
-}, 20);
+}, 30);

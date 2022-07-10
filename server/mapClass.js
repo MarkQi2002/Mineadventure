@@ -272,10 +272,14 @@ class mapLevel {
         }
     }
 
+    IsNotInMapRange(floatBlockX, floatBlockY){
+        return this.blockNumber.x <= floatBlockX || 0 > floatBlockX || this.blockNumber.y <= floatBlockY || 0 > floatBlockY;
+    }
+
     // Return The Block Based On xy Coordinate
     getBlock([mapX, mapY]){
         let [floatBlockX, floatBlockY] = [mapX / this.blockSize.x, mapY / this.blockSize.y];
-        if (this.blockNumber.x <= floatBlockX || 0 > floatBlockX || this.blockNumber.y <= floatBlockY || 0 > floatBlockY) return null;
+        if (this.IsNotInMapRange(floatBlockX, floatBlockY)) return null;
         return this.blockList[floatBlockY >> 0][floatBlockX >> 0];
     }
 
