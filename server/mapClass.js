@@ -5,13 +5,14 @@ class map {
     constructor(blockNumber, blockSize) {
         // Set Unit ID List Information
         this.unitIDList = [
-            this.setUnitIDInfo(["image/unit_material/0_ground.jpg"], false, 0),
+            this.setUnitIDInfo(["image/unit_material/0_ground.jpg"], false, false, true, 0),
             this.setUnitIDInfo(["image/unit_material/0_ground.jpg",
                                 "image/unit_material/0_ground.jpg",
                                 "image/unit_material/0_ground.jpg",
                                 "image/unit_material/0_ground.jpg",
                                 "image/unit_material/1_wall.jpg",
-                                "image/unit_material/1_wall.jpg"], true, 1)
+                                "image/unit_material/1_wall.jpg"], true, true, false, 1),
+            this.setUnitIDInfo(["image/unit_material/test.jpg"], false, true, false, 0),
         ];
 
         // Save Block Size
@@ -27,10 +28,27 @@ class map {
         };
 
         // Save Map Level (Multiple Map Level)
-        this.mapLevel = [new mapLevel(this.blockNumber, this.blockSize),
-                         new mapLevel(this.blockNumber, this.blockSize),
-                         new mapLevel(this.blockNumber, this.blockSize)
+        this.mapLevel;
+    }
+
+    createMapLevel(){
+        // Save Map Level (Multiple Map Level)
+        this.mapLevel = [new mapLevel(this.blockNumber, this.blockSize, this),
+                         new mapLevel(this.blockNumber, this.blockSize, this),
+                         new mapLevel(this.blockNumber, this.blockSize, this)
                         ];
+    }
+
+    // set UnitIDInfo by (texture url address, collision bool)
+    setUnitIDInfo(texture, collision, destroyable, base, geometryType) {
+        var unitIDInfo = {
+            texture: texture, // texture url address
+            collision: collision, // Can Walk through (true or false)
+            destroyable: destroyable, // Can be destroyed (true or false)
+            base: base, // Can have childUnit On (true or false)
+            geometryType: geometryType
+        }
+        return unitIDInfo
     }
 
     // Find Neighboring Map Blocks
@@ -104,16 +122,6 @@ class map {
         return neighborList;
     }
 
-    // set UnitIDInfo by (texture url address, collision bool)
-    setUnitIDInfo(texture, collision, geometryType) {
-        var unitIDInfo = {
-            texture: texture, // texture url address
-            collision: collision, //true or false
-            geometryType: geometryType
-        }
-        return unitIDInfo
-    }
-
     // Function To Initialize The Block And Package It To Send To Client
     getInitMap([mapX, mapY], mapLevelIndex, [blockHalfRangeX, blockHalfRangeY]) {
         let  [centerBlockX, centerBlockY] = [mapX / this.blockSize.x >> 0, mapY / this.blockSize.y >> 0];
@@ -167,7 +175,7 @@ class map {
 
 // Map level
 class mapLevel {
-    constructor(blockNumber, blockSize) {
+    constructor(blockNumber, blockSize, this_game_map) {
         this.blockList = [];
         this.blockNumber = blockNumber;
         this.blockSize = blockSize;
@@ -252,7 +260,7 @@ class mapLevel {
         }
 
         this.newEmptyLevel(blockNumber);
-        this.initQuarterMap(blockSize);
+        this.initQuarterMap(blockSize, this_game_map);
 
     }
 
@@ -264,10 +272,10 @@ class mapLevel {
     }
 
     // Double For Loop To Generate The Block
-    initQuarterMap(blockSize){
+    initQuarterMap(blockSize, this_game_map){
         for (let y_Axis = 0; y_Axis < this.blockList.length; y_Axis++) {
             for (let x_Axis = 0; x_Axis < this.blockList[y_Axis].length; x_Axis++) {
-                this.blockList[y_Axis][x_Axis] = new block(x_Axis, y_Axis, blockSize, this.PerlinNoise);
+                this.blockList[y_Axis][x_Axis] = new block(x_Axis, y_Axis, blockSize, this.PerlinNoise, this_game_map);
             }
         }
     }
@@ -310,11 +318,11 @@ class mapLevel {
 // Map Block Class
 class block {
     // Block Class Constructor
-    constructor(x, y, blockSize, PerlinNoise) {
+    constructor(x, y, blockSize, PerlinNoise, this_game_map) {
         this.unitList = [];
         this.projectileList = [];
         this.makeBlock(blockSize);
-        this.initBlock(x, y, PerlinNoise);
+        this.initBlock(x, y, PerlinNoise, this_game_map);
     }
 
     // Create An Empty Block
@@ -325,7 +333,7 @@ class block {
     }
 
     // To Create The Units Inside The Block
-    initBlock(x, y, PerlinNoise) {
+    initBlock(x, y, PerlinNoise, this_game_map) {
         for (let y_Axis = 0; y_Axis < this.unitList.length; y_Axis++) {
             for (let x_Axis = 0; x_Axis < this.unitList[y_Axis].length; x_Axis++) {
                 var ID = 1;
@@ -339,9 +347,23 @@ class block {
                     Height = 3;
                 }
 
+                let newChildUnit;
+                if (this_game_map.unitIDList[ID].base && (Math.random() * 50) >> 0 == 0){
+                    newChildUnit = {
+                        ID: 2,
+                        Height: 1,
+                        childUnit: null
+                    };
+                }else{
+                    newChildUnit = null;
+                }
+
+
+
                 this.unitList[y_Axis][x_Axis] = {
                     ID: ID,
                     Height: Height,
+                    childUnit: newChildUnit
                 };
 
             }

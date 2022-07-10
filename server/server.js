@@ -284,7 +284,7 @@ AI_controllerList.length = 100;
 var monsterArray = [];
 monsterArray.length = 100;
 var monster_ID_Count = 0;
-var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower", "properties":{"health": 50000000, "maxHealth": 50, "attackDamage": 10, "attackSpeed": 30, "moveSpeed": 3}},{}],
+var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower", "properties":{"health": 50, "maxHealth": 50, "attackDamage": 10, "attackSpeed": 0.5, "moveSpeed": 3}},{}],
 						[{"name": "Fakecat", "type": "burrower", "properties":{"health": 100, "maxHealth": 100, "attackDamage": 20, "attackSpeed": 0.5, "moveSpeed": 3}},{}],
 						];
 
@@ -732,7 +732,7 @@ function updateProjectile(delta, mapLevelIndex){
 				deleteProjectileList.push(i);
 				continue;
 			} else {
-				if (game_map.unitIDList[unit.ID].collision == true){
+				if (getAllChildUnitDestroyable(unit)){
 					// For Delete Unit
 					let isNotIn = true;
 					for (let ii = 0; ii < deleteUnitList.length; ii++){
@@ -748,9 +748,12 @@ function updateProjectile(delta, mapLevelIndex){
 						theMapLevel.updateProjectileArray[i] = null;
 						deleteProjectileList.push(i);
 
-						let newID = 0;
-						unit.ID = newID;
-						unit.Height = 0;
+
+						if (game_map.unitIDList[unit.ID].destroyable){
+							unit.ID = 0;
+							unit.Height = 0;
+						}
+						unit.childUnit = null;
 						deleteUnitList.push([[mapX, mapY], unit]);
 						continue;
 					}
@@ -808,6 +811,10 @@ function updateProjectile(delta, mapLevelIndex){
 	if (deleteProjectileList.length > 0){
 		io.to("level " + mapLevelIndex).emit('deleteEvent', [deleteProjectileList, deleteUnitList]);
 	}
+}
+
+function getAllChildUnitDestroyable(unit){
+	return game_map.unitIDList[unit.ID].destroyable || (unit.childUnit == null ? false : getAllChildUnitDestroyable(unit.childUnit));
 }
 
 // -------------------End Of Projectile-------------------
@@ -913,6 +920,7 @@ function damagefunction(damageInfo, defender){
 // -------------------Map-------------------
 // Setting The Size Of The Map
 var game_map = new map([20, 20],[20, 20]);
+game_map.createMapLevel();
 // -------------------End Of Map-------------------
 
 // -------------------Sending And Receiving Information-------------------

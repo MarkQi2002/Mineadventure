@@ -18,6 +18,7 @@ class map {
 
         this.unitIDList = unitIDList;// get unit ID list from server
         this.loader = new THREE.TextureLoader();// texture loader
+        //this.OBJloader = new THREE.OBJLoader();// OBJ loader
         this.materialList = []; // Material List
         this.geometryList = []; // Geometry List
         this.loadMaterials(); // Load Materials
@@ -60,6 +61,10 @@ class map {
         //******************************************************************
         geometry = new THREE.BoxGeometry(1, 1, 6); // geometry for all cubes
         this.geometryList.push(geometry); //1
+
+        //******************************************************************
+        geometry = new THREE.BoxGeometry(1, 1, 6); // geometry for OBJ
+        this.geometryList.push(geometry); //2
     }
 
     // Generating A Completely Empty Map
@@ -86,34 +91,6 @@ class map {
         let theBlock = this.getBlock([mapX, mapY]);
         if (theBlock == null || theBlock.class == null) return null;
         return  theBlock.class.unitList[mapY % this.blockSize.y][mapX % this.blockSize.x];
-    }
-
-    // return true when deletion successful
-    deleteUnit([[mapX, mapY], replaceUnitInfo]){ 
-
-        let theBlock = this.getBlock([mapX, mapY]);
-        if (theBlock != null && theBlock.class != null){
-            let [x, y] = [mapX % this.blockSize.x, mapY % this.blockSize.y];
-            let unit = theBlock.class.unitList[y][x];
-
-
-            if (theBlock.block != null){
-                theBlock.block.remove(unit.mesh);
-            }
-        
-            if (replaceUnitInfo.ID != null){
-                unit.ID = replaceUnitInfo.ID;
-                unit.Height = replaceUnitInfo.Height;
-                if (theBlock.block != null) this.spawnUnit(x, y, unit, theBlock.block);
-            }else{
-                unit.mesh = null;
-            }
-
-            return true;
-        }else{
-            return false;
-        }
-        
     }
 
     // Creating Client Side Blocks
@@ -166,27 +143,61 @@ class map {
     }
 
     // Creating Client Side Unit
-    spawnUnit(x, y, unitClass, block){
+    spawnUnit(x, y, unitClass, parent){
         let geometry = this.geometryList[this.unitIDList[unitClass.ID].geometryType];
         let material = this.materialList[unitClass.ID];
         
-        let mesh = new THREE.Mesh(geometry, material);
-        block.add(mesh);
+        let mesh = new THREE.Mesh(geometry, material);        
+        if (unitClass.childUnit != null){
+            this.spawnUnit(0, 0, unitClass.childUnit, mesh);
+        }
+
+        parent.add(mesh);
         unitClass.mesh = mesh;
         mesh.position.set(x, y, unitClass.Height);
-
     }
 
 
     // Removing A Block (No Longer Render This Block)
     deleteBlock(block){
         // Remove All Child Object
-        var obj;
-        for (var i = block.children.length - 1; i >= 0; i--) { 
-            obj = block.children[i];
-            block.remove(obj); 
-        }
+        this.removeAllChildUnit(block);
         this.object.remove(block);
+    }
+    
+    // return true when deletion successful
+    deleteUnit([[mapX, mapY], replaceUnitInfo]){ 
+        let theBlock = this.getBlock([mapX, mapY]);
+        if (theBlock != null && theBlock.class != null){
+            let [x, y] = [mapX % this.blockSize.x, mapY % this.blockSize.y];
+            let unit = theBlock.class.unitList[y][x];
+
+
+            if (theBlock.block != null){
+                this.removeAllChildUnit(unit.mesh);
+                theBlock.block.remove(unit.mesh);
+            }
+        
+            if (replaceUnitInfo.ID != null){
+                unit.ID = replaceUnitInfo.ID;
+                unit.Height = replaceUnitInfo.Height;
+                unit.childUnit = replaceUnitInfo.childUnit;
+                if (theBlock.block != null) this.spawnUnit(x, y, unit, theBlock.block);
+            }else{
+                unit.mesh = null;
+            }
+
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    removeAllChildUnit(parent){
+        for (var i = parent.children.length - 1; i >= 0; i--) {
+            this.removeAllChildUnit(parent.children[i]);
+            parent.remove(parent.children[i]);
+        }
     }
 
     //delete Whole Map
