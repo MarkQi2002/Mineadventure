@@ -9,7 +9,35 @@ function spawnPlayer(playerInfo){
 
 // Initialization Every Player Before You Enter The Game
 const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap,
-				  projectileList, serverMonsterArray, monsterArrayLength, initMapLevel) => {
+				  serverProjectileList, serverMonsterArray, monsterArrayLength, initMapLevel) => {
+	
+	//Delete Old Player
+	for (let i = 0; i < playerArray.length; ++i) {
+		if (playerArray[i] != null && i != clientPlayerID){
+			playerArray[i].delete();
+			playerArray[i] = null;
+		}
+	}
+
+	//Delete Old Monster
+	for (let i = 0; i < monsterArray.length; ++i) {
+		deleteMonster(i);
+	}
+
+	//Delete Old Projectile
+	for (let i = 0; i < projectileList.length; ++i) {
+		if (projectileList[i] != null){
+			projectileList[i].delete();
+			projectileList[i] = null;
+		}
+	}
+
+	gameMapLevel = initMapLevel;
+	// Delete Old Map
+	if (game_map != null) game_map.delete();
+	// Create New Map
+	game_map = new map(serverMap);
+
 	clientPlayerID = severPlayerID;
 	if (playerArray.length < playerArrayLength){
 		playerArray.length = playerArrayLength;
@@ -20,11 +48,7 @@ const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap
 		}
 	}
 
-	gameMapLevel = initMapLevel;
-
-	game_map = new map(serverMap);
-
-	spawnProjectile(projectileList);
+	spawnProjectile(serverProjectileList);
 
 	if (monsterArray.length < monsterArrayLength){
 		monsterArray.length = monsterArrayLength;
@@ -454,4 +478,10 @@ const clientUpdateBlocks = (blockList) => {
 		sock.compress(true).emit('newMessage', sendingMessage);
 	}
 	document.addEventListener('sendMessage', SendClientMessage);
+
+	// Send A Command To Server
+	const sendCommand = () => {
+		sock.compress(true).emit('newCommand', sendingCommand);
+	}
+	document.addEventListener('sendCommand', sendCommand);
 })();

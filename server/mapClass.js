@@ -28,6 +28,7 @@ class map {
 
         // Save Map Level (Multiple Map Level)
         this.mapLevel = [new mapLevel(this.blockNumber, this.blockSize),
+                         new mapLevel(this.blockNumber, this.blockSize),
                          new mapLevel(this.blockNumber, this.blockSize)
                         ];
     }

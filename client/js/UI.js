@@ -307,6 +307,7 @@ command.addEventListener("keypress", function(event) {
 // SHA256 Unlock
 var hashKey = "kodiaks";
 var sendingMessage = ["System", "Init Message"];
+var sendingCommand = [null, null];
 
 function terminalSubmit() {
     // Receiving User Input
@@ -472,7 +473,16 @@ function lockedCommand(inputArray) {
         var event = new Event('position event', {bubbles: true, cancelable: false}) 
         document.dispatchEvent(event);
 
-    } else {
+    } else if (inputArray[0] == "mapLevel"){
+        if (inputArray[1] == null || isNaN(parseInt(inputArray[1]))) {
+            console.log("The Number Is Invalid!");
+            return;
+        }
+
+        sendingCommand = ["mapLevel", parseInt(inputArray[1])];
+
+        document.dispatchEvent(new Event('sendCommand', {bubbles: true, cancelable: false}));
+    }else {
 
         if (isNaN(parseInt(inputArray[2])) || (inputArray.length >= 4 && isNaN(parseInt(inputArray[3])))) {
             console.log("The Number Is Invalid!");

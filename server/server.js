@@ -141,22 +141,29 @@ function levelUp(creatureInfo, experience) {
 // -------------------Player-------------------
 // Player Related Variable Declaration
 var playerArray = [];
+var sockArray = [];
 playerArray.length = 32;
+sockArray.length = playerArray.length;
 
 // ID Of Player
 var ID_Count = 0;
 
 // Function Used To Create A New Player Using Two Parameters
-const CreateNewPlayer = (playerID, playerName, spawnPos, mapLevel) => {
+const CreateNewPlayer = (playerID, playerName, spawnPos, mapLevel, sock) => {
 	// Creating PlayerInfo Object
 	let playerInfo  = new creatureInfoClass(playerID,
 											"player",
 											playerName != '' ? playerName : "player_" + playerID,
 											[spawnPos[0], spawnPos[1], 1],
 											mapLevel);
-
 	// Store PlayerInfo Object Into playerArray
 	playerArray[playerID] = playerInfo;
+
+	// Add Sock In sockArray
+	if (sockArray.length < playerArray.length){
+		sockArray.length = playerArray.length;
+	}
+	sockArray[playerID] = sock;
 
 	// Print PlayerInfo
 	console.log(playerInfo);
@@ -210,6 +217,65 @@ function newPlayerID() {
 	return ID_Count;
 }
 
+// Client Is Disconnected
+const clientDisconnect = (Info, playerID) => {
+	// Clear The PlayerID From Player Array
+	if (playerArray[playerID] != null){
+		let mapLevelIndex = playerArray[playerID].mapLevel;
+
+		// Send To All Player In Same Level
+		io.to("level " + mapLevelIndex).compress(true).emit('clientDisconnect', playerID);
+
+		// Remove The Player From mapLevel
+		let index = game_map.mapLevel[mapLevelIndex].levelPlayerArray.indexOf(playerArray[playerID]);
+		if (index > -1) { // only splice array when item is found
+			game_map.mapLevel[mapLevelIndex].levelPlayerArray.splice(index, 1); // 2nd parameter means remove one item only
+		}
+
+		// Delete This Player's Info
+		console.log("Player ID:", playerID, " Name:", playerArray[playerID].name, "is disconnected!  Info:", Info);
+		delete playerArray[playerID];
+		playerArray[playerID] = null;
+		sockArray[playerID] = null;
+	}
+};
+
+// Command
+const serverCommand = (playerID, theCommand) => {
+	if (theCommand[0] == "mapLevel"){
+		if (theCommand[1] >= game_map.mapLevel.length) return;
+		SwitchMapLevel([playerArray[playerID].position[0], playerArray[playerID].position[1]], playerArray[playerID], theCommand[1]);
+	}
+};
+
+function SwitchMapLevel(spawnPos, playerInfo, newMapLevelIndex){
+	// Remove The Player From mapLevel
+	let mapLevelIndex = playerInfo.mapLevel;
+	let sock = sockArray[playerInfo.ID];
+	sock.leave("level " + mapLevelIndex);
+	let index = game_map.mapLevel[mapLevelIndex].levelPlayerArray.indexOf(playerInfo);
+	if (index > -1) { // only splice array when item is found
+		game_map.mapLevel[mapLevelIndex].levelPlayerArray.splice(index, 1); // 2nd parameter means remove one item only
+	}
+	io.to("level " + mapLevelIndex).compress(true).emit('clientDisconnect', playerInfo.ID);
+
+
+	// Add Player To The New mapLevel
+	playerInfo.mapLevel = newMapLevelIndex;
+	io.to("level " + newMapLevelIndex).compress(true).emit('newPlayer', playerInfo, playerArray.length);
+	setMapLevel(sock, [(spawnPos[0] + 0.5) >> 0, (spawnPos[1] + 0.5) >> 0], playerInfo.ID, newMapLevelIndex);
+	game_map.mapLevel[newMapLevelIndex].levelPlayerArray.push(playerInfo);
+}
+
+
+function setMapLevel(sock, spawnPos, playerID, newMapLevelIndex){
+	// Add Player To The New mapLevel
+	sock.join("level " + newMapLevelIndex);
+	sock.compress(true).emit('initSelf', playerID, game_map.mapLevel[newMapLevelIndex].levelPlayerArray, playerArray.length,
+							 game_map.getInitMap(spawnPos, newMapLevelIndex, [1, 1]), initPlayerProjectile(newMapLevelIndex),
+							 game_map.mapLevel[newMapLevelIndex].levelMonsterArray, monsterArray.length, newMapLevelIndex);
+}
+
 // -------------------End Of Player-------------------
 
 // -------------------Monster-------------------
@@ -219,6 +285,7 @@ var monsterArray = [];
 monsterArray.length = 100;
 var monster_ID_Count = 0;
 var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower", "properties":{"health": 50, "maxHealth": 50, "attackDamage": 10, "attackSpeed": 0.5, "moveSpeed": 3}},{}],
+						[{"name": "Fakecat", "type": "burrower", "properties":{"health": 100, "maxHealth": 100, "attackDamage": 20, "attackSpeed": 0.5, "moveSpeed": 3}},{}],
 						];
 
 // Get A New Monster ID From The Empty Space In MonsterArray
@@ -719,8 +786,10 @@ function serverLoop(){
 }
 // -------------------End Of Server Loop-------------------
 // Update Client Frame
-function ClientFrameUpdate(mapLevelIndex) {
-	return [game_map.mapLevel[mapLevelIndex].updateProjectileArray, game_map.mapLevel[mapLevelIndex].updateMonsterPos];
+function ClientFrameUpdate(playerID) {
+	if (playerArray[playerID] == null) return;
+	let mapLevelIndex = playerArray[playerID].mapLevel;
+	sockArray[playerID].compress(true).emit('updateFrame', [game_map.mapLevel[mapLevelIndex].updateProjectileArray, game_map.mapLevel[mapLevelIndex].updateMonsterPos]);
 }
 
 // Changing Server Creature Information
@@ -795,28 +864,6 @@ function damagefunction(damageInfo, defender){
 	return defender.properties.health;
 }
 
-// Client Is Disconnected
-const clientDisconnect = (Info, playerID) => {
-	// Clear The PlayerID From Player Array
-	if (playerArray[playerID] != null){
-		let mapLevelIndex = playerArray[playerID].mapLevel;
-
-		// Send To All Player In Same Level
-		io.to("level " + mapLevelIndex).compress(true).emit('clientDisconnect', playerID);
-
-		// Remove The Player From mapLevel
-		let index = game_map.mapLevel[mapLevelIndex].levelPlayerArray.indexOf(playerArray[playerID]);
-		if (index > -1) { // only splice array when item is found
-			game_map.mapLevel[mapLevelIndex].levelPlayerArray.splice(index, 1); // 2nd parameter means remove one item only
-		}
-
-		// Delete This Player's Info
-		console.log("Player ID:", playerID, " Name:", playerArray[playerID].name, "is disconnected!  Info:", Info);
-		delete playerArray[playerID];
-		playerArray[playerID] = null;
-	}
-};
-
 // -------------------Map-------------------
 // Setting The Size Of The Map
 var game_map = new map([20, 20],[20, 20]);
@@ -827,13 +874,10 @@ var game_map = new map([20, 20],[20, 20]);
 io.on('connection', (sock) => {
 	// Setting The New PlayerID
 	const playerID = newPlayerID();
-	let initMapLevel = playerID;
+	let initMapLevel = 0;
 	let spawnPos = createSpawnPosition(initMapLevel);
-	sock.join("level " + initMapLevel);
 	// Initializing The Player To The Client
-	sock.compress(true).emit('initSelf', playerID, game_map.mapLevel[initMapLevel].levelPlayerArray, playerArray.length,
-							 game_map.getInitMap(spawnPos, initMapLevel, [1, 1]), initPlayerProjectile(initMapLevel),
-							 game_map.mapLevel[initMapLevel].levelMonsterArray, monsterArray.length, initMapLevel);
+	setMapLevel(sock, spawnPos, playerID, initMapLevel);
 
 	console.log("new player joined, ID: ", playerID);
 
@@ -844,10 +888,11 @@ io.on('connection', (sock) => {
 	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
 	// First Parameter Data Name (Same As Client Side), Second Parameter The Actual Data
 	// Player Related
-	sock.on('newName', (playerName) => CreateNewPlayer(playerID, playerName, spawnPos, initMapLevel));
+	sock.on('newName', (playerName) => CreateNewPlayer(playerID, playerName, spawnPos, initMapLevel, sock));
 	sock.on('newPos', (Pos) => UpdatePlayerPosition(Pos, playerID));
 	sock.on('disconnect', (Info) => clientDisconnect(Info, playerID));
 	sock.on('requireBlock', (blockPosList) => sock.compress(true).emit('addBlocks', game_map.getUpdateBlock(blockPosList, playerArray[playerID].mapLevel)));
+	sock.on('newCommand', (newCommand) => serverCommand(playerID, newCommand));
 
 	// Creature Related
 	sock.on('creatureInfo', (creatureInfo) => creatureInfoChange(creatureInfo));
@@ -861,8 +906,7 @@ io.on('connection', (sock) => {
 	sock.on('newProjectile', (projectileSpawnInfo) => spawnProjectile(projectileSpawnInfo));
 
 	// Client Frame Update
-	sock.on('clientFrame', () => sock.compress(true).emit('updateFrame', ClientFrameUpdate(playerArray[playerID].mapLevel)));
-
+	sock.on('clientFrame', () => ClientFrameUpdate(playerID));
 	// New Message From Client
 	sock.on('newMessage', (clientMessage) => io.compress(true).emit('serverMessage', clientMessage));
 });
@@ -879,6 +923,9 @@ server.listen(8080, () => {
 });
 
 // Spawning 500 Monsters Randomly Throughout The Map
-for (let monsterIndex = 0; monsterIndex < 500; ++monsterIndex){
+for (let monsterIndex = 0; monsterIndex < 100; ++monsterIndex){
 	createNewMonster(0, createSpawnPosition(0), 0);
+}
+for (let monsterIndex = 0; monsterIndex < 100; ++monsterIndex){
+	createNewMonster(1, createSpawnPosition(1), 1);
 }

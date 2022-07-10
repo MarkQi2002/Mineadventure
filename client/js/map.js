@@ -188,4 +188,21 @@ class map {
         }
         this.object.remove(block);
     }
+
+    //delete Whole Map
+    delete(){
+        let theBlock;
+        for (let y_Axis = 0; y_Axis < this.blockList.length; ++y_Axis) {
+            for (let x_Axis = 0; x_Axis < this.blockList[y_Axis].length; ++x_Axis) {
+                if (this.blockList[y_Axis][x_Axis] != null){
+                    theBlock = this.blockList[y_Axis][x_Axis].block;
+                    if (theBlock != null){
+                        this.deleteBlock(theBlock);
+                    }
+                    delete this.blockList[y_Axis][x_Axis];
+                } 
+            }
+        }
+        delete this;
+    }
 }
