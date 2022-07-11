@@ -16,36 +16,52 @@ class map {
         this.blockList = [];
         this.createEmptyMap();
 
-        this.unitIDList = unitIDList;// get unit ID list from server
-        this.loader = new THREE.TextureLoader();// texture loader
-        //this.OBJloader = new THREE.OBJLoader();// OBJ loader
-        this.materialList = []; // Material List
-        this.geometryList = []; // Geometry List
-        this.loadMaterials(); // Load Materials
-        this.loadGeometry(); // Load Geometry
-
         this.blockObjectClass = [];
         this.newBlockObjectClass = [];
 
+        this.unitIDList = unitIDList;// get unit ID list from server
+        this.loader = new THREE.TextureLoader();// texture loader
+        this.GLTFLoader = new THREE.GLTFLoader();// OBJ loader
+        this.materialList = []; // Material List
+        this.geometryList = []; // Geometry List
+
+        this.loadMaterials(); // Load Materials
+        this.loadGeometry(); // Load Geometry
+        this.loadModel(this, 0, [serverBlocks]); // Load GLTF Model, including afterLoadFunction()
+
+
+    }
+
+    afterLoadFunction([serverBlocks]){
         this.spawnBlocks(serverBlocks);
         scene.add(this.object);
     }
 
     // For Each Unit ID, Load Materials
     loadMaterials(){
-
+        let imageDir = "image/unit_material/";
         this.materialList.length = this.unitIDList.length;
         for (let i = 0; i < this.unitIDList.length; i++) {
+            // If It Has No geometryType, Don't Load Texture
+            if (this.unitIDList[i].geometryType == null) continue;
             let texture;
-            if (this.unitIDList[i].texture.length == 1){
-                texture = this.loader.load(this.unitIDList[i].texture[0]);
-                this.materialList[i] =  new THREE.MeshPhongMaterial({map: texture});
+            if (this.unitIDList[i].fileName.length == 1){
+                texture = this.loader.load(imageDir + this.unitIDList[i].fileName[0]);
+                if (this.unitIDList[i].IsPhongMaterial){
+                    this.materialList[i] =  new THREE.MeshPhongMaterial({map: texture});
+                }else{
+                    this.materialList[i] =  new THREE.MeshBasicMaterial({map: texture});
+                }
 
             } else {// for multi material
                 let materials = [];
-                for (let ii = 0; ii < this.unitIDList[i].texture.length; ii++) {
-                    texture = this.loader.load(this.unitIDList[i].texture[ii]);
-                    materials.push(new THREE.MeshPhongMaterial({map: texture}))
+                for (let ii = 0; ii < this.unitIDList[i].fileName.length; ii++) {
+                    texture = this.loader.load(imageDir + this.unitIDList[i].fileName[ii]);
+                    if (this.unitIDList[i].IsPhongMaterial){
+                        materials.push(new THREE.MeshPhongMaterial({map: texture}));
+                    }else{
+                        materials.push(new THREE.MeshBasicMaterial({map: texture}));
+                    }
                 }
                 this.materialList[i] =  materials;
             }
@@ -56,15 +72,37 @@ class map {
     loadGeometry(){
         var geometry;
         geometry = new THREE.PlaneGeometry(1, 1); // geometry for all plane
-        this.geometryList.push(geometry); //0
+        this.geometryList.push(geometry); // 0
 
         //******************************************************************
         geometry = new THREE.BoxGeometry(1, 1, 6); // geometry for all cubes
-        this.geometryList.push(geometry); //1
+        this.geometryList.push(geometry); // 1
 
         //******************************************************************
-        geometry = new THREE.BoxGeometry(1, 1, 6); // geometry for OBJ
-        this.geometryList.push(geometry); //2
+    }
+
+    loadModel(scope, index, passInfo) {
+        if (scope.unitIDList[index].modelType == null){
+            if (scope.unitIDList.length > index + 1){
+                scope.loadModel(scope, index + 1, passInfo)
+            }else{
+                scope.afterLoadFunction(passInfo);
+            }
+            return;
+        }
+        scope.GLTFLoader.load("model/" + scope.unitIDList[index].fileName, function (gltf) {
+            
+            var newModel = gltf.scene;
+            // Set Scale
+            newModel.scale.set(scope.unitIDList[index].modelType, scope.unitIDList[index].modelType, scope.unitIDList[index].modelType);
+            scope.unitIDList[index].modelType = newModel;
+    
+            if (scope.unitIDList.length > index + 1){
+                scope.loadModel(scope, index + 1, passInfo)
+            }else{
+                scope.afterLoadFunction(passInfo);
+            }
+        });
     }
 
     // Generating A Completely Empty Map
@@ -72,6 +110,10 @@ class map {
         for (let i = 0; i < this.blockNumber.y; i++) {
             this.blockList.push(new Array(this.blockNumber.x));
         }
+    }
+
+    getAllChildUnitCollision(unit){
+        return this.unitIDList[unit.ID].collision || (unit.childUnit == null ? false : this.getAllChildUnitCollision(unit.childUnit));
     }
 
     // Converting xy Coordinate To Block Coordinate
@@ -144,10 +186,20 @@ class map {
 
     // Creating Client Side Unit
     spawnUnit(x, y, unitClass, parent){
-        let geometry = this.geometryList[this.unitIDList[unitClass.ID].geometryType];
-        let material = this.materialList[unitClass.ID];
+        let mesh;
+        if (this.unitIDList[unitClass.ID].geometryType != null){
+            let geometry = this.geometryList[this.unitIDList[unitClass.ID].geometryType];
+            let material = this.materialList[unitClass.ID];
+            mesh = new THREE.Mesh(geometry, material);      
+
+        }else if(this.unitIDList[unitClass.ID].modelType != null){
+            mesh = this.unitIDList[unitClass.ID].modelType.clone();
+
+        }else{
+            return;
+        }
         
-        let mesh = new THREE.Mesh(geometry, material);        
+
         if (unitClass.childUnit != null){
             this.spawnUnit(0, 0, unitClass.childUnit, mesh);
         }

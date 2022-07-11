@@ -88,7 +88,7 @@ function createSpawnPosition(mapLevelIndex) {
 		mapX = (Math.random() * game_map.blockNumber.x * game_map.blockSize.x) >> 0;
 		mapY = (Math.random() * game_map.blockNumber.y * game_map.blockSize.y) >> 0;
 		let unit = game_map.mapLevel[mapLevelIndex].getUnit([mapX, mapY]);
-		if (unit != null && !(game_map.unitIDList[unit.ID].collision)) break;
+		if (unit != null && !(game_map.getAllChildUnitCollision(unit))) break;
 	}
 
 	// Return Valid Position XY Coordinate
@@ -322,7 +322,7 @@ function createNewMonster(ID, spawnPos, mapLevel, monsterID) {
 											mapLevel);
 											
 	// Add Properties By ID
-	for ([key, value] of Object.entries(monsterInfoArray[ID][0]["properties"])) {
+	for (let [key, value] of Object.entries(monsterInfoArray[ID][0]["properties"])) {
 		monsterInfo.properties[key] = value;
 	}
 
@@ -750,7 +750,7 @@ function updateProjectile(delta, mapLevelIndex){
 
 
 						if (game_map.unitIDList[unit.ID].destroyable){
-							unit.ID = 0;
+							unit.ID = 15;
 							unit.Height = 0;
 						}
 						unit.childUnit = null;

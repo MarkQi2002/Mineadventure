@@ -5,14 +5,48 @@ class map {
     constructor(blockNumber, blockSize) {
         // Set Unit ID List Information
         this.unitIDList = [
-            this.setUnitIDInfo(["image/unit_material/0_ground.jpg"], false, false, true, 0),
-            this.setUnitIDInfo(["image/unit_material/0_ground.jpg",
-                                "image/unit_material/0_ground.jpg",
-                                "image/unit_material/0_ground.jpg",
-                                "image/unit_material/0_ground.jpg",
-                                "image/unit_material/1_wall.jpg",
-                                "image/unit_material/1_wall.jpg"], true, true, false, 1),
-            this.setUnitIDInfo(["image/unit_material/test.jpg"], false, true, false, 0),
+            this.setUnitIDInfo(["rockSide.jpg"], {"IsPhongMaterial": true, "geometryType": 0}),// 0
+            this.setUnitIDInfo(["0_ground.jpg",// Vertical
+                                "0_ground.jpg",// Vertical
+                                "0_ground.jpg",// Horizontal
+                                "0_ground.jpg",// Horizontal
+                                "rock1.jpg",
+                                "rock1.jpg"], {"collision": true, "destroyable": true, "IsPhongMaterial": true, "geometryType": 1}),
+            this.setUnitIDInfo(["tree1.glb"], {"collision": true, "destroyable": true, "modelType": 0.3}),
+            this.setUnitIDInfo(["tree2.glb"], {"collision": true, "destroyable": true, "modelType": 0.3}),
+            this.setUnitIDInfo(["tree3.glb"], {"collision": true, "destroyable": true, "modelType": 0.3}),
+            this.setUnitIDInfo(["tree4.glb"], {"collision": true, "destroyable": true, "modelType": 0.3}),
+            this.setUnitIDInfo(["tree5.glb"], {"collision": true, "destroyable": true, "modelType": 0.3}),
+            this.setUnitIDInfo(["tree6.glb"], {"collision": true, "destroyable": true, "modelType": 0.3}),
+            this.setUnitIDInfo(["bush1.glb"], {"collision": true, "destroyable": true, "modelType": 0.2}),
+            this.setUnitIDInfo(["bush2.glb"], {"collision": true, "destroyable": true, "modelType": 0.4}),
+            this.setUnitIDInfo(["bush3.glb"], {"collision": true, "destroyable": true, "modelType": 0.4}),// 10
+            this.setUnitIDInfo(["flower1.glb"], {"destroyable": true, "modelType": 0.3}),
+            this.setUnitIDInfo(["flower2.glb"], {"destroyable": true, "modelType": 0.3}),
+            this.setUnitIDInfo(["flower3.glb"], {"destroyable": true, "modelType": 0.3}),
+            this.setUnitIDInfo(["flower4.glb"], {"destroyable": true, "modelType": 0.3}),
+            this.setUnitIDInfo(["rock1.jpg"], {"IsPhongMaterial": true, "geometryType": 0}),
+            this.setUnitIDInfo(["grass1.jpg"], {"base": true, "IsPhongMaterial": true, "geometryType": 0}),
+            this.setUnitIDInfo(["grass2.jpg"], {"base": true, "IsPhongMaterial": true, "geometryType": 0}),
+            this.setUnitIDInfo(["grass3.jpg"], {"base": true, "IsPhongMaterial": true, "geometryType": 0}),
+            this.setUnitIDInfo(["grass4.jpg"], {"base": true, "IsPhongMaterial": true, "geometryType": 0}),
+            this.setUnitIDInfo(["grass5.jpg"], {"base": true, "IsPhongMaterial": true, "geometryType": 0}),// 20
+            this.setUnitIDInfo(["grass6.jpg"], {"base": true, "IsPhongMaterial": true, "geometryType": 0}),
+            this.setUnitIDInfo(["grass7.jpg"], {"base": true, "IsPhongMaterial": true, "geometryType": 0}),
+            this.setUnitIDInfo(["grass8.jpg"], {"base": true, "IsPhongMaterial": true, "geometryType": 0}),
+            this.setUnitIDInfo(["grass9.jpg"], {"base": true, "IsPhongMaterial": true, "geometryType": 0}),
+            this.setUnitIDInfo(["grass10.jpg"], {"base": true, "IsPhongMaterial": true, "geometryType": 0}),
+            this.setUnitIDInfo(["ground3.jpg"], {"IsPhongMaterial": true, "geometryType": 0}),
+            this.setUnitIDInfo(["mushroom1.glb"], {"destroyable": true, "modelType": 0.6}),
+            this.setUnitIDInfo(["mushroom2.glb"], {"destroyable": true, "modelType": 0.6}),
+            this.setUnitIDInfo(["mushroom3.glb"], {"destroyable": true, "modelType": 0.6}),
+            this.setUnitIDInfo(["mushroom4.glb"], {"destroyable": true, "modelType": 0.6}),
+            this.setUnitIDInfo(["mushroom5.glb"], {"destroyable": true, "modelType": 0.6}),
+            this.setUnitIDInfo(["mushroom6.glb"], {"destroyable": true, "modelType": 0.6}),
+            this.setUnitIDInfo(["mushroom7.glb"], {"destroyable": true, "modelType": 0.6}),
+            
+
+
         ];
 
         // Save Block Size
@@ -40,15 +74,27 @@ class map {
     }
 
     // set UnitIDInfo by (texture url address, collision bool)
-    setUnitIDInfo(texture, collision, destroyable, base, geometryType) {
+    setUnitIDInfo(fileName, additionalInfo) {
         var unitIDInfo = {
-            texture: texture, // texture url address
-            collision: collision, // Can Walk through (true or false)
-            destroyable: destroyable, // Can be destroyed (true or false)
-            base: base, // Can have childUnit On (true or false)
-            geometryType: geometryType
+            ["fileName"]: fileName, // FileName for url address
+            ["collision"]: false, // Can Walk through (true or false)
+            ["destroyable"]: false, // Can be destroyed (true or false)
+            ["base"]: false, // Can have childUnit On (true or false)
+            ["geometryType"]: null, // if is not null, load geometry and texture (need to be geometry index)
+            ["modelType"]: null, // if is not null, load model (inside is model scale)
+            ["IsPhongMaterial"]: false// material can reflect light (true or false)
         }
+
+        // AdditionalInfo
+	    for (let [key, value] of Object.entries(additionalInfo)) {
+		    unitIDInfo[key] = value;
+	    }
+
         return unitIDInfo
+    }
+
+    getAllChildUnitCollision(unit){
+        return this.unitIDList[unit.ID].collision || (unit.childUnit == null ? false : this.getAllChildUnitCollision(unit.childUnit));
     }
 
     // Find Neighboring Map Blocks
@@ -61,25 +107,25 @@ class map {
 
         // Get Direction Switch
         theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX + 1, mapY]);
-        if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+        if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
             neighborList.push([mapX + 1, mapY]);
             dirSwitch[0] = true;
         }
 
         theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX - 1, mapY]);
-        if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+        if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
             neighborList.push([mapX - 1, mapY]);
             dirSwitch[1] = true;
         }
 
         theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX, mapY + 1]);
-        if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+        if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
             neighborList.push([mapX, mapY + 1]);
             dirSwitch[2] = true;
         }
 
         theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX, mapY - 1]);
-        if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+        if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
             neighborList.push([mapX, mapY - 1]);
             dirSwitch[3] = true;
         }
@@ -88,14 +134,14 @@ class map {
         if (dirSwitch[0]){
             if (dirSwitch[2]){
                 theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX + 1, mapY + 1]);
-                if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+                if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
                     neighborList.push([mapX + 1, mapY + 1]);
                 }
             }
 
             if (dirSwitch[3]){
                 theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX + 1, mapY - 1]);
-                if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+                if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
                     neighborList.push([mapX + 1, mapY - 1]);
                 }
             }
@@ -105,14 +151,14 @@ class map {
         if (dirSwitch[1]){
             if (dirSwitch[2]){
                 theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX - 1, mapY + 1]);
-                if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+                if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
                     neighborList.push([mapX - 1, mapY + 1]);
                 }
             }
     
             if (dirSwitch[3]){
                 theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX - 1, mapY - 1]);
-                if (theUnit != null && this.unitIDList[theUnit.ID].collision == false){
+                if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
                     neighborList.push([mapX - 1, mapY - 1]);
                 }
             }
@@ -334,24 +380,39 @@ class block {
 
     // To Create The Units Inside The Block
     initBlock(x, y, PerlinNoise, this_game_map) {
+        let groundIDList = [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]; //For random ground unit
+        let childIDList = [2, 3, 4, 5, 6, 7, 8, 9, 10]; //For random child unit
+        let childIDList2 = [11, 12, 13, 14, 27, 28, 29, 30, 31, 32]; //For random child unit
+
         for (let y_Axis = 0; y_Axis < this.unitList.length; y_Axis++) {
             for (let x_Axis = 0; x_Axis < this.unitList[y_Axis].length; x_Axis++) {
                 var ID = 1;
                 var Height = 6 - 12 * PerlinNoise.noise((PerlinNoise.initX + x * this.unitList[0].length + x_Axis) / 10,
                                                     (PerlinNoise.initY + y * this.unitList.length + y_Axis) / 10,
                                                      0.1);
-                if (Height < 0) {
+                if (Height <= 0) {
+                    
+
+                    ID = groundIDList[(2 / Math.PI * Math.atan(- Height * 3 * Math.random()) * groundIDList.length) >> 0];
                     Height = 0;
-                    ID = 0;
+
                 } else if (Height > 3) {
                     Height = 3;
                 }
 
                 let newChildUnit;
-                if (this_game_map.unitIDList[ID].base && (Math.random() * 50) >> 0 == 0){
+                if (this_game_map.unitIDList[ID].base && (Math.random() * 30) >> 0 == 0){
+                    let childID;
+                    if ((Math.random() * 5) >> 0 == 0){
+                        childID = childIDList[(Math.random() * childIDList.length) >> 0];
+                    }else{
+                        childID = childIDList2[(Math.random() * childIDList2.length) >> 0];
+                    }
+
+
                     newChildUnit = {
-                        ID: 2,
-                        Height: 1,
+                        ID: childID,
+                        Height: 0,
                         childUnit: null
                     };
                 }else{

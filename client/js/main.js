@@ -56,13 +56,13 @@ document.body.appendChild(renderer.domElement);
 // Light Setting
 
 // Hemisphere Light 
-const hemisphereLight = new THREE.HemisphereLight(0xFFFFFF, 0x000000, 5);//skyColor, groundColor, intensity
+const hemisphereLight = new THREE.HemisphereLight(0xFFFFFF, 0x000000, 4);//skyColor, groundColor, intensity
 hemisphereLight.position.set(0, 0, 1);
 scene.add(hemisphereLight);
 
 
 // Direction Light
-const directionLight = new THREE.DirectionalLight(0xFFFFFF, 2);// color, intensity
+const directionLight = new THREE.DirectionalLight(0xFFFFFF, 1);// color, intensity
 directionLight.position.set(0, 0, 20);
 directionLight.target.position.set(0, 0, 0);
 scene.add(directionLight);

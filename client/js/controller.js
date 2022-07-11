@@ -324,7 +324,7 @@ class controller{
                 let distY = cy - testY;
 
                 // Collision Has Occur
-                if (distX * distX + distY * distY < 0.25 && game_map.unitIDList[unit.ID].collision) {
+                if (distX * distX + distY * distY < 0.25 && game_map.getAllChildUnitCollision(unit)) {
                     this.forwardCollision = true;
                     break;
                 }
@@ -368,7 +368,7 @@ class controller{
                 let distY = cy - testY;
 
                 // Collision Has Occur
-                if (distX * distX + distY * distY < 0.25 && game_map.unitIDList[unit.ID].collision) {
+                if (distX * distX + distY * distY < 0.25 && game_map.getAllChildUnitCollision(unit)) {
                     this.backwardCollision = true;
                     break;
                 }
@@ -412,7 +412,7 @@ class controller{
                 let distY = cy - testY;
                 
                 // Collision Has Occur
-                if (distX * distX + distY * distY < 0.25 && game_map.unitIDList[unit.ID].collision) {
+                if (distX * distX + distY * distY < 0.25 && game_map.getAllChildUnitCollision(unit)) {
                     this.leftCollision = true;
                     break;
                 }
@@ -456,7 +456,7 @@ class controller{
                 let distY = cy - testY;
 
                 // Collision Has Occur
-                if (distX * distX + distY * distY < 0.25 && game_map.unitIDList[unit.ID].collision) {
+                if (distX * distX + distY * distY < 0.25 && game_map.getAllChildUnitCollision(unit)) {
                     this.rightCollision = true;
                     break;
                 }
