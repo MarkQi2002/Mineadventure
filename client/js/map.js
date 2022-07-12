@@ -32,9 +32,26 @@ class map {
 
     }
 
+    // For Map Level Change
+    loadNewMapLevel([serverBlocks, blockNumber, blockSize, unitIDList]){
+        this.clearAllBlock();
+
+        this.blockSize = blockSize;
+        this.blockNumber =  blockNumber;
+
+        this.blockList = [];
+        this.createEmptyMap();
+    
+        this.blockObjectClass = [];
+        this.newBlockObjectClass = [];
+
+        this.spawnBlocks(serverBlocks);
+    }
+
     afterLoadFunction([serverBlocks]){
         this.spawnBlocks(serverBlocks);
         scene.add(this.object);
+        sock.compress(true).emit('newName', sessionStorage.getItem("playerInitialName"));
     }
 
     // For Each Unit ID, Load Materials
@@ -194,7 +211,6 @@ class map {
 
         }else if(this.unitIDList[unitClass.ID].modelType != null){
             mesh = this.unitIDList[unitClass.ID].modelType.clone();
-
         }else{
             return;
         }
@@ -252,8 +268,7 @@ class map {
         }
     }
 
-    //delete Whole Map
-    delete(){
+    clearAllBlock(){
         let theBlock;
         for (let y_Axis = 0; y_Axis < this.blockList.length; ++y_Axis) {
             for (let x_Axis = 0; x_Axis < this.blockList[y_Axis].length; ++x_Axis) {
@@ -266,6 +281,6 @@ class map {
                 } 
             }
         }
-        delete this;
     }
+
 }

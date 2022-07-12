@@ -83,12 +83,14 @@ function createSpawnPosition(mapLevelIndex) {
 	// Variable Declaration
 	let mapX, mapY;
 
+	let findCount = 0;
 	// Randomly Generate XY Coordinate Until Found One That Doesn't Collide With The Wall
-	while (true) {
+	while (findCount < 100) {
 		mapX = (Math.random() * game_map.blockNumber.x * game_map.blockSize.x) >> 0;
 		mapY = (Math.random() * game_map.blockNumber.y * game_map.blockSize.y) >> 0;
 		let unit = game_map.mapLevel[mapLevelIndex].getUnit([mapX, mapY]);
 		if (unit != null && !(game_map.getAllChildUnitCollision(unit))) break;
+		++findCount;
 	}
 
 	// Return Valid Position XY Coordinate

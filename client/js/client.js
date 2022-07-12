@@ -33,10 +33,6 @@ const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap
 	}
 
 	gameMapLevel = initMapLevel;
-	// Delete Old Map
-	if (game_map != null) game_map.delete();
-	// Create New Map
-	game_map = new map(serverMap);
 
 	clientPlayerID = severPlayerID;
 	if (playerArray.length < playerArrayLength){
@@ -57,6 +53,13 @@ const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap
 		if (serverMonsterArray[i] != null){
 			spawnMonster(serverMonsterArray[i]);
 		}
+	}
+
+	if (game_map != null){
+		game_map.loadNewMapLevel(serverMap); 
+	}else{
+		// Create New Map
+		game_map = new map(serverMap);
 	}
 };
 
@@ -374,14 +377,15 @@ const clientUpdateBlocks = (blockList) => {
 };
 // -------------------End Of Map-------------------
 
+
+var sock;
 // -------------------Sending And Receiving Information-------------------
 (() => {
 	// When Connected To Server, Create A Sock (MySelf)
-	const sock = io();
+	sock = io();
 
 	// Sending Information To Server Only Once
 	// First Parameter Is The Tag, Second Parameter Is What We Send To The Server
-	sock.compress(true).emit('newName', sessionStorage.getItem("playerInitialName"));
 	sock.compress(true).emit('serverNewItem', 0, itemDefaultPosition);
 
 	// Receiving Information From Server
