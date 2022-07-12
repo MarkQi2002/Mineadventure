@@ -69,8 +69,9 @@ class map {
         // Save Map Level (Multiple Map Level)
         this.mapLevel = [new mapLevel(this.blockNumber, this.blockSize, this,
                                     this.init_perlinNoiseMapMethod({childUnitSpawnRate: 0.04,
-                                                                    childUnitIDList: [{list: [2, 3, 4, 5, 6, 7, 8, 9, 10], weight: 1},// (trees and bushes)
-                                                                                      {list: [11, 12, 13, 14, 27, 28, 29, 30, 31, 32], weight: 5}, // (flowers and mushrooms)
+                                                                    childUnitIDList: [{list: [2, 3, 4, 5, 6, 7, 8, 9, 10], weight: 3},// (trees and bushes)
+                                                                                      {list: [13, 14, 31], weight: 15}, // (blue flowers and green mushrooms)
+                                                                                      {list: [11, 12, 27, 28, 29, 30, 32], weight: 1}, // (other color flowers and mushrooms)
                                                                                     ],
                                                                     groundIDList: [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26],
                                                                     wallIDList: [1]
@@ -113,7 +114,7 @@ class map {
 
 
     // ------------------- Method One - Perlin Noise -------------------
-    init_perlinNoiseMapMethod(ChanegSpawnMethodInputs){
+    init_perlinNoiseMapMethod(ChangeSpawnMethodInputs){
         let spawnMethodInputs = {
             ["childUnitSpawnRate"]: 0,
             ["childUnitIDList"]: [],
@@ -126,7 +127,7 @@ class map {
         }
 
         // Change
-	    for (let [key, value] of Object.entries(ChanegSpawnMethodInputs)) {
+	    for (let [key, value] of Object.entries(ChangeSpawnMethodInputs)) {
 		    spawnMethodInputs[key] = value;
 	    }
 
