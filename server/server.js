@@ -275,7 +275,8 @@ function setMapLevel(sock, spawnPos, playerID, newMapLevelIndex){
 	sock.join("level " + newMapLevelIndex);
 	sock.compress(true).emit('initSelf', playerID, game_map.mapLevel[newMapLevelIndex].levelPlayerArray, playerArray.length,
 							 game_map.getInitMap(spawnPos, newMapLevelIndex, [1, 1]), initPlayerProjectile(newMapLevelIndex),
-							 game_map.mapLevel[newMapLevelIndex].levelMonsterArray, monsterArray.length, newMapLevelIndex);
+							 game_map.mapLevel[newMapLevelIndex].levelMonsterArray, monsterArray.length, newMapLevelIndex,
+							 game_map.mapLevel[newMapLevelIndex].itemArray, itemInfoArray);
 }
 
 // -------------------End Of Player-------------------
@@ -382,6 +383,9 @@ function updateMonster(delta, theMapLevel) {
 function deleteMonster(monsterID) {
 	// When The MonsterArray Corresponding To MonsterID Is Not NULL Spawn An Item
 	if (monsterArray[monsterID] != null) {
+		// Get Which Map Level The Monster Is In
+		let mapLevelIndex = monsterArray[monsterID].mapLevel;
+
 		// Variable Declaration For Spawning Item After Monster Dead
 		let newItemID;
 		let newItemPosition = monsterArray[monsterID].position;
@@ -395,10 +399,7 @@ function deleteMonster(monsterID) {
 		else if (randomNumber < 1.00 * monsterDropRate) newItemID = itemRarityArray[3][Math.floor(Math.random() * itemRarityArray[3].length)];
 
 		// Spawning The Actual Item
-		if (newItemID != null && typeof newItemID != "undefined") io.emit('clientNewItem', newItem(newItemID, newItemPosition), newItemPosition, newItemIndex);
-		
-		// Get Which Map Level The Monster Is In
-		let mapLevelIndex = monsterArray[monsterID].mapLevel;
+		if (newItemID != null && typeof newItemID != "undefined") newItem(newItemID, newItemPosition, mapLevelIndex);
 
 		// Remove The Monster From mapLevel
 		let index = game_map.mapLevel[mapLevelIndex].levelMonsterArray.indexOf(monsterArray[monsterID]);
@@ -484,12 +485,6 @@ function creatureOnHit(creatureInfo, theMapLevel) {
 // -------------------End Of Monster-------------------
 
 // -------------------Item-------------------
-// Item Related Variable Declaration
-var newItemIndex;
-var currentItemIndex = 0;
-var itemArray = [];
-itemArray.length = 256;
-
 // itemInfoArray Is A 2D Array
 // First Layer: Item ID (Currently 20 Items)
 // Second Layer: itemInfo, itemPosition, propertyInfo
@@ -515,9 +510,6 @@ function itemHealing(amount) {
 	this.type = {"heal": amount},
 	this.properties = new properties()
 }
-
-// Item Default Location
-var itemDefaultPosition = [1, 1, 1];
 
 // Item Information Array
 var itemInfoArray = [[{"itemID": 0, "itemName": "Bison Steak", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"maxHealth": ["+", 25], "damage": new itemHealing(25)}],
@@ -565,7 +557,8 @@ for (let itemInfoIndex = 0; itemInfoIndex < itemInfoArray.length; ++itemInfoInde
 // Update Player Property And Player Item Array
 const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
 	// Remove Item From The Item Array
-	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID);
+	let mapLevelIndex = playerArray[updatePlayerID].mapLevel;
+	if (removeItemID >= 0 && removeItemID < game_map.mapLevel[mapLevelIndex].itemArray.length) deleteItem(removeItemID, mapLevelIndex);
 
 	let itemAddProperty = {};
 	for (let [key, value] of Object.entries(itemInfoArray[additionalItemID][1])) {
@@ -582,76 +575,41 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 	else
 		playerArray[updatePlayerID].creatureItemArray[additionalItemID] = 1;
 
-	// Return The Additional Item's ID
-	return additionalItemID;
+	io.to("level " + mapLevelIndex).compress(true).emit('clientCreatureItemArray', additionalItemID, updatePlayerID, removeItemID);
 }
 
 // Creating An Item When Client Send A Request
-const newItem = (newItemID, newItemPosition) => {
+const newItem = (newItemID, newItemPosition, mapLevelIndex) => {
+	let theMapLevel = game_map.mapLevel[mapLevelIndex];
 	// Indexing Item Array To Include The New Item
-	for (let itemIndex = currentItemIndex; itemIndex < itemArray.length; itemIndex++) {
-		if (itemArray[itemIndex] == null) {
-			// Set New Current Item Index
-			currentItemIndex = itemIndex;
+	let itemIndex = theMapLevel.getNewItemID();
 
-			// Save The ItemID Into The Server Item Array
-			newItemIndex = itemIndex;
-			itemArray[itemIndex] = {"itemID": newItemID, "itemPosition": newItemPosition};
-			
-			// Log The ItemInfo On The Server Side
-			console.log(itemInfoArray[newItemID], newItemIndex);
-			
-			// Return newItemID
-			return newItemID;
-		}
-	}
+	// Save The ItemID Into The Server Item Array
+	theMapLevel.itemArray[itemIndex] = {"itemID": newItemID, "itemPosition": newItemPosition};
 	
-	// Indexing Item Array To Include The New Item
-	for (let itemIndex = 0; itemIndex < currentItemIndex; itemIndex++) {
-		if (itemArray[itemIndex] == null) {
-			// Set New Current Item Index
-			currentItemIndex = itemIndex;
-
-			// Save The ItemID Into The Server Item Array
-			newItemIndex = itemIndex;
-			itemArray[itemIndex] = {"itemID": newItemID, "itemPosition": newItemPosition};
-			
-			// Log The ItemInfo On The Server Side
-			console.log(itemInfoArray[newItemID], newItemIndex);
-			
-			// Return newItemID
-			return newItemID;
-		}
-	}
-
-	newItemIndex = -1;
+	// Log The ItemInfo On The Server Side
+	console.log(itemInfoArray[newItemID], itemIndex);
+	
+	console
+	io.to("level " + mapLevelIndex).compress(true).emit('clientNewItem', newItemID, newItemPosition, itemIndex);
 };
 
-// Removing An Item When Client Send A Request
-const deleteItem = (removeItemID) => {
-	if (itemArray[removeItemID] != null){
-		console.log("Deleting Item ", removeItemID);
-		delete itemArray[removeItemID];
-		itemArray[removeItemID] = null;
-	}
-	return removeItemID;
+// Delete Item
+const deleteItem = (removeItemID, mapLevelIndex) => {
+	removeItem(removeItemID, mapLevelIndex);
+	io.to("level " + mapLevelIndex).compress(true).emit('removeItem', removeItemID);
 };
 
 // Removing An Item As A Function
-function removeItem(removeItemID) {
-	if (itemArray[removeItemID] != null){
+function removeItem(removeItemID, mapLevelIndex) {
+	let theMapLevel = game_map.mapLevel[mapLevelIndex];
+	if (theMapLevel.itemArray[removeItemID] != null){
 		console.log("Deleting Item ", removeItemID);
-		delete itemArray[removeItemID];
-		itemArray[removeItemID] = null;
+		delete theMapLevel.itemArray[removeItemID];
+		theMapLevel.itemArray[removeItemID] = null;
 	}
-	return removeItemID;
 }
 
-// Randomly Spawn An Item Every Half A Minute
-setInterval(randomSpawnItem, 30000);
-function randomSpawnItem() {
-	io.emit('clientNewItem', newItem(0, itemDefaultPosition), itemDefaultPosition, newItemIndex);
-}
 // -------------------End Of Item-------------------
 
 // -------------------Projectile-------------------
@@ -936,9 +894,6 @@ io.on('connection', (sock) => {
 	setMapLevel(sock, spawnPos, playerID, initMapLevel);
 
 	console.log("new player joined, ID: ", playerID);
-
-	// Initializing Collectable Item To The Client
-	sock.compress(true).emit('initItem', itemArray, itemInfoArray);
 	
 	// Receiving Information From Client And Calling Function
 	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
@@ -954,9 +909,8 @@ io.on('connection', (sock) => {
 	sock.on('creatureInfo', (creatureInfo) => creatureInfoChange(creatureInfo));
 
 	// Item Related
-	sock.on('serverCreatureItemArray', (additionalItemID, updatePlayerID, removeItemID) => io.compress(true).emit('clientCreatureItemArray', creatureItemArrayUpdate(additionalItemID, updatePlayerID, removeItemID), updatePlayerID, removeItemID));
-	sock.on('serverNewItem', (newItemID, newItemPosition) => io.compress(true).emit('clientNewItem', newItem(newItemID, newItemPosition), newItemPosition, newItemIndex));
-	sock.on('deleteItem', (removeItemID) => io.compress(true).emit('removeItem', deleteItem(removeItemID)));
+	sock.on('serverCreatureItemArray', (additionalItemID, updatePlayerID, removeItemID) => creatureItemArrayUpdate(additionalItemID, updatePlayerID, removeItemID));
+	sock.on('deleteItem', (removeItemID) => deleteItem(removeItemID, playerArray[playerID].mapLevel));
 
 	// Projectile Related
 	sock.on('newProjectile', (projectileSpawnInfo) => spawnProjectile(projectileSpawnInfo));

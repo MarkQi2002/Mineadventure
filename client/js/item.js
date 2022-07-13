@@ -1,10 +1,11 @@
 // Function To Load Item Image As THREE Material Mesh
 function loadItemMaterials(){
     let itemMaterialsArray = [];
+    let loader = new THREE.TextureLoader();
     itemMaterialsArray.length = itemInfoArray.length;
     for (let i = 0; i < itemMaterialsArray.length; i++) {
         if (itemInfoArray[i].length > 0){
-            let texture = game_map.loader.load("image/UI_Image/" + itemInfoArray[i][0].itemName + ".png");
+            let texture = loader.load("image/UI_Image/" + itemInfoArray[i][0].itemName + ".png");
             itemMaterialsArray[i] =  new THREE.MeshBasicMaterial({map: texture, transparent: true});
         }
     }

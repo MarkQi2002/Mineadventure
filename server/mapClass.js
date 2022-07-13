@@ -201,7 +201,7 @@ class map {
             function scale(n) { return (1 + n)/2; }
         }
 
-        return [this.perlinNoiseMapMethod, spawnMethodInputs]
+        return [this.perlinNoiseMapMethod, spawnMethodInputs                        ]
     }
 
     perlinNoiseMapMethod(spawnMethodInputs, blockX, blockY, unitX, unitY, theBlock, this_game_map){
@@ -387,6 +387,11 @@ class mapLevel {
         this.blockSize = blockSize;
         this.initSpawnMethodOutput = initSpawnMethodOutput;
 
+        // Item Related Variable Declaration
+        this.currentItemIndex = 0;
+        this.itemArray = [];
+        this.itemArray.length = 256;
+
         // Player In the Level
         this.levelPlayerArray = [];
 
@@ -452,11 +457,28 @@ class mapLevel {
             // If Exceed Max LevelProjectileArray Length
             if (exceedCount >= this.levelProjectileArray.length){
                 this.levelProjectileArray.length += 100;
-                console.log("Exceed Max LevelProjectileArray Length, Double The LevelProjectileArray Length! Current Length:", this.levelProjectileArray.length);
+                console.log("Exceed Max LevelProjectileArray Length, Expand The LevelProjectileArray Length! Current Length:", this.levelProjectileArray.length);
             }
         }
         return this.projectile_count;
     }
+
+    getNewItemID(){
+        let exceedCount = 0;
+        // Stop Untill Get An Item Index Corresponding To An Empty Space In itemArray
+        while (this.itemArray[this.currentItemIndex] != null) {
+            this.currentItemIndex = (this.currentItemIndex + 1) % this.itemArray.length;
+            exceedCount++;
+            
+            // If Exceed Max itemArray Length
+            if (exceedCount >= this.itemArray.length){
+                this.itemArray.length += 100;
+                console.log("Exceed Max itemArray Length, Expand The itemArray Length! Current Length:", this.itemArray.length);
+            }
+        }
+        return this.currentItemIndex;
+    }
+
 }
 
 // Map Block Class

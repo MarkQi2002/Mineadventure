@@ -9,7 +9,8 @@ function spawnPlayer(playerInfo){
 
 // Initialization Every Player Before You Enter The Game
 const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap,
-				  serverProjectileList, serverMonsterArray, monsterArrayLength, initMapLevel) => {
+				  serverProjectileList, serverMonsterArray, monsterArrayLength, initMapLevel,
+				  serverItemArray, serverItemInfoArray) => {
 	
 	//Delete Old Player
 	for (let i = 0; i < playerArray.length; ++i) {
@@ -32,7 +33,12 @@ const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap
 		}
 	}
 
+	for (let i = 0; i < itemArray.length; ++i) {
+		removeItem(i);
+	}
+
 	gameMapLevel = initMapLevel;
+
 
 	clientPlayerID = severPlayerID;
 	if (playerArray.length < playerArrayLength){
@@ -54,6 +60,8 @@ const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap
 			spawnMonster(serverMonsterArray[i]);
 		}
 	}
+
+	initItem(serverItemArray, serverItemInfoArray);
 
 	if (game_map != null){
 		game_map.loadNewMapLevel(serverMap); 
@@ -210,7 +218,6 @@ var additionalItemID;
 var removeItemID;
 var itemArray = [];
 var itemInfoArray;
-var itemDefaultPosition = [1, 1, 1];
 var itemLoader;
 var damageTextList = [];
 
@@ -235,16 +242,16 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 // Initialization Myself And All Future Players
 // Constructing An Player Object And Storing In The Client Side playerArray
 function spawnItem(itemID, itemPosition, itemIndex){
+	if (itemIndex >= itemArray.length){
+		itemArray.length = itemIndex + 1;
+	}
+
 	// Creating Passive Item Object
-	var new_item;
-	if (itemIndex >= 0 && itemIndex < itemArray.length) new_item = new passiveItem(itemInfoArray[itemID][0], itemPosition, itemInfoArray[itemID][1]);
-	else return;
+	var new_item = new passiveItem(itemInfoArray[itemID][0], itemPosition, itemInfoArray[itemID][1]);
 	
 	// Storing Passive Item Object Into itemArray
-	if (itemArray[itemIndex] == null) {
-		itemArray[itemIndex] = new_item;
-		console.log("Spawning", itemInfoArray[itemID], " At ItemIndex: ", itemIndex);
-	}
+	itemArray[itemIndex] = new_item;
+	console.log("Spawning", itemInfoArray[itemID], " At ItemIndex: ", itemIndex);
 
 	// Return The New Item Object
 	return new_item;
@@ -275,10 +282,7 @@ const newItem = (itemID, itemPosition, itemIndex) => {
 
 // Deleting An Item When Server Send A Request
 const deleteItem = (itemIndex) => {
-	if (itemArray[itemIndex] != null) {
-		itemArray[itemIndex].delete();
-		itemArray[itemIndex] = null;
-	}
+	removeItem(itemIndex);
 }
 
 // Removing An Item When Server Send A Request
@@ -386,8 +390,6 @@ var sock;
 
 	// Sending Information To Server Only Once
 	// First Parameter Is The Tag, Second Parameter Is What We Send To The Server
-	sock.compress(true).emit('serverNewItem', 0, itemDefaultPosition);
-
 	// Receiving Information From Server
 	// First Parameter Is The Tag, Second Parameter Is The Event/Function To Operate On Information From Server
 	sock.on('initSelf', initSelf);
@@ -407,7 +409,6 @@ var sock;
 
 	// Item
 	sock.on('clientCreatureItemArray', creatureItemArrayUpdate);
-	sock.on('initItem', initItem);
 	sock.on('clientNewItem', newItem);
 	sock.on('removeItem', deleteItem);
 
