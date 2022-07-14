@@ -6,9 +6,27 @@ class AI_controller {
         this.targetPositionList = [];
         this.routeCount = 0;
         this.searchRange = 32;
-
-        // Attack Speed
+        this.aggro = {creature: null, amount: 0, base: 2, max: 5};
         this.attackCD = 0;
+    }
+
+    setAggro(theCreature, amount){
+        if (theCreature == null) return;
+
+        if (this.aggro.creature == null || this.aggro.creature.ID != theCreature.ID){
+            // Come From A Different Creature
+            this.aggro.amount -= amount;
+            if (this.aggro.amount <= 0){
+                this.aggro.creature = theCreature;
+                this.aggro.amount = this.aggro.amount * -1 + this.aggro.base;
+            }
+        }else{
+            // Come From The Same Creature
+            this.aggro.amount += amount;
+            if (this.aggro.amount > this.aggro.max){
+                this.aggro.amount = this.aggro.max;
+            }
+        }
     }
 
     // Sending A Projectile To Goal Location
@@ -127,22 +145,29 @@ class AI_controller {
     }
 
     // Update Function
-    update(delta, theMap, goal, spawnProjectile) {
+    update(delta, theMap, spawnProjectile) {
         // Get Path Using The Path Finding Algorithm
-        if (this.routeCount > 10 && Math.abs(goal[0] - this.creature.position[0]) + Math.abs(goal[1] - this.creature.position[1]) < this.searchRange){
-            let newRoute = this.getRoute(theMap, goal);
-		    this.targetPositionList = newRoute;
-            this.routeCount = 0;
+
+        if (this.aggro.creature != null){
+            let goal = [Math.floor(this.aggro.creature.position[0]), Math.floor(this.aggro.creature.position[1])];
+
+            if (this.routeCount > 10 && Math.abs(goal[0] - this.creature.position[0]) + Math.abs(goal[1] - this.creature.position[1]) < this.searchRange){
+                let newRoute = this.getRoute(theMap, goal);
+                this.targetPositionList = newRoute;
+                this.routeCount = 0;
+            }
+
+            // Attack
+            if ( this.targetPositionList.length > 0 && this.attackCD <= 0){
+                spawnProjectile([[this.sendProjectile(goal)], this.creature.mapLevel]);
+                this.attackCD = 1;
+            }
         }
+
+
+
         this.routeCount++;
         this.moveToPosition(delta);
-
-
-        // Attack
-        if ( this.targetPositionList.length > 0 && this.attackCD <= 0){
-            spawnProjectile([[this.sendProjectile(goal)], this.creature.mapLevel]);
-            this.attackCD = 1;
-        }
 
         // Attack CoolDown (CD)
         if (this.attackCD > 0){

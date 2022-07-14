@@ -369,9 +369,8 @@ function updateMonster(delta, theMapLevel) {
 		// Extract The Creature
 		theMonster = AI_controllerList[monsterID].creature;
 
-		// Monster Path Finding To Goal
-		goal = playerArray[0] != null ? [Math.floor(playerArray[0].position[0]), Math.floor(playerArray[0].position[1])] : [0,0];
-		AI_controllerList[monsterID].update(delta, game_map, goal, spawnProjectile);
+		// AI controller update
+		AI_controllerList[monsterID].update(delta, game_map, spawnProjectile);
 		theMapLevel.updateMonsterPos.push([theMonster.position, monsterID]);
 
 		// Check Monster Collision With Projectile
@@ -463,7 +462,7 @@ function creatureOnHit(creatureInfo, theMapLevel) {
 			if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
 				// Updating Creature Information
 				creatureInfoChange([[[creatureInfo.creatureType, creatureInfo.ID], {"damage": theProjectile.damageInfo}]]);
-
+				AI_controllerList[creatureInfo.ID].setAggro(playerArray[theProjectile.damageInfo.attacker[1]], 1);
 				// Set Projectile Deletion Tag
 				theMapLevel.levelProjectileArray[blockProjectileList[projectileIndex]] = "deletion";
 
