@@ -42,7 +42,7 @@ class AI_controller {
         // Setting Projectile Information
         var newDamageInfo = {
             type: {"true": (this.creature.properties.attackDamage / 10) >> 0, "normal": this.creature.properties.attackDamage},
-            attacker: ["monster", this.creature.ID],
+            attacker: ["monster", this.creature.ID, this.creature.camp],
             properties: this.creature.properties
         }
 
@@ -152,8 +152,7 @@ class AI_controller {
             let goal = [Math.floor(this.aggro.creature.position[0]), Math.floor(this.aggro.creature.position[1])];
 
             if (this.routeCount > 10 && Math.abs(goal[0] - this.creature.position[0]) + Math.abs(goal[1] - this.creature.position[1]) < this.searchRange){
-                let newRoute = this.getRoute(theMap, goal);
-                this.targetPositionList = newRoute;
+                this.targetPositionList = this.getRoute(theMap, goal);
                 this.routeCount = 0;
             }
 

@@ -447,38 +447,6 @@ class mapLevel {
         return theBlock.unitList[mapY % this.blockSize.y][mapX % this.blockSize.x];
     }
 
-    getNewProjectileID(){
-        let exceedCount = 0;
-        // Stop Untill Get An Projectile ID Corresponding To An Empty Space In LevelProjectileArray
-        while (this.levelProjectileArray[this.projectile_count] != null) {
-            this.projectile_count = (this.projectile_count + 1) % this.levelProjectileArray.length;
-            exceedCount++;
-            
-            // If Exceed Max LevelProjectileArray Length
-            if (exceedCount >= this.levelProjectileArray.length){
-                this.levelProjectileArray.length += 100;
-                console.log("Exceed Max LevelProjectileArray Length, Expand The LevelProjectileArray Length! Current Length:", this.levelProjectileArray.length);
-            }
-        }
-        return this.projectile_count;
-    }
-
-    getNewItemID(){
-        let exceedCount = 0;
-        // Stop Untill Get An Item Index Corresponding To An Empty Space In itemArray
-        while (this.itemArray[this.currentItemIndex] != null) {
-            this.currentItemIndex = (this.currentItemIndex + 1) % this.itemArray.length;
-            exceedCount++;
-            
-            // If Exceed Max itemArray Length
-            if (exceedCount >= this.itemArray.length){
-                this.itemArray.length += 100;
-                console.log("Exceed Max itemArray Length, Expand The itemArray Length! Current Length:", this.itemArray.length);
-            }
-        }
-        return this.currentItemIndex;
-    }
-
 }
 
 // Map Block Class
