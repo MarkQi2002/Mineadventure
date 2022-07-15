@@ -336,6 +336,7 @@ function creatureOnHit(creatureInfo, theMapLevel) {
 						// Do Nothing
 					} else {
 						// Monster Creature, Delete Monster And Give Attacker EXP
+						itemDrop(creatureInfo.ID);
 						deleteMonster(creatureInfo.ID);
 						if (attackerInfo[0] == "player" && playerArray[attackerInfo[1]] != null) levelUp(playerArray[attackerInfo[1]], creatureInfo.properties.level * 100);
 						return;
@@ -557,27 +558,29 @@ function updateMonster(delta, theMapLevel) {
 	}
 }
 
+// Randomly Generating An Item ID Based On Rarity Distribution
+function itemDrop(monsterID){
+	// Variable Declaration For Spawning Item After Monster Dead
+	let newItemID;
+	let newItemPosition = monsterArray[monsterID].position;
+
+	let monsterDropRate = 1.00;
+	let randomNumber = Math.random();
+	if (randomNumber < 0.60 * monsterDropRate) newItemID = itemRarityArray[0][Math.floor(Math.random() * itemRarityArray[0].length)];
+	else if (randomNumber < 0.85 * monsterDropRate) newItemID = itemRarityArray[1][Math.floor(Math.random() * itemRarityArray[1].length)];
+	else if (randomNumber < 0.95 * monsterDropRate) newItemID = itemRarityArray[2][Math.floor(Math.random() * itemRarityArray[2].length)];
+	else if (randomNumber < 1.00 * monsterDropRate) newItemID = itemRarityArray[3][Math.floor(Math.random() * itemRarityArray[3].length)];	
+
+	// Spawning The Actual Item
+	if (newItemID != null && typeof newItemID != "undefined") newItem(newItemID, newItemPosition, monsterArray[monsterID].mapLevel);
+}
+
 // Deleting A Monster Based On The Input Monster ID
 function deleteMonster(monsterID) {
 	// When The MonsterArray Corresponding To MonsterID Is Not NULL Spawn An Item
 	if (monsterArray[monsterID] != null) {
 		// Get Which Map Level The Monster Is In
 		let mapLevelIndex = monsterArray[monsterID].mapLevel;
-
-		// Variable Declaration For Spawning Item After Monster Dead
-		let newItemID;
-		let newItemPosition = monsterArray[monsterID].position;
-		
-		// Randomly Generating An Item ID Based On Rarity Distribution
-		let monsterDropRate = 1.00;
-		let randomNumber = Math.random();
-		if (randomNumber < 0.60 * monsterDropRate) newItemID = itemRarityArray[0][Math.floor(Math.random() * itemRarityArray[0].length)];
-		else if (randomNumber < 0.85 * monsterDropRate) newItemID = itemRarityArray[1][Math.floor(Math.random() * itemRarityArray[1].length)];
-		else if (randomNumber < 0.95 * monsterDropRate) newItemID = itemRarityArray[2][Math.floor(Math.random() * itemRarityArray[2].length)];
-		else if (randomNumber < 1.00 * monsterDropRate) newItemID = itemRarityArray[3][Math.floor(Math.random() * itemRarityArray[3].length)];
-
-		// Spawning The Actual Item
-		if (newItemID != null && typeof newItemID != "undefined") newItem(newItemID, newItemPosition, mapLevelIndex);
 
 		// Remove The Monster From mapLevel
 		let index = game_map.mapLevel[mapLevelIndex].levelMonsterArray.indexOf(monsterArray[monsterID]);

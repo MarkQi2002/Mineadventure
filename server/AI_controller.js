@@ -153,7 +153,8 @@ class AI_controller {
 
             if (this.routeCount > 10 && Math.abs(goal[0] - this.creature.position[0]) + Math.abs(goal[1] - this.creature.position[1]) < this.searchRange){
                 this.routeCount = 0;
-                let newRoute = this.getRoute(theMap, goal);
+                let newRoute = [];
+                if (this.aggro.creature.mapLevel == this.creature.mapLevel) newRoute = this.getRoute(theMap, goal);
                 // find target
                 if(newRoute.length > 0){
                     this.targetPositionList = newRoute;
@@ -163,7 +164,7 @@ class AI_controller {
                         spawnProjectile([[this.sendProjectile(goal)], this.creature.mapLevel]);
                         this.attackCD = 1;
                     }
-                    
+
                 }else{
                     if (this.targetPositionList.length <= 0){
                         // Find A Random Position
@@ -180,7 +181,7 @@ class AI_controller {
                 let minDistance = this.searchRange;
                 let distance;
                 for(let i = 0; i < playerArray.length; ++i){
-                    if(playerArray[i] == null) continue;
+                    if(playerArray[i] == null || playerArray[i].mapLevel != this.creature.mapLevel ||this.creature.campInfo[playerArray[i].camp] >= -50) continue;
 
                     distance = Math.abs(playerArray[i].position[0] - this.creature.position[0]) + Math.abs(playerArray[i].position[1] - this.creature.position[1])
                     if (distance < minDistance){
