@@ -42,7 +42,7 @@ class AI_controller {
         // Setting Projectile Information
         var newDamageInfo = {
             type: {"true": (this.creature.properties.attackDamage / 10) >> 0, "normal": this.creature.properties.attackDamage},
-            attacker: ["monster", this.creature.ID, this.creature.camp],
+            attacker: ["monster", this.creature.ID, this.creature.campInfo],
             properties: this.creature.properties
         }
 
@@ -145,22 +145,53 @@ class AI_controller {
     }
 
     // Update Function
-    update(delta, theMap, spawnProjectile) {
+    update(delta, theMap, spawnProjectile, playerArray) {
         // Get Path Using The Path Finding Algorithm
 
         if (this.aggro.creature != null){
             let goal = [Math.floor(this.aggro.creature.position[0]), Math.floor(this.aggro.creature.position[1])];
 
             if (this.routeCount > 10 && Math.abs(goal[0] - this.creature.position[0]) + Math.abs(goal[1] - this.creature.position[1]) < this.searchRange){
-                this.targetPositionList = this.getRoute(theMap, goal);
+                this.routeCount = 0;
+                let newRoute = this.getRoute(theMap, goal);
+                // find target
+                if(newRoute.length > 0){
+                    this.targetPositionList = newRoute;
+
+                     // Attack
+                    if (this.attackCD <= 0){
+                        spawnProjectile([[this.sendProjectile(goal)], this.creature.mapLevel]);
+                        this.attackCD = 1;
+                    }
+                    
+                }else{
+                    if (this.targetPositionList.length <= 0){
+                        // Find A Random Position
+                        this.targetPositionList = this.getRoute(theMap, [(this.creature.position[0] + (Math.random() - 0.5) * this.searchRange) >> 0,
+                                                                         (this.creature.position[1] + (Math.random() - 0.5) * this.searchRange) >> 0]);
+                    }
+                    this.aggro.creature = null;
+                }
+            }
+
+        }else{
+
+            if (this.routeCount > 100){
+                let minDistance = this.searchRange;
+                let distance;
+                for(let i = 0; i < playerArray.length; ++i){
+                    if(playerArray[i] == null) continue;
+
+                    distance = Math.abs(playerArray[i].position[0] - this.creature.position[0]) + Math.abs(playerArray[i].position[1] - this.creature.position[1])
+                    if (distance < minDistance){
+                        this.aggro.creature = playerArray[i];
+                        minDistance = distance;
+                    }
+                }
+                this.aggro.amount = this.aggro.base;
                 this.routeCount = 0;
             }
 
-            // Attack
-            if ( this.targetPositionList.length > 0 && this.attackCD <= 0){
-                spawnProjectile([[this.sendProjectile(goal)], this.creature.mapLevel]);
-                this.attackCD = 1;
-            }
         }
 
 

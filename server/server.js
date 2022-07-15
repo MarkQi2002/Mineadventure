@@ -32,6 +32,7 @@ const io = socketio(server);
 
 
 // -------------------Camp-------------------
+/*
 var campArray = [];
 campArray.length = 32;
 var newCampIndex = 0;
@@ -137,8 +138,18 @@ class camp{
 		let index = this.friendCamp.indexOf(theCampID);
 		if (index > -1) this.friendCamp.splie(index, 1);
 	}
+}*/
+
+
+
+function campInfo(){
+	this["defaultPlayer"] = -100
+	this["defaultMonster"] = 0
 }
 
+function IsAttackable(attackerCampInfo, defenderCamp){
+	return attackerCampInfo[defenderCamp] < 50;
+}
 // -------------------End Of Camp-------------------
 
 // -------------------Creature-------------------
@@ -175,14 +186,15 @@ function properties() {
 }
 
 // Default Creature Information Class
-function creatureInfoClass(ID, creatureType, name, initPos, mapLevel) {
+function creatureInfoClass(ID, creatureType, name, initPos, mapLevel, camp) {
 	// Creature Identification Information
 	this["ID"] = ID;
 	this["creatureType"] = creatureType;
 	this["name"] = name;
 	this["position"] =  initPos;
 	this["mapLevel"] =  mapLevel;
-	this["camp"] = null;
+	this["camp"] = camp
+	this["campInfo"] = new campInfo();
 		
 	// Creature Properties Information
 	this["properties"] = new properties();
@@ -299,7 +311,7 @@ function creatureOnHit(creatureInfo, theMapLevel) {
 
 		// Is Not Attackable
 		if((attackerInfo[0] == creatureInfo.creatureType && attackerInfo[1] == creatureInfo.ID) || 
-			!campArray[attackerInfo[2]].IsAttackable([creatureInfo.creatureType, creatureInfo.ID])) continue;
+			!IsAttackable(attackerInfo[2], creatureInfo.camp)) continue;
 
 		// Calculate XY Coordinate Difference
 		let diffX = theProjectile.position[0] - creatureInfo.position[0];
@@ -353,12 +365,11 @@ const CreateNewPlayer = (playerID, playerName, spawnPos, mapLevel, sock) => {
 											"player",
 											playerName != '' ? playerName : "player_" + playerID,
 											[spawnPos[0], spawnPos[1], 1],
-											mapLevel);
+											mapLevel,
+											"defaultPlayer");
 
 	// Store PlayerInfo Object Into playerArray
 	playerArray[playerID] = playerInfo;
-
-	playerCamp.addMember([playerInfo.creatureType, playerInfo.ID]);
 
 	// Add Sock In sockArray
 	if (sockArray.length < playerArray.length){
@@ -413,8 +424,6 @@ const clientDisconnect = (Info, playerID) => {
 		if (index > -1) { // only splice array when item is found
 			game_map.mapLevel[mapLevelIndex].levelPlayerArray.splice(index, 1); // 2nd parameter means remove one item only
 		}
-
-		playerCamp.removeMember([playerArray[playerID].creatureType, playerArray[playerID].ID]);
 
 		// Delete This Player's Info
 		console.log("Player ID:", playerID, " Name:", playerArray[playerID].name, "is disconnected!  Info:", Info);
@@ -488,7 +497,11 @@ function createNewMonster(ID, spawnPos, mapLevel, monsterID) {
 											"monster",
 											monsterInfoArray[ID][0]["name"],
 											[spawnPos[0], spawnPos[1], 1],
-											mapLevel);
+											mapLevel,
+											"defaultMonster");
+	
+	// Monster Can't Attack Each Other
+	monsterInfo.campInfo.defaultMonster = 100;
 											
 	// Add Properties By ID
 	for (let [key, value] of Object.entries(monsterInfoArray[ID][0]["properties"])) {
@@ -497,8 +510,6 @@ function createNewMonster(ID, spawnPos, mapLevel, monsterID) {
 
 	// Saving Monster Info To Monster Array
 	monsterArray[monsterID] = monsterInfo;
-
-	monsterCamp.addMember([monsterInfo.creatureType, monsterInfo.ID]);
 
 	// If The AI_contollerList Is Not Long Enought Increment It
 	if (monsterID >= AI_controllerList.length){
@@ -538,7 +549,7 @@ function updateMonster(delta, theMapLevel) {
 		theMonster = AI_controllerList[monsterID].creature;
 
 		// AI controller update
-		AI_controllerList[monsterID].update(delta, game_map, spawnProjectile);
+		AI_controllerList[monsterID].update(delta, game_map, spawnProjectile, playerArray);
 		theMapLevel.updateMonsterPos.push([theMonster.position, monsterID]);
 
 		// Check Monster Collision With Projectile
@@ -577,8 +588,6 @@ function deleteMonster(monsterID) {
 		// Send Deletion Info To All Client In Same Level
 		io.to("level " + monsterArray[monsterID].mapLevel).compress(true).emit('deleteMonster', monsterID);
 	}
-
-	monsterCamp.removeMember([monsterArray[monsterID].creatureType, monsterArray[monsterID].ID]);
 
 	// Deleting Everything Relating To The Particular Monster Being Deleted
 	delete monsterArray[monsterID];
@@ -989,16 +998,6 @@ function damagefunction(damageInfo, defender){
 var game_map = new map([20, 20],[20, 20]);
 game_map.createMapLevel();
 // -------------------End Of Map-------------------
-
-
-// Set default Camps 
-const playerCamp = new camp("defaultPlayer");
-playerCamp.friendlyFire = true;
-const monsterCamp = new camp("defaultMonster");
-
-playerCamp.addEnemy(monsterCamp.ID);
-//monsterCamp.addEnemy(playerCamp.ID);
-monsterCamp.addFriend(playerCamp.ID);
 
 // -------------------Sending And Receiving Information-------------------
 // Once A New Player Join, Update To All Other Clients

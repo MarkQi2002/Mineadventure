@@ -151,7 +151,7 @@ class controller{
         // Setting Projectile Information
         var newDamageInfo = {
             type: {"true": (this.creature.properties.attackDamage / 10) >> 0, "normal": this.creature.properties.attackDamage},
-            attacker: ["player", clientPlayerID, this.creature.camp],
+            attacker: ["player", clientPlayerID, this.creature.campInfo],
             properties: this.creature.properties
         }
 

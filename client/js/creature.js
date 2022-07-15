@@ -9,6 +9,7 @@ class creature{
         // Creating THREE Object
         this.ID = creatureInfo.ID;
         this.camp = creatureInfo.camp;
+        this.campInfo = creatureInfo.campInfo;
         this.object = new THREE.Object3D();
         this.object.position.set(creatureInfo.position[0], creatureInfo.position[1], creatureInfo.position[2]);
         scene.add(this.object);
