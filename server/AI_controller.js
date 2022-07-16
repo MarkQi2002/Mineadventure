@@ -10,14 +10,14 @@ class AI_controller {
         this.attackCD = 0;
     }
 
-    setAggro(theCreature, amount){
-        if (theCreature == null) return;
+    setAggro(creatureType, ID, amount){
+        if (creatureType == null || ID == null) return;
 
-        if (this.aggro.creature == null || this.aggro.creature.ID != theCreature.ID){
+        if (this.aggro.creature == null || !(this.aggro.creature[1] == ID && this.aggro.creature[0] == creatureType)){
             // Come From A Different Creature
             this.aggro.amount -= amount;
             if (this.aggro.amount <= 0){
-                this.aggro.creature = theCreature;
+                this.aggro.creature = [creatureType, ID];
                 this.aggro.amount = this.aggro.amount * -1 + this.aggro.base;
             }
         }else{
@@ -108,6 +108,7 @@ class AI_controller {
         let routePoints = [];
 
         let current = this.aStarAlgorithm(theMap, goal);
+        if (current == null) return "not find";
         while (current != null){
             routePoints.push([current.x, current.y]);
             current = current.last;
@@ -145,50 +146,91 @@ class AI_controller {
     }
 
     // Update Function
-    update(delta, theMap, spawnProjectile, playerArray) {
+    update(delta, theMap, spawnProjectile, playerArray, monsterArray) {
         // Get Path Using The Path Finding Algorithm
 
+        let aggroCreature = null;
         if (this.aggro.creature != null){
-            let goal = [Math.floor(this.aggro.creature.position[0]), Math.floor(this.aggro.creature.position[1])];
+            if (this.aggro.creature[0] == "player"){
+                aggroCreature = playerArray[this.aggro.creature[1]];
+            }else{
+                aggroCreature = monsterArray[this.aggro.creature[1]];
+            }
+        }
 
-            if (this.routeCount > 10 && Math.abs(goal[0] - this.creature.position[0]) + Math.abs(goal[1] - this.creature.position[1]) < this.searchRange){
-                this.routeCount = 0;
-                let newRoute = [];
-                if (this.aggro.creature.mapLevel == this.creature.mapLevel) newRoute = this.getRoute(theMap, goal);
-                // find target
-                if(newRoute.length > 0){
-                    this.targetPositionList = newRoute;
+        if (aggroCreature == null){
+            this.aggro.creature = null;
+        }
 
-                     // Attack
-                    if (this.attackCD <= 0){
-                        spawnProjectile([[this.sendProjectile(goal)], this.creature.mapLevel]);
-                        this.attackCD = 1;
+
+        if (this.aggro.creature != null){
+
+            let goal = [Math.floor(aggroCreature.position[0] + Math.random() * 2 - 1), Math.floor(aggroCreature.position[1] + Math.random() * 2 - 1)];
+
+            if (this.routeCount > 10){
+                
+                if (Math.abs(goal[0] - this.creature.position[0]) + Math.abs(goal[1] - this.creature.position[1]) < this.searchRange * 2){
+                    this.routeCount = 0;
+                    let newRoute = [];
+                    if (aggroCreature.mapLevel == this.creature.mapLevel){
+                        newRoute = this.getRoute(theMap, goal);
                     }
 
+                    // find target
+                    if(newRoute != "not find"){
+                        this.targetPositionList = newRoute;
+
+                            // Attack
+                        if (this.attackCD <= 0){
+                            spawnProjectile([[this.sendProjectile([aggroCreature.position[0], aggroCreature.position[1]])], this.creature.mapLevel]);
+                            this.attackCD = 1;
+                        }
+
+                    }else{
+                        if (this.targetPositionList.length <= 0){
+                            // Find A Random Position
+                            newRoute = this.getRoute(theMap, [(this.creature.position[0] + 0.5 + (Math.random() - 0.5) * 2 * this.searchRange) >> 0,
+                                                                             (this.creature.position[1] + 0.5 + (Math.random() - 0.5) * 2 * this.searchRange) >> 0]);
+                            if (this.targetPositionList != "not find"){
+                                this.targetPositionLis = newRoute;
+                            }else{
+                                this.targetPositionLis = [];
+                            }
+                        }
+                        this.aggro.creature = null;
+                    }
+            
                 }else{
-                    if (this.targetPositionList.length <= 0){
-                        // Find A Random Position
-                        this.targetPositionList = this.getRoute(theMap, [(this.creature.position[0] + (Math.random() - 0.5) * this.searchRange) >> 0,
-                                                                         (this.creature.position[1] + (Math.random() - 0.5) * this.searchRange) >> 0]);
-                    }
                     this.aggro.creature = null;
                 }
             }
 
         }else{
 
-            if (this.routeCount > 100){
+            if (this.routeCount > 30){
                 let minDistance = this.searchRange;
-                let distance;
-                for(let i = 0; i < playerArray.length; ++i){
-                    if(playerArray[i] == null || playerArray[i].mapLevel != this.creature.mapLevel ||this.creature.campInfo[playerArray[i].camp] >= -50) continue;
+                let distance, otherCreature;
 
-                    distance = Math.abs(playerArray[i].position[0] - this.creature.position[0]) + Math.abs(playerArray[i].position[1] - this.creature.position[1])
-                    if (distance < minDistance){
-                        this.aggro.creature = playerArray[i];
-                        minDistance = distance;
+                let surroundingBlocks = theMap.getSurroundingBlock([this.creature.position[0] / theMap.blockSize.x >> 0, this.creature.position[1] / theMap.blockSize.y >> 0], this.creature.mapLevel, [1, 1])
+                for (let i = 0; i < surroundingBlocks.length; ++i) {
+                    for (let ii = 0; ii < surroundingBlocks[i][2].blockCreatureArray.length; ++ii) {
+                        if (surroundingBlocks[i][2].blockCreatureArray[ii][0] == "player"){
+                            otherCreature = playerArray[surroundingBlocks[i][2].blockCreatureArray[ii][1]];
+                        }else{
+                            otherCreature = monsterArray[surroundingBlocks[i][2].blockCreatureArray[ii][1]];
+                        }
+
+                        if(otherCreature == null || this.creature.campInfo[otherCreature.camp] >= -50 ||
+                            (this.creature.ID == otherCreature.ID && this.creature.creatureType == otherCreature.creatureType)) continue;
+
+                        distance = Math.abs(otherCreature.position[0] - this.creature.position[0]) + Math.abs(otherCreature.position[1] - this.creature.position[1]);
+                        if (distance < minDistance){
+                            this.aggro.creature = [otherCreature.creatureType, otherCreature.ID];
+                            minDistance = distance;
+                        }
                     }
                 }
+
                 this.aggro.amount = this.aggro.base;
                 this.routeCount = 0;
             }
@@ -196,9 +238,32 @@ class AI_controller {
         }
 
 
-
         this.routeCount++;
         this.moveToPosition(delta);
+
+        
+        
+        let [blockX, blockY] = [this.creature.position[0] / theMap.blockSize.x >> 0, this.creature.position[1] / theMap.blockSize.y >> 0];
+		if (blockX != this.creature.lastBlockPos[0] || blockY != this.creature.lastBlockPos[1]){
+			let theMapLevel = theMap.mapLevel[this.creature.mapLevel];
+            let lastBlock = theMapLevel.getBlockByBlockPos([this.creature.lastBlockPos[0], this.creature.lastBlockPos[1]]);
+            let theBlock = theMapLevel.getBlock([this.creature.position[0], this.creature.position[1]]);
+            if (theBlock != null){
+                if (lastBlock != null){
+                    let theBlockArray = lastBlock.blockCreatureArray;
+                    for (let i = 0; i < theBlockArray.length; ++i){
+                        if (theBlockArray[i] != null && theBlockArray[i][1] == this.creature.ID && theBlockArray[i][0] == this.creature.creatureType){
+                            lastBlock.blockCreatureArray.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+                
+
+                theBlock.blockCreatureArray.push([this.creature.creatureType, this.creature.ID]);
+                this.creature.lastBlockPos = [blockX, blockY];
+            }
+		}
 
         // Attack CoolDown (CD)
         if (this.attackCD > 0){

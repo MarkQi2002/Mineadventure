@@ -12,32 +12,45 @@ const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap
 				  serverProjectileList, serverMonsterArray, monsterArrayLength, initMapLevel,
 				  serverItemArray, serverItemInfoArray) => {
 	
-	//Delete Old Player
-	for (let i = 0; i < playerArray.length; ++i) {
-		if (playerArray[i] != null && i != clientPlayerID){
-			playerArray[i].delete();
-			playerArray[i] = null;
-		}
-	}
-
-	//Delete Old Monster
-	for (let i = 0; i < monsterArray.length; ++i) {
-		deleteMonster(i);
-	}
-
-	//Delete Old Projectile
-	for (let i = 0; i < projectileList.length; ++i) {
-		if (projectileList[i] != null){
-			projectileList[i].delete();
-			projectileList[i] = null;
-		}
-	}
-
-	for (let i = 0; i < itemArray.length; ++i) {
-		removeItem(i);
-	}
 
 	gameMapLevel = initMapLevel;
+
+	if (game_map != null){
+		
+		//Delete Old Player
+		for (let i = 0; i < playerArray.length; ++i) {
+			if (playerArray[i] != null && i != clientPlayerID){
+				playerArray[i].delete();
+				playerArray[i] = null;
+			}
+		}
+	
+		//Delete Old Monster
+		for (let i = 0; i < monsterArray.length; ++i) {
+			deleteMonster(i);
+		}
+	
+		//Delete Old Projectile
+		for (let i = 0; i < projectileList.length; ++i) {
+			if (projectileList[i] != null){
+				projectileList[i].delete();
+				projectileList[i] = null;
+			}
+		}
+		
+		//Delete Old item
+		for (let i = 0; i < itemArray.length; ++i) {
+			removeItem(i);
+		}
+
+
+
+
+		game_map.loadNewMapLevel(serverMap); 
+	}else{
+		// Create New Map
+		game_map = new map(serverMap);
+	}
 
 
 	clientPlayerID = severPlayerID;
@@ -63,12 +76,7 @@ const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap
 
 	initItem(serverItemArray, serverItemInfoArray);
 
-	if (game_map != null){
-		game_map.loadNewMapLevel(serverMap); 
-	}else{
-		// Create New Map
-		game_map = new map(serverMap);
-	}
+	
 };
 
 // Initialization Myself And All Future Players
@@ -174,6 +182,7 @@ const creatureInfoChange = (creatureInfo) => {
 
 // Creating Damage Text List
 function createDamageTextList(damageInfo, theCreature){
+	if (player_controller == null) return;
 	if (Math.abs(theCreature.object.position.x - player_controller.camera.position.x) + Math.abs(theCreature.object.position.y - player_controller.camera.position.y) < game_map.blockSize.x + game_map.blockSize.y){
 		for (let [key, value] of Object.entries(damageInfo.type)) {
 			new damageText(key, value, [theCreature.object.position.x , theCreature.object.position.y, theCreature.object.position.z]);
@@ -316,7 +325,7 @@ const playerDisconnect = (PlayerID) => {
 // Spawning Projectile
 const spawnProjectile = (projectileInfo) => {
 	for (let i = 0; i < projectileInfo.length; i++){
-		if (projectileInfo[i] != null && projectileInfo[i][1] != null){
+		if (projectileInfo[i] != null && projectileInfo[i][1] != null && projectileInfo[i][1] != "deletion"){
 			var newProjectile = new projectile(projectileInfo[i][1]);
 			if (projectileList.length < projectileInfo[i][0]){
 				projectileList.length === projectileInfo[i][0];

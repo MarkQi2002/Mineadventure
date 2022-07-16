@@ -328,11 +328,9 @@ class map {
         return neighborList;
     }
 
-    // Function To Initialize The Block And Package It To Send To Client
-    getInitMap([mapX, mapY], mapLevelIndex, [blockHalfRangeX, blockHalfRangeY]) {
-        let  [centerBlockX, centerBlockY] = [mapX / this.blockSize.x >> 0, mapY / this.blockSize.y >> 0];
-        let sendingBlock = [];
+    getSurroundingBlock([centerBlockX, centerBlockY], mapLevelIndex, [blockHalfRangeX, blockHalfRangeY]){
         let theBlock;
+        let surroundingBlocks = [];
         for (let y_Axis = -blockHalfRangeY; y_Axis <= blockHalfRangeY; y_Axis++) {
             for (let x_Axis = -blockHalfRangeX; x_Axis <= blockHalfRangeX; x_Axis++) {
 
@@ -342,16 +340,25 @@ class map {
                 
                 theBlock = this.mapLevel[mapLevelIndex].blockList[blockY][blockX];
 
-                if (theBlock == null) continue;
-
-                let blockInfo = {
-                    x: blockX,
-                    y: blockY,
-                    block: {unitList: theBlock.unitList}
-                }
-                sendingBlock.push(blockInfo);
-                
+                if (theBlock != null) surroundingBlocks.push([blockX, blockY, theBlock]);
             }
+        }
+        return surroundingBlocks;
+    }
+
+    // Function To Initialize The Block And Package It To Send To Client
+    getInitMap([mapX, mapY], mapLevelIndex, [blockHalfRangeX, blockHalfRangeY]) {
+        let sendingBlock = [];
+        let surroundingBlocks = this.getSurroundingBlock([mapX / this.blockSize.x >> 0, mapY / this.blockSize.y >> 0], mapLevelIndex, [blockHalfRangeX, blockHalfRangeY])
+        for (let i = 0; i < surroundingBlocks.length; ++i) {
+
+            let blockInfo = {
+                x: surroundingBlocks[i][0],
+                y: surroundingBlocks[i][1],
+                block: {unitList: surroundingBlocks[i][2].unitList}
+            }
+            sendingBlock.push(blockInfo);
+                
         }
         return [sendingBlock, this.blockNumber, this.blockSize, this.unitIDList];
     }
@@ -433,6 +440,11 @@ class mapLevel {
         return this.blockNumber.x <= floatBlockX || 0 > floatBlockX || this.blockNumber.y <= floatBlockY || 0 > floatBlockY;
     }
 
+    getBlockByBlockPos([blockX, blockY]){
+        if (this.IsNotInMapRange(blockX, blockY)) return null;
+        return this.blockList[blockY][blockX];
+    }
+
     // Return The Block Based On xy Coordinate
     getBlock([mapX, mapY]){
         let [floatBlockX, floatBlockY] = [mapX / this.blockSize.x, mapY / this.blockSize.y];
@@ -455,6 +467,8 @@ class block {
     constructor(x, y, blockSize, this_game_map, initSpawnMethodOutput) {
         this.unitList = [];
         this.projectileList = [];
+        this.blockCreatureArray = [];
+
         this.makeBlock(blockSize);
         this.initBlock(x, y, this_game_map, initSpawnMethodOutput[0], initSpawnMethodOutput[1]);
     }

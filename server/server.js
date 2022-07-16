@@ -145,6 +145,7 @@ class camp{
 function campInfo(){
 	this["defaultPlayer"] = -100
 	this["defaultMonster"] = 0
+	this["monsterKiller"] = 0
 }
 
 function IsAttackable(attackerCampInfo, defenderCamp){
@@ -195,6 +196,8 @@ function creatureInfoClass(ID, creatureType, name, initPos, mapLevel, camp) {
 	this["mapLevel"] =  mapLevel;
 	this["camp"] = camp
 	this["campInfo"] = new campInfo();
+
+	this["lastBlockPos"] = [-1, -1];
 		
 	// Creature Properties Information
 	this["properties"] = new properties();
@@ -326,7 +329,7 @@ function creatureOnHit(creatureInfo, theMapLevel) {
 			if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
 				// Updating Creature Information
 				creatureInfoChange([[[creatureInfo.creatureType, creatureInfo.ID], {"damage": theProjectile.damageInfo}]]);
-				AI_controllerList[creatureInfo.ID].setAggro(playerArray[theProjectile.damageInfo.attacker[1]], 1);
+				if (AI_controllerList[creatureInfo.ID] != null) AI_controllerList[creatureInfo.ID].setAggro(attackerInfo[0], attackerInfo[1], 1);
 				// Set Projectile Deletion Tag
 				theMapLevel.levelProjectileArray[blockProjectileList[projectileIndex]] = "deletion";
 
@@ -404,8 +407,27 @@ function updatePlayer(delta, theMapLevel) {
 const UpdatePlayerPosition = (Pos, playerID) => {
 	// Updating Player Position
 	if (playerArray[playerID] != null) {
-		playerArray[playerID].position = Pos;
+		let [blockX, blockY] = [Pos[0] / game_map.blockSize.x >> 0, Pos[1] / game_map.blockSize.y >> 0];
+		if (blockX != playerArray[playerID].lastBlockPos[0] || blockY != playerArray[playerID].lastBlockPos[1]){
+			let theMapLevel = game_map.mapLevel[playerArray[playerID].mapLevel];
+			let lastBlock = theMapLevel.getBlockByBlockPos([playerArray[playerID].lastBlockPos[0], playerArray[playerID].lastBlockPos[1]]);
 
+			if (lastBlock != null){
+				let theBlockArray = lastBlock.blockCreatureArray;
+				for (let i = 0; i < theBlockArray.length; ++i){
+					if (theBlockArray[i] != null && theBlockArray[i].ID == playerArray[playerID].ID && theBlockArray[i].creatureType == playerArray[playerID].creatureType){
+						lastBlock.blockCreatureArray.splice(i, 1);
+						break;
+					}
+				}
+			}
+
+			theMapLevel.getBlock([Pos[0], Pos[1]]).blockCreatureArray.push([playerArray[playerID].creatureType, playerArray[playerID].ID]);
+			playerArray[playerID].lastBlockPos = [blockX, blockY];
+		}
+
+		playerArray[playerID].position = Pos;
+		
 		// Send To All Player On Same Level
 		io.to("level " + playerArray[playerID].mapLevel).compress(true).emit('clientPos', [Pos, playerID]);
 	}
@@ -424,6 +446,19 @@ const clientDisconnect = (Info, playerID) => {
 		let index = game_map.mapLevel[mapLevelIndex].levelPlayerArray.indexOf(playerArray[playerID]);
 		if (index > -1) { // only splice array when item is found
 			game_map.mapLevel[mapLevelIndex].levelPlayerArray.splice(index, 1); // 2nd parameter means remove one item only
+		}
+
+		
+		//Remove from blockCreatureArray
+		let lastBlock = game_map.mapLevel[mapLevelIndex].getBlockByBlockPos([playerArray[playerID].lastBlockPos[0], playerArray[playerID].lastBlockPos[1]]);
+		if (lastBlock != null){
+			let theBlockArray = lastBlock.blockCreatureArray;
+			for (let i = 0; i < theBlockArray.length; ++i){
+				if (theBlockArray[i] != null && theBlockArray[i][1] == playerArray[playerID].ID && theBlockArray[i][0] == playerArray[playerID].creatureType){
+					lastBlock.blockCreatureArray.splice(i, 1);
+					break;
+				}
+			}
 		}
 
 		// Delete This Player's Info
@@ -479,9 +514,20 @@ AI_controllerList.length = 100;
 var monsterArray = [];
 monsterArray.length = 100;
 var monster_ID_Count = 0;
-var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower", "properties":{"health": 50, "maxHealth": 50, "attackDamage": 10, "attackSpeed": 0.5, "moveSpeed": 3}},{}],
-						[{"name": "Fakecat", "type": "burrower", "properties":{"health": 100, "maxHealth": 100, "attackDamage": 20, "attackSpeed": 0.5, "moveSpeed": 3}},{}],
-						];
+var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower",
+						  "properties": {"health": 50, "maxHealth": 50, "attackDamage": 10, "attackSpeed": 0.5, "moveSpeed": 3},
+						  "camp": "defaultMonster",
+					      "campInfo": {"defaultMonster": -100}
+						},{}],
+						
+						[{"name": "Fakecat", "type": "burrower", 
+						  "properties":{"health": 100, "maxHealth": 100, "attackDamage": 20, "attackSpeed": 0.5, "moveSpeed": 3},
+						  "camp": "defaultMonster",
+					      "campInfo": {"defaultMonster": 100}
+						},{}],
+
+
+					];
 
 // Creating A New Monster
 function createNewMonster(ID, spawnPos, mapLevel, monsterID) {
@@ -496,13 +542,16 @@ function createNewMonster(ID, spawnPos, mapLevel, monsterID) {
 	// Monster Information
 	let monsterInfo  = new creatureInfoClass(monsterID,
 											"monster",
-											monsterInfoArray[ID][0]["name"],
+											monsterInfoArray[ID][0].name,
 											[spawnPos[0], spawnPos[1], 1],
 											mapLevel,
-											"defaultMonster");
+											monsterInfoArray[ID][0].camp);
 	
 	// Monster Can't Attack Each Other
-	monsterInfo.campInfo.defaultMonster = 100;
+	//monsterInfo.campInfo.defaultMonster = 100;
+	for (let [key, value] of Object.entries(monsterInfoArray[ID][0]["campInfo"])) {
+		monsterInfo.campInfo[key] = value;
+	}
 											
 	// Add Properties By ID
 	for (let [key, value] of Object.entries(monsterInfoArray[ID][0]["properties"])) {
@@ -550,7 +599,7 @@ function updateMonster(delta, theMapLevel) {
 		theMonster = AI_controllerList[monsterID].creature;
 
 		// AI controller update
-		AI_controllerList[monsterID].update(delta, game_map, spawnProjectile, playerArray);
+		AI_controllerList[monsterID].update(delta, game_map, spawnProjectile, playerArray, monsterArray);
 		theMapLevel.updateMonsterPos.push([theMonster.position, monsterID]);
 
 		// Check Monster Collision With Projectile
@@ -586,6 +635,18 @@ function deleteMonster(monsterID) {
 		let index = game_map.mapLevel[mapLevelIndex].levelMonsterArray.indexOf(monsterArray[monsterID]);
 		if (index > -1) { // Only Splice Array When Item Is Found
 			game_map.mapLevel[mapLevelIndex].levelMonsterArray.splice(index, 1); // 2nd Parameter Means Remove One Item Only
+		}
+		
+		//Remove from blockCreatureArray
+		let lastBlock = game_map.mapLevel[mapLevelIndex].getBlockByBlockPos([monsterArray[monsterID].lastBlockPos[0], monsterArray[monsterID].lastBlockPos[1]]);
+		if (lastBlock != null){
+			let theBlockArray = lastBlock.blockCreatureArray;
+			for (let i = 0; i < theBlockArray.length; ++i){
+				if (theBlockArray[i] != null && theBlockArray[i][1] == monsterArray[monsterID].ID && theBlockArray[i][0] == monsterArray[monsterID].creatureType){
+					lastBlock.blockCreatureArray.splice(i, 1);
+					break;
+				}
+			}
 		}
 
 		// Send Deletion Info To All Client In Same Level
@@ -1053,9 +1114,9 @@ server.listen(8080, () => {
 });
 
 // Spawning 500 Monsters Randomly Throughout The Map
-for (let monsterIndex = 0; monsterIndex < 400; ++monsterIndex){
+for (let monsterIndex = 0; monsterIndex < 800; ++monsterIndex){
 	createNewMonster(0, createSpawnPosition(0), 0);
 }
-for (let monsterIndex = 0; monsterIndex < 100; ++monsterIndex){
+for (let monsterIndex = 0; monsterIndex < 0; ++monsterIndex){
 	createNewMonster(1, createSpawnPosition(1), 1);
 }
