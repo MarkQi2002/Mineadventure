@@ -64,7 +64,7 @@ class AI_controller {
 
     // Using A Star As The Path Finding Algorithm
     aStarAlgorithm(theMap, goal){
-        let start = [Math.floor(this.creature.position[0]), Math.floor(this.creature.position[1])];
+        let start = [Math.floor(this.creature.position[0] + 0.5), Math.floor(this.creature.position[1] + 0.5)];
         
         let frontier = new PriorityQueue();
         frontier.enqueue({x: start[0], y: start[1], cost: 0, last: null}, 0);

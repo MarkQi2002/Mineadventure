@@ -734,8 +734,11 @@ for (let itemInfoIndex = 0; itemInfoIndex < itemInfoArray.length; ++itemInfoInde
 
 // Update Player Property And Player Item Array
 const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID) => {
+	let thePlayer = playerArray[updatePlayerID];
+	if (thePlayer == null) return;
+
 	// Remove Item From The Item Array
-	let mapLevelIndex = playerArray[updatePlayerID].mapLevel;
+	let mapLevelIndex = thePlayer.mapLevel;
 	if (removeItemID >= 0 && removeItemID < game_map.mapLevel[mapLevelIndex].itemArray.length) deleteItem(removeItemID, mapLevelIndex);
 
 	let itemAddProperty = {};
@@ -748,10 +751,10 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 	creatureInfoChange(playerInfo);
 
 	// Update Server Side Player Item Array
-	if (playerArray[updatePlayerID].creatureItemArray[additionalItemID] != null)
-		playerArray[updatePlayerID].creatureItemArray[additionalItemID]++;
+	if (thePlayer.creatureItemArray[additionalItemID] != null)
+		thePlayer.creatureItemArray[additionalItemID]++;
 	else
-		playerArray[updatePlayerID].creatureItemArray[additionalItemID] = 1;
+		thePlayer.creatureItemArray[additionalItemID] = 1;
 
 	io.to("level " + mapLevelIndex).compress(true).emit('clientCreatureItemArray', additionalItemID, updatePlayerID, removeItemID);
 }
