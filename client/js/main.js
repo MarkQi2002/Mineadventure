@@ -121,12 +121,6 @@ function animate() {
         }
     }
 
-    for (let i = 0; i < monsterArray.length; i++){
-        if (monsterArray[i] != null){
-            monsterArray[i].update();
-        }
-    }
-
     for (let i = 0; i < damageTextList.length; ++i){
         if (damageTextList[i] != null){
             damageTextList[i].update(delta, i);

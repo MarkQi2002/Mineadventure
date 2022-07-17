@@ -197,7 +197,7 @@ function creatureInfoClass(ID, creatureType, name, initPos, mapLevel, camp) {
 	this["camp"] = camp
 	this["campInfo"] = new campInfo();
 
-	this["lastBlockPos"] = [-1, -1];
+	this["lastBlockPos"] = [initPos[0] / game_map.blockSize.x >> 0, initPos[1] / game_map.blockSize.y >> 0];
 		
 	// Creature Properties Information
 	this["properties"] = new properties();
@@ -398,8 +398,12 @@ function updatePlayer(delta, theMapLevel) {
 	// Loop Through All Player Within theMapLevel
 	for (let i = 0; i < theMapLevel.levelPlayerArray.length; ++i) {
 		thePlayer = theMapLevel.levelPlayerArray[i];
+		if (thePlayer == null) continue; 
+		
 		// Check Player Collision With Projectile
-		if (thePlayer != null) creatureOnHit(thePlayer, theMapLevel);
+		creatureOnHit(thePlayer, theMapLevel);
+
+		updateSurroundingMonster(delta, thePlayer, theMapLevel);
 	}
 }
 
@@ -561,6 +565,13 @@ function createNewMonster(ID, spawnPos, mapLevel, monsterID) {
 	// Saving Monster Info To Monster Array
 	monsterArray[monsterID] = monsterInfo;
 
+	// Add Monster In Block
+	let theMapLevel = game_map.mapLevel[mapLevel];
+    let lastBlock = theMapLevel.getBlockByBlockPos([monsterInfo.lastBlockPos[0], monsterInfo.lastBlockPos[1]]);
+    lastBlock.blockCreatureArray.push([monsterInfo.creatureType, monsterInfo.ID]);
+
+
+
 	// If The AI_contollerList Is Not Long Enought Increment It
 	if (monsterID >= AI_controllerList.length){
 		AI_controllerList.length = monsterID + 1;
@@ -570,10 +581,10 @@ function createNewMonster(ID, spawnPos, mapLevel, monsterID) {
 	AI_controllerList[monsterID] = new AI_controller(monsterInfo);
 
 	// Log The MonsterInfo On The Server Side
-	console.log(monsterInfo);
+	//console.log(monsterInfo);
 
 	// Add Monster Into mapLevel
-	game_map.mapLevel[mapLevel].levelMonsterArray.push(monsterInfo);
+	theMapLevel.levelMonsterArray.push(monsterInfo);
 
 	// Send Information To Client To Generate A New Monster
 	io.to("level " + mapLevel).compress(true).emit('newMonster', monsterInfo, monsterArray.length);
@@ -583,28 +594,39 @@ function createNewMonster(ID, spawnPos, mapLevel, monsterID) {
 }
 
 // Updating Monster
-function updateMonster(delta, theMapLevel) {
+function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 	// Variable Declaration
-	let monsterID;
-	theMapLevel.updateMonsterPos = [];
+	let monsterID, theBlock;
 
-	// Loop Through All Monster Within theMapLevel
-	for (let monsterIndex = 0; monsterIndex < theMapLevel.levelMonsterArray.length; ++monsterIndex) {
-		monsterID = theMapLevel.levelMonsterArray[monsterIndex].ID;
+	// All Monster Surround The Player Within theMapLevel
+	let surroundingBlocks = game_map.getSurroundingBlock([thePlayer.lastBlockPos[0], thePlayer.lastBlockPos[1]], thePlayer.mapLevel, [1, 1])
+	for (let i = 0; i < surroundingBlocks.length; ++i) {
+		theBlock = surroundingBlocks[i][2];
+		if (theBlock.updated) continue;
+		theBlock.updated = true;
+		theMapLevel.resetBlockUpdated.push(theBlock);
+		for (let ii = 0; ii < theBlock.blockCreatureArray.length; ++ii) {
+			
+			if (theBlock.blockCreatureArray[ii][0] == "player") continue;
+
+			monsterID = theBlock.blockCreatureArray[ii][1];
 		
-		// If Monster Is Empty Continue
-		if (AI_controllerList[monsterID] == null) continue;
+			// If Monster Is Empty Continue
+			if (AI_controllerList[monsterID] == null) continue;
 
-		// Extract The Creature
-		theMonster = AI_controllerList[monsterID].creature;
+			// Extract The Creature
+			theMonster = AI_controllerList[monsterID].creature;
 
-		// AI controller update
-		AI_controllerList[monsterID].update(delta, game_map, spawnProjectile, playerArray, monsterArray);
-		theMapLevel.updateMonsterPos.push([theMonster.position, monsterID]);
+			// AI controller update
+			AI_controllerList[monsterID].update(delta, game_map, spawnProjectile, playerArray, monsterArray);
+			theMapLevel.updateMonsterPos.push([theMonster.position, monsterID]);
 
-		// Check Monster Collision With Projectile
-		creatureOnHit(theMonster, theMapLevel);
+			// Check Monster Collision With Projectile
+			creatureOnHit(theMonster, theMapLevel);
+		}
 	}
+
+	
 }
 
 // Randomly Generating An Item ID Based On Rarity Distribution
@@ -772,7 +794,6 @@ const newItem = (newItemID, newItemPosition, mapLevelIndex) => {
 	// Log The ItemInfo On The Server Side
 	console.log(itemInfoArray[newItemID], itemIndex);
 	
-	console
 	io.to("level " + mapLevelIndex).compress(true).emit('clientNewItem', newItemID, newItemPosition, itemIndex);
 };
 
@@ -968,18 +989,30 @@ setInterval(serverLoop, timeInterval);
 let startDate = new Date();
 let endDate = new Date();
 
+
 // Looping Certain Functions Per Server Frame
 function serverLoop(){
 	endDate = new Date();
 	let delta = (endDate.getTime() - startDate.getTime()) / 1000;
 	//For Each MapLevel
+	let theMapLevel;
 	for (let i = 0; i < game_map.mapLevel.length; ++i){
+		// Reset all block.updated to false
+		theMapLevel = game_map.mapLevel[i];
+		for (let ii = 0; ii < theMapLevel.resetBlockUpdated.length; ++ii){
+			theMapLevel.resetBlockUpdated[ii].updated = false;
+		}
+		theMapLevel.resetBlockUpdated = [];
+		theMapLevel.updateMonsterPos = [];
 		updateProjectile(delta, i);
-		updatePlayer(delta, game_map.mapLevel[i]);
-		updateMonster(delta, game_map.mapLevel[i]);
+		updatePlayer(delta, theMapLevel);
+		
+
 	}
 	startDate = new Date();
 }
+
+
 // -------------------End Of Server Loop-------------------
 // Update Client Frame
 function ClientFrameUpdate(playerID) {
@@ -1117,9 +1150,9 @@ server.listen(8080, () => {
 });
 
 // Spawning 500 Monsters Randomly Throughout The Map
-for (let monsterIndex = 0; monsterIndex < 800; ++monsterIndex){
+for (let monsterIndex = 0; monsterIndex < 1000; ++monsterIndex){
 	createNewMonster(0, createSpawnPosition(0), 0);
 }
-for (let monsterIndex = 0; monsterIndex < 0; ++monsterIndex){
+for (let monsterIndex = 0; monsterIndex < 1000; ++monsterIndex){
 	createNewMonster(1, createSpawnPosition(1), 1);
 }

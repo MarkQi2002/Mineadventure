@@ -338,7 +338,7 @@ class map {
 
                 if (blockX < 0 || blockX >= this.blockNumber.x || blockY < 0 || blockY >= this.blockNumber.y) continue;
                 
-                theBlock = this.mapLevel[mapLevelIndex].blockList[blockY][blockX];
+                theBlock = this.mapLevel[mapLevelIndex].getBlockByBlockPos([blockX, blockY]);
 
                 if (theBlock != null) surroundingBlocks.push([blockX, blockY, theBlock]);
             }
@@ -415,6 +415,8 @@ class mapLevel {
         this.updateProjectileArray = [];
         this.clearBlockProjectileArray = [];
 
+        this.resetBlockUpdated = [];
+
         this.newEmptyLevel(blockNumber);
         this.initLevelMap(blockSize, this_game_map);
 
@@ -468,6 +470,7 @@ class block {
         this.unitList = [];
         this.projectileList = [];
         this.blockCreatureArray = [];
+        this.updated = false;
 
         this.makeBlock(blockSize);
         this.initBlock(x, y, this_game_map, initSpawnMethodOutput[0], initSpawnMethodOutput[1]);

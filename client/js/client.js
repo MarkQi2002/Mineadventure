@@ -352,6 +352,7 @@ const updateFrame = ([projectilePosList, monsterPosList]) => {
 		theMonster = monsterArray[monsterPosList[i][1]];
 		if (theMonster != null){
 			theMonster.object.position.set(monsterPosList[i][0][0], monsterPosList[i][0][1], monsterPosList[i][0][2]); 
+			theMonster.update();
 		}
 	}
 };
