@@ -225,6 +225,27 @@ function createSpawnPosition(mapLevelIndex) {
 	return [mapX, mapY];
 }
 
+function createSurroundingSpawnPosition(mapLevelIndex,[blockX,blockY], [blockHalfRangeX, blockHalfRangeY], [spawnMinRangeX, spawnMinRangeY]) {
+	// Variable Declaration
+	let mapX, mapY;
+
+	let centerMapX = (blockX + 0.5) * game_map.blockSize.x >> 0;
+	let centerMapY = (blockY + 0.5) * game_map.blockSize.y >> 0;
+	let findCount = 0;
+	// Randomly Generate XY Coordinate Until Found One That Doesn't Collide With The Wall
+	while (findCount < 100) {
+		mapX = ((Math.random() * (1 + blockHalfRangeX * 2) - blockHalfRangeX + blockX) * game_map.blockSize.x) >> 0;
+		mapY = ((Math.random() * (1 + blockHalfRangeY * 2) - blockHalfRangeY + blockY) * game_map.blockSize.y) >> 0;
+		if (Math.abs(centerMapX - mapX) < spawnMinRangeX || Math.abs(centerMapY - mapY) < spawnMinRangeY) continue;
+		let unit = game_map.mapLevel[mapLevelIndex].getUnit([mapX, mapY]);
+		if (unit != null && !(game_map.getAllChildUnitCollision(unit))) break;
+		++findCount;
+	}
+
+	// Return Valid Position XY Coordinate
+	return [mapX, mapY];
+}
+
 // Exponential Level Up Function
 function experienceRequire(level) {
 	// Calculate EXP Required To Level Up
@@ -232,7 +253,7 @@ function experienceRequire(level) {
 }
 
 // This Function Is Called When Creature Gain EXP
-function levelUp(creatureInfo, experience) {
+function levelUpLocal(creatureInfo, experience) {
 	// Add EXP Gained And Calculate Required EXP To Level Up
 	creatureInfo.properties.experience += experience;
 	let nextLevelEXP = experienceRequire(creatureInfo.properties.level);
@@ -252,6 +273,12 @@ function levelUp(creatureInfo, experience) {
 		creatureInfo.properties.criticalRate += creatureInfo.properties.criticalRateGrowth;
 	}
 
+}
+
+// This Function Is Called When Creature Gain EXP
+function levelUp(creatureInfo, experience) {
+	levelUpLocal(creatureInfo, experience);
+
 	// Package Level Up Information
 	let levelUpInfo = { "level": ["=", creatureInfo.properties.level],
 						"experience": ["=", creatureInfo.properties.experience],
@@ -263,7 +290,7 @@ function levelUp(creatureInfo, experience) {
 					};
 	
 	// Sending Package To All Clients
-	io.compress(true).emit('creatureInfoChange', [[[creatureInfo.creatureType, creatureInfo.ID], levelUpInfo]]);
+	io.to("level " + creatureInfo.mapLevel).compress(true).emit('creatureInfoChange', [[[creatureInfo.creatureType, creatureInfo.ID], levelUpInfo]]);
 }
 
 
@@ -521,7 +548,7 @@ var monster_ID_Count = 0;
 var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower",
 						  "properties": {"health": 50, "maxHealth": 50, "attackDamage": 10, "attackSpeed": 0.5, "moveSpeed": 3},
 						  "camp": "defaultMonster",
-					      "campInfo": {"defaultMonster": -100}
+					      "campInfo": {"defaultMonster": 100}
 						},{}],
 						
 						[{"name": "Fakecat", "type": "burrower", 
@@ -534,9 +561,8 @@ var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower",
 					];
 
 // Creating A New Monster
-function createNewMonster(ID, spawnPos, mapLevel, monsterID) {
+function createNewMonster(ID, level, spawnPos, mapLevel, monsterID) {
 	// Input Control
-
 	if (monsterID == null){
 		monster_ID_Count = newDynamicArrayID(monsterArray, monster_ID_Count, 100, "Monster Array");
 		monsterID = monster_ID_Count;
@@ -564,6 +590,12 @@ function createNewMonster(ID, spawnPos, mapLevel, monsterID) {
 
 	// Saving Monster Info To Monster Array
 	monsterArray[monsterID] = monsterInfo;
+
+	// Set Level
+	if (level < 1) level = 1;
+	for (let i = 1; i < level; ++i) {
+		levelUpLocal(monsterInfo, experienceRequire(i));
+	}
 
 	// Add Monster In Block
 	let theMapLevel = game_map.mapLevel[mapLevel];
@@ -597,9 +629,10 @@ function createNewMonster(ID, spawnPos, mapLevel, monsterID) {
 function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 	// Variable Declaration
 	let monsterID, theBlock;
+	let surroundingMonsterNumber = 0;
 
 	// All Monster Surround The Player Within theMapLevel
-	let surroundingBlocks = game_map.getSurroundingBlock([thePlayer.lastBlockPos[0], thePlayer.lastBlockPos[1]], thePlayer.mapLevel, [1, 1])
+	let surroundingBlocks = game_map.getSurroundingBlock(thePlayer.lastBlockPos, thePlayer.mapLevel, [1, 1])
 	for (let i = 0; i < surroundingBlocks.length; ++i) {
 		theBlock = surroundingBlocks[i][2];
 		if (theBlock.updated) continue;
@@ -614,6 +647,8 @@ function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 			// If Monster Is Empty Continue
 			if (AI_controllerList[monsterID] == null) continue;
 
+			++surroundingMonsterNumber;
+
 			// Extract The Creature
 			theMonster = AI_controllerList[monsterID].creature;
 
@@ -626,7 +661,10 @@ function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 		}
 	}
 
-	
+	if (surroundingMonsterNumber < 10){
+		let newSpawnPos = createSurroundingSpawnPosition(thePlayer.mapLevel, thePlayer.lastBlockPos, [1, 1], [game_map.blockSize.x / 2, game_map.blockSize.y / 2])
+		createNewMonster(0, thePlayer.properties.level, newSpawnPos, thePlayer.mapLevel);
+	}
 }
 
 // Randomly Generating An Item ID Based On Rarity Distribution
@@ -1149,10 +1187,12 @@ server.listen(8080, () => {
   	console.log('server is ready');
 });
 
+
+/*
 // Spawning 500 Monsters Randomly Throughout The Map
 for (let monsterIndex = 0; monsterIndex < 1000; ++monsterIndex){
 	createNewMonster(0, createSpawnPosition(0), 0);
 }
 for (let monsterIndex = 0; monsterIndex < 1000; ++monsterIndex){
 	createNewMonster(1, createSpawnPosition(1), 1);
-}
+}*/
