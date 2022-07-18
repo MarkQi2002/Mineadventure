@@ -89,7 +89,7 @@ class AI_controller {
                 if ( existData == null) {
                     let priority = new_cost + this.heuristic(goal, next);
                     frontier.enqueue({x: next[0], y: next[1], cost: new_cost, last: current}, priority);
-                } else if(new_cost < existData.element.cost) {
+                } else if(new_cost < existData[0].element.cost) {
                     let priority = new_cost + this.heuristic(goal, next);
                     frontier.remove(existData[1]);
                     frontier.enqueue({x: existData[0].element.x, y: existData[0].element.y, cost: new_cost, last: current}, priority);
@@ -288,11 +288,6 @@ class PriorityQueue {
     constructor() {
         this.items = [];
     }
-    
-    // Get Element From The Array
-    get(index) {
-        return this.items[index];
-    }
 
     // Enqueue An Element To The Priority Queue
     // enqueue(item, priority)
@@ -338,24 +333,6 @@ class PriorityQueue {
         this.items.splice(index, 1);
     }
 
-    // front()
-    // Front Function
-    front() {
-        // Returns The Highest Priority Element
-        // In The Priority Queue Without Removing It.
-        if (this.isEmpty())
-            return "No elements in Queue";
-        return this.items[0];
-    }
-
-    // rear function
-    rear(){
-        // Returns The Lowest Priority
-        // Element Of The Queue
-        if (this.isEmpty())
-            return "No elements in Queue";
-        return this.items[this.items.length - 1];
-    }
 
     // isEmpty()
     isEmpty(){
@@ -373,13 +350,6 @@ class PriorityQueue {
         return null;
     }
 
-    // printPQueue()
-    printPQueue(){
-        var str = "";
-        for (var i = 0; i < this.items.length; i++)
-            str += this.items[i].element + " ";
-        return str;
-    }
 }
 
 // Required Because server.js Uses This JavaScript File

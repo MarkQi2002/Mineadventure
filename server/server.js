@@ -252,32 +252,35 @@ function experienceRequire(level) {
 	return Math.floor(level * 100 * Math.exp((level - 1) / 15));
 }
 
-// This Function Is Called When Creature Gain EXP
-function levelUpLocal(creatureInfo, experience) {
-	// Add EXP Gained And Calculate Required EXP To Level Up
-	creatureInfo.properties.experience += experience;
-	let nextLevelEXP = experienceRequire(creatureInfo.properties.level);
-
-	// Continuously Level Up Creature Until Not Enough EXP To Level Up Further More
-	while (creatureInfo.properties.experience >= nextLevelEXP){
-		// Level Up And Remove EXP
-		creatureInfo.properties.level += 1;
-		creatureInfo.properties.experience -= nextLevelEXP;
-		nextLevelEXP = experienceRequire(creatureInfo.properties.level);
-
-		// Increase Creature Properties Based On Level Up Growth Rate
-		creatureInfo.properties.health += creatureInfo.properties.maxHealthGrowth;
-		creatureInfo.properties.maxHealth += creatureInfo.properties.maxHealthGrowth;
-		creatureInfo.properties.attackDamage += creatureInfo.properties.attackDamageGrowth;
-		creatureInfo.properties.attackSpeed += creatureInfo.properties.attackSpeedGrowth;
-		creatureInfo.properties.criticalRate += creatureInfo.properties.criticalRateGrowth;
-	}
+// Creature Add Level
+function levelUpLocal(creatureInfo, addLevel) {
+	// Increase Creature Properties Based On Level Up Growth Rate
+	creatureInfo.properties.level += addLevel;
+	creatureInfo.properties.health += creatureInfo.properties.maxHealthGrowth * addLevel;
+	creatureInfo.properties.maxHealth += creatureInfo.properties.maxHealthGrowth * addLevel;
+	creatureInfo.properties.attackDamage += creatureInfo.properties.attackDamageGrowth * addLevel;
+	creatureInfo.properties.attackSpeed += creatureInfo.properties.attackSpeedGrowth * addLevel;
+	creatureInfo.properties.criticalRate += creatureInfo.properties.criticalRateGrowth * addLevel;
 
 }
 
 // This Function Is Called When Creature Gain EXP
 function levelUp(creatureInfo, experience) {
-	levelUpLocal(creatureInfo, experience);
+	// Add EXP Gained And Calculate Required EXP To Level Up
+	creatureInfo.properties.experience += experience;
+	let creaturelevel = creatureInfo.properties.level;
+	let nextLevelEXP = experienceRequire(creaturelevel);
+	let number = 0;
+	// Continuously Level Up Creature Until Not Enough EXP To Level Up Further More
+	while (creatureInfo.properties.experience >= nextLevelEXP){
+		// Level Up And Remove EXP
+		creaturelevel += 1;
+		creatureInfo.properties.experience -= nextLevelEXP;
+		nextLevelEXP = experienceRequire(creaturelevel);
+		++ number;
+	}
+
+	levelUpLocal(creatureInfo, number);
 
 	// Package Level Up Information
 	let levelUpInfo = { "level": ["=", creatureInfo.properties.level],
@@ -593,9 +596,8 @@ function createNewMonster(ID, level, spawnPos, mapLevel, monsterID) {
 
 	// Set Level
 	if (level < 1) level = 1;
-	for (let i = 1; i < level; ++i) {
-		levelUpLocal(monsterInfo, experienceRequire(i));
-	}
+	levelUpLocal(monsterInfo, level - 1);
+
 
 	// Add Monster In Block
 	let theMapLevel = game_map.mapLevel[mapLevel];
@@ -663,9 +665,21 @@ function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 
 	if (surroundingMonsterNumber < 10){
 		let newSpawnPos = createSurroundingSpawnPosition(thePlayer.mapLevel, thePlayer.lastBlockPos, [1, 1], [game_map.blockSize.x / 2, game_map.blockSize.y / 2])
-		createNewMonster(0, thePlayer.properties.level, newSpawnPos, thePlayer.mapLevel);
+		let [monsterInfoID, minLevel, maxLevel, levelHalfRange] = theMapLevel.monsterSpawnFunction(theMapLevel.monsterSpawnInfo);
+		//thePlayer.properties.level
+		
+
+		let randomNum = Math.random() * 2 - 1;
+
+		let spawnLevel = ((randomNum > 1 ? levelHalfRange : -levelHalfRange) * Math.log(Math.abs(randomNum)) / Math.log(50) + thePlayer.properties.level) >> 0;
+
+		if (spawnLevel > maxLevel) spawnLevel = maxLevel;
+		else if (spawnLevel < minLevel)spawnLevel = minLevel;
+		console.log(spawnLevel)
+		createNewMonster(monsterInfoID, spawnLevel, newSpawnPos, thePlayer.mapLevel);
 	}
 }
+
 
 // Randomly Generating An Item ID Based On Rarity Distribution
 function itemDrop(monsterID){
