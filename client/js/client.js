@@ -327,8 +327,8 @@ const spawnProjectile = (projectileInfo) => {
 	for (let i = 0; i < projectileInfo.length; i++){
 		if (projectileInfo[i] != null && projectileInfo[i][1] != null && projectileInfo[i][1] != "deletion"){
 			var newProjectile = new projectile(projectileInfo[i][1]);
-			if (projectileList.length < projectileInfo[i][0]){
-				projectileList.length === projectileInfo[i][0];
+			if (projectileList.length <= projectileInfo[i][0]){
+				projectileList.length = projectileInfo[i][0] + 1;
 			}
 			projectileList[projectileInfo[i][0]] = newProjectile;
 		}
@@ -337,13 +337,11 @@ const spawnProjectile = (projectileInfo) => {
 
 // Update Frame
 const updateFrame = ([projectilePosList, monsterPosList]) => {
-	if (projectileList.length < projectilePosList.length){
-		projectileList.length === projectilePosList.length;
-	}
-
-	for (let i = 0; i < projectileList.length; i++){
-		if (projectileList[i] != null){
-			projectileList[i].positionChange(projectilePosList[i]);
+	let projectileID;
+	for (let i = 0; i < projectilePosList.length; i++){
+		projectileID = projectilePosList[i][0];
+		if (projectileList[projectileID] != null){
+			projectileList[projectileID].positionChange(projectilePosList[i][1]);
 		}
 	}
 

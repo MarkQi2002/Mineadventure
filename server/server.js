@@ -323,7 +323,7 @@ function creatureOnHit(creatureInfo, theMapLevel) {
 	if (theBlock == null) return;
 
 	// Extract All Projectiles Within The Block
-	let blockProjectileList = theBlock.projectileList;
+	let blockProjectileList = theBlock.projectileList.getInorderList();
 
 	// Variable Declaration
 	let theProjectile;
@@ -858,11 +858,21 @@ function removeItem(removeItemID, mapLevelIndex) {
 function spawnProjectile([projectileInfo, mapLevelIndex]){
 	let projectileSpawnInfo = [];
 	let theMapLevel = game_map.mapLevel[mapLevelIndex];
-	let newProjectileID;
+	let newProjectileID, theBlock;
 	for (let i = 0; i < projectileInfo.length; i++){
 		theMapLevel.projectile_count = newDynamicArrayID(theMapLevel.levelProjectileArray, theMapLevel.projectile_count, 100, "Projectile Array");
 		newProjectileID = theMapLevel.projectile_count;
 		theMapLevel.levelProjectileArray[newProjectileID] = projectileInfo[i];
+		if (theMapLevel.clearBlockProjectileArray.length < theMapLevel.levelProjectileArray.length){
+			theMapLevel.clearBlockProjectileArray.length = theMapLevel.levelProjectileArray.length;
+		}
+		theBlock = theMapLevel.getBlock([(projectileInfo[i].position[0]+ 0.5) >> 0, (projectileInfo[i].position[1]+ 0.5) >> 0]);
+		if (theBlock != null){
+			theBlock.projectileList.insert(newProjectileID);
+			theMapLevel.clearBlockProjectileArray[newProjectileID] = [theBlock];
+		}else{
+			theMapLevel.clearBlockProjectileArray[newProjectileID] = [];
+		}
 		projectileSpawnInfo.push([newProjectileID, projectileInfo[i]]);
 	}
 
@@ -882,46 +892,47 @@ function initPlayerProjectile(mapLevelIndex){
 // Update All Projectiles
 function updateProjectile(delta, mapLevelIndex){
 	let theMapLevel = game_map.mapLevel[mapLevelIndex];
-	theMapLevel.updateProjectileArray.length = theMapLevel.levelProjectileArray.length;
-
+	theMapLevel.updateProjectileArray =[];
 	let deleteProjectileList = [];
 	let deleteUnitList = [];
 	let projectilePos;
 
-	for (let i = 0; i < theMapLevel.clearBlockProjectileArray.length; i++){
-		game_map.mapLevel[0].blockList[theMapLevel.clearBlockProjectileArray[i][1]]
-									  [theMapLevel.clearBlockProjectileArray[i][0]].projectileList = [];
-	}
+	//for (let i = 0; i < theMapLevel.clearBlockProjectileArray.length; i++){
+		//theMapLevel.clearBlockProjectileArray[i].projectileList = [];
+	//}
 
-	theMapLevel.clearBlockProjectileArray = [];
+	//theMapLevel.clearBlockProjectileArray = [];
 
-	let projectileArray, unit, theBlock, mapX, mapY, unitIndexX, unitIndexY, floatBlockX, floatBlockY, blockX, blockY, OnXBorder;
+	let projectileArray, unit, theBlock, mapX, mapY, unitIndexX, unitIndexY, floatBlockX, floatBlockY, blockX, blockY, OnXBorder, lastBlock;
 	// Check All Projectile List
 	for (let i = 0; i < theMapLevel.levelProjectileArray.length; i++) {
 		projectileArray = theMapLevel.levelProjectileArray[i];
 		if (projectileArray == "deletion"){
 			// For Delete Projectile
-			theMapLevel.levelProjectileArray[i] = null;
-			theMapLevel.updateProjectileArray[i] = null;
+			deleteProjectile(theMapLevel, i);
 			deleteProjectileList.push(i);
 
 		} else if (projectileArray != null) {
+			let [lastBlockX, lastBlockY] = [(projectileArray.position[0] + 0.5) / game_map.blockSize.x >> 0, (projectileArray.position[1] + 0.5) / game_map.blockSize.y >> 0];
 			projectileArray.position[0] += projectileArray.initVelocity[0] * delta;
 			projectileArray.position[1] += projectileArray.initVelocity[1] * delta;
+			
+
 			projectilePos = [
 				projectileArray.position[0],
 				projectileArray.position[1]
 			];
-			theMapLevel.updateProjectileArray[i] = projectilePos;
 			
 			[mapX, mapY] = [(projectileArray.position[0] + 0.5) >> 0, (projectileArray.position[1] + 0.5) >> 0];
-
 			[floatBlockX, floatBlockY] = [mapX / theMapLevel.blockSize.x, mapY / theMapLevel.blockSize.y];
-        	if (theMapLevel.IsNotInMapRange(floatBlockX, floatBlockY)){
+			[blockX, blockY] = [floatBlockX >> 0, floatBlockY >> 0];
+
+
+			if (theMapLevel.IsNotInMapRange(floatBlockX, floatBlockY)){
 				theBlock = null;
 				unit = null;
 			}else{
-				theBlock = theMapLevel.blockList[floatBlockY >> 0][floatBlockX >> 0];
+				theBlock = theMapLevel.blockList[blockY][blockX];
 				[unitIndexX, unitIndexY] = [mapX % game_map.blockSize.x, mapY % game_map.blockSize.y];
 				unit = theBlock.unitList[unitIndexY][unitIndexX];
 			}
@@ -929,8 +940,7 @@ function updateProjectile(delta, mapLevelIndex){
 			
 			if (unit == null){
 				// For Delete Projectile
-				theMapLevel.levelProjectileArray[i] = null;
-				theMapLevel.updateProjectileArray[i] = null;
+				deleteProjectile(theMapLevel, i);
 				deleteProjectileList.push(i);
 				continue;
 			} else {
@@ -946,8 +956,7 @@ function updateProjectile(delta, mapLevelIndex){
 					// Check Is The Unit Is Already Hit
 					if (isNotIn){
 						// For Delete Projectile
-						theMapLevel.levelProjectileArray[i] = null;
-						theMapLevel.updateProjectileArray[i] = null;
+						deleteProjectile(theMapLevel, i);
 						deleteProjectileList.push(i);
 
 
@@ -962,50 +971,68 @@ function updateProjectile(delta, mapLevelIndex){
 				}
 			}
 
-			// Pushing Information To The Lists
-			theBlock.projectileList.push(i);
-			theMapLevel.clearBlockProjectileArray.push([floatBlockX >> 0, floatBlockY >> 0]);
-
-
-			OnXBorder = false;
-			// For Projectile On the Border Of The Block
-			if (unitIndexX == 0){
-				blockX = (floatBlockX - 1) >> 0;
-				if (blockX >= 0){
-					theMapLevel.blockList[floatBlockY >> 0][blockX].projectileList.push(i);
-					theMapLevel.clearBlockProjectileArray.push([blockX, floatBlockY >> 0]);
-					OnXBorder = true;
+			// Update Only If Block Change
+			if (lastBlockX != blockX || lastBlockY != blockY){
+				for (let ii = 0; ii < theMapLevel.clearBlockProjectileArray[i].length; ++ii){
+					lastBlock = theMapLevel.clearBlockProjectileArray[i][ii];
+					lastBlock.projectileList.remove(i);
 				}
-			}else if (unitIndexX == theMapLevel.blockSize.x - 1){
-				blockX = (floatBlockX + 1) >> 0;
-				if (blockX < theMapLevel.blockNumber.x){
-					theMapLevel.blockList[floatBlockY >> 0][blockX].projectileList.push(i);
-					theMapLevel.clearBlockProjectileArray.push([blockX, floatBlockY >> 0]);
-					OnXBorder = true;
-				}
-			}
+				theMapLevel.clearBlockProjectileArray[i] = [];
 
-			if (unitIndexY == 0){
-				blockY = (floatBlockY - 1) >> 0;
-				if (blockY >= 0){
-					theMapLevel.blockList[blockY][floatBlockX >> 0].projectileList.push(i);
-					theMapLevel.clearBlockProjectileArray.push([floatBlockX >> 0, blockY]);
-					if(OnXBorder){
-						theMapLevel.blockList[blockY][blockX].projectileList.push(i);
-						theMapLevel.clearBlockProjectileArray.push([blockX, blockY]);
+				// Pushing Information To The Lists
+				theBlock.projectileList.insert(i);
+				theMapLevel.clearBlockProjectileArray[i].push(theBlock);
+
+
+				OnXBorder = false;
+				// For Projectile On the Border Of The Block
+				if (unitIndexX == 0){
+					blockX = (floatBlockX - 1) >> 0;
+					if (blockX >= 0){
+						theBlock = theMapLevel.blockList[floatBlockY >> 0][blockX];
+						theBlock.projectileList.insert(i);
+						theMapLevel.clearBlockProjectileArray[i].push(theBlock);
+						OnXBorder = true;
+					}
+				}else if (unitIndexX == theMapLevel.blockSize.x - 1){
+					blockX = (floatBlockX + 1) >> 0;
+					if (blockX < theMapLevel.blockNumber.x){
+						theBlock = theMapLevel.blockList[floatBlockY >> 0][blockX];
+						theBlock.projectileList.insert(i);
+						theMapLevel.clearBlockProjectileArray[i].push(theBlock);
+						OnXBorder = true;
 					}
 				}
-			}else if (unitIndexY == theMapLevel.blockSize.y - 1){
-				blockY = (floatBlockY + 1) >> 0;
-				if (blockY < theMapLevel.blockNumber.y){
-					theMapLevel.blockList[blockY][floatBlockX >> 0].projectileList.push(i);
-					theMapLevel.clearBlockProjectileArray.push([floatBlockX >> 0, blockY]);
-					if(OnXBorder){
-						theMapLevel.blockList[blockY][blockX].projectileList.push(i);
-						theMapLevel.clearBlockProjectileArray.push([blockX, blockY]);
+
+				if (unitIndexY == 0){
+					blockY = (floatBlockY - 1) >> 0;
+					if (blockY >= 0){
+						theBlock = theMapLevel.blockList[blockY][floatBlockX >> 0];
+						theBlock.projectileList.insert(i);
+						theMapLevel.clearBlockProjectileArray[i].push(theBlock);
+						if(OnXBorder){
+							theBlock = theMapLevel.blockList[blockY][blockX];
+							theBlock.projectileList.insert(i);
+							theMapLevel.clearBlockProjectileArray[i].push(theBlock);
+						}
+					}
+				}else if (unitIndexY == theMapLevel.blockSize.y - 1){
+					blockY = (floatBlockY + 1) >> 0;
+					if (blockY < theMapLevel.blockNumber.y){
+						theBlock = theMapLevel.blockList[blockY][floatBlockX >> 0];
+						theBlock.projectileList.insert(i);
+						theMapLevel.clearBlockProjectileArray[i].push(theBlock);
+						if(OnXBorder){
+							theBlock = theMapLevel.blockList[blockY][blockX];
+							theBlock.projectileList.insert(i);
+							theMapLevel.clearBlockProjectileArray[i].push(theBlock);
+						}
 					}
 				}
-			}
+			} 
+
+        	
+			theMapLevel.updateProjectileArray.push([i, projectilePos]);
 		}
 	}
 	
@@ -1014,6 +1041,18 @@ function updateProjectile(delta, mapLevelIndex){
 		io.to("level " + mapLevelIndex).emit('deleteEvent', [deleteProjectileList, deleteUnitList]);
 	}
 }
+
+function deleteProjectile(theMapLevel, projectileID){
+	let lastBlock;
+	for (let ii = 0; ii < theMapLevel.clearBlockProjectileArray[projectileID].length; ++ii){
+		lastBlock = theMapLevel.clearBlockProjectileArray[projectileID][ii];
+		lastBlock.projectileList.remove(projectileID);
+	}
+
+	theMapLevel.levelProjectileArray[projectileID] = null;
+	theMapLevel.clearBlockProjectileArray[projectileID] = null;
+}
+
 
 function getAllChildUnitDestroyable(unit){
 	return game_map.unitIDList[unit.ID].destroyable || (unit.childUnit == null ? false : getAllChildUnitDestroyable(unit.childUnit));
