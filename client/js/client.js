@@ -131,7 +131,7 @@ function sendCreaturePropertyChange([creatureType, id], propertyList){
 const creatureInfoChange = (creatureInfo) => {
 	// Example creatureInfo = [[creatureType, id], {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
 	let updateLocalPlayerUI = false;
-	let updateOnlyHealthUI = true;
+	let updateOnlyHealthUI = false;
 
 	// Loop Through creatureInfo
 	for (let i = 0; i < creatureInfo.length; i++){
@@ -159,11 +159,14 @@ const creatureInfoChange = (creatureInfo) => {
 				else if (value[0] == "/") setValue = theCreature.properties[key] / value[1];
 
 				if (key == "health"){
+					if (updateLocalPlayerUI) updateOnlyHealthUI = true;
 					theCreature.setHealth(setValue);
 				} else if (key == "maxHealth") {
+					if (updateLocalPlayerUI) updateOnlyHealthUI = true;
 					theCreature.setMaxHealth(setValue);
+				} else if (key == "level") {
+					theCreature.setLevel(setValue);
 				} else {
-					if (updateLocalPlayerUI) updateOnlyHealthUI = false;
 					theCreature.properties[key] = setValue;
 				}
 			}

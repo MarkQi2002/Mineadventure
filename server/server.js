@@ -405,6 +405,11 @@ const CreateNewPlayer = (playerID, playerName, spawnPos, mapLevel, sock) => {
 	// Store PlayerInfo Object Into playerArray
 	playerArray[playerID] = playerInfo;
 
+	// Add Player In Block
+	let theMapLevel = game_map.mapLevel[mapLevel];
+    let lastBlock = theMapLevel.getBlockByBlockPos([playerInfo.lastBlockPos[0], playerInfo.lastBlockPos[1]]);
+    lastBlock.blockCreatureArray.push([playerInfo.creatureType, playerInfo.ID]);
+
 	// Add Sock In sockArray
 	if (sockArray.length < playerArray.length){
 		sockArray.length = playerArray.length;
@@ -415,7 +420,7 @@ const CreateNewPlayer = (playerID, playerName, spawnPos, mapLevel, sock) => {
 	console.log(playerInfo);
 
 	// Add Player To mapLevel
-	game_map.mapLevel[mapLevel].levelPlayerArray.push(playerInfo);
+	theMapLevel.levelPlayerArray.push(playerInfo);
 
 	// Send To All Clients in Same Level
 	// io.to -> To Individual SocketID
@@ -449,11 +454,12 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 			if (lastBlock != null){
 				let theBlockArray = lastBlock.blockCreatureArray;
 				for (let i = 0; i < theBlockArray.length; ++i){
-					if (theBlockArray[i] != null && theBlockArray[i].ID == playerArray[playerID].ID && theBlockArray[i].creatureType == playerArray[playerID].creatureType){
+					if (theBlockArray[i] != null && theBlockArray[i][1] == playerArray[playerID].ID && theBlockArray[i][0] == playerArray[playerID].creatureType){
 						lastBlock.blockCreatureArray.splice(i, 1);
 						break;
 					}
 				}
+
 			}
 
 			theMapLevel.getBlock([Pos[0], Pos[1]]).blockCreatureArray.push([playerArray[playerID].creatureType, playerArray[playerID].ID]);
@@ -632,50 +638,60 @@ function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 	// Variable Declaration
 	let monsterID, theBlock;
 	let surroundingMonsterNumber = 0;
+	let totalSurroundingPlayerLevel = 0;
+	let totalSurroundingPlayerNumber = 0;
 
 	// All Monster Surround The Player Within theMapLevel
 	let surroundingBlocks = game_map.getSurroundingBlock(thePlayer.lastBlockPos, thePlayer.mapLevel, [1, 1])
 	for (let i = 0; i < surroundingBlocks.length; ++i) {
 		theBlock = surroundingBlocks[i][2];
-		if (theBlock.updated) continue;
-		theBlock.updated = true;
-		theMapLevel.resetBlockUpdated.push(theBlock);
-		for (let ii = 0; ii < theBlock.blockCreatureArray.length; ++ii) {
+		if (!theBlock.updated){
+			theBlock.updated = true;
+			theBlock.surroundingMonsterNumber = 0;
+			theMapLevel.resetBlockUpdated.push(theBlock);
+			for (let ii = 0; ii < theBlock.blockCreatureArray.length; ++ii) {
+				
+				if (theBlock.blockCreatureArray[ii][0] == "player"){
+					let aPlayer = playerArray[theBlock.blockCreatureArray[ii][1]];
+					if (aPlayer != null){
+						totalSurroundingPlayerLevel += aPlayer.properties.level;
+						++ totalSurroundingPlayerNumber;
+					}
+					continue;
+				};
+
+				monsterID = theBlock.blockCreatureArray[ii][1];
 			
-			if (theBlock.blockCreatureArray[ii][0] == "player") continue;
+				// If Monster Is Empty Continue
+				if (AI_controllerList[monsterID] == null) continue;
 
-			monsterID = theBlock.blockCreatureArray[ii][1];
-		
-			// If Monster Is Empty Continue
-			if (AI_controllerList[monsterID] == null) continue;
+				++ theBlock.surroundingMonsterNumber;
 
-			++surroundingMonsterNumber;
+				// Extract The Creature
+				theMonster = AI_controllerList[monsterID].creature;
 
-			// Extract The Creature
-			theMonster = AI_controllerList[monsterID].creature;
+				// AI controller update
+				AI_controllerList[monsterID].update(delta, game_map, spawnProjectile, playerArray, monsterArray);
+				theMapLevel.updateMonsterPos.push([theMonster.position, monsterID]);
 
-			// AI controller update
-			AI_controllerList[monsterID].update(delta, game_map, spawnProjectile, playerArray, monsterArray);
-			theMapLevel.updateMonsterPos.push([theMonster.position, monsterID]);
-
-			// Check Monster Collision With Projectile
-			creatureOnHit(theMonster, theMapLevel);
+				// Check Monster Collision With Projectile
+				creatureOnHit(theMonster, theMapLevel);
+			}
 		}
+		
+		surroundingMonsterNumber += theBlock.surroundingMonsterNumber;
 	}
 
-	if (surroundingMonsterNumber < 10){
+	if (surroundingMonsterNumber < 10 && totalSurroundingPlayerNumber > 0){
 		let newSpawnPos = createSurroundingSpawnPosition(thePlayer.mapLevel, thePlayer.lastBlockPos, [1, 1], [game_map.blockSize.x / 2, game_map.blockSize.y / 2])
 		let [monsterInfoID, minLevel, maxLevel, levelHalfRange] = theMapLevel.monsterSpawnFunction(theMapLevel.monsterSpawnInfo);
-		//thePlayer.properties.level
-		
 
+		// Set Spawn Level
 		let randomNum = Math.random() * 2 - 1;
-
-		let spawnLevel = ((randomNum > 1 ? levelHalfRange : -levelHalfRange) * Math.log(Math.abs(randomNum)) / Math.log(50) + thePlayer.properties.level) >> 0;
-
+		let spawnLevel = ((randomNum > 1 ? levelHalfRange : -levelHalfRange) * Math.log(Math.abs(randomNum)) / Math.log(50) + (totalSurroundingPlayerLevel / totalSurroundingPlayerNumber)) >> 0;
 		if (spawnLevel > maxLevel) spawnLevel = maxLevel;
 		else if (spawnLevel < minLevel)spawnLevel = minLevel;
-		console.log(spawnLevel)
+
 		createNewMonster(monsterInfoID, spawnLevel, newSpawnPos, thePlayer.mapLevel);
 	}
 }

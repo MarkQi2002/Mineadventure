@@ -41,6 +41,11 @@ class creature{
         this.updateHealthBarPercent();
     }
 
+    setLevel(newLevel){
+        this.properties.level = newLevel;
+        this.onHeadUI.updateLevel();
+    }
+
     // Updating Health Bar UI
     updateHealthBarPercent() {
         let scale = this.properties.health / this.properties.maxHealth;

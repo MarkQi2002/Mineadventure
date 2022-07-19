@@ -74,8 +74,7 @@ class propertiesUI {
         this.text.style.width = 100 + 'vw';
         this.text.style.height = 5 + 'vh';
         this.text.innerHTML = this.key + ": " + value;
-
-        this.setSize();
+        this.text.style.fontSize = 2 + 'vh';
 
         //this.text.style.opacity = 1;
         this.text.style.top = 2 + 'vh';
@@ -83,11 +82,6 @@ class propertiesUI {
 
         creatureInfoUI.appendChild(this.text);
 
-    }
-
-    // Setting UI Size
-    setSize() {
-        this.text.style.fontSize = window.innerHeight * 0.02 + 'px';
     }
 
     // Setting UI Information
@@ -136,8 +130,10 @@ class damageText{
         this.text.style.width = 100;
         this.text.style.height = 100;
         this.text.innerHTML = Math.abs(amount);
-
-        this.size = (8 / Math.PI * Math.atan(Math.abs(amount) / 100) + 1) * 0.01 *  window.innerHeight;
+        this.size = (8 / Math.PI * Math.atan(Math.abs(amount) / 100) + 1);
+        console.log( this.size)
+        this.text.style.fontSize = this.size + 'vh';
+        //this.size = this.size * window.innerHeight;
         
         // Check Damage Type
         if (type == "true") {
@@ -154,7 +150,6 @@ class damageText{
         // Damage Text Timer
         this.sqrtSize = Math.sqrt(this.size);
         this.rate = this.deleteTimer / (2 * this.sqrtSize);
-        this.text.style.fontSize = this.size + 'px';
 
         this.text.style.opacity = 0.75;
         
@@ -209,30 +204,67 @@ class creatureUI{
         // DIV CSS
         this.UI = document.createElement('div');
         this.UI.style.position = 'absolute';
+        this.UI.style.width = 10 + "vh";
+        this.UI.style.height = 4  + "vh";
+        this.UI.style.overflow = "hidden";
 
         // Name DIV CSS
         this.name = document.createElement('div');
-
         this.name.style.position = 'relative';
         this.name.style.textAlign = 'center';
         this.name.innerHTML = this.creature.name;
 		this.name.style.color = 'white';
         this.name.style.opacity = 1;
+        this.name.style.width = 100 + '%';
+        this.name.style.height = 50 + '%';
+        this.name.style.fontSize = 1.5 + 'vh';
+        this.name.style.top = 0 + '%';
+        this.name.style.left = 0 + '%';
 
         // Background CSS
         this.healthBackground = document.createElement('div');
         this.healthBackground.style.position = 'relative';
         this.healthBackground.style.backgroundColor = "rgba(255,255,255,0.5)";
-
+        this.healthBackground.style.width = 80 + '%';
+        this.healthBackground.style.height = 30 + '%';
+        this.healthBackground.style.left = 20 + '%';
+        
         // HealthBar CSS
         this.healthBar = document.createElement('div');
         this.healthBackground.appendChild(this.healthBar);
         this.healthBar.style.position = 'relative';
         this.healthBar.style.backgroundColor = "rgba(255,0,0,1)";
         this.healthBar.style.opacity = 1;
+        this.setScale(this.scale);
+        this.healthBar.style.height = 60 + '%';
+        this.healthBar.style.top = 20 + '%';
+        this.healthBar.style.left = 5 + '%';
 
-        // Adjusting Size Based On Scale
-        this.updateSize();
+        // Level CSS
+        this.level = document.createElement('div');
+        this.level.style.position = 'relative';
+        this.level.style.width = 20 + '%';
+        this.level.style.height = 50 + '%';
+        this.level.style.top = -30 + '%';
+
+        var levelImage = document.createElement("IMG");
+        levelImage.style.position = 'absolute';
+        levelImage.setAttribute("src", "/image/levelCircle.png");
+        levelImage.style.width = 100 + '%';
+        levelImage.style.height = 100 + '%';
+        this.level.appendChild(levelImage);
+
+        this.levelText = document.createElement('div');
+        this.levelText.style.position = 'absolute';
+        this.levelText.style.textAlign = 'center';
+        this.updateLevel();
+        this.levelText.style.width = 100 + '%';
+        this.levelText.style.height = 100 + '%';
+        //this.levelText.style.top = 50 + '%';
+       // this.levelText.style.left = 50 + '%';
+        this.level.appendChild(this.levelText);
+
+        //this.level.style.left = window.innerHeight * 0 + 'px';
 
         this.UI.style.visibility = 'hidden';
 
@@ -242,7 +274,12 @@ class creatureUI{
         this.UI.style.left = posX + 'px';
         this.UI.appendChild(this.name);
         this.UI.appendChild(this.healthBackground);
+        this.UI.appendChild(this.level);
         menuHtml.appendChild(this.UI);
+    }
+
+    updateLevel(){
+        this.levelText.innerHTML = this.creature.properties.level;
     }
 
     // Conversion To XY Coordinate
@@ -256,29 +293,7 @@ class creatureUI{
     // Setting Scale Based On Window Size
     setScale(scale) {
         this.scale = scale;
-        this.healthBar.style.width = window.innerHeight * 0.1 * scale + 'px';
-    }
-
-    // Update CSS Size Based On Window Size
-    updateSize() {
-        this.UI.style.width = window.innerHeight * 0.2 + "px";
-        this.UI.style.height = window.innerHeight * 0.05  + "px";
-
-        this.name.style.width = window.innerHeight * 0.2 + 'px';
-        this.name.style.height = window.innerHeight * 0.025 + 'px';
-        this.name.style.fontSize = window.innerHeight * 0.02 + 'px';
-        this.name.style.top = 0 + 'px';
-        this.name.style.left = 0 + 'px';
-
-        this.healthBackground.style.width = window.innerHeight * 0.105 + 'px';
-        this.healthBackground.style.height = window.innerHeight * 0.015 + 'px';
-        this.healthBackground.style.top = window.innerHeight * 0.005 + 'px';
-        this.healthBackground.style.left = window.innerHeight * 0.05 + 'px';
-
-        this.setScale(this.scale);
-        this.healthBar.style.height = window.innerHeight * 0.01 + 'px';
-        this.healthBar.style.top = window.innerHeight * 0.0025 + 'px';
-        this.healthBar.style.left = window.innerHeight * 0.0025 + 'px';
+        this.healthBar.style.width = 90 * scale + '%';
     }
 
     // Update Function

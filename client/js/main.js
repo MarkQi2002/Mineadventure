@@ -25,22 +25,6 @@ const resizeWindow = () => {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
-
-    for (let i = 0; i < playerArray.length; i++){
-        if (playerArray[i] != null && i != clientPlayerID){
-            playerArray[i].onHeadUI.updateSize();
-        }
-    }
-
-    for (let i = 0; i < monsterArray.length; i++){
-        if (monsterArray[i] != null){
-            monsterArray[i].onHeadUI.updateSize();
-        }
-    }
-
-    for (let [key, value] of Object.entries(creatureInfoUIList)) {
-        creatureInfoUIList[key].setSize();
-    }
 };
 
 // Fix window size event

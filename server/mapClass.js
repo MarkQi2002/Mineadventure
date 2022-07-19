@@ -106,7 +106,7 @@ class map {
                                                                     }),
                                     this.init_defaultMonsterMethod({defaultMinLevel: 10,
                                                                     defaultMaxLevel: 20,
-                                                                    monsterSpawnList: [{ID: 0, weight: 2, minLevel: 1, maxLevel: 15}
+                                                                    monsterSpawnList: [{ID: 0, weight: 2}
                                 
                                 
                                                                                     ],
@@ -551,6 +551,7 @@ class block {
         this.projectileList = new BinarySearchTree();
         this.blockCreatureArray = [];
         this.updated = false;
+        this.surroundingMonsterNumber = 0;
 
         this.makeBlock(blockSize);
         this.initBlock(x, y, this_game_map, initSpawnMethodOutput[0], initSpawnMethodOutput[1]);
