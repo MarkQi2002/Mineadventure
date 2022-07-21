@@ -268,6 +268,7 @@ class map {
         }
     }
 
+    // Remove All Block
     clearAllBlock(){
         let theBlock;
         for (let y_Axis = 0; y_Axis < this.blockList.length; ++y_Axis) {

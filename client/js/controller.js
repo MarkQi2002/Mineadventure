@@ -1,5 +1,6 @@
 // Controller Class 
 class controller{ 
+    // Controller Constructor
     constructor(creature, camera) { 
         this.creature = creature; 
         this.camera = camera;
@@ -19,7 +20,8 @@ class controller{
         this.rightCollision = false;
         
         this.lastBlockPos = [0, 0];
- 
+        
+        // Input Boolean
         this.inputs = { 
             forward: false, 
             backward: false, 
@@ -29,6 +31,7 @@ class controller{
             shift: false, 
         }; 
 
+        // Mouse Position
         this.mouse = {
             x: 0,
             y: 0,
@@ -36,7 +39,8 @@ class controller{
             right: false,
             middle: false
         }
- 
+        
+        // Adding Event Listener
         document.addEventListener("keydown", (e) => this.KeyDown(e), false); 
         document.addEventListener("keyup", (e) => this.KeyUp(e), false); 
         document.addEventListener("mousedown", (e) => this.MouseDown(e), false); 
@@ -155,6 +159,7 @@ class controller{
             properties: this.creature.properties
         }
 
+        // New Projectile
         var newProjectile = {
             position: [this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z],
             initVelocity: [8 * vectorX, 8 * vectorY],
@@ -276,6 +281,7 @@ class controller{
         // For Collision Detection 
         let creatureTrans = this.creature.object; 
 
+        // Reset Input Boolean
         this.forwardCollision = false;
         this.backwardCollision = false;
         this.leftCollision = false;
@@ -285,6 +291,7 @@ class controller{
         let predictedPosition = new THREE.Vector3();
         predictedPosition.copy(creatureTrans.position);
 
+        // Next Position
         let predictedMapX;
         let predictedMapY;
         
@@ -477,7 +484,6 @@ class controller{
  
     // Updating Client Block If Moving Between Blocks 
     controllerUpdateBlock([blockX,blockY]){ 
- 
         if (blockX != this.lastBlockPos[0] || 
             blockY != this.lastBlockPos[1]){ 
  
@@ -496,8 +502,8 @@ class controller{
             game_map.blockObjectClass[i].view = false; 
         } 
  
- 
         var blockPosList = []; 
+        // Get All Surrounding Blocks
         for (let y_Axis = -blockHalfRangeY; y_Axis <= blockHalfRangeY; y_Axis++) { 
             for (let x_Axis = -blockHalfRangeX; x_Axis <= blockHalfRangeX; x_Axis++) { 
                 // Variable Declaration 
@@ -519,7 +525,7 @@ class controller{
             } 
         } 
  
-        for (let i = 0; i < game_map.blockObjectClass.length; i++){ 
+        for (let i = 0; i < game_map.blockObjectClass.length; ++i){ 
             if (!game_map.blockObjectClass[i].view){ 
                 if (game_map.blockObjectClass[i].block != null){ 
                     game_map.deleteBlock(game_map.blockObjectClass[i].block); 
@@ -541,7 +547,6 @@ class controller{
     damage(amount){
         sendCreaturePropertyChange(["player", clientPlayerID], {"health": ["-", amount]});
     }
-
 
     // Updating The Position 
     update(delta){ 

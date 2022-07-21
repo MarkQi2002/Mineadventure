@@ -105,6 +105,7 @@ function animate() {
         }
     }
 
+    // Updating Event
     for (let i = 0; i < damageTextList.length; ++i){
         if (damageTextList[i] != null){
             damageTextList[i].update(delta, i);

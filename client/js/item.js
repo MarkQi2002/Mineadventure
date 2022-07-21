@@ -3,8 +3,10 @@ function loadItemMaterials(){
     let itemMaterialsArray = [];
     let loader = new THREE.TextureLoader();
     itemMaterialsArray.length = itemInfoArray.length;
+
+    // Loop Through Item Material Array To Initialize Material
     for (let i = 0; i < itemMaterialsArray.length; i++) {
-        if (itemInfoArray[i].length > 0){
+        if (itemInfoArray[i].length > 0) {
             let texture = loader.load("image/UI_Image/" + itemInfoArray[i][0].itemName + ".png");
             itemMaterialsArray[i] =  new THREE.MeshBasicMaterial({map: texture, transparent: true});
         }
@@ -24,6 +26,7 @@ class item {
         this.object = new THREE.Object3D();
         this.object.position.set(itemPosition[0], itemPosition[1], itemPosition[2]);
 
+        // Creating THREE Mesh
         let itemMesh = new THREE.Mesh(itemLoader.geometry, itemLoader.material[ this.itemInfo.itemID]);
         itemMesh.rotation.x = cameraAngle;
         this.object.add(itemMesh);

@@ -14,10 +14,10 @@ const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap
 	
 
 	gameMapLevel = initMapLevel;
-
+	
+	// Input Control
 	if (game_map != null){
-		
-		//Delete Old Player
+		// Delete Old Player
 		for (let i = 0; i < playerArray.length; ++i) {
 			if (playerArray[i] != null && i != clientPlayerID){
 				playerArray[i].delete();
@@ -25,12 +25,12 @@ const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap
 			}
 		}
 	
-		//Delete Old Monster
+		// Delete Old Monster
 		for (let i = 0; i < monsterArray.length; ++i) {
 			deleteMonster(i);
 		}
 	
-		//Delete Old Projectile
+		// Delete Old Projectile
 		for (let i = 0; i < projectileList.length; ++i) {
 			if (projectileList[i] != null){
 				projectileList[i].delete();
@@ -38,16 +38,13 @@ const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap
 			}
 		}
 		
-		//Delete Old item
+		// Delete Old item
 		for (let i = 0; i < itemArray.length; ++i) {
 			removeItem(i);
 		}
 
-
-
-
 		game_map.loadNewMapLevel(serverMap); 
-	}else{
+	} else {
 		// Create New Map
 		game_map = new map(serverMap);
 	}
@@ -68,15 +65,16 @@ const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap
 	if (monsterArray.length < monsterArrayLength){
 		monsterArray.length = monsterArrayLength;
 	}
+
+	// Loop Through Monster Array
 	for (let i = 0; i < serverMonsterArray.length; ++i) {
 		if (serverMonsterArray[i] != null){
 			spawnMonster(serverMonsterArray[i]);
 		}
 	}
 
+	// Initilize Player Item
 	initItem(serverItemArray, serverItemInfoArray);
-
-	
 };
 
 // Initialization Myself And All Future Players
@@ -85,6 +83,7 @@ const newPlayer = (playerInfo, playerArrayLength) => {
 		playerArray.length = playerArrayLength;
 	}
 	let new_player = spawnPlayer(playerInfo);
+	
 	// Setting The Controller To The Player When First Enter
 	if (playerInfo.ID == clientPlayerID){
 		player_controller = new controller(new_player, camera);
@@ -114,8 +113,8 @@ const playerPositionUpdate = ([Pos, PlayerID]) => {
 // Send Creature Property Change To Server And Change At All Other Client
 function sendCreaturePropertyChange([creatureType, id], propertyList){
 	let isIn = false;
-	for (let i; i < changingCreatureInfo.length; i++){
-		if (changingCreatureInfo[i][0][0] == creatureType && changingCreatureInfo[i][0][1] == id){
+	for (let i; i < changingCreatureInfo.length; i++) {
+		if (changingCreatureInfo[i][0][0] == creatureType && changingCreatureInfo[i][0][1] == id) {
 			isIn = true;
 			for ([key, value] of Object.entries(propertyList)) {
 				changingCreatureInfo[i][1][key] = value;
@@ -156,6 +155,7 @@ const creatureInfoChange = (creatureInfo) => {
 				else if (value[0] == "*") setValue = theCreature.properties[key] * value[1];
 				else if (value[0] == "/") setValue = theCreature.properties[key] / value[1];
 
+				// Modifying Corresponding Properties
 				if (key == "health"){
 					theCreature.setHealth(setValue);
 					if (updateLocalPlayerUI) updateTopLeftUI = true;
@@ -168,7 +168,8 @@ const creatureInfoChange = (creatureInfo) => {
 				} else {
 					theCreature.properties[key] = setValue;
 				}
-
+				
+				// Update Local Player UI
 				if (updateLocalPlayerUI) {
 					displayCreatureProperty(key);
 				}
@@ -176,10 +177,10 @@ const creatureInfoChange = (creatureInfo) => {
 		}
 	}
 
+	// Updating Player UI
 	if (updateTopLeftUI) {
 		displayPlayerHealth();
 	}
-
 };
 
 // Creating Damage Text List
@@ -190,7 +191,6 @@ function createDamageTextList(damageInfo, theCreature){
 			new damageText(key, value, [theCreature.object.position.x , theCreature.object.position.y, theCreature.object.position.z]);
 		}
 	}
-
 }
 // -------------------End Of Player-------------------
 
@@ -326,6 +326,7 @@ const playerDisconnect = (PlayerID) => {
 // -------------------Projectile-------------------
 // Spawning Projectile
 const spawnProjectile = (projectileInfo) => {
+	// Loop Through Projectile Info
 	for (let i = 0; i < projectileInfo.length; i++){
 		if (projectileInfo[i] != null && projectileInfo[i][1] != null && projectileInfo[i][1] != "deletion"){
 			var newProjectile = new projectile(projectileInfo[i][1]);
@@ -369,6 +370,7 @@ const deleteEvent = ([deleteProjectileList, deleteUnitList]) => {
 		}
 	}
 
+	// Removing Unit Based On deleteUnitList
 	for (let i = 0; i < deleteUnitList.length; i++){
 		if (deleteUnitList[i] != null){
 			game_map.deleteUnit(deleteUnitList[i]);

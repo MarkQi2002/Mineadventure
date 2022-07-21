@@ -41,6 +41,7 @@ class creature{
         this.updateHealthBarPercent();
     }
 
+    // Setting Game Level
     setLevel(newLevel){
         this.properties.level = newLevel;
         this.onHeadUI.updateLevel();
