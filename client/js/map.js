@@ -94,7 +94,6 @@ class map {
         //******************************************************************
         geometry = new THREE.BoxGeometry(1, 1, 6); // geometry for all cubes
         this.geometryList.push(geometry); // 1
-
         //******************************************************************
     }
 
@@ -223,6 +222,7 @@ class map {
         parent.add(mesh);
         unitClass.mesh = mesh;
         mesh.position.set(x, y, unitClass.Height);
+        mesh.rotation.z = unitClass.rotation;
     }
 
 

@@ -25,6 +25,10 @@ function displayCreatureProperties() {
     }
 }
 
+function displayCreatureProperty(key) {
+    creatureInfoUIList[key].update(player_controller.creature.properties[key]);
+}
+
 // Initialize The UI
 function initUI() {
     for (let [key, value] of Object.entries(player_controller.creature.properties)) {
@@ -131,9 +135,7 @@ class damageText{
         this.text.style.height = 100;
         this.text.innerHTML = Math.abs(amount);
         this.size = (8 / Math.PI * Math.atan(Math.abs(amount) / 100) + 1);
-        console.log( this.size)
         this.text.style.fontSize = this.size + 'vh';
-        //this.size = this.size * window.innerHeight;
         
         // Check Damage Type
         if (type == "true") {
@@ -377,6 +379,35 @@ function unlockedCommand(inputArray) {
     }
 }
 
+function teleport([mapX, mapY]){
+    // Updating Renderer Information
+    player_controller.controllerUpdateBlock(game_map.mapPosToBlockPos([mapX, mapY]));
+
+    // Moving Player To New Position
+    player_controller.creature.object.position.x = mapX;
+    player_controller.creature.object.position.y = mapY;
+
+    // Moving The Camera With The Player
+    player_controller.camera.position.x = mapX;
+    player_controller.camera.position.y = mapY - carmeraOffsetY;
+
+    for (let i = 0; i < playerArray.length; ++i){
+        if (playerArray[i] != null){
+            playerArray[i].update();
+        }
+    }
+
+    for (let i = 0; i < monsterArray.length; ++i){
+        if (monsterArray[i] != null){
+            monsterArray[i].update();
+        }
+    }
+
+    // Update Player Position Event
+    var event = new Event('position event', {bubbles: true, cancelable: false}) 
+    document.dispatchEvent(event);
+}
+
 // Commands That Need To Be Unlocked
 function lockedCommand(inputArray) {
     // Teleport The Player
@@ -384,27 +415,15 @@ function lockedCommand(inputArray) {
         // Input Control
         let [playerX, playerY] = [parseInt(inputArray[1]), parseInt(inputArray[2])];
 
-        player_controller.controllerUpdateBlock(game_map.mapPosToBlockPos([playerX, playerY]));
-
-
         if (isNaN(parseInt(playerX)) || isNaN(parseInt(playerY))) {
             console.log("The TP Location Is Invalid!");
             return;
         }
 
-        // Updating Redenerer Information
 
-        // Moving Player To New Position
-        player_controller.creature.object.position.x = playerX;
-        player_controller.creature.object.position.y = playerY;
+        teleport([playerX, playerY]);
 
-        // Moving The Camera With The Player
-        player_controller.camera.position.x = playerX;
-        player_controller.camera.position.y = playerY - carmeraOffsetY;
-
-        // Update Player Position Event
-        var event = new Event('position event', {bubbles: true, cancelable: false}) 
-        document.dispatchEvent(event);
+        
     // Teleport To Playe By Player ID
     } else if (inputArray[0] == "tpa") {
         // Input Control
@@ -420,10 +439,6 @@ function lockedCommand(inputArray) {
         
         let playerX = Math.floor(playerArray[parseInt(inputArray[1])].object.position.x);
         let playerY = Math.floor(playerArray[parseInt(inputArray[1])].object.position.y);
-
-        // Updating Redenerer Information
-        player_controller.controllerUpdateBlock(game_map.mapPosToBlockPos([playerX, playerY]));
-
 
         let xPosOffset, yPosOffset;
         let count = 0
@@ -441,18 +456,8 @@ function lockedCommand(inputArray) {
             yPosOffset = playerY;
         }
 
+        teleport([xPosOffset, yPosOffset]);
 
-        // Moving Player To New Position
-        player_controller.creature.object.position.x = xPosOffset;
-        player_controller.creature.object.position.y = yPosOffset;
-
-        // Moving The Camera With The Player
-        player_controller.camera.position.x = xPosOffset;
-        player_controller.camera.position.y = yPosOffset - carmeraOffsetY;
-
-        // Update Player Position Event
-        var event = new Event('position event', {bubbles: true, cancelable: false}) 
-        document.dispatchEvent(event);
     // Teleport To Player By Name
     } else if (inputArray[0] == "tpn") {
         let trueIndex = -1;
@@ -473,20 +478,7 @@ function lockedCommand(inputArray) {
         let xPosOffset = playerArray[trueIndex].object.position.x + 1;
         let yPosOffset = playerArray[trueIndex].object.position.y + 1;
 
-        // Updating Redenerer Information
-        player_controller.controllerUpdateBlock(game_map.mapPosToBlockPos([playerX, playerY]));
-
-        // Moving Player To New Position
-        player_controller.creature.object.position.x = xPosOffset;
-        player_controller.creature.object.position.y = yPosOffset;
-
-        // Moving The Camera With The Player
-        player_controller.camera.position.x = xPosOffset;
-        player_controller.camera.position.y = yPosOffset - carmeraOffsetY;
-
-        // Update Player Position Event
-        var event = new Event('position event', {bubbles: true, cancelable: false}) 
-        document.dispatchEvent(event);
+        teleport([xPosOffset, yPosOffset]);
 
     } else if (inputArray[0] == "mapLevel"){
         if (inputArray[1] == null || isNaN(parseInt(inputArray[1]))) {

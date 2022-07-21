@@ -989,11 +989,14 @@ function updateProjectile(delta, mapLevelIndex){
 						deleteProjectile(theMapLevel, i);
 						deleteProjectileList.push(i);
 
-
 						if (game_map.unitIDList[unit.ID].destroyable){
-							unit.ID = 15;
-							unit.Height = 0;
+							unit.ID = game_map.unitIDList[unit.ID].replacingUnit;
+							if (unit.ID == null) {
+								unit.ID = theMapLevel.initSpawnMethodOutput[1].defaultReplacingUnit;
+								unit.Height = 0;
+							}
 						}
+						
 						unit.childUnit = null;
 						deleteUnitList.push([[mapX, mapY], unit]);
 						continue;

@@ -130,13 +130,11 @@ function sendCreaturePropertyChange([creatureType, id], propertyList){
 // Change An Creature's Property Using Input creatureInfo
 const creatureInfoChange = (creatureInfo) => {
 	// Example creatureInfo = [[creatureType, id], {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
-	let updateLocalPlayerUI = false;
-	let updateOnlyHealthUI = false;
-
+	let updateTopLeftUI = false;
 	// Loop Through creatureInfo
 	for (let i = 0; i < creatureInfo.length; i++){
 		let theCreature;
-
+		let updateLocalPlayerUI = false;
 		// Check If Target Is Player Or Monster
 		if (creatureInfo[i][0][0] == "player") {
 			if (playerArray[creatureInfo[i][0][1]] == null) continue;
@@ -159,28 +157,29 @@ const creatureInfoChange = (creatureInfo) => {
 				else if (value[0] == "/") setValue = theCreature.properties[key] / value[1];
 
 				if (key == "health"){
-					if (updateLocalPlayerUI) updateOnlyHealthUI = true;
 					theCreature.setHealth(setValue);
+					if (updateLocalPlayerUI) updateTopLeftUI = true;
 				} else if (key == "maxHealth") {
-					if (updateLocalPlayerUI) updateOnlyHealthUI = true;
 					theCreature.setMaxHealth(setValue);
+					if (updateLocalPlayerUI) updateTopLeftUI = true;
 				} else if (key == "level") {
 					theCreature.setLevel(setValue);
+					if (updateLocalPlayerUI) updateTopLeftUI = true;
 				} else {
 					theCreature.properties[key] = setValue;
+				}
+
+				if (updateLocalPlayerUI) {
+					displayCreatureProperty(key);
 				}
 			}
 		}
 	}
 
-	// Updating Player Health UI
-	if (updateLocalPlayerUI) {
-		if (updateOnlyHealthUI) {
-			displayPlayerHealth();
-		} else {
-			displayAllUI();
-		}
+	if (updateTopLeftUI) {
+		displayPlayerHealth();
 	}
+
 };
 
 // Creating Damage Text List

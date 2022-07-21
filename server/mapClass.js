@@ -47,8 +47,27 @@ class map {
             this.setUnitIDInfo(["mushroom6.glb"], {destroyable: true, modelType: 0.6}),
             this.setUnitIDInfo(["mushroom7.glb"], {destroyable: true, modelType: 0.6}),
             this.setUnitIDInfo(["stone1.glb"], {destroyable: true, modelType: 3}),
-            this.setUnitIDInfo(["portal1.glb"], {collision: true, modelType: 0.5}),
-            this.setUnitIDInfo(["statueDown.glb"], {collision: true, modelType: 0.5}),
+            this.setUnitIDInfo(["portal1.glb"], {modelType: 1}),
+            this.setUnitIDInfo(["guider.glb"], {collision: true, modelType: 0.5}),
+            this.setUnitIDInfo(null, {collision: true}),// 37  Invisible wall
+            this.setUnitIDInfo(["rockSideH.jpg",// Horizontal
+                                "rockSideH.jpg",// Horizontal
+                                "rockSideV.jpg",// Vertical
+                                "rockSideV.jpg",// Vertical
+                                "rock1.jpg",
+                                "rock1.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true, geometryType: 1, replacingUnit: 39}),
+            this.setUnitIDInfo(["rockSideH2.jpg",// Horizontal
+                                "rockSideH2.jpg",// Horizontal
+                                "rockSideV2.jpg",// Vertical
+                                "rockSideV2.jpg",// Vertical
+                                "rock2.jpg",
+                                "rock2.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true, geometryType: 1, replacingUnit: 40}),
+            this.setUnitIDInfo(["rockSideH3.jpg",// Horizontal
+                                "rockSideH3.jpg",// Horizontal
+                                "rockSideV3.jpg",// Vertical
+                                "rockSideV3.jpg",// Vertical
+                                "rock3.jpg",
+                                "rock3.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true, geometryType: 1}),
             
 
 
@@ -78,10 +97,9 @@ class map {
                                                                                       {list: [13, 14, 31], weight: 15}, // (blue flowers and green mushrooms)
                                                                                       {list: [11, 12, 27, 28, 29, 30, 32], weight: 1}, // (other color flowers and mushrooms)
                                                                                       {list: [34], weight: 1}, // (stone)
-                                                                                      {list: [35, 36], weight: 0}, // (portal, statue)
                                                                                     ],
                                                                     groundIDList: [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26],
-                                                                    wallIDList: [1]
+                                                                    wallIDList: [38]
                                                                     }),
                                     this.init_defaultMonsterMethod({defaultMinLevel: 1,
                                                                     defaultMaxLevel: 10,
@@ -126,7 +144,8 @@ class map {
             ["base"]: false, // Can have childUnit On (true or false)
             ["geometryType"]: null, // if is not null, load geometry and texture (need to be geometry index)
             ["modelType"]: null, // if is not null, load model (inside is model scale)
-            ["IsPhongMaterial"]: false// material can reflect light (true or false)
+            ["IsPhongMaterial"]: false,// material can reflect light (true or false)
+            ["replacingUnit"]: null, // Replacing Unit After Destroy
         }
 
         // AdditionalInfo
@@ -149,6 +168,7 @@ class map {
             ["maxWallHeight"]: 3,
             ["perlinRate"]: 10, // amplitude of wall
             ["perlinOffset"]: 0, // Offset for determind is ground or wall (between -0.5 and 0.5. For -0.5 there will be no wall, and 0.5 will be all wall)
+            ["defaultReplacingUnit"]: 15,
 
         }
 
@@ -266,7 +286,7 @@ class map {
                 randomChildListWeight -= childIDList.weight;
             }
 
-            newChildUnit = new mapUnit(childID, 0, null)
+            newChildUnit = new mapUnit(childID, 0, null, Math.random() * Math.PI * 2);
         }else{
             newChildUnit = null;
         }
@@ -414,7 +434,6 @@ class map {
 
                 let [blockX, blockY] = [centerBlockX + x_Axis, centerBlockY + y_Axis];
 
-                if (blockX < 0 || blockX >= this.blockNumber.x || blockY < 0 || blockY >= this.blockNumber.y) continue;
                 
                 theBlock = this.mapLevel[mapLevelIndex].getBlockByBlockPos([blockX, blockY]);
 
@@ -511,11 +530,69 @@ class mapLevel{
 
     // Double For Loop To Generate The Block
     initLevelMap(blockSize, this_game_map){
-        for (let y_Axis = 0; y_Axis < this.blockList.length; y_Axis++) {
-            for (let x_Axis = 0; x_Axis < this.blockList[y_Axis].length; x_Axis++) {
+        for (let y_Axis = 0; y_Axis < this.blockList.length; ++y_Axis) {
+            for (let x_Axis = 0; x_Axis < this.blockList[y_Axis].length; ++x_Axis) {
                 this.blockList[y_Axis][x_Axis] = new block(x_Axis, y_Axis, blockSize, this_game_map, this.initSpawnMethodOutput);
             }
         }
+
+
+        // Spawn Portal
+        let count = 0;
+        let surroundingUnitList;
+        let portalX, portalY, allBase;
+        let [halfRangeX, halfRangeY] = [3,3];
+        let numberOfUnit = (halfRangeX * 2 + 1) * (halfRangeY * 2 + 1);
+        while (count < 100){
+            ++count;
+            portalX = (Math.random() * this_game_map.blockNumber.x * this_game_map.blockSize.x) >> 0;
+		    portalY = (Math.random() * this_game_map.blockNumber.y * this_game_map.blockSize.y) >> 0;
+            surroundingUnitList = this.getSurroundingUnit([portalX , portalY], [halfRangeX, halfRangeY]);
+            if (surroundingUnitList.length != numberOfUnit) continue;
+            allBase = true;
+            for (let i = 0; i < surroundingUnitList.length; ++i) {
+                if (!this_game_map.unitIDList[surroundingUnitList[i].ID].base) {
+                    allBase = false;
+                    break;
+                }
+            }
+            if (allBase) break;
+        }
+        console.log ("Spawn Portal On:", portalX, portalY, "   Number Of Run:", count)
+
+        for (let i = 0; i < surroundingUnitList.length; ++i) {
+            surroundingUnitList[i].childUnit = null;
+        }
+
+        // Invisible Wall For Portal
+        let portalCollision =  [23 ,25];
+        for (let i = 0; i < portalCollision.length; ++i) {
+            surroundingUnitList[portalCollision[i]].childUnit = new mapUnit(37, 0, null);
+        }
+        surroundingUnitList[numberOfUnit / 2 >> 0].childUnit = new mapUnit(35, 0, null);
+
+
+        let guiderX, guiderY, guiderUnit;
+
+        let numberOfGuider = this.blockNumber.x * this.blockSize.x * this.blockNumber.y * this.blockSize.y / 1000;
+        for (let i = 0; i < numberOfGuider; ++i) {
+            count = 0;
+            while (count < 100){
+                ++count;
+                guiderX = (Math.random() * this_game_map.blockNumber.x * this_game_map.blockSize.x) >> 0;
+                guiderY = (Math.random() * this_game_map.blockNumber.y * this_game_map.blockSize.y) >> 0;
+                guiderUnit = this.getUnit([guiderX , guiderY]);
+
+                if (guiderUnit != null && this_game_map.unitIDList[guiderUnit.ID].base) break;
+            }
+
+
+            guiderUnit.childUnit = new mapUnit(36, 0, null, Math.atan2((guiderY - portalY), (guiderX - portalX)) - Math.PI / 2);
+        }
+
+
+
+
     }
 
     IsNotInMapRange(floatBlockX, floatBlockY){
@@ -539,6 +616,22 @@ class mapLevel{
         let theBlock = this.getBlock([mapX, mapY]);
         if (theBlock == null) return null;
         return theBlock.unitList[mapY % this.blockSize.y][mapX % this.blockSize.x];
+    }
+
+    getSurroundingUnit([centerUnitX, centerUnitY], [unitHalfRangeX, unitHalfRangeY]){
+        let theUnit;
+        let surroundingUnit = [];
+        for (let y_Axis = -unitHalfRangeY; y_Axis <= unitHalfRangeY; y_Axis++) {
+            for (let x_Axis = -unitHalfRangeX; x_Axis <= unitHalfRangeX; x_Axis++) {
+
+                let [unitX, unitY] = [centerUnitX + x_Axis, centerUnitY + y_Axis];
+
+                theUnit = this.getUnit([unitX, unitY]);
+
+                if (theUnit != null) surroundingUnit.push(theUnit);
+            }
+        }
+        return surroundingUnit;
     }
 
 }
@@ -576,10 +669,11 @@ class block {
     }
 }
 
-function mapUnit(ID, Height, newChildUnit) {
+function mapUnit(ID, Height, newChildUnit, rotation = 0) {
     this.ID = ID;
     this.Height = Height;
     this.childUnit = newChildUnit;
+    this.rotation = rotation;
 }
 
 
