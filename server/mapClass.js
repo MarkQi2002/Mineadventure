@@ -49,28 +49,25 @@ class map {
             this.setUnitIDInfo(["stone1.glb"], {destroyable: true, modelType: 3}),
             this.setUnitIDInfo(["portal1.glb"], {modelType: 1}),
             this.setUnitIDInfo(["guider.glb"], {collision: true, modelType: 0.5}),
-            this.setUnitIDInfo(null, {collision: true}),// 37  Invisible wall
-            this.setUnitIDInfo(["rockSideH.jpg",// Horizontal
-                                "rockSideH.jpg",// Horizontal
-                                "rockSideV.jpg",// Vertical
-                                "rockSideV.jpg",// Vertical
+            this.setUnitIDInfo(null, {collision: true}), // 37  Invisible wall
+            this.setUnitIDInfo(["rockSideH.jpg", // Horizontal
+                                "rockSideH.jpg", // Horizontal
+                                "rockSideV.jpg", // Vertical
+                                "rockSideV.jpg", // Vertical
                                 "rock1.jpg",
                                 "rock1.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true, geometryType: 1, replacingUnit: 39}),
-            this.setUnitIDInfo(["rockSideH2.jpg",// Horizontal
-                                "rockSideH2.jpg",// Horizontal
-                                "rockSideV2.jpg",// Vertical
-                                "rockSideV2.jpg",// Vertical
+            this.setUnitIDInfo(["rockSideH2.jpg", // Horizontal
+                                "rockSideH2.jpg", // Horizontal
+                                "rockSideV2.jpg", // Vertical
+                                "rockSideV2.jpg", // Vertical
                                 "rock2.jpg",
                                 "rock2.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true, geometryType: 1, replacingUnit: 40}),
-            this.setUnitIDInfo(["rockSideH3.jpg",// Horizontal
-                                "rockSideH3.jpg",// Horizontal
-                                "rockSideV3.jpg",// Vertical
-                                "rockSideV3.jpg",// Vertical
+            this.setUnitIDInfo(["rockSideH3.jpg", // Horizontal
+                                "rockSideH3.jpg", // Horizontal
+                                "rockSideV3.jpg", // Vertical
+                                "rockSideV3.jpg", // Vertical
                                 "rock3.jpg",
                                 "rock3.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true, geometryType: 1}),
-            
-
-
         ];
 
         // Save Block Size
@@ -89,6 +86,7 @@ class map {
         this.mapLevel;
     }
 
+    // Create New MapLevel
     createMapLevel(){
         // Save Map Level (Multiple Map Level)
         this.mapLevel = [new mapLevel(this.blockNumber, this.blockSize, this,
@@ -138,13 +136,13 @@ class map {
     // set UnitIDInfo by (texture url address, collision bool)
     setUnitIDInfo(fileName, additionalInfo) {
         var unitIDInfo = {
-            ["fileName"]: fileName, // FileName for url address
-            ["collision"]: false, // Can Walk through (true or false)
-            ["destroyable"]: false, // Can be destroyed (true or false)
-            ["base"]: false, // Can have childUnit On (true or false)
-            ["geometryType"]: null, // if is not null, load geometry and texture (need to be geometry index)
-            ["modelType"]: null, // if is not null, load model (inside is model scale)
-            ["IsPhongMaterial"]: false,// material can reflect light (true or false)
+            ["fileName"]: fileName, // FileName For url Address
+            ["collision"]: false, // Can Walk Through (True Or False)
+            ["destroyable"]: false, // Can Be Destroyed (True Or False)
+            ["base"]: false, // Can Have childUnit On (True Or False)
+            ["geometryType"]: null, // If Is Not null, Load Geometry And Texture (Need To Be Geometry Index)
+            ["modelType"]: null, // If Is Not null, Load Model (Inside Is Model Scale)
+            ["IsPhongMaterial"]: false, // Material Can Reflect Light (True or False)
             ["replacingUnit"]: null, // Replacing Unit After Destroy
         }
 
@@ -153,10 +151,10 @@ class map {
 		    unitIDInfo[key] = value;
 	    }
 
+        // Return The Unit Information ID
         return unitIDInfo
     }
     // ****************************************************** Map Method ******************************************************
-
 
     // ------------------- Method One - Perlin Noise -------------------
     init_perlinNoiseMapMethod(ChangeSpawnMethodInputs){
@@ -250,6 +248,7 @@ class map {
         return [this.perlinNoiseMapMethod, spawnMethodInputs];
     }
 
+    // Perlin Noise Map Method
     perlinNoiseMapMethod(spawnMethodInputs, blockX, blockY, unitX, unitY, theBlock, this_game_map){
         var ID;
         var Height = spawnMethodInputs.perlinRate * 
@@ -324,7 +323,8 @@ class map {
 
         return [this.defaultMonsterMethod, monsterSpawnInputs];
     }
-
+    
+    // Default Monster Method
     defaultMonsterMethod(monsterSpawnInputs){
         let spawnMonster;
         // Get A Random Monster From monsterSpawnList By Their Weight
@@ -426,6 +426,7 @@ class map {
         return neighborList;
     }
 
+    // FUnction To Return All Surrounding Block
     getSurroundingBlock([centerBlockX, centerBlockY], mapLevelIndex, [blockHalfRangeX, blockHalfRangeY]){
         let theBlock;
         let surroundingBlocks = [];
@@ -536,13 +537,14 @@ class mapLevel{
             }
         }
 
-
         // Spawn Portal
         let count = 0;
         let surroundingUnitList;
         let portalX, portalY, allBase;
         let [halfRangeX, halfRangeY] = [3,3];
         let numberOfUnit = (halfRangeX * 2 + 1) * (halfRangeY * 2 + 1);
+        
+        // Looping Through Multiple Position To Spawn A Protal
         while (count < 100){
             ++count;
             portalX = (Math.random() * this_game_map.blockNumber.x * this_game_map.blockSize.x) >> 0;
@@ -565,12 +567,11 @@ class mapLevel{
         }
 
         // Invisible Wall For Portal
-        let portalCollision =  [23 ,25];
+        let portalCollision =  [23, 25];
         for (let i = 0; i < portalCollision.length; ++i) {
             surroundingUnitList[portalCollision[i]].childUnit = new mapUnit(37, 0, null);
         }
         surroundingUnitList[numberOfUnit / 2 >> 0].childUnit = new mapUnit(35, 0, null);
-
 
         let guiderX, guiderY, guiderUnit;
 
@@ -586,19 +587,16 @@ class mapLevel{
                 if (guiderUnit != null && this_game_map.unitIDList[guiderUnit.ID].base) break;
             }
 
-
             guiderUnit.childUnit = new mapUnit(36, 0, null, Math.atan2((guiderY - portalY), (guiderX - portalX)) - Math.PI / 2);
         }
-
-
-
-
     }
 
+    // Check If Within Map Rnage
     IsNotInMapRange(floatBlockX, floatBlockY){
         return this.blockNumber.x <= floatBlockX || 0 > floatBlockX || this.blockNumber.y <= floatBlockY || 0 > floatBlockY;
     }
 
+    // Return The Block By Block Coordinate
     getBlockByBlockPos([blockX, blockY]){
         if (this.IsNotInMapRange(blockX, blockY)) return null;
         return this.blockList[blockY][blockX];
@@ -618,12 +616,12 @@ class mapLevel{
         return theBlock.unitList[mapY % this.blockSize.y][mapX % this.blockSize.x];
     }
 
+    // Reutnr The Surrounding Unit
     getSurroundingUnit([centerUnitX, centerUnitY], [unitHalfRangeX, unitHalfRangeY]){
         let theUnit;
         let surroundingUnit = [];
         for (let y_Axis = -unitHalfRangeY; y_Axis <= unitHalfRangeY; y_Axis++) {
             for (let x_Axis = -unitHalfRangeX; x_Axis <= unitHalfRangeX; x_Axis++) {
-
                 let [unitX, unitY] = [centerUnitX + x_Axis, centerUnitY + y_Axis];
 
                 theUnit = this.getUnit([unitX, unitY]);
@@ -633,7 +631,6 @@ class mapLevel{
         }
         return surroundingUnit;
     }
-
 }
 
 // Map Block Class
@@ -669,6 +666,7 @@ class block {
     }
 }
 
+// Setting Map Unit
 function mapUnit(ID, Height, newChildUnit, rotation = 0) {
     this.ID = ID;
     this.Height = Height;

@@ -140,17 +140,18 @@ class camp{
 	}
 }*/
 
-
-
+// Default Camp Information
 function campInfo(){
 	this["defaultPlayer"] = -100
 	this["defaultMonster"] = 0
 	this["monsterKiller"] = 0
 }
 
+// Return Attackability For Attacker Based On Defender Status
 function IsAttackable(attackerCampInfo, defenderCamp){
 	return attackerCampInfo[defenderCamp] < 50;
 }
+
 // -------------------End Of Camp-------------------
 
 // -------------------Creature-------------------
@@ -225,13 +226,16 @@ function createSpawnPosition(mapLevelIndex) {
 	return [mapX, mapY];
 }
 
+// Spawning A Creature Without Colliding With The Wall
 function createSurroundingSpawnPosition(mapLevelIndex,[blockX,blockY], [blockHalfRangeX, blockHalfRangeY], [spawnMinRangeX, spawnMinRangeY]) {
 	// Variable Declaration
 	let mapX, mapY;
 
+	// Location Related Variables
 	let centerMapX = (blockX + 0.5) * game_map.blockSize.x >> 0;
 	let centerMapY = (blockY + 0.5) * game_map.blockSize.y >> 0;
 	let findCount = 0;
+
 	// Randomly Generate XY Coordinate Until Found One That Doesn't Collide With The Wall
 	while (findCount < 100) {
 		mapX = ((Math.random() * (1 + blockHalfRangeX * 2) - blockHalfRangeX + blockX) * game_map.blockSize.x) >> 0;
@@ -450,22 +454,23 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 		if (blockX != playerArray[playerID].lastBlockPos[0] || blockY != playerArray[playerID].lastBlockPos[1]){
 			let theMapLevel = game_map.mapLevel[playerArray[playerID].mapLevel];
 			let lastBlock = theMapLevel.getBlockByBlockPos([playerArray[playerID].lastBlockPos[0], playerArray[playerID].lastBlockPos[1]]);
-
-			if (lastBlock != null){
+			
+			// Loop Through All Block Array
+			if (lastBlock != null) {
 				let theBlockArray = lastBlock.blockCreatureArray;
-				for (let i = 0; i < theBlockArray.length; ++i){
-					if (theBlockArray[i] != null && theBlockArray[i][1] == playerArray[playerID].ID && theBlockArray[i][0] == playerArray[playerID].creatureType){
+				for (let i = 0; i < theBlockArray.length; ++i) {
+					if (theBlockArray[i] != null && theBlockArray[i][1] == playerArray[playerID].ID && theBlockArray[i][0] == playerArray[playerID].creatureType) {
 						lastBlock.blockCreatureArray.splice(i, 1);
 						break;
 					}
 				}
-
 			}
 
 			theMapLevel.getBlock([Pos[0], Pos[1]]).blockCreatureArray.push([playerArray[playerID].creatureType, playerArray[playerID].ID]);
 			playerArray[playerID].lastBlockPos = [blockX, blockY];
 		}
 
+		// Updating The Position
 		playerArray[playerID].position = Pos;
 		
 		// Send To All Player On Same Level
@@ -509,7 +514,7 @@ const clientDisconnect = (Info, playerID) => {
 	}
 };
 
-// Command
+// Command Handler
 const serverCommand = (playerID, theCommand) => {
 	if (theCommand[0] == "mapLevel"){
 		if (theCommand[1] >= game_map.mapLevel.length) return;
@@ -517,14 +522,17 @@ const serverCommand = (playerID, theCommand) => {
 	}
 };
 
+// Switching Between Different Map Level
 function SwitchMapLevel(spawnPos, playerInfo, newMapLevelIndex){
 	// Remove The Player From mapLevel
 	let mapLevelIndex = playerInfo.mapLevel;
 	let sock = sockArray[playerInfo.ID];
 	sock.leave("level " + mapLevelIndex);
 	let index = game_map.mapLevel[mapLevelIndex].levelPlayerArray.indexOf(playerInfo);
-	if (index > -1) { // only splice array when item is found
-		game_map.mapLevel[mapLevelIndex].levelPlayerArray.splice(index, 1); // 2nd parameter means remove one item only
+	
+	// Only Splice Array When Item Is Found
+	if (index > -1) {
+		game_map.mapLevel[mapLevelIndex].levelPlayerArray.splice(index, 1); // 2nd Parameter Means Remove One Item Only
 	}
 	io.to("level " + mapLevelIndex).compress(true).emit('clientDisconnect', playerInfo.ID);
 
@@ -536,7 +544,7 @@ function SwitchMapLevel(spawnPos, playerInfo, newMapLevelIndex){
 	game_map.mapLevel[newMapLevelIndex].levelPlayerArray.push(playerInfo);
 }
 
-
+// Setting Map Level
 function setMapLevel(sock, spawnPos, playerID, newMapLevelIndex){
 	// Add Player To The New mapLevel
 	sock.join("level " + newMapLevelIndex);
@@ -545,7 +553,6 @@ function setMapLevel(sock, spawnPos, playerID, newMapLevelIndex){
 							 game_map.mapLevel[newMapLevelIndex].levelMonsterArray, monsterArray.length, newMapLevelIndex,
 							 game_map.mapLevel[newMapLevelIndex].itemArray, itemInfoArray);
 }
-
 // -------------------End Of Player-------------------
 
 // -------------------Monster-------------------
@@ -565,9 +572,7 @@ var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower",
 						  "camp": "defaultMonster",
 					      "campInfo": {"defaultMonster": 100}
 						},{}],
-
-
-					];
+						];
 
 // Creating A New Monster
 function createNewMonster(ID, level, spawnPos, mapLevel, monsterID) {
@@ -604,13 +609,10 @@ function createNewMonster(ID, level, spawnPos, mapLevel, monsterID) {
 	if (level < 1) level = 1;
 	levelUpLocal(monsterInfo, level - 1);
 
-
 	// Add Monster In Block
 	let theMapLevel = game_map.mapLevel[mapLevel];
     let lastBlock = theMapLevel.getBlockByBlockPos([monsterInfo.lastBlockPos[0], monsterInfo.lastBlockPos[1]]);
     lastBlock.blockCreatureArray.push([monsterInfo.creatureType, monsterInfo.ID]);
-
-
 
 	// If The AI_contollerList Is Not Long Enought Increment It
 	if (monsterID >= AI_controllerList.length){
@@ -649,13 +651,15 @@ function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 			theBlock.updated = true;
 			theBlock.surroundingMonsterNumber = 0;
 			theMapLevel.resetBlockUpdated.push(theBlock);
+
+			// Loop Through All The Creatures Within The Creature Array
 			for (let ii = 0; ii < theBlock.blockCreatureArray.length; ++ii) {
-				
+				// If The Creature Is A Active Player
 				if (theBlock.blockCreatureArray[ii][0] == "player"){
 					let aPlayer = playerArray[theBlock.blockCreatureArray[ii][1]];
 					if (aPlayer != null){
 						totalSurroundingPlayerLevel += aPlayer.properties.level;
-						++ totalSurroundingPlayerNumber;
+						++totalSurroundingPlayerNumber;
 					}
 					continue;
 				};
@@ -665,7 +669,7 @@ function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 				// If Monster Is Empty Continue
 				if (AI_controllerList[monsterID] == null) continue;
 
-				++ theBlock.surroundingMonsterNumber;
+				++theBlock.surroundingMonsterNumber;
 
 				// Extract The Creature
 				theMonster = AI_controllerList[monsterID].creature;
@@ -682,6 +686,7 @@ function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 		surroundingMonsterNumber += theBlock.surroundingMonsterNumber;
 	}
 
+	// Spawing New Monster Arround Active Player
 	if (surroundingMonsterNumber < 10 && totalSurroundingPlayerNumber > 0){
 		let newSpawnPos = createSurroundingSpawnPosition(thePlayer.mapLevel, thePlayer.lastBlockPos, [1, 1], [game_map.blockSize.x / 2, game_map.blockSize.y / 2])
 		let [monsterInfoID, minLevel, maxLevel, levelHalfRange] = theMapLevel.monsterSpawnFunction(theMapLevel.monsterSpawnInfo);
@@ -703,6 +708,7 @@ function itemDrop(monsterID){
 	let newItemID;
 	let newItemPosition = monsterArray[monsterID].position;
 
+	// Dropping Item When Monster Die
 	let monsterDropRate = 1.00;
 	let randomNumber = Math.random();
 	if (randomNumber < 0.60 * monsterDropRate) newItemID = itemRarityArray[0][Math.floor(Math.random() * itemRarityArray[0].length)];
@@ -889,18 +895,20 @@ function spawnProjectile([projectileInfo, mapLevelIndex]){
 	let projectileSpawnInfo = [];
 	let theMapLevel = game_map.mapLevel[mapLevelIndex];
 	let newProjectileID, theBlock;
+
+	// Loop Through All Projectiles Within ProjectileInfo
 	for (let i = 0; i < projectileInfo.length; i++){
 		theMapLevel.projectile_count = newDynamicArrayID(theMapLevel.levelProjectileArray, theMapLevel.projectile_count, 100, "Projectile Array");
 		newProjectileID = theMapLevel.projectile_count;
 		theMapLevel.levelProjectileArray[newProjectileID] = projectileInfo[i];
-		if (theMapLevel.clearBlockProjectileArray.length < theMapLevel.levelProjectileArray.length){
+		if (theMapLevel.clearBlockProjectileArray.length < theMapLevel.levelProjectileArray.length) {
 			theMapLevel.clearBlockProjectileArray.length = theMapLevel.levelProjectileArray.length;
 		}
 		theBlock = theMapLevel.getBlock([(projectileInfo[i].position[0]+ 0.5) >> 0, (projectileInfo[i].position[1]+ 0.5) >> 0]);
-		if (theBlock != null){
+		if (theBlock != null) {
 			theBlock.projectileList.insert(newProjectileID);
 			theMapLevel.clearBlockProjectileArray[newProjectileID] = [theBlock];
-		}else{
+		} else {
 			theMapLevel.clearBlockProjectileArray[newProjectileID] = [];
 		}
 		projectileSpawnInfo.push([newProjectileID, projectileInfo[i]]);
@@ -947,21 +955,22 @@ function updateProjectile(delta, mapLevelIndex){
 			projectileArray.position[0] += projectileArray.initVelocity[0] * delta;
 			projectileArray.position[1] += projectileArray.initVelocity[1] * delta;
 			
-
+			// Projectile Position
 			projectilePos = [
 				projectileArray.position[0],
 				projectileArray.position[1]
 			];
-			
+
+			// Map Related Variables
 			[mapX, mapY] = [(projectileArray.position[0] + 0.5) >> 0, (projectileArray.position[1] + 0.5) >> 0];
 			[floatBlockX, floatBlockY] = [mapX / theMapLevel.blockSize.x, mapY / theMapLevel.blockSize.y];
 			[blockX, blockY] = [floatBlockX >> 0, floatBlockY >> 0];
 
-
-			if (theMapLevel.IsNotInMapRange(floatBlockX, floatBlockY)){
+			// Check If Within Map Range
+			if (theMapLevel.IsNotInMapRange(floatBlockX, floatBlockY)) {
 				theBlock = null;
 				unit = null;
-			}else{
+			} else {
 				theBlock = theMapLevel.blockList[blockY][blockX];
 				[unitIndexX, unitIndexY] = [mapX % game_map.blockSize.x, mapY % game_map.blockSize.y];
 				unit = theBlock.unitList[unitIndexY][unitIndexX];
@@ -1019,17 +1028,17 @@ function updateProjectile(delta, mapLevelIndex){
 
 				OnXBorder = false;
 				// For Projectile On the Border Of The Block
-				if (unitIndexX == 0){
+				if (unitIndexX == 0) {
 					blockX = (floatBlockX - 1) >> 0;
-					if (blockX >= 0){
+					if (blockX >= 0) {
 						theBlock = theMapLevel.blockList[floatBlockY >> 0][blockX];
 						theBlock.projectileList.insert(i);
 						theMapLevel.clearBlockProjectileArray[i].push(theBlock);
 						OnXBorder = true;
 					}
-				}else if (unitIndexX == theMapLevel.blockSize.x - 1){
+				} else if (unitIndexX == theMapLevel.blockSize.x - 1) {
 					blockX = (floatBlockX + 1) >> 0;
-					if (blockX < theMapLevel.blockNumber.x){
+					if (blockX < theMapLevel.blockNumber.x) {
 						theBlock = theMapLevel.blockList[floatBlockY >> 0][blockX];
 						theBlock.projectileList.insert(i);
 						theMapLevel.clearBlockProjectileArray[i].push(theBlock);
@@ -1037,25 +1046,25 @@ function updateProjectile(delta, mapLevelIndex){
 					}
 				}
 
-				if (unitIndexY == 0){
+				if (unitIndexY == 0) {
 					blockY = (floatBlockY - 1) >> 0;
-					if (blockY >= 0){
+					if (blockY >= 0) {
 						theBlock = theMapLevel.blockList[blockY][floatBlockX >> 0];
 						theBlock.projectileList.insert(i);
 						theMapLevel.clearBlockProjectileArray[i].push(theBlock);
-						if(OnXBorder){
+						if (OnXBorder) {
 							theBlock = theMapLevel.blockList[blockY][blockX];
 							theBlock.projectileList.insert(i);
 							theMapLevel.clearBlockProjectileArray[i].push(theBlock);
 						}
 					}
-				}else if (unitIndexY == theMapLevel.blockSize.y - 1){
+				} else if (unitIndexY == theMapLevel.blockSize.y - 1) {
 					blockY = (floatBlockY + 1) >> 0;
-					if (blockY < theMapLevel.blockNumber.y){
+					if (blockY < theMapLevel.blockNumber.y) {
 						theBlock = theMapLevel.blockList[blockY][floatBlockX >> 0];
 						theBlock.projectileList.insert(i);
 						theMapLevel.clearBlockProjectileArray[i].push(theBlock);
-						if(OnXBorder){
+						if (OnXBorder) {
 							theBlock = theMapLevel.blockList[blockY][blockX];
 							theBlock.projectileList.insert(i);
 							theMapLevel.clearBlockProjectileArray[i].push(theBlock);
@@ -1064,7 +1073,6 @@ function updateProjectile(delta, mapLevelIndex){
 				}
 			} 
 
-        	
 			theMapLevel.updateProjectileArray.push([i, projectilePos]);
 		}
 	}
@@ -1075,6 +1083,7 @@ function updateProjectile(delta, mapLevelIndex){
 	}
 }
 
+// Deleting A Projectile From BlockProjectileArray
 function deleteProjectile(theMapLevel, projectileID){
 	let lastBlock;
 	for (let ii = 0; ii < theMapLevel.clearBlockProjectileArray[projectileID].length; ++ii){
@@ -1082,11 +1091,12 @@ function deleteProjectile(theMapLevel, projectileID){
 		lastBlock.projectileList.remove(projectileID);
 	}
 
+	// Setting The Index To NULL
 	theMapLevel.levelProjectileArray[projectileID] = null;
 	theMapLevel.clearBlockProjectileArray[projectileID] = null;
 }
 
-
+// Get Check If Something Is Destroyable Or Not
 function getAllChildUnitDestroyable(unit){
 	return game_map.unitIDList[unit.ID].destroyable || (unit.childUnit == null ? false : getAllChildUnitDestroyable(unit.childUnit));
 }
@@ -1104,12 +1114,12 @@ let endDate = new Date();
 function serverLoop(){
 	endDate = new Date();
 	let delta = (endDate.getTime() - startDate.getTime()) / 1000;
-	//For Each MapLevel
+	// For Each MapLevel
 	let theMapLevel;
-	for (let i = 0; i < game_map.mapLevel.length; ++i){
+	for (let i = 0; i < game_map.mapLevel.length; ++i) {
 		// Reset all block.updated to false
 		theMapLevel = game_map.mapLevel[i];
-		for (let ii = 0; ii < theMapLevel.resetBlockUpdated.length; ++ii){
+		for (let ii = 0; ii < theMapLevel.resetBlockUpdated.length; ++ii) {
 			theMapLevel.resetBlockUpdated[ii].updated = false;
 		}
 		theMapLevel.resetBlockUpdated = [];
@@ -1260,11 +1270,13 @@ server.listen(8080, () => {
 });
 
 
-/*
-// Spawning 500 Monsters Randomly Throughout The Map
+// TESTING USE
+/* // Spawning 1000 Monsters Randomly Throughout The Map
 for (let monsterIndex = 0; monsterIndex < 1000; ++monsterIndex){
 	createNewMonster(0, createSpawnPosition(0), 0);
 }
+
+// Spawning 1000 Monsters Randomly Throughout The Map
 for (let monsterIndex = 0; monsterIndex < 1000; ++monsterIndex){
 	createNewMonster(1, createSpawnPosition(1), 1);
-}*/
+} */

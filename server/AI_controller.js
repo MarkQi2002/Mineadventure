@@ -10,6 +10,7 @@ class AI_controller {
         this.attackCD = 0;
     }
 
+    // Setting Creature Aggro
     setAggro(creatureType, ID, amount){
         if (creatureType == null || ID == null) return;
 
@@ -158,13 +159,13 @@ class AI_controller {
             }
         }
 
-        if (aggroCreature == null){
+        // Setting Aggro
+        if (aggroCreature == null) {
             this.aggro.creature = null;
         }
 
-
-        if (this.aggro.creature != null){
-
+        // WHAT IS THIS
+        if (this.aggro.creature != null) {
             let goal = [Math.floor(aggroCreature.position[0] + Math.random() * 2 - 1), Math.floor(aggroCreature.position[1] + Math.random() * 2 - 1)];
 
             if (this.routeCount > 10){
@@ -177,36 +178,35 @@ class AI_controller {
                     }
 
                     // find target
-                    if(newRoute != "not find"){
+                    if(newRoute != "not find") {
                         this.targetPositionList = newRoute;
 
-                            // Attack
-                        if (this.attackCD <= 0){
+                        // Attack
+                        if (this.attackCD <= 0) {
                             spawnProjectile([[this.sendProjectile([aggroCreature.position[0], aggroCreature.position[1]])], this.creature.mapLevel]);
                             this.attackCD = 1;
                         }
 
-                    }else{
-                        if (this.targetPositionList.length <= 0){
+                    } else {
+                        if (this.targetPositionList.length <= 0) {
                             // Find A Random Position
                             newRoute = this.getRoute(theMap, [(this.creature.position[0] + 0.5 + (Math.random() - 0.5) * 2 * this.searchRange) >> 0,
                                                                              (this.creature.position[1] + 0.5 + (Math.random() - 0.5) * 2 * this.searchRange) >> 0]);
                             if (this.targetPositionList != "not find"){
                                 this.targetPositionLis = newRoute;
-                            }else{
+                            } else {
                                 this.targetPositionLis = [];
                             }
                         }
                         this.aggro.creature = null;
                     }
             
-                }else{
+                } else {
                     this.aggro.creature = null;
                 }
             }
 
-        }else{
-
+        } else {
             if (this.routeCount > 30){
                 let minDistance = this.searchRange;
                 let distance, otherCreature;
@@ -214,9 +214,9 @@ class AI_controller {
                 let surroundingBlocks = theMap.getSurroundingBlock([this.creature.position[0] / theMap.blockSize.x >> 0, this.creature.position[1] / theMap.blockSize.y >> 0], this.creature.mapLevel, [1, 1])
                 for (let i = 0; i < surroundingBlocks.length; ++i) {
                     for (let ii = 0; ii < surroundingBlocks[i][2].blockCreatureArray.length; ++ii) {
-                        if (surroundingBlocks[i][2].blockCreatureArray[ii][0] == "player"){
+                        if (surroundingBlocks[i][2].blockCreatureArray[ii][0] == "player") {
                             otherCreature = playerArray[surroundingBlocks[i][2].blockCreatureArray[ii][1]];
-                        }else{
+                        } else {
                             otherCreature = monsterArray[surroundingBlocks[i][2].blockCreatureArray[ii][1]];
                         }
 
@@ -224,7 +224,7 @@ class AI_controller {
                             (this.creature.ID == otherCreature.ID && this.creature.creatureType == otherCreature.creatureType)) continue;
 
                         distance = Math.abs(otherCreature.position[0] - this.creature.position[0]) + Math.abs(otherCreature.position[1] - this.creature.position[1]);
-                        if (distance < minDistance){
+                        if (distance < minDistance) {
                             this.aggro.creature = [otherCreature.creatureType, otherCreature.ID];
                             minDistance = distance;
                         }
@@ -234,7 +234,6 @@ class AI_controller {
                 this.aggro.amount = this.aggro.base;
                 this.routeCount = 0;
             }
-
         }
 
 
@@ -349,7 +348,6 @@ class PriorityQueue {
         }
         return null;
     }
-
 }
 
 // Required Because server.js Uses This JavaScript File
