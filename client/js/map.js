@@ -4,7 +4,7 @@
 
 // Map Class
 class map {
-    // Constructor
+    // Map Constructor
     constructor([serverBlocks, blockNumber, blockSize, unitIDList]) {
         this.object = new THREE.Object3D();
         this.object.position.set(0, 0, 0);
@@ -28,8 +28,6 @@ class map {
         this.loadMaterials(); // Load Materials
         this.loadGeometry(); // Load Geometry
         this.loadModel(this, 0, [serverBlocks]); // Load GLTF Model, including afterLoadFunction()
-
-
     }
 
     // For Map Level Change
@@ -48,6 +46,7 @@ class map {
         this.spawnBlocks(serverBlocks);
     }
 
+    // After Load Function
     afterLoadFunction([serverBlocks]){
         this.spawnBlocks(serverBlocks);
         scene.add(this.object);
@@ -97,11 +96,12 @@ class map {
         //******************************************************************
     }
 
+    // Loading The Model Using Imported Module
     loadModel(scope, index, passInfo) {
         if (scope.unitIDList[index].modelType == null){
-            if (scope.unitIDList.length > index + 1){
+            if (scope.unitIDList.length > index + 1) {
                 scope.loadModel(scope, index + 1, passInfo)
-            }else{
+            } else {
                 scope.afterLoadFunction(passInfo);
             }
             return;
@@ -115,7 +115,7 @@ class map {
     
             if (scope.unitIDList.length > index + 1){
                 scope.loadModel(scope, index + 1, passInfo)
-            }else{
+            } else {
                 scope.afterLoadFunction(passInfo);
             }
         });
@@ -203,22 +203,22 @@ class map {
     // Creating Client Side Unit
     spawnUnit(x, y, unitClass, parent){
         let mesh;
-        if (this.unitIDList[unitClass.ID].geometryType != null){
+        if (this.unitIDList[unitClass.ID].geometryType != null) {
+            // Getting Geometry And Materials
             let geometry = this.geometryList[this.unitIDList[unitClass.ID].geometryType];
             let material = this.materialList[unitClass.ID];
             mesh = new THREE.Mesh(geometry, material);      
-
-        }else if(this.unitIDList[unitClass.ID].modelType != null){
+        } else if(this.unitIDList[unitClass.ID].modelType != null) {
             mesh = this.unitIDList[unitClass.ID].modelType.clone();
-        }else{
+        } else {
             return;
         }
-        
 
         if (unitClass.childUnit != null){
             this.spawnUnit(0, 0, unitClass.childUnit, mesh);
         }
 
+        // Adding Unit To Parent
         parent.add(mesh);
         unitClass.mesh = mesh;
         mesh.position.set(x, y, unitClass.Height);
@@ -240,27 +240,29 @@ class map {
             let [x, y] = [mapX % this.blockSize.x, mapY % this.blockSize.y];
             let unit = theBlock.class.unitList[y][x];
 
-
+            // If The Block Is Not null
             if (theBlock.block != null){
                 this.removeAllChildUnit(unit.mesh);
                 theBlock.block.remove(unit.mesh);
             }
-        
+            
+            // If ReplaceUnitInfo Is Valid
             if (replaceUnitInfo.ID != null){
                 unit.ID = replaceUnitInfo.ID;
                 unit.Height = replaceUnitInfo.Height;
                 unit.childUnit = replaceUnitInfo.childUnit;
                 if (theBlock.block != null) this.spawnUnit(x, y, unit, theBlock.block);
-            }else{
+            } else {
                 unit.mesh = null;
             }
 
             return true;
-        }else{
+        } else {
             return false;
         }
     }
 
+    // Remove All Child Units
     removeAllChildUnit(parent){
         for (var i = parent.children.length - 1; i >= 0; i--) {
             this.removeAllChildUnit(parent.children[i]);
@@ -271,6 +273,7 @@ class map {
     // Remove All Block
     clearAllBlock(){
         let theBlock;
+        // Looping Through All Block
         for (let y_Axis = 0; y_Axis < this.blockList.length; ++y_Axis) {
             for (let x_Axis = 0; x_Axis < this.blockList[y_Axis].length; ++x_Axis) {
                 if (this.blockList[y_Axis][x_Axis] != null){
@@ -283,5 +286,4 @@ class map {
             }
         }
     }
-
 }

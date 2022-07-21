@@ -11,6 +11,8 @@ function loadItemMaterials(){
             itemMaterialsArray[i] =  new THREE.MeshBasicMaterial({map: texture, transparent: true});
         }
     }
+
+    // Return The Loaded Item Materials Array
     return itemMaterialsArray;
 }
 
@@ -50,9 +52,11 @@ class item {
 
 // PassiveItem That Improve Player Property
 class passiveItem extends item {
+    // PassiveItem Constructor
     constructor(itemInfo, itemPosition, propertyInfo) {
         super(itemInfo, itemPosition);
 
+        // Properties Of The Item
         self.propertyInfo = propertyInfo;
     }
 }

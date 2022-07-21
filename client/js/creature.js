@@ -5,6 +5,7 @@ var creatureLoader = {
 
 // The Most Basic Class, All Other Class (Player, Monster) Will Built Upon This By Inheritance
 class creature{
+    // Creature Constructor
     constructor(creatureInfo) {
         // Creating THREE Object
         this.ID = creatureInfo.ID;
@@ -85,7 +86,7 @@ class creature{
 
         // Remove All Child Object
         var obj;
-        for(var i = this.object.children.length - 1; i >= 0; i--) { 
+        for (var i = this.object.children.length - 1; i >= 0; i--) { 
             obj = this.object.children[i];
             obj.geometry.dispose();
             obj.material.dispose();

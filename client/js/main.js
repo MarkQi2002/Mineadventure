@@ -30,6 +30,7 @@ const resizeWindow = () => {
 // Fix window size event
 window.addEventListener('resize', resizeWindow);
 
+// Setting WebGL Renderer
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.physicallyCorrectLights = true;

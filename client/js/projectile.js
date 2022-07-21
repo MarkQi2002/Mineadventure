@@ -6,6 +6,7 @@ var projectileLoader = {
 
 // Projectile Class
 class projectile{
+    // Projectile Constructor
     constructor(projectileInfo) {
         this.object = new THREE.Object3D();
         this.object.position.set(projectileInfo.position[0], projectileInfo.position[1], projectileInfo.position[2]);
@@ -39,7 +40,7 @@ class projectile{
     delete() {
         // Remove All Child Object
         var obj;
-        for(var i = this.object.children.length - 1; i >= 0; i--) { 
+        for (var i = this.object.children.length - 1; i >= 0; i--) { 
             obj = this.object.children[i];
             this.object.remove(obj); 
         }

@@ -2,6 +2,7 @@
 class controller{ 
     // Controller Constructor
     constructor(creature, camera) { 
+        // Position Related
         this.creature = creature; 
         this.camera = camera;
         this.camera.position.x = this.creature.object.position.x;
@@ -9,11 +10,13 @@ class controller{
         this.cameraOffset = 0;
         
         this.speed = this.creature.properties["moveSpeed"]; // Per Second 
- 
+        
+        // Jump Related
         this.initJumpVelocity = 1; // Per Second 
         this.jumpVelocity = 0; // Per Second 
         this.onGround = true; 
- 
+        
+        // Collision Related Boolean Variables
         this.forwardCollision = false;
         this.backwardCollision = false;
         this.leftCollision = false;

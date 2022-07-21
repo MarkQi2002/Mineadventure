@@ -10,11 +10,8 @@ function displayPlayerHealth() {
     creatureInfoUIList.health.update(playerArray[clientPlayerID].properties["health"]);
     document.getElementById("playerHealthInfo").innerHTML = playerArray[clientPlayerID].properties["health"] + "/" + playerArray[clientPlayerID].properties["maxHealth"];
     let scale = playerArray[clientPlayerID].properties["health"] / playerArray[clientPlayerID].properties["maxHealth"];
-    if (scale < 0){
-        scale = 0;
-    }else if (scale > 1){
-        scale = 1;
-    }
+    if (scale < 0) scale = 0;
+    else if (scale > 1) scale = 1;
     document.getElementById("playerHealthBar").style.width = (98 * scale).toString() + '%';
 }
 
@@ -25,6 +22,7 @@ function displayCreatureProperties() {
     }
 }
 
+// Update Player Properties
 function displayCreatureProperty(key) {
     creatureInfoUIList[key].update(player_controller.creature.properties[key]);
 }
@@ -35,6 +33,7 @@ function initUI() {
         creatureInfoUIList[key] = new propertiesUI(key, value);
     }
 
+    // Event Handler
     var coll = document.querySelector('#creaturePropertiesButton');
     coll.addEventListener("click", function() {
         this.classList.toggle("active");
@@ -46,6 +45,7 @@ function initUI() {
         }
     });
 
+    // Event Handler
     coll = document.querySelector('#messageDisplayButton');
     coll.addEventListener("click", function() {
         this.classList.toggle("active");
@@ -71,6 +71,7 @@ function displayAllUI() {
 
 // Properties UI Class
 class propertiesUI {
+    // PropertiesUI Constructor
     constructor(key, value) {
         this.key = key;
         this.text = document.createElement('div');
@@ -85,7 +86,6 @@ class propertiesUI {
         this.text.style.left = 2 + 'vw';
 
         creatureInfoUI.appendChild(this.text);
-
     }
 
     // Setting UI Information
@@ -106,7 +106,6 @@ class messageUI {
         this.text.style.color = color;
         chatBoxUI.appendChild(this.text);
         chatBoxUI.scrollTo(0, chatBoxUI.scrollHeight);
-
     }
 
     // Setting UI Size
@@ -249,6 +248,7 @@ class creatureUI{
         this.level.style.height = 50 + '%';
         this.level.style.top = -30 + '%';
 
+        // Level Image
         var levelImage = document.createElement("IMG");
         levelImage.style.position = 'absolute';
         levelImage.setAttribute("src", "/image/levelCircle.png");
@@ -256,6 +256,7 @@ class creatureUI{
         levelImage.style.height = 100 + '%';
         this.level.appendChild(levelImage);
 
+        // Level Text
         this.levelText = document.createElement('div');
         this.levelText.style.position = 'absolute';
         this.levelText.style.textAlign = 'center';
@@ -263,7 +264,7 @@ class creatureUI{
         this.levelText.style.width = 100 + '%';
         this.levelText.style.height = 100 + '%';
         //this.levelText.style.top = 50 + '%';
-       // this.levelText.style.left = 50 + '%';
+        //this.levelText.style.left = 50 + '%';
         this.level.appendChild(this.levelText);
 
         //this.level.style.left = window.innerHeight * 0 + 'px';
@@ -280,6 +281,7 @@ class creatureUI{
         menuHtml.appendChild(this.UI);
     }
 
+    // Update Level UI
     updateLevel(){
         this.levelText.innerHTML = this.creature.properties.level;
     }
@@ -326,6 +328,7 @@ var hashKey = "kodiaks";
 var sendingMessage = ["System", "Init Message"];
 var sendingCommand = [null, null];
 
+// Terminal Button Function
 function terminalSubmit() {
     // Receiving User Input
     var inputCommand = terminalInput.value;
@@ -379,6 +382,7 @@ function unlockedCommand(inputArray) {
     }
 }
 
+// Teleport Player To Corresponding Coordinate
 function teleport([mapX, mapY]){
     // Updating Renderer Information
     player_controller.controllerUpdateBlock(game_map.mapPosToBlockPos([mapX, mapY]));
@@ -391,15 +395,17 @@ function teleport([mapX, mapY]){
     player_controller.camera.position.x = mapX;
     player_controller.camera.position.y = mapY - carmeraOffsetY;
 
-    for (let i = 0; i < playerArray.length; ++i){
-        if (playerArray[i] != null){
-            playerArray[i].update();
+    // Loop Through All Player
+    for (let playerIndex = 0; playerIndex < playerArray.length; ++playerIndex){
+        if (playerArray[playerIndex] != null){
+            playerArray[playerIndex].update();
         }
     }
 
-    for (let i = 0; i < monsterArray.length; ++i){
-        if (monsterArray[i] != null){
-            monsterArray[i].update();
+    // Loop Through All Monster
+    for (let monsterIndex = 0; monsterIndex < monsterArray.length; ++monsterIndex){
+        if (monsterArray[monsterIndex] != null){
+            monsterArray[monsterIndex].update();
         }
     }
 
@@ -415,15 +421,14 @@ function lockedCommand(inputArray) {
         // Input Control
         let [playerX, playerY] = [parseInt(inputArray[1]), parseInt(inputArray[2])];
 
+        // Input Control
         if (isNaN(parseInt(playerX)) || isNaN(parseInt(playerY))) {
             console.log("The TP Location Is Invalid!");
             return;
         }
 
-
+        // Call Teleportation Function
         teleport([playerX, playerY]);
-
-        
     // Teleport To Playe By Player ID
     } else if (inputArray[0] == "tpa") {
         // Input Control
@@ -432,16 +437,20 @@ function lockedCommand(inputArray) {
             return;
         }
 
+        // Input Control
         if (playerArray[parseInt(inputArray[1])] == null) {
             console.log("Player Number ", parseInt(inputArray[1]), " Not Found");
             return;
         }
         
+        // Calculate Player Position
         let playerX = Math.floor(playerArray[parseInt(inputArray[1])].object.position.x);
         let playerY = Math.floor(playerArray[parseInt(inputArray[1])].object.position.y);
 
         let xPosOffset, yPosOffset;
         let count = 0
+        
+        // Avoid Spawn Location That Make Player Stuck In The Wall
         while (count < 10) {
             xPosOffset = Math.floor((Math.random() < 0.5) ? 1 : -1) + playerX;
             yPosOffset = Math.floor((Math.random() < 0.5) ? 1 : -1) + playerY;
@@ -451,13 +460,15 @@ function lockedCommand(inputArray) {
             }
             count ++;
         }
+
+        // If No Valid Location Found In While Loop
         if (count >= 10){
             xPosOffset = playerX;
             yPosOffset = playerY;
         }
 
+        // Call Teleportation Function
         teleport([xPosOffset, yPosOffset]);
-
     // Teleport To Player By Name
     } else if (inputArray[0] == "tpn") {
         let trueIndex = -1;
@@ -469,52 +480,58 @@ function lockedCommand(inputArray) {
             }
         }
 
-        // Didn't Find The Player
+        // Input Control (Didn't Find The Player)
         if (trueIndex == -1) {
             console.log("Couldn't Find Player Named: ", inputArray[1]);
             return;
         }
         
+        // Calculate Position
         let xPosOffset = playerArray[trueIndex].object.position.x + 1;
         let yPosOffset = playerArray[trueIndex].object.position.y + 1;
 
+        // Call Teleporatation Function
         teleport([xPosOffset, yPosOffset]);
-
+    // Teleport Between MapLevels
     } else if (inputArray[0] == "mapLevel"){
+        // Input Control
         if (inputArray[1] == null || isNaN(parseInt(inputArray[1]))) {
             console.log("The Number Is Invalid!");
             return;
         }
 
+        // Sending Teleportation Event To Server
         sendingCommand = ["mapLevel", parseInt(inputArray[1])];
-
         document.dispatchEvent(new Event('sendCommand', {bubbles: true, cancelable: false}));
-    }else {
-
+    // All Other Commands
+    } else {
+        // Input Control
         if (isNaN(parseInt(inputArray[2])) || (inputArray.length >= 4 && isNaN(parseInt(inputArray[3])))) {
             console.log("The Number Is Invalid!");
             return;
         }
 
+        // Input Control
         let id = inputArray.length < 4 ? clientPlayerID : parseInt(inputArray[3]);
         if (playerArray[id].properties[inputArray[0]] == null) {
             console.log("The Property Is Invalid!");
             return;
         }
 
+        // Input Control
         if (!(["+", "-", "*", "/", "="].includes(inputArray[1]))) {
             console.log("The Math Symbol Invalid!");
             return;
         }
 
+        // Get Creature Type
         let creatureType = (inputArray.length >= 5 && inputArray[4] == "monster") ? "monster" : "player";
         
+        // Update Player Properties
         let propertyList = {};
         propertyList[inputArray[0]] = [inputArray[1], parseInt(inputArray[2])];
-        sendCreaturePropertyChange([creatureType, id], propertyList);
-        
+        sendCreaturePropertyChange([creatureType, id], propertyList);   
     }
-
 }
 
 // Preventing User From Zooming The WebPage
