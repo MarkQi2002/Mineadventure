@@ -1,6 +1,7 @@
 // Node class
 class Node
 {
+    // Node Constructor
     constructor(data)
     {
         this.data = data;
@@ -12,33 +13,33 @@ class Node
 // Binary Search tree class
 class BinarySearchTree
 {
+    // BinarySearchTree Constructore
     constructor()
     {
-        // root of a binary search tree
+        // Root Of a Binary Search Tree
         this.root = null;
     }
  
-    // function to be implemented
+    // Function To Be Implemented
     
-    // helper method which creates a new node to
-    // be inserted and calls insertNode
+    // Helper Method Which Creates A New Node To
+    // Be Inserted And Calls insertNode
     insert(data){
-        // Creating a node and initialising
-        // with data
+        // Creating A Node And Initialising
+        // With Data
         var newNode = new Node(data);
                         
-        // root is null then node will
-        // be added to the tree and made root.
+        // Root Is Null Then Node Will
+        // Be Added To The Tree And Made Root.
         if(this.root === null)
             this.root = newNode;
         else
-    
-            // find the correct position in the
-            // tree and add the node
+            // Find The Correct Position In The
+            // Tree And Add The Node
             this.insertNode(this.root, newNode);
     }
     
-    // Method to insert a node in a tree
+    // Method To Insert A Node In A Tree
     // it moves over the tree to find the location
     // to insert a node with a given data
     insertNode(node, newNode){
@@ -50,7 +51,6 @@ class BinarySearchTree
             if(node.left === null)
                 node.left = newNode;
             else
-    
                 // if left is not null recur until
                 // null is found
                 this.insertNode(node.left, newNode);
@@ -64,7 +64,6 @@ class BinarySearchTree
             if(node.right === null)
                 node.right = newNode;
             else
-    
                 // if right is not null recur until
                 // null is found
                 this.insertNode(node.right,newNode);
@@ -139,16 +138,16 @@ class BinarySearchTree
             node.right = this.removeNode(node.right, aux.data);
             return node;
         }
-
-    
     }
 
+    // Return InOrder List
     getInorderList(){
         var newList = [];
         this.inorder(this.root, newList);
         return newList;
     }
 
+    // InOrder Helper Function
     inorder(node, newList){
         if(node !== null)
         {
@@ -157,20 +156,18 @@ class BinarySearchTree
             this.inorder(node.right, newList);
         }
     }
-                 
- 
-    //  finds the minimum node in tree
+
+    // finds the minimum node in tree
     // searching starts from given node
     findMinNode(node){
         // if left of a node is null
         // then it must be minimum node
-        if(node.left === null)
+        if (node.left === null)
             return node;
         else
             return this.findMinNode(node.left);
     }
 
-    
     // search for a node with given data
     search(node, data){
     // if trees is empty return null
@@ -194,4 +191,5 @@ class BinarySearchTree
     }
 }
 
+// Exports BinarySearchTree
 module.exports = BinarySearchTree;
