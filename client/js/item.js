@@ -1,5 +1,6 @@
 // Function To Load Item Image As THREE Material Mesh
 function loadItemMaterials(){
+    // Variable Declaration
     let itemMaterialsArray = [];
     let loader = new THREE.TextureLoader();
     itemMaterialsArray.length = itemInfoArray.length;

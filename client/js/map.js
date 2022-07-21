@@ -69,7 +69,7 @@ class map {
                     this.materialList[i] =  new THREE.MeshBasicMaterial({map: texture});
                 }
 
-            } else {// for multi material
+            } else { // For Multi Material
                 let materials = [];
                 for (let ii = 0; ii < this.unitIDList[i].fileName.length; ii++) {
                     texture = this.loader.load(imageDir + this.unitIDList[i].fileName[ii]);
@@ -87,11 +87,11 @@ class map {
     // Load THREE Geometry For Map
     loadGeometry(){
         var geometry;
-        geometry = new THREE.PlaneGeometry(1, 1); // geometry for all plane
+        geometry = new THREE.PlaneGeometry(1, 1); // Geometry For All Plane
         this.geometryList.push(geometry); // 0
 
         //******************************************************************
-        geometry = new THREE.BoxGeometry(1, 1, 6); // geometry for all cubes
+        geometry = new THREE.BoxGeometry(1, 1, 6); // Geometry For All Cubes
         this.geometryList.push(geometry); // 1
         //******************************************************************
     }

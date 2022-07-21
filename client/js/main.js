@@ -10,7 +10,7 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
 scene.add( camera );
 
-//scene.background = new THREE.Color( 0xffffff );
+// scene.background = new THREE.Color( 0xffffff );
 var cameraAngle = Math.PI / 8
 var carmeraHeight = 10;
 var carmeraOffsetY = Math.tan(cameraAngle) * (carmeraHeight - groundLevel);
@@ -35,19 +35,19 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.physicallyCorrectLights = true;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Default THREE.PCFShadowMap
 document.body.appendChild(renderer.domElement);
 
 // Light Setting
 
 // Hemisphere Light 
-const hemisphereLight = new THREE.HemisphereLight(0xFFFFFF, 0x000000, 4);//skyColor, groundColor, intensity
+const hemisphereLight = new THREE.HemisphereLight(0xFFFFFF, 0x000000, 4); // SkyColor, GroundColor, Intensity
 hemisphereLight.position.set(0, 0, 1);
 scene.add(hemisphereLight);
 
 
 // Direction Light
-const directionLight = new THREE.DirectionalLight(0xFFFFFF, 1);// color, intensity
+const directionLight = new THREE.DirectionalLight(0xFFFFFF, 1); // Color, Intensity
 directionLight.position.set(0, 0, 20);
 directionLight.target.position.set(0, 0, 0);
 scene.add(directionLight);
@@ -85,17 +85,17 @@ function updateTimeEvent(){
     }
 }
 
-// create thread
+// Create Thread
 let intervalWorker = new Worker('./js/thread.js');
 
-// using for update player
+// Using For Update Player
 var changingCreatureInfo = [];
 
 // Animation Function
 function animate() {
     // Beginning Of The Frame
     stats.begin();
-    //helper.update()
+    // helper.update()
     delta = clock.getDelta();
     player_controller.update(delta);
     
@@ -112,7 +112,6 @@ function animate() {
             damageTextList[i].update(delta, i);
         }
     }
-
 
     // Setting The Renderer Of The Scene And Camera
     renderer.render(scene, camera);

@@ -53,9 +53,9 @@ class camp{
 		if (this.friendlyFire) return true;
 		
 		let theCampID;
-		if (creatureType == "player"){
+		if (creatureType == "player") {
 			theCampID = playerArray[ID].camp;
-		}else{
+		} else {
 			theCampID = monsterArray[ID].camp;
 		}
 
@@ -67,9 +67,9 @@ class camp{
 
 	IsMember([creatureType, ID]){
 		// Return If the Creature ID Is Already Inside
-		if (creatureType == "player"){
+		if (creatureType == "player") {
 			if (playerArray[ID].camp == this.ID) return true;
-		}else{
+		} else {
 			if (monsterArray[ID].camp == this.ID) return true;
 		}
 		return false;
@@ -91,9 +91,9 @@ class camp{
 		// Return If the Creature ID Is Already Inside
 		if(this.IsMember([creatureType, ID])) return;
 
-		if (creatureType == "player"){
+		if (creatureType == "player") {
 			playerArray[ID].camp = this.ID;
-		}else{
+		} else {
 			monsterArray[ID].camp = this.ID;
 		}
 
@@ -166,9 +166,11 @@ function properties() {
 	
 	// Level Up Growth Amount
 	// Growth Is Linearly Scaled
+	// Defensive Property Growth
 	this["maxHealthGrowth"] = 50;
 	this["armorGrowth"] = 5;
 
+	// Offensive Property Growth
 	this["attackDamageGrowth"] = 5;
 	this["attackSpeedGrowth"] = 0.05;
 	this["criticalRateGrowth"] = 0.005;
@@ -265,7 +267,6 @@ function levelUpLocal(creatureInfo, addLevel) {
 	creatureInfo.properties.attackDamage += creatureInfo.properties.attackDamageGrowth * addLevel;
 	creatureInfo.properties.attackSpeed += creatureInfo.properties.attackSpeedGrowth * addLevel;
 	creatureInfo.properties.criticalRate += creatureInfo.properties.criticalRateGrowth * addLevel;
-
 }
 
 // This Function Is Called When Creature Gain EXP
@@ -284,6 +285,7 @@ function levelUp(creatureInfo, experience) {
 		++ number;
 	}
 
+	// Call Level Up Local Function
 	levelUpLocal(creatureInfo, number);
 
 	// Package Level Up Information

@@ -71,7 +71,7 @@ class controller{
                 break; 
             case 32: // space 
                 if (this.onGround){ 
-                    this.jumpVelocity = this.initJumpVelocity;//jump 
+                    this.jumpVelocity = this.initJumpVelocity;// jump 
                     this.onGround = false; 
                 } 
                 this.inputs.space = true; 
@@ -569,9 +569,8 @@ class controller{
         let dy = this.inputs.forward - this.inputs.backward; 
         let dx = this.inputs.right - this.inputs.left; 
         let magnitude = Math.sqrt(dx * dx + dy * dy); 
-        if (magnitude == 0){//magnitude can't be zero 
-            magnitude = 1; 
-        }
+        // Magnitude Can't Be Zero 
+        if (magnitude == 0) magnitude = 1; 
  
         // Variable Declaration 
         let translateDistance = speedPerFrame / magnitude; 
