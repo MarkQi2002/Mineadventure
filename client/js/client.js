@@ -244,7 +244,7 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 		playerArray[updatePlayerID].creatureItemArray[additionalItemID] = 1;
 
 	// Update Item UI
-	if (updatePlayerID == clientPlayerID) appendItemUIArray(itemInfoArray[additionalItemID][0].itemName);
+	if (updatePlayerID == clientPlayerID) appendItemUIArray(itemInfoArray[additionalItemID].itemName);
 
 	// Return The Additional Item's ID
 	return additionalItemID;
@@ -257,8 +257,8 @@ function spawnItem(itemID, itemPosition, itemIndex){
 		itemArray.length = itemIndex + 1;
 	}
 
-	// Creating Passive Item Object
-	var new_item = new passiveItem(itemInfoArray[itemID][0], itemPosition, itemInfoArray[itemID][1]);
+	// Creating Item Object
+	var new_item = new item(itemInfoArray[itemID], itemPosition);
 	
 	// Storing Passive Item Object Into itemArray
 	itemArray[itemIndex] = new_item;

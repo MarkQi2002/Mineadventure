@@ -776,10 +776,6 @@ Linear Stacking
 Hyperbolic Stacking
 Exponential Stacking
 */
-/* itemBuffType - What Type Of Buff The Item Gives
-Attack
-Defensive
-*/
 function itemHealing(amount) {
 	// Defensive Properties
 	this.attacker = "item",
@@ -787,17 +783,40 @@ function itemHealing(amount) {
 	this.properties = new properties()
 }
 
+var itemIDCount = 0;
+function itemInfo(name, changeInfo) {
+	var newItemInfo = {
+		"itemID": itemIDCount,
+		"itemName": name,
+		"rarity": "Common",
+		"stackType": "Linear",
+		"propertyChange": null,
+		"consumable": false,
+
+	};
+
+	++itemIDCount;
+
+	// AdditionalInfo
+	for (let [key, value] of Object.entries(changeInfo)) {
+		newItemInfo[key] = value;
+	}
+	
+	if (newItemInfo.itemType == "propertyChange"){
+
+	}else if (newItemInfo.itemType == "consumable"){
+
+	}
+	
+	return newItemInfo;
+}
+
 // Item Information Array
-var itemInfoArray = [[{"itemID": 0, "itemName": "Bison Steak", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"maxHealth": ["+", 25], "damage": new itemHealing(25)}],
-					[{"itemID": 1, "itemName": "Armor Piercing Rounds", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Offensive"}, {"attackDamage": ["+", 5]}],
-					[{"itemID": 2, "itemName": "Small Recovery Potion", "rarity": "Common", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"damage": new itemHealing(10)}],
-					[{"itemID": 3, "itemName": "Mediuml Recovery Potion", "rarity": "Uncommon", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"damage": new itemHealing(100)}],
-					[{"itemID": 4, "itemName": "Large Recovery Potion", "rarity": "Suprior", "itemType": "Passive", "stackType": "Linear", "buffTyle": "Defensive"}, {"damage": new itemHealing(1000)}],
-					[],
-					[],
-					[],
-					[],
-					[],
+var itemInfoArray = [itemInfo("Bison Steak", {"propertyChange": {"maxHealth": ["+", 25], "damage": new itemHealing(25)}}),
+					itemInfo("Armor Piercing Rounds", {"propertyChange": {"attackDamage": ["+", 5]}}),
+					itemInfo("Small Recovery Potion", {"consumable": true, "propertyChange": {"damage": new itemHealing(10)}}),
+					itemInfo("Mediuml Recovery Potion", {"consumable": true, "rarity": "Uncommon", "propertyChange": {"damage": new itemHealing(100)}}),
+					itemInfo("Large Recovery Potion", {"consumable": true, "rarity": "Suprior", "propertyChange": {"damage": new itemHealing(1000)}}),
 					[],
 					[],
 					[],
@@ -824,10 +843,10 @@ for (let itemInfoIndex = 0; itemInfoIndex < itemInfoArray.length; ++itemInfoInde
 	if (itemInfoArray[itemInfoIndex].length <= 0) continue;
 
 	// Push ItemID To Array
-	if (itemInfoArray[itemInfoIndex][0].rarity == "Common") itemRarityArray[0].push(itemInfoArray[itemInfoIndex][0].itemID);
-	else if (itemInfoArray[itemInfoIndex][0].rarity == "Uncommon") itemRarityArray[1].push(itemInfoArray[itemInfoIndex][0].itemID);
-	else if (itemInfoArray[itemInfoIndex][0].rarity == "Suprior") itemRarityArray[2].push(itemInfoArray[itemInfoIndex][0].itemID);
-	else if (itemInfoArray[itemInfoIndex][0].rarity == "Legendary") itemRarityArray[3].push(itemInfoArray[itemInfoIndex][0].itemID);
+	if (itemInfoArray[itemInfoIndex].rarity == "Common") itemRarityArray[0].push(itemInfoArray[itemInfoIndex].itemID);
+	else if (itemInfoArray[itemInfoIndex].rarity == "Uncommon") itemRarityArray[1].push(itemInfoArray[itemInfoIndex].itemID);
+	else if (itemInfoArray[itemInfoIndex].rarity == "Suprior") itemRarityArray[2].push(itemInfoArray[itemInfoIndex].itemID);
+	else if (itemInfoArray[itemInfoIndex].rarity == "Legendary") itemRarityArray[3].push(itemInfoArray[itemInfoIndex].itemID);
 }
 
 // Update Player Property And Player Item Array
@@ -835,26 +854,32 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 	let thePlayer = playerArray[updatePlayerID];
 	if (thePlayer == null) return;
 
-	// Remove Item From The Item Array
 	let mapLevelIndex = thePlayer.mapLevel;
-	if (removeItemID >= 0 && removeItemID < game_map.mapLevel[mapLevelIndex].itemArray.length) deleteItem(removeItemID, mapLevelIndex);
+	
+	if (itemInfoArray[additionalItemID].propertyChange != null){
+		let itemAddProperty = {};
+		for (let [key, value] of Object.entries(itemInfoArray[additionalItemID].propertyChange)) {
+			itemAddProperty[key] = JSON.parse(JSON.stringify(value));
+		}
 
-	let itemAddProperty = {};
-	for (let [key, value] of Object.entries(itemInfoArray[additionalItemID][1])) {
-		itemAddProperty[key] = JSON.parse(JSON.stringify(value));
+		// Update Player Property Based On Item
+		let playerInfo = [[["player", updatePlayerID], itemAddProperty]];
+		creatureInfoChange(playerInfo);
 	}
 
-	// Update Player Property Based On Item
-	let playerInfo = [[["player", updatePlayerID], itemAddProperty]];
-	creatureInfoChange(playerInfo);
 
-	// Update Server Side Player Item Array
-	if (thePlayer.creatureItemArray[additionalItemID] != null)
-		thePlayer.creatureItemArray[additionalItemID]++;
-	else
-		thePlayer.creatureItemArray[additionalItemID] = 1;
+	if (!itemInfoArray[additionalItemID].consumable){
+		// Update Server Side Player Item Array
+		if (thePlayer.creatureItemArray[additionalItemID] != null)
+			thePlayer.creatureItemArray[additionalItemID]++;
+		else
+			thePlayer.creatureItemArray[additionalItemID] = 1;
 
-	io.to("level " + mapLevelIndex).compress(true).emit('clientCreatureItemArray', additionalItemID, updatePlayerID, removeItemID);
+		io.to("level " + mapLevelIndex).compress(true).emit('clientCreatureItemArray', additionalItemID, updatePlayerID, removeItemID);
+	}
+
+	// Remove Item From The Item Array
+	if (removeItemID >= 0 && removeItemID < game_map.mapLevel[mapLevelIndex].itemArray.length) deleteItem(removeItemID, mapLevelIndex);
 }
 
 // Creating An Item When Client Send A Request

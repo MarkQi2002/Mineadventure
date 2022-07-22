@@ -7,8 +7,8 @@ function loadItemMaterials(){
 
     // Loop Through Item Material Array To Initialize Material
     for (let i = 0; i < itemMaterialsArray.length; i++) {
-        if (itemInfoArray[i].length > 0) {
-            let texture = loader.load("image/UI_Image/" + itemInfoArray[i][0].itemName + ".png");
+        if (itemInfoArray[i].itemName != null) {
+            let texture = loader.load("image/UI_Image/" + itemInfoArray[i].itemName + ".png");
             itemMaterialsArray[i] =  new THREE.MeshBasicMaterial({map: texture, transparent: true});
         }
     }
@@ -51,13 +51,3 @@ class item {
     }
 }
 
-// PassiveItem That Improve Player Property
-class passiveItem extends item {
-    // PassiveItem Constructor
-    constructor(itemInfo, itemPosition, propertyInfo) {
-        super(itemInfo, itemPosition);
-
-        // Properties Of The Item
-        self.propertyInfo = propertyInfo;
-    }
-}
