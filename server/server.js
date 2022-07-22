@@ -817,8 +817,8 @@ var itemInfoArray = [itemInfo("Bison Steak", {"propertyChange": {"maxHealth": ["
 					itemInfo("Small Recovery Potion", {"consumable": true, "propertyChange": {"damage": new itemHealing(10)}}),
 					itemInfo("Mediuml Recovery Potion", {"consumable": true, "rarity": "Uncommon", "propertyChange": {"damage": new itemHealing(100)}}),
 					itemInfo("Large Recovery Potion", {"consumable": true, "rarity": "Suprior", "propertyChange": {"damage": new itemHealing(1000)}}),
-					[],
-					[],
+					itemInfo("Critical Gloves", {"rarity": "Uncommon", "propertyChange": {"criticalRate": ["+", 0.05]}}),
+					itemInfo("Wind's Blessing Cloak", {"rarity": "Uncommon","propertyChange": {"moveSpeed": ["+", 1]}}),
 					[],
 					[],
 					[],
@@ -855,7 +855,7 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 	if (thePlayer == null) return;
 
 	let mapLevelIndex = thePlayer.mapLevel;
-	
+
 	if (itemInfoArray[additionalItemID].propertyChange != null){
 		let itemAddProperty = {};
 		for (let [key, value] of Object.entries(itemInfoArray[additionalItemID].propertyChange)) {
