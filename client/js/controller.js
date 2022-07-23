@@ -158,7 +158,7 @@ class controller{
         // Setting Projectile Information
         var newDamageInfo = {
             type: {"true": (this.creature.properties.attackDamage / 10) >> 0, "normal": this.creature.properties.attackDamage},
-            attacker: ["player", clientPlayerID, this.creature.campInfo],
+            attacker: [this.creature.creatureType, this.creature.ID, this.creature.campInfo],
             properties: this.creature.properties
         }
 
@@ -166,7 +166,18 @@ class controller{
         var newProjectile = {
             position: [this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z],
             initVelocity: [8 * vectorX, 8 * vectorY],
-            damageInfo: newDamageInfo
+            damageInfo: newDamageInfo,
+            addState: {}
+        };
+
+
+        newProjectile.addState["burning"] = {
+            duration: 10, 
+            typeInput: {
+                attacker: [this.creature.creatureType, this.creature.ID], 
+                baseDamage: this.creature.properties.attackDamage,
+                criticalRate: this.creature.properties.criticalRate
+            }
         };
 
         // Updating To Projectile List

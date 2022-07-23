@@ -148,6 +148,8 @@ const creatureInfoChange = (creatureInfo) => {
 		for (let [key, value] of Object.entries(creatureInfo[i][1])) {
 			if (key == "damage"){
 				createDamageTextList(value, theCreature);
+			} else if (key == "state"){
+				
 			} else {
 				let setValue = value[1];
 				if (value[0] == "+") setValue = theCreature.properties[key] + value[1];

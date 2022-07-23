@@ -41,9 +41,10 @@ class AI_controller {
         let vectorY = diffY / magnitude;
 
         // Setting Projectile Information
+
         var newDamageInfo = {
             type: {"true": (this.creature.properties.attackDamage / 10) >> 0, "normal": this.creature.properties.attackDamage},
-            attacker: ["monster", this.creature.ID, this.creature.campInfo],
+            attacker: [this.creature.creatureType, this.creature.ID, this.creature.campInfo],
             properties: this.creature.properties
         }
 
@@ -51,7 +52,8 @@ class AI_controller {
         var newProjectile = {
             position: [this.creature.position[0], this.creature.position[1], this.creature.position[2]],
             initVelocity: [8 * vectorX, 8 * vectorY],
-            damageInfo: newDamageInfo
+            damageInfo: newDamageInfo,
+            addState: {}
         };
 
         // Updating To Projectile List

@@ -179,6 +179,7 @@ function properties() {
 	this["health"] = 100;
 	this["maxHealth"] = 100;
 	this["armor"] = 10;
+	this["fireResistance"] = 0;
 
 	// Attack Properties
 	this["attackDamage"] = 10;
@@ -207,7 +208,139 @@ function creatureInfoClass(ID, creatureType, name, initPos, mapLevel, camp) {
 	
 	// Creature Item Array
 	this["creatureItemArray"] = {};
+
+	// Creature state
+	this["state"] = {};
 }
+
+var stateTypeInfo = {
+	"burning": {stateBegin: function(theState){
+					theState["baseDamage"] = 0;
+				},
+
+				stateAdd: function(theState, element){
+					theState["criticalRate"] = element.typeInput.criticalRate;
+					theState["attacker"] = element.typeInput.attacker;
+					theState.baseDamage += element.typeInput.baseDamage;
+				},
+
+				atState: function(theState){
+					//console.log(theState.creature,,,) 
+					let newProperties = new properties();
+					newProperties.criticalRate = theState.criticalRate;
+					creatureInfoChange([[theState.creature, {"damage": damage(theState.attacker, {"fire": theState.baseDamage * 0.1, "true": theState.baseDamage * 0.01}, newProperties)}]]);
+
+					let theCreature;
+					if (theState.creature[0] == "player"){
+						theCreature = playerArray[theState.creature[1]];
+					} else {
+						theCreature = monsterArray[theState.creature[1]];
+					}
+
+					if (theCreature != null) return checkLifeStatus(theCreature, theState.attacker);
+				},
+
+				stateShift: function(theState, element){
+					theState.baseDamage -= element.typeInput.baseDamage;
+				},
+
+
+				stateEnd: null,
+			}
+
+};
+	
+class state{
+	constructor(type, creature, duration, typeInput){
+		this.type = type;
+		this.creature = creature;
+		this.nextTime = new Date().getTime();
+		this.list = [];
+		this.endTime;
+		stateTypeInfo[this.type].stateBegin(this);
+		this.add(duration, typeInput)
+	}
+
+	update(creatureInfo, currentTime){
+		if (this.nextTime < currentTime){
+			if (stateTypeInfo[this.type].atState(this) == true) return;
+			this.nextTime += 1000;
+		}
+
+		while (this.list.length > 0) {
+            if (this.list[0].endTime <= currentTime) {
+				stateTypeInfo[this.type].stateShift(this, this.list.shift());
+            }else{
+				break;
+			}
+        }
+
+		if (this.list.length <= 0){
+			delete creatureInfo.state[this.type];
+		}
+	}
+
+	add(duration, typeInput){
+		let startTime = new Date().getTime();
+		let newElement = {
+			startTime: startTime,
+			endTime: startTime + duration * 1000,
+			typeInput: typeInput
+		};
+
+		let contain = false;
+
+		if (this.list.length <= 0 || this.list[this.list.length - 1].endTime < newElement.endTime) {
+			this.list.push(newElement);
+			contain = true;
+		}else{
+			// Correct Location Of The Queue
+			for (var i = this.list.length - 2; i >= 0; --i) {
+				if (this.list[i].endTime < newElement.endTime) {
+					// Once the correct location is found it is
+					// Enqueued
+					this.list.splice(i + 1, 0, newElement);
+					contain = true;
+					break;
+				}
+			}
+		}
+    
+        // If The Element Have The Highest endTime
+        if (!contain) {
+            this.list.splice(0, 0, newElement);
+        }
+
+		this.setEndTime();
+
+		stateTypeInfo[this.type].stateAdd(this, newElement);
+	}
+
+	setEndTime(){
+		/*
+		let maxEndTime = 0;
+		for (let i = 0; i < this.list.length; ++i){
+			if (this.list[i].endTime > maxEndTime) maxEndTime = this.list[i].endTime;
+		}
+		this.endTime = maxEndTime;*/
+		this.endTime = this.list[this.list.length - 1].endTime;
+	}
+}
+
+function addState(newState, theCreature){
+	for (let [type, inputs] of Object.entries(newState)) {
+		if (theCreature.state[type] == null){
+			theCreature.state[type] = new state (type, [theCreature.creatureType, theCreature.ID], inputs.duration, inputs.typeInput);
+		} else {
+			theCreature.state[type].add(inputs.duration, inputs.typeInput);
+		}
+		
+	}
+}
+
+
+
+
 
 // Generate Spawn Position Without Collision With Wall
 function createSpawnPosition(mapLevelIndex) {
@@ -324,6 +457,12 @@ function newDynamicArrayID(dynamicArray, arrayCount, IncreaseAmount, printName){
 
 // Check Whether Creature Has Been Hit Or Not
 function creatureOnHit(creatureInfo, theMapLevel) {
+	// Update Creature State
+	let currentTime = new Date().getTime();
+	for (let [type, theState] of Object.entries(creatureInfo.state)) {
+		theState.update(creatureInfo, currentTime);
+	}
+
 	// Get The Block The Creature Located Within
 	let theBlock = theMapLevel.getBlock([(creatureInfo.position[0] + 0.5) >> 0,
 										 (creatureInfo.position[1] + 0.5) >> 0]);
@@ -346,11 +485,11 @@ function creatureOnHit(creatureInfo, theMapLevel) {
 		if (theProjectile == null || theProjectile == "deletion") continue;
 
 		// Check Attacker Information
-		let attackerInfo = theProjectile.damageInfo.attacker;
+		let attacker = theProjectile.damageInfo.attacker;
 
 		// Is Not Attackable
-		if((attackerInfo[0] == creatureInfo.creatureType && attackerInfo[1] == creatureInfo.ID) || 
-			!IsAttackable(attackerInfo[2], creatureInfo.camp)) continue;
+		if((attacker[0] == creatureInfo.creatureType && attacker[1] == creatureInfo.ID) || 
+			!IsAttackable(attacker[2], creatureInfo.camp)) continue;
 
 		// Calculate XY Coordinate Difference
 		let diffX = theProjectile.position[0] - creatureInfo.position[0];
@@ -364,26 +503,33 @@ function creatureOnHit(creatureInfo, theMapLevel) {
 			// Calculate Distance To Squared
 			if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
 				// Updating Creature Information
-				creatureInfoChange([[[creatureInfo.creatureType, creatureInfo.ID], {"damage": theProjectile.damageInfo}]]);
-				if (AI_controllerList[creatureInfo.ID] != null) AI_controllerList[creatureInfo.ID].setAggro(attackerInfo[0], attackerInfo[1], 1);
+				creatureInfoChange([[[creatureInfo.creatureType, creatureInfo.ID], {"damage": theProjectile.damageInfo, "state": theProjectile.addState}]]);
+				
 				// Set Projectile Deletion Tag
 				theMapLevel.levelProjectileArray[blockProjectileList[projectileIndex]] = "deletion";
 
-				// Creature On Hit Health Below 0
-				if (creatureInfo.properties["health"] <= 0){
-					if (creatureInfo.creatureType == "player"){
-						// Do Nothing
-					} else {
-						// Monster Creature, Delete Monster And Give Attacker EXP
-						itemDrop(creatureInfo.ID);
-						deleteMonster(creatureInfo.ID);
-						if (attackerInfo[0] == "player" && playerArray[attackerInfo[1]] != null) levelUp(playerArray[attackerInfo[1]], creatureInfo.properties.level * 100);
-						return;
-					}
-				}
+				if (checkLifeStatus(creatureInfo, attacker)) return;
 			}
 		}
 	}
+}
+
+function checkLifeStatus(creatureInfo, attacker){
+	if (creatureInfo.creatureType == "player"){
+		// Do Nothing
+		
+	} else {
+		if (AI_controllerList[creatureInfo.ID] != null) AI_controllerList[creatureInfo.ID].setAggro(attacker[0], attacker[1], 1);
+		// Creature On Hit Health Below 0
+		if (creatureInfo.properties["health"] <= 0){
+			// Monster Creature, Delete Monster And Give Attacker EXP
+			itemDrop(creatureInfo.ID);
+			deleteMonster(creatureInfo.ID);
+			if (attacker[0] == "player" && playerArray[attacker[1]] != null) levelUp(playerArray[attacker[1]], creatureInfo.properties.level * 100);
+			return true;
+		}
+	}
+	return false;
 }
 
 // -------------------End Of Creature-------------------
@@ -776,11 +922,16 @@ Linear Stacking
 Hyperbolic Stacking
 Exponential Stacking
 */
+function damage(attacker, type, properties) {
+	return {
+		attacker: attacker,
+		type: type,
+		properties: properties
+	}
+}
+
 function itemHealing(amount) {
-	// Defensive Properties
-	this.attacker = "item",
-	this.type = {"heal": amount},
-	this.properties = new properties()
+	return new damage("item", {"heal": amount}, new properties());
 }
 
 var itemIDCount = 0;
@@ -812,11 +963,11 @@ function itemInfo(name, changeInfo) {
 }
 
 // Item Information Array
-var itemInfoArray = [itemInfo("Bison Steak", {"propertyChange": {"maxHealth": ["+", 25], "damage": new itemHealing(25)}}),
+var itemInfoArray = [itemInfo("Bison Steak", {"propertyChange": {"maxHealth": ["+", 25], "damage": itemHealing(25)}}),
 					itemInfo("Armor Piercing Rounds", {"propertyChange": {"attackDamage": ["+", 5]}}),
-					itemInfo("Small Recovery Potion", {"consumable": true, "propertyChange": {"damage": new itemHealing(10)}}),
-					itemInfo("Mediuml Recovery Potion", {"consumable": true, "rarity": "Uncommon", "propertyChange": {"damage": new itemHealing(100)}}),
-					itemInfo("Large Recovery Potion", {"consumable": true, "rarity": "Suprior", "propertyChange": {"damage": new itemHealing(1000)}}),
+					itemInfo("Small Recovery Potion", {"consumable": true, "propertyChange": {"damage": itemHealing(10)}}),
+					itemInfo("Mediuml Recovery Potion", {"consumable": true, "rarity": "Uncommon", "propertyChange": {"damage": itemHealing(100)}}),
+					itemInfo("Large Recovery Potion", {"consumable": true, "rarity": "Suprior", "propertyChange": {"damage": itemHealing(1000)}}),
 					itemInfo("Critical Gloves", {"rarity": "Uncommon", "propertyChange": {"criticalRate": ["+", 0.05]}}),
 					itemInfo("Wind's Blessing Cloak", {"rarity": "Uncommon","propertyChange": {"moveSpeed": ["+", 1]}}),
 					[],
@@ -1186,6 +1337,8 @@ function creatureInfoChange(creatureInfo) {
 		for (let [key, value] of Object.entries(creatureInfo[i][1])) {
 			if (key == "damage"){
 				creatureInfo[i][1]["health"] = ["=", damagefunction(value, theCreature)];
+			} else if (key == "state") {
+				addState(value, theCreature);
 			} else {
 				let setValue = value[1];
 				if (value[0] == "+") setValue = theCreature.properties[key] + value[1];
@@ -1206,33 +1359,39 @@ function creatureInfoChange(creatureInfo) {
 function damagefunction(damageInfo, defender){
 	// Check Critical Attack By A Factor
 	let criticalAttack = false;
-	if (damageInfo.properties.criticalRate >= Math.random()) criticalAttack = true;
+	if (damageInfo.properties != null && damageInfo.properties.criticalRate >= Math.random()) criticalAttack = true;
 
 	for (let [key, value] of Object.entries(damageInfo.type)) {
 		// Input Control
-		if (value < 0) continue;
+		if (value < 0) value = 0;
 
 		// True Damage (Ignores Armor)
 		if (key == "true"){
-			defender.properties.health -= value;
+			let amount = value * (1 + criticalAttack) >> 0;
+			defender.properties.health -= amount
+			damageInfo.type.true = {amount: amount, criticalAttack: criticalAttack};
 		// Normal Attack
 		} else if (key == "normal") {
-			let amount = Math.floor(value * (1 - 2 / Math.PI * Math.atan(defender.properties.armor / 500)));
-			if (criticalAttack) {
-				amount *= 2;
-				damageInfo.type["criticalNormal"] = amount;
-				delete damageInfo.type["normal"];
-			} else {
-				damageInfo.type.normal = amount;
-			}
+			let amount = (value * (1 - 2 / Math.PI * Math.atan(defender.properties.armor / 500))) * (1 + criticalAttack) >> 0;
 			defender.properties.health -= amount;
+			damageInfo.type.normal = {amount: amount, criticalAttack: criticalAttack};
 		// Healing Attack
 		} else if (key == "heal") {
-			defender.properties.health += value;
+			let amount = value >> 0;
+			defender.properties.health += amount;
 			if (defender.properties.health > defender.properties.maxHealth){
-				damageInfo.type.heal = value - (defender.properties.health - defender.properties.maxHealth);
+				damageInfo.type.heal = {amount: amount - (defender.properties.health - defender.properties.maxHealth), criticalAttack: false};
 				defender.properties.health = defender.properties.maxHealth;
+			}else{
+				damageInfo.type.heal =  {amount: amount, criticalAttack: false};
 			}
+		// fire Attack	
+		} else if (key == "fire") {
+			let rate = 1 - defender.properties.fireResistance;
+			if (rate < 0) rate = 0;
+			let amount = rate * value * (1 + criticalAttack) >> 0;
+			defender.properties.health -= amount;
+			damageInfo.type.fire = {amount: amount, criticalAttack: criticalAttack};
 		}
 	}
 

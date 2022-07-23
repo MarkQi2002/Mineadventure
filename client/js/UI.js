@@ -122,7 +122,7 @@ class messageUI {
 // Damage Text Class
 class damageText{
     // Damage Text Class Constructor
-    constructor(type, amount, position) {
+    constructor(type, value, position) {
         this.deleteTimer = 1;
         this.position = [position[0] + Math.random() - 0.5, position[1] + Math.random() - 0.5, position[2] + Math.random() - 0.5];
 
@@ -132,27 +132,39 @@ class damageText{
         this.text.style.textAlign = "center";
         this.text.style.width = 100;
         this.text.style.height = 100;
-        this.text.innerHTML = Math.abs(amount);
-        this.size = (8 / Math.PI * Math.atan(Math.abs(amount) / 100) + 1);
+        this.text.innerHTML = Math.abs(value.amount);
+        this.size = (8 / Math.PI * Math.atan(Math.abs(value.amount) / 100) + 1);
         this.text.style.fontSize = this.size + 'vh';
         
         // Check Damage Type
+        let color;
         if (type == "true") {
-			this.text.style.color = "white";
+            color = [255, 255, 255];
 		} else if(type == "normal") {
-			this.text.style.color = "#AB4100";
-        } else if(type == "criticalNormal") {
-            this.text.style.color = "red";
-            this.size *= 2;
+            color = [255, 128, 0];
 		} else if(type == "heal") {
-			this.text.style.color = "green";
-		}
+            color = [0, 255, 0];
+		} else if(type == "fire") {
+            color = [255, 0, 0];
+        }
+
+        
+
+        if (value.criticalAttack){
+            this.text.style['-webkit-text-stroke'] = this.size / 40 + "vh rgb(" + color[0] + "," + color[1] + "," + color[2] + ")";
+
+            this.size *= 2;
+            for (let i = 0; i < 3; ++i){
+                color[i] = color[i] * 0.8 >> 0;
+            }
+        }
+
+        this.text.style.color = "rgb(" + color[0] + "," + color[1] + "," + color[2] + ")";
+
 
         // Damage Text Timer
         this.sqrtSize = Math.sqrt(this.size);
         this.rate = this.deleteTimer / (2 * this.sqrtSize);
-
-        this.text.style.opacity = 0.75;
         
         // Damage Text Locatoin Update
         let [posX, posY] = this.toXYCoords(this.position);

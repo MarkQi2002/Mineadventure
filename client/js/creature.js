@@ -9,6 +9,7 @@ class creature{
     constructor(creatureInfo) {
         // Creating THREE Object
         this.ID = creatureInfo.ID;
+        this.creatureType = creatureInfo.creatureType;
         this.camp = creatureInfo.camp;
         this.campInfo = creatureInfo.campInfo;
         this.object = new THREE.Object3D();
