@@ -126,6 +126,13 @@ function sendCreaturePropertyChange([creatureType, id], propertyList){
 	if (!isIn) changingCreatureInfo.push([[creatureType, id], propertyList]);
 }
 
+
+function addAbility(newAbility, theCreature){
+	for (let [type, inputs] of Object.entries(newAbility)) {
+		theCreature.properties.ability[type] = inputs;
+	}
+}
+
 // Change An Creature's Property Using Input creatureInfo
 const creatureInfoChange = (creatureInfo) => {
 	// Example creatureInfo = [[creatureType, id], {"health": ["+", 10], "attackSpeed": ["=", 1], ...}]
@@ -149,7 +156,9 @@ const creatureInfoChange = (creatureInfo) => {
 			if (key == "damage"){
 				createDamageTextList(value, theCreature);
 			} else if (key == "state"){
-				
+			
+			} else if (key == "ability"){
+				addAbility(value, theCreature);
 			} else {
 				let setValue = value[1];
 				if (value[0] == "+") setValue = theCreature.properties[key] + value[1];

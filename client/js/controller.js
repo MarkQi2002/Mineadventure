@@ -166,18 +166,7 @@ class controller{
         var newProjectile = {
             position: [this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z],
             initVelocity: [8 * vectorX, 8 * vectorY],
-            damageInfo: newDamageInfo,
-            addState: {}
-        };
-
-
-        newProjectile.addState["burning"] = {
-            duration: 10, 
-            typeInput: {
-                attacker: [this.creature.creatureType, this.creature.ID], 
-                baseDamage: this.creature.properties.attackDamage,
-                criticalRate: this.creature.properties.criticalRate
-            }
+            damageInfo: newDamageInfo
         };
 
         // Updating To Projectile List

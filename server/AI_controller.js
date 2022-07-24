@@ -52,8 +52,7 @@ class AI_controller {
         var newProjectile = {
             position: [this.creature.position[0], this.creature.position[1], this.creature.position[2]],
             initVelocity: [8 * vectorX, 8 * vectorY],
-            damageInfo: newDamageInfo,
-            addState: {}
+            damageInfo: newDamageInfo
         };
 
         // Updating To Projectile List

@@ -137,7 +137,7 @@ class damageText{
         this.text.style.fontSize = this.size + 'vh';
         
         // Check Damage Type
-        let color;
+        let color = [0, 0, 0];
         if (type == "true") {
             color = [255, 255, 255];
 		} else if(type == "normal") {
@@ -146,6 +146,8 @@ class damageText{
             color = [0, 255, 0];
 		} else if(type == "fire") {
             color = [255, 0, 0];
+        } else if(type == "poison") {
+            color = [0, 100, 0];
         }
 
         

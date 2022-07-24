@@ -180,6 +180,7 @@ function properties() {
 	this["maxHealth"] = 100;
 	this["armor"] = 10;
 	this["fireResistance"] = 0;
+	this["poisonResistance"] = 0;
 
 	// Attack Properties
 	this["attackDamage"] = 10;
@@ -188,6 +189,9 @@ function properties() {
 
 	// Movement Properties
 	this["moveSpeed"] = 3;
+
+	// Ability
+	this["ability"] = {};
 }
 
 // Default Creature Information Class
@@ -213,41 +217,211 @@ function creatureInfoClass(ID, creatureType, name, initPos, mapLevel, camp) {
 	this["state"] = {};
 }
 
-var stateTypeInfo = {
-	"burning": {stateBegin: function(theState){
-					theState["baseDamage"] = 0;
-				},
+var abilityTypeInfo = {
+	"Flame Manipulator": {
+		
+		add: // When Get Same Ability
+			function(theAbility){
+				theAbility.level += 1;
+			},
 
-				stateAdd: function(theState, element){
+		projectileAttack: //When Calculate Projectile Damage
+			function(theAbility, damageInfo){
+				let newInfo = {
+					duration: theAbility.level + 5, 
+					typeInput: {
+						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]], 
+						baseDamage: damageInfo.properties.attackDamage,
+						criticalRate: damageInfo.properties.criticalRate,
+						stateLevel: theAbility.level
+					}
+				};
+
+				return {"state": {"burning": newInfo}}
+			},
+	},
+
+	"Poisoner": {
+		
+		add: // When Get Same Ability
+			function(theAbility){
+				theAbility.level += 1;
+			},
+
+		projectileAttack: //When Calculate Projectile Damage
+			function(theAbility, damageInfo){
+				let newInfo = {
+					duration: theAbility.level * 2 + 30,
+					typeInput: {
+						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]], 
+						baseDamage: damageInfo.properties.attackDamage,
+						criticalRate: damageInfo.properties.criticalRate,
+						stateLevel: theAbility.level
+					}
+				};
+
+				return {"state": {"poisoning": newInfo}}
+			},
+	},
+
+}
+
+// Add Each Ability Result
+function addAbilityResult(attackInfo, abilityResult){
+	for (let [type, info] of Object.entries(abilityResult)) {
+		if (attackInfo[type] != null){
+			addAbilityResult(attackInfo[type], info);
+		}else{
+			attackInfo[type] = info;
+		}
+	}
+} 
+
+// Calculate Projectile Damage and Ablility With Attacker Information
+function projectileAttackInfo(creatureInfo, theProjectile){
+	let attackInfo = {"damage": theProjectile.damageInfo};
+
+	let abilityResult;
+	for (let [type, theAbility] of Object.entries(theProjectile.damageInfo.properties.ability)) {
+		abilityResult = abilityTypeInfo[type].projectileAttack(theAbility, theProjectile.damageInfo);
+		if (abilityResult != null){
+			addAbilityResult(attackInfo, abilityResult);
+		}
+	}
+	return attackInfo;
+}
+
+
+function addAbility(newAbility, theCreature){
+	for (let [type, inputs] of Object.entries(newAbility)) {
+		if (theCreature.properties.ability[type] == null){
+			console.log(type, inputs)
+			theCreature.properties.ability[type] = new ability (type, inputs);
+		} else {
+			abilityTypeInfo[type].add(theCreature.properties.ability[type]);
+		}
+
+		newAbility[type] = theCreature.properties.ability[type];
+	}
+}
+
+function ability (type, inputs) {
+	this.type = type;
+	this.level = inputs.level;
+}
+
+
+var stateTypeInfo = {
+	"burning": {
+		
+		stateBegin: 
+			function(theState){
+					theState["baseDamage"] = 0;
+					theState.period = 500;
+			},
+
+		stateAdd: 
+			function(theState, element){
 					theState["criticalRate"] = element.typeInput.criticalRate;
 					theState["attacker"] = element.typeInput.attacker;
+					theState["stateLevel"] = element.typeInput.stateLevel;
 					theState.baseDamage += element.typeInput.baseDamage;
-				},
+			},
 
-				atState: function(theState){
-					//console.log(theState.creature,,,) 
-					let newProperties = new properties();
-					newProperties.criticalRate = theState.criticalRate;
-					creatureInfoChange([[theState.creature, {"damage": damage(theState.attacker, {"fire": theState.baseDamage * 0.1, "true": theState.baseDamage * 0.01}, newProperties)}]]);
+		atState: 
+			function(theState){
+				let theCreature;
+				if (theState.creature[0] == "player"){
+					theCreature = playerArray[theState.creature[1]];
+				} else {
+					theCreature = monsterArray[theState.creature[1]];
+				}
 
-					let theCreature;
-					if (theState.creature[0] == "player"){
-						theCreature = playerArray[theState.creature[1]];
-					} else {
-						theCreature = monsterArray[theState.creature[1]];
+				if (theCreature == null) return;
+
+				let newProperties = new properties();
+				newProperties.criticalRate = theState.criticalRate;
+
+				let damageType =  {};
+
+				let newDamage;
+
+				newDamage = theState.baseDamage * (0.1 + (theState.stateLevel - 1) * 0.05) >> 0;
+				if (newDamage) damageType["fire"] = newDamage;
+
+				newDamage = theState.baseDamage * 0.01 >> 0;
+				if (newDamage) damageType["true"] = newDamage;
+
+				creatureInfoChange([[theState.creature, {"damage": damage(theState.attacker, damageType, newProperties)}]]);
+
+				return checkLifeStatus(theCreature, theState.attacker);
+			},
+
+		stateShift: 
+			function(theState, element){
+				theState.baseDamage -= element.typeInput.baseDamage;
+			},
+
+
+		stateEnd: null,
+	},
+
+
+	"poisoning": {
+		
+		stateBegin: 
+			function(theState){
+					
+			},
+
+		stateAdd: 
+			function(theState, element){
+					theState["criticalRate"] = element.typeInput.criticalRate;
+					theState["attacker"] = element.typeInput.attacker;
+					theState["stateLevel"] = element.typeInput.stateLevel;
+					if (theState["baseDamage"] == null || theState.baseDamage < element.typeInput.baseDamage){
+						theState["baseDamage"] = element.typeInput.baseDamage;
 					}
+			},
 
-					if (theCreature != null) return checkLifeStatus(theCreature, theState.attacker);
-				},
+		atState: 
+			function(theState){
+				let theCreature;
+				if (theState.creature[0] == "player"){
+					theCreature = playerArray[theState.creature[1]];
+				} else {
+					theCreature = monsterArray[theState.creature[1]];
+				}
 
-				stateShift: function(theState, element){
-					theState.baseDamage -= element.typeInput.baseDamage;
-				},
+				if (theCreature == null) return;
 
 
-				stateEnd: null,
-			}
+				let newProperties = new properties();
+				newProperties.criticalRate = theState.criticalRate;
+				let damageType =  {};
 
+				let newDamage;
+
+				newDamage = (theCreature.properties.maxHealth * (0.01 + (theState.stateLevel - 1) * 0.005) + theState.baseDamage * 0.03) >> 0;
+				if (newDamage) damageType["poison"] = newDamage;
+
+				newDamage = theState.baseDamage * 0.01 >> 0;
+				if (newDamage) damageType["true"] = newDamage;
+
+
+				creatureInfoChange([[theState.creature, {"damage": damage(theState.attacker, damageType, newProperties)}]]);
+				
+				return checkLifeStatus(theCreature, theState.attacker);
+			},
+
+		stateShift: 
+			function(theState, element){
+				
+			},
+
+
+		stateEnd: null,
+	}
 };
 	
 class state{
@@ -257,6 +431,7 @@ class state{
 		this.nextTime = new Date().getTime();
 		this.list = [];
 		this.endTime;
+		this.period = 1000;
 		stateTypeInfo[this.type].stateBegin(this);
 		this.add(duration, typeInput)
 	}
@@ -264,7 +439,7 @@ class state{
 	update(creatureInfo, currentTime){
 		if (this.nextTime < currentTime){
 			if (stateTypeInfo[this.type].atState(this) == true) return;
-			this.nextTime += 1000;
+			this.nextTime += this.period;
 		}
 
 		while (this.list.length > 0) {
@@ -317,12 +492,6 @@ class state{
 	}
 
 	setEndTime(){
-		/*
-		let maxEndTime = 0;
-		for (let i = 0; i < this.list.length; ++i){
-			if (this.list[i].endTime > maxEndTime) maxEndTime = this.list[i].endTime;
-		}
-		this.endTime = maxEndTime;*/
 		this.endTime = this.list[this.list.length - 1].endTime;
 	}
 }
@@ -337,10 +506,6 @@ function addState(newState, theCreature){
 		
 	}
 }
-
-
-
-
 
 // Generate Spawn Position Without Collision With Wall
 function createSpawnPosition(mapLevelIndex) {
@@ -502,8 +667,9 @@ function creatureOnHit(creatureInfo, theMapLevel) {
 			
 			// Calculate Distance To Squared
 			if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
+
 				// Updating Creature Information
-				creatureInfoChange([[[creatureInfo.creatureType, creatureInfo.ID], {"damage": theProjectile.damageInfo, "state": theProjectile.addState}]]);
+				creatureInfoChange([[[creatureInfo.creatureType, creatureInfo.ID], projectileAttackInfo(creatureInfo, theProjectile)]]);
 				
 				// Set Projectile Deletion Tag
 				theMapLevel.levelProjectileArray[blockProjectileList[projectileIndex]] = "deletion";
@@ -852,6 +1018,7 @@ function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 
 // Randomly Generating An Item ID Based On Rarity Distribution
 function itemDrop(monsterID){
+	if (monsterArray[monsterID] == null) return;
 	// Variable Declaration For Spawning Item After Monster Dead
 	let newItemID;
 	let newItemPosition = monsterArray[monsterID].position;
@@ -970,6 +1137,8 @@ var itemInfoArray = [itemInfo("Bison Steak", {"propertyChange": {"maxHealth": ["
 					itemInfo("Large Recovery Potion", {"consumable": true, "rarity": "Suprior", "propertyChange": {"damage": itemHealing(1000)}}),
 					itemInfo("Critical Gloves", {"rarity": "Uncommon", "propertyChange": {"criticalRate": ["+", 0.05]}}),
 					itemInfo("Wind's Blessing Cloak", {"rarity": "Uncommon","propertyChange": {"moveSpeed": ["+", 1]}}),
+					itemInfo("Small Flame", {"propertyChange": {"ability": {"Flame Manipulator": {level: 1}}}}),
+					itemInfo("Small Poison", {"propertyChange": {"ability": {"Poisoner": {level: 1}}}}),
 					[],
 					[],
 					[],
@@ -1339,6 +1508,8 @@ function creatureInfoChange(creatureInfo) {
 				creatureInfo[i][1]["health"] = ["=", damagefunction(value, theCreature)];
 			} else if (key == "state") {
 				addState(value, theCreature);
+			} else if (key == "ability") {
+				addAbility(value, theCreature);
 			} else {
 				let setValue = value[1];
 				if (value[0] == "+") setValue = theCreature.properties[key] + value[1];
@@ -1385,14 +1556,22 @@ function damagefunction(damageInfo, defender){
 			}else{
 				damageInfo.type.heal =  {amount: amount, criticalAttack: false};
 			}
-		// fire Attack	
+		// Fire Attack	
 		} else if (key == "fire") {
 			let rate = 1 - defender.properties.fireResistance;
 			if (rate < 0) rate = 0;
 			let amount = rate * value * (1 + criticalAttack) >> 0;
 			defender.properties.health -= amount;
 			damageInfo.type.fire = {amount: amount, criticalAttack: criticalAttack};
+		// Poison Attack	
+		} else if (key == "poison") {
+			let rate = 1 - defender.properties.poisonResistance;
+			if (rate < 0) rate = 0;
+			let amount = rate * value * (1 + criticalAttack) >> 0;
+			defender.properties.health -= amount;
+			damageInfo.type.poison = {amount: amount, criticalAttack: criticalAttack};
 		}
+
 	}
 
 	// Return Defender Health
