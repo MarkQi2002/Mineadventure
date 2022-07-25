@@ -231,11 +231,13 @@ var abilityTypeInfo = {
 
 		projectileAttack: //When Calculate Projectile Damage
 			function(theAbility, damageInfo){
+				let growthRate = 2 / Math.PI * Math.atan((theAbility.level - 1) * 0.1);
+				if (Math.random() >= 0.1 + growthRate * 0.9) return null;
+
 				let newInfo = {
 					duration: theAbility.level * 0.5 + 3, 
 					typeInput: {
 						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]], 
-						baseDamage: damageInfo.properties.attackDamage,
 						criticalRate: damageInfo.properties.criticalRate,
 						stack: theAbility.level
 					}
@@ -252,11 +254,13 @@ var abilityTypeInfo = {
 
 		projectileAttack: //When Calculate Projectile Damage
 			function(theAbility, damageInfo){
+				let growthRate = 2 / Math.PI * Math.atan((theAbility.level - 1) * 0.1);
+				if (Math.random() >= 0.1 + growthRate * 0.9) return null;
+
 				let newInfo = {
 					duration: theAbility.level * 2 + 30,
 					typeInput: {
 						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]], 
-						baseDamage: damageInfo.properties.attackDamage,
 						criticalRate: damageInfo.properties.criticalRate,
 						stack: theAbility.level
 					}
@@ -273,11 +277,13 @@ var abilityTypeInfo = {
 
 		projectileAttack: //When Calculate Projectile Damage
 			function(theAbility, damageInfo){
+				let growthRate = 2 / Math.PI * Math.atan((theAbility.level - 1) * 0.1);
+				if (Math.random() >= 0.1 + growthRate * 0.9) return null;
+
 				let newInfo = {
 					duration: theAbility.level + 5,
 					typeInput: {
 						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]], 
-						baseDamage: damageInfo.properties.attackDamage,
 						criticalRate: damageInfo.properties.criticalRate,
 						stack: theAbility.level
 					}
