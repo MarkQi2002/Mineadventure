@@ -89,48 +89,85 @@ class map {
     // Create New MapLevel
     createMapLevel(){
         // Save Map Level (Multiple Map Level)
-        this.mapLevel = [new mapLevel(this.blockNumber, this.blockSize, this,
-                                    this.init_perlinNoiseMapMethod({childUnitSpawnRate: 0.04,
-                                                                    childUnitIDList: [{list: [2, 3, 4, 5, 6, 7, 8, 9, 10], weight: 3},// (trees and bushes)
-                                                                                      {list: [13, 14, 31], weight: 15}, // (blue flowers and green mushrooms)
-                                                                                      {list: [11, 12, 27, 28, 29, 30, 32], weight: 1}, // (other color flowers and mushrooms)
-                                                                                      {list: [34], weight: 1}, // (stone)
-                                                                                    ],
-                                                                    groundIDList: [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26],
-                                                                    wallIDList: [38]
-                                                                    }),
-                                    this.init_defaultMonsterMethod({defaultMinLevel: 1,
-                                                                    defaultMaxLevel: 10,
-                                                                    monsterSpawnList: [{ID: 0, weight: 2, minLevel: 1, maxLevel: 15}
+        this.mapLevel = [
+            new mapLevel(this.blockNumber, this.blockSize, this,
+                this.init_perlinNoiseMapMethod({
+                    childUnitSpawnRate: 0.04,
+                    childUnitIDList: [
+                        {list: [2, 3, 4, 5, 6, 7, 8, 9, 10], weight: 3},// (trees and bushes)
+                        {list: [13, 14, 31], weight: 15}, // (blue flowers and green mushrooms)
+                        {list: [11, 12, 27, 28, 29, 30, 32], weight: 1}, // (other color flowers and mushrooms)
+                        {list: [34], weight: 1}, // (stone)
+                    ],
+                    groundIDList: [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26],
+                    wallIDList: [38]
+                }),
+
+                this.init_defaultMonsterMethod({
+                    defaultMinLevel: 1,
+                    defaultMaxLevel: 10,
+                    monsterSpawnList: [
+                        {ID: 0, weight: 2, minLevel: 1, maxLevel: 15}
 
 
-                                                                                        ],
+                    ],
 
-                                                                    }),    //monsterSetting
-                            ),
+                }),    //monsterSetting
+            ),
 
 
-                        new mapLevel(this.blockNumber, this.blockSize, this,
-                                    this.init_perlinNoiseMapMethod({childUnitSpawnRate: 0.1,
-                                                                    childUnitIDList: [{list: [2, 3, 4, 5, 6, 7, 8, 9, 10], weight: 5}, // (trees and bushes)
-                                                                                      {list: [11, 12, 13, 14, 27, 28, 29, 30, 31, 32], weight: 1}, // (flowers and mushrooms)
-                                                                                    ],
-                                                                    groundIDList: [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26],
-                                                                    wallIDList: [1],
-                                                                    perlinRate: 10,
-                                                                    perlinOffset: -0.4
-                                                                    }),
-                                    this.init_defaultMonsterMethod({defaultMinLevel: 10,
-                                                                    defaultMaxLevel: 20,
-                                                                    monsterSpawnList: [{ID: 0, weight: 2}
-                                
-                                
-                                                                                    ],
-                                
-                                                                    }), //monsterSetting
-                            ),
+            new mapLevel(this.blockNumber, this.blockSize, this,
+                this.init_perlinNoiseMapMethod({
+                    childUnitSpawnRate: 0.1,
+                    childUnitIDList: [
+                        {list: [2, 3, 4, 5, 6, 7, 8, 9, 10], weight: 5}, // (trees and bushes)
+                        {list: [11, 12, 13, 14, 27, 28, 29, 30, 31, 32], weight: 1}, // (flowers and mushrooms)
+                    ],
+                    groundIDList: [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26],
+                    wallIDList: [1],
+                    perlinRate: 10,
+                    perlinOffset: -0.4
+                }),
+                this.init_defaultMonsterMethod({
+                    defaultMinLevel: 10,
+                    defaultMaxLevel: 20,
+                    monsterSpawnList: [
+                        {ID: 0, weight: 2}
 
-                        ];
+
+                    ],
+            
+                }), //monsterSetting
+            ),
+
+
+
+            new mapLevel(this.blockNumber, this.blockSize, this,
+                this.init_perlinNoiseMapMethod({
+                    childUnitSpawnRate: 0.1,
+                    childUnitIDList: [
+                        {list: [11, 12, 13, 14, 27, 28, 29, 30, 31, 32], weight: 1}, // (flowers and mushrooms)
+                    ],
+                    groundIDList: [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26],
+                    wallIDList: [1],
+                    perlinRate: 10,
+                    perlinOffset: -0.4
+                }),
+                this.init_defaultMonsterMethod({
+                    defaultMinLevel: 20,
+                    defaultMaxLevel: 99999999,
+                    monsterSpawnList: [
+                        {ID: 0, weight: 2}
+
+
+                    ],
+            
+                }), //monsterSetting
+            ),
+
+
+
+        ];
     }
 
     // set UnitIDInfo by (texture url address, collision bool)

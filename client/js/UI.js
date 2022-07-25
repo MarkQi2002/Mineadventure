@@ -148,7 +148,10 @@ class damageText{
             color = [255, 0, 0];
         } else if(type == "poison") {
             color = [0, 100, 0];
+        } else if(type == "ice") {
+            color = [0, 128, 255];
         }
+
 
         
 
