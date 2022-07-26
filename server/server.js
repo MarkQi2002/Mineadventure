@@ -202,7 +202,10 @@ function creatureInfoClass(ID, creatureType, name, initPos, mapLevel, camp) {
 	this["ID"] = ID;
 	this["creatureType"] = creatureType;
 	this["name"] = name;
-	this["position"] =  initPos;
+	this["position"] = initPos;
+	this["velocity"] = [0, 0, 0];
+	
+
 	this["mapLevel"] =  mapLevel;
 	this["camp"] = camp
 	this["campInfo"] = new campInfo();
@@ -230,7 +233,8 @@ var abilityTypeInfo = {
 			abilityLevelUp,
 
 		projectileAttack: //When Calculate Projectile Damage
-			function(theAbility, damageInfo){
+			function(theAbility, theProjectile){
+				let damageInfo = theProjectile.damageInfo;
 				let growthRate = 2 / Math.PI * Math.atan((theAbility.level - 1) * 0.1);
 				if (Math.random() >= 0.1 + growthRate * 0.9) return null;
 
@@ -243,7 +247,7 @@ var abilityTypeInfo = {
 					}
 				};
 
-				return {"state": {"burning": newInfo}}
+				return {"state": {"Burning": newInfo}}
 			},
 	},
 
@@ -253,7 +257,8 @@ var abilityTypeInfo = {
 			abilityLevelUp,
 
 		projectileAttack: //When Calculate Projectile Damage
-			function(theAbility, damageInfo){
+			function(theAbility, theProjectile){
+				let damageInfo = theProjectile.damageInfo;
 				let growthRate = 2 / Math.PI * Math.atan((theAbility.level - 1) * 0.1);
 				if (Math.random() >= 0.1 + growthRate * 0.9) return null;
 
@@ -266,7 +271,7 @@ var abilityTypeInfo = {
 					}
 				};
 
-				return {"state": {"poisoning": newInfo}}
+				return {"state": {"Poisoning": newInfo}}
 			},
 	},
 
@@ -276,7 +281,8 @@ var abilityTypeInfo = {
 			abilityLevelUp,
 
 		projectileAttack: //When Calculate Projectile Damage
-			function(theAbility, damageInfo){
+			function(theAbility, theProjectile){
+				let damageInfo = theProjectile.damageInfo;
 				let growthRate = 2 / Math.PI * Math.atan((theAbility.level - 1) * 0.1);
 				if (Math.random() >= 0.1 + growthRate * 0.9) return null;
 
@@ -289,9 +295,53 @@ var abilityTypeInfo = {
 					}
 				};
 
-				return {"state": {"freezing": newInfo}}
+				return {"state": {"Freezing": newInfo}}
 			},
 	},
+
+	"Repulsor": {
+		
+		add: // When Get Same Ability
+			abilityLevelUp,
+
+		projectileAttack: //When Calculate Projectile Damage
+			function(theAbility, theProjectile){
+				let damageInfo = theProjectile.damageInfo;
+				let newInfo = {
+					duration: theAbility.level * 0.1 + 0.4,
+					typeInput: {
+						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]], 
+						stack: theAbility.level,
+						initVelocity: theProjectile.initVelocity
+					}
+				};
+
+				return {"state": {"Knock Back": newInfo}}
+			},
+	},
+
+	/*
+	"Corpse Explosion": {
+		
+		add: // When Get Same Ability
+			abilityLevelUp,
+
+		projectileAttack: //When Calculate Projectile Damage
+			function(theAbility, theProjectile){
+				let damageInfo = theProjectile.damageInfo;
+				let newInfo = {
+					duration: theAbility.level * 0.5,
+					typeInput: {
+						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]], 
+						stack: theAbility.level,
+						projectilePos: theProjectile.position
+					}
+				};
+
+				return {"state": {"Freezing": newInfo}}
+			},
+	},*/
+	
 
 }
 
@@ -312,7 +362,7 @@ function projectileAttackInfo(creatureInfo, theProjectile){
 
 	let abilityResult;
 	for (let [type, theAbility] of Object.entries(theProjectile.damageInfo.properties.ability)) {
-		abilityResult = abilityTypeInfo[type].projectileAttack(theAbility, theProjectile.damageInfo);
+		abilityResult = abilityTypeInfo[type].projectileAttack(theAbility, theProjectile);
 		if (abilityResult != null){
 			addAbilityResult(attackInfo, abilityResult);
 		}
@@ -376,9 +426,9 @@ function solveConflictState(inputs, theCreature, conflictStateList){
 }
 
 var stateTypeInfo = {
-	"burning": {
+	"Burning": {
 		conflictState:
-			["freezing"],
+			["Freezing"],
 
 		updateDamageType:
 			function(theState){
@@ -430,7 +480,7 @@ var stateTypeInfo = {
 	},
 
 
-	"poisoning": {
+	"Poisoning": {
 		updateDamageType:
 			function(theState){
 				theState["damageType"] =  {};
@@ -484,9 +534,9 @@ var stateTypeInfo = {
 	},
 
 
-	"freezing": {
+	"Freezing": {
 		conflictState:
-			["burning"],
+			["Burning"],
 
 		updateDamageType:
 			function(theState){
@@ -558,6 +608,66 @@ var stateTypeInfo = {
 	},
 
 
+
+	"Knock Back": {
+
+		stateBegin: 
+			function(theState){
+				theState.period = 15; // Update Every Frame (60FPS)
+			},
+
+		stateAdd: 
+			function(theState, element){
+				theState["attacker"] = element.typeInput.attacker;
+				
+				let theCreature = getCreature(theState.creature);
+				if (theCreature == null) return;
+
+				let [diffX, diffY] = [element.typeInput.initVelocity[0], element.typeInput.initVelocity[1]];
+				let magnitude = Math.sqrt(diffX * diffX + diffY * diffY);
+
+				if (theState.movementVector != null){
+					let lastVector = theState.movementVector;
+					[diffX, diffY] = [lastVector[0] + diffX / magnitude, lastVector[0] + diffY / magnitude];
+					magnitude = Math.sqrt(diffX * diffX + diffY * diffY);
+				}
+				
+				theState["movementVector"] = [diffX / magnitude, diffY / magnitude];
+			
+				element.typeInput["removedMoveSpeed"] = theCreature.properties.moveSpeed * 0.5;
+				creatureInfoChange([[theState.creature, {"moveSpeed": ["-", element.typeInput.removedMoveSpeed]}]]);
+			},
+
+		atState: 
+			function(theState){
+				let theCreature = getCreature(theState.creature);
+				if (theCreature == null) return;
+
+				let speed = (theState.list[theState.list.length - 1].endTime - theState.currentTime) / 5000;
+				
+				theCreature.position[0] += theState.movementVector[0] * speed;
+
+				theCreature.position[1] += theState.movementVector[1] * speed;
+			
+
+				
+			},
+
+		stateShift: 
+			function(theState, element){
+				if ( element.typeInput.removedMoveSpeed != null){
+					let theCreature = getCreature(theState.creature);
+					if (theCreature == null) return;
+
+					creatureInfoChange([[theState.creature, {"moveSpeed": ["+", element.typeInput.removedMoveSpeed]}]]);
+				}
+			},
+
+
+		stateEnd: null,
+	},
+
+
 };
 	
 class state{
@@ -575,6 +685,7 @@ class state{
 
 	update(creatureInfo, currentTime){
 		if (this.nextTime < currentTime){
+			this.currentTime = currentTime;
 			if (stateTypeInfo[this.type].atState(this) == true) return;
 			this.nextTime += this.period;
 		}
@@ -927,9 +1038,12 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 					}
 				}
 			}
-
-			theMapLevel.getBlock([Pos[0], Pos[1]]).blockCreatureArray.push([playerArray[playerID].creatureType, playerArray[playerID].ID]);
-			playerArray[playerID].lastBlockPos = [blockX, blockY];
+			
+			let newBlock = theMapLevel.getBlock([Pos[0], Pos[1]]);
+			if (newBlock != null){
+				newBlock.blockCreatureArray.push([playerArray[playerID].creatureType, playerArray[playerID].ID]);
+				playerArray[playerID].lastBlockPos = [blockX, blockY];
+			}
 		}
 
 		// Updating The Position
@@ -1284,10 +1398,11 @@ var itemInfoArray = [/*itemInfo("Bison Steak", {"propertyChange": {"maxHealth": 
 					itemInfo("Mediuml Recovery Potion", {"consumable": true, "rarity": "Uncommon", "propertyChange": {"damage": itemHealing(100)}}),
 					itemInfo("Large Recovery Potion", {"consumable": true, "rarity": "Suprior", "propertyChange": {"damage": itemHealing(1000)}}),
 					itemInfo("Critical Gloves", {"rarity": "Uncommon", "propertyChange": {"criticalRate": ["+", 0.05]}}),
-					itemInfo("Wind's Blessing Cloak", {"rarity": "Uncommon","propertyChange": {"moveSpeed": ["+", 1]}}),*/
+					itemInfo("Wind's Blessing Cloak", {"rarity": "Uncommon","propertyChange": {"moveSpeed": ["+", 1]}}),
 					itemInfo("Small Flame", {"propertyChange": {"ability": {"Flame Manipulator": {level: 1}}}}),
 					itemInfo("Small Poison", {"propertyChange": {"ability": {"Poisoner": {level: 1}}}}),
-					itemInfo("Small Ice", {"propertyChange": {"ability": {"Freezer": {level: 1}}}}),
+					itemInfo("Small Ice", {"propertyChange": {"ability": {"Freezer": {level: 1}}}}),*/
+					itemInfo("Knock Stick", {"propertyChange": {"ability": {"Repulsor": {level: 1}}}}),
 					[],
 					[],
 					[],

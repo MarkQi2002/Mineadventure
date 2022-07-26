@@ -11,7 +11,7 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 scene.add( camera );
 
 // scene.background = new THREE.Color( 0xffffff );
-var cameraAngle = Math.PI / 8
+var cameraAngle = 0//Math.PI / 8
 var carmeraHeight = 10;
 var carmeraOffsetY = Math.tan(cameraAngle) * (carmeraHeight - groundLevel);
 camera.rotation.x = cameraAngle;
