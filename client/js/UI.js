@@ -401,9 +401,6 @@ function unlockedCommand(inputArray) {
 
 // Teleport Player To Corresponding Coordinate
 function teleport([mapX, mapY]){
-    // Updating Renderer Information
-    player_controller.controllerUpdateBlock(game_map.mapPosToBlockPos([mapX, mapY]));
-
     // Moving Player To New Position
     player_controller.creature.object.position.x = mapX;
     player_controller.creature.object.position.y = mapY;
@@ -414,7 +411,10 @@ function teleport([mapX, mapY]){
 
     // Loop Through All Player
     for (let playerIndex = 0; playerIndex < playerArray.length; ++playerIndex){
-        if (playerArray[playerIndex] != null){
+        if (playerArray[playerIndex] != null && 
+            !(playerArray[playerIndex].creatureType == player_controller.creature.creatureType &&
+            playerArray[playerIndex].ID == player_controller.creature.ID)){
+
             playerArray[playerIndex].update();
         }
     }
@@ -429,6 +429,9 @@ function teleport([mapX, mapY]){
     // Update Player Position Event
     var event = new Event('position event', {bubbles: true, cancelable: false}) 
     document.dispatchEvent(event);
+
+    // Updating Renderer Information
+    player_controller.controllerUpdateBlock(game_map.mapPosToBlockPos([mapX, mapY]));
 }
 
 // Commands That Need To Be Unlocked

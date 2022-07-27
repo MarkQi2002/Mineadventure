@@ -149,8 +149,8 @@ function campInfo(){
 }
 
 // Return Attackability For Attacker Based On Defender Status
-function IsAttackable(attackerCampInfo, defenderCamp){
-	return attackerCampInfo[defenderCamp] < 50;
+function IsAttackable(attacker, attackerCampInfo, defender, defenderCamp){
+	return !(attacker[0] == defender[0] && attacker[1] == defender[1]) && attackerCampInfo[defenderCamp] < 50
 }
 
 // -------------------End Of Camp-------------------
@@ -232,7 +232,7 @@ var abilityTypeInfo = {
 			abilityLevelUp,
 
 		projectileAttack: //When Calculate Projectile Damage
-			function(theAbility, theProjectile){
+			function(theAbility, theProjectile, creatureInfo){
 				let damageInfo = theProjectile.damageInfo;
 				let growthRate = 2 / Math.PI * Math.atan((theAbility.level - 1) * 0.1);
 				if (Math.random() >= 0.1 + growthRate * 0.9) return null;
@@ -246,7 +246,13 @@ var abilityTypeInfo = {
 					}
 				};
 
-				return {"state": {"Burning": newInfo}}
+	
+				if (damageInfo.properties.ability["Fire Range"] != null){
+					abilityTypeInfo["Fire Range"].effect(damageInfo.properties.ability["Fire Range"], theProjectile, newInfo, creatureInfo);
+				}
+				
+
+				return {"state": {"Burning": newInfo}};
 			},
 	},
 
@@ -256,7 +262,7 @@ var abilityTypeInfo = {
 			abilityLevelUp,
 
 		projectileAttack: //When Calculate Projectile Damage
-			function(theAbility, theProjectile){
+			function(theAbility, theProjectile, creatureInfo){
 				let damageInfo = theProjectile.damageInfo;
 				let growthRate = 2 / Math.PI * Math.atan((theAbility.level - 1) * 0.1);
 				if (Math.random() >= 0.1 + growthRate * 0.9) return null;
@@ -270,7 +276,7 @@ var abilityTypeInfo = {
 					}
 				};
 
-				return {"state": {"Poisoning": newInfo}}
+				return {"state": {"Poisoning": newInfo}};
 			},
 	},
 
@@ -280,7 +286,7 @@ var abilityTypeInfo = {
 			abilityLevelUp,
 
 		projectileAttack: //When Calculate Projectile Damage
-			function(theAbility, theProjectile){
+			function(theAbility, theProjectile, creatureInfo){
 				let damageInfo = theProjectile.damageInfo;
 				let growthRate = 2 / Math.PI * Math.atan((theAbility.level - 1) * 0.1);
 				if (Math.random() >= 0.1 + growthRate * 0.9) return null;
@@ -293,8 +299,8 @@ var abilityTypeInfo = {
 						stack: theAbility.level
 					}
 				};
-
-				return {"state": {"Freezing": newInfo}}
+	
+				return {"state": {"Freezing": newInfo}};
 			},
 	},
 
@@ -304,7 +310,7 @@ var abilityTypeInfo = {
 			abilityLevelUp,
 
 		projectileAttack: //When Calculate Projectile Damage
-			function(theAbility, theProjectile){
+			function(theAbility, theProjectile, creatureInfo){
 				let damageInfo = theProjectile.damageInfo;
 				let newInfo = {
 					duration: theAbility.level * 0.1 + 0.4,
@@ -315,8 +321,59 @@ var abilityTypeInfo = {
 					}
 				};
 
-				return {"state": {"Knock Back": newInfo}}
+				return {"state": {"Knock Back": newInfo}};
 			},
+	},
+
+
+	"Fire Range": {
+		
+		add: // When Get Same Ability
+			abilityLevelUp,
+
+		effect:
+			function(theAbility, theProjectile, newInfo, creatureInfo){
+				let damageInfo = theProjectile.damageInfo;
+				let infoList = [];
+				let otherCreature;
+				let surroundingBlocks = game_map.getSurroundingBlock([theProjectile.position[0] / game_map.blockSize.x >> 0,
+																	theProjectile.position[1] / game_map.blockSize.y >> 0],
+																	creatureInfo.mapLevel, [1, 1])
+                for (let i = 0; i < surroundingBlocks.length; ++i) {
+                    for (let ii = 0; ii < surroundingBlocks[i][2].blockCreatureArray.length; ++ii) {
+                        if (surroundingBlocks[i][2].blockCreatureArray[ii][0] == "player") {
+                            otherCreature = playerArray[surroundingBlocks[i][2].blockCreatureArray[ii][1]];
+                        } else {
+                            otherCreature = monsterArray[surroundingBlocks[i][2].blockCreatureArray[ii][1]];
+                        }
+
+						let radius = 0.8 + 0.2 * theAbility.level;
+
+						// For Calculating Manhattan Distance
+						let diffX = otherCreature.position[0] - theProjectile.position[0];
+						let diffY = otherCreature.position[1] - theProjectile.position[1];
+						if (Math.abs(diffX) + Math.abs(diffY) > radius + radius) continue; 
+						
+						// If Collision Occur, Move In Opposite Direction And Return True
+						// Calculate Direct Distance To Squared
+						if (diffX * diffX + diffY * diffY > radius * radius) continue; 
+
+
+						if (!IsAttackable([damageInfo.attacker[0], damageInfo.attacker[1]], damageInfo.attacker[2], 
+							[otherCreature.creatureType, otherCreature.ID], otherCreature.camp)) continue;
+						
+						
+						infoList.push([[otherCreature.creatureType, otherCreature.ID], {"state": {"Burning": newInfo}}]);
+
+                    }
+                }
+
+				
+				creatureInfoChange(infoList);
+
+				
+			},
+
 	},
 
 	/*
@@ -339,6 +396,7 @@ var abilityTypeInfo = {
 
 				return {"state": {"Freezing": newInfo}}
 			},
+
 	},*/
 	
 
@@ -361,7 +419,9 @@ function projectileAttackInfo(creatureInfo, theProjectile){
 
 	let abilityResult;
 	for (let [type, theAbility] of Object.entries(theProjectile.damageInfo.properties.ability)) {
-		abilityResult = abilityTypeInfo[type].projectileAttack(theAbility, theProjectile);
+		if (abilityTypeInfo[type].projectileAttack == null) continue;
+
+		abilityResult = abilityTypeInfo[type].projectileAttack(theAbility, theProjectile, creatureInfo);
 		if (abilityResult != null){
 			addAbilityResult(attackInfo, abilityResult);
 		}
@@ -931,8 +991,7 @@ function creatureOnHit(creatureInfo, theMapLevel) {
 		let attacker = theProjectile.damageInfo.attacker;
 
 		// Is Not Attackable
-		if((attacker[0] == creatureInfo.creatureType && attacker[1] == creatureInfo.ID) || 
-			!IsAttackable(attacker[2], creatureInfo.camp)) continue;
+		if(!IsAttackable([attacker[0], attacker[1]], attacker[2], [creatureInfo.creatureType, creatureInfo.ID], creatureInfo.camp)) continue;
 
 		// Calculate XY Coordinate Difference
 		let diffX = theProjectile.position[0] - creatureInfo.position[0];
@@ -1422,6 +1481,7 @@ var itemInfoArray = [itemInfo("Bison Steak", {"propertyChange": {"maxHealth": ["
 					itemInfo("Small Poison", {"propertyChange": {"ability": {"Poisoner": {level: 1}}}}),
 					itemInfo("Small Ice", {"propertyChange": {"ability": {"Freezer": {level: 1}}}}),
 					itemInfo("Knock Stick", {"propertyChange": {"ability": {"Repulsor": {level: 1}}}}),
+					itemInfo("Burst Fireball", {"propertyChange": {"ability": {"Fire Range": {level: 10}}}}),
 					[],
 					[],
 					[],
