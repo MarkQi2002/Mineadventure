@@ -178,15 +178,7 @@ class controller{
     // Player Collision Detection 
     playerCollision(translateDistance){ 
         // For Collision Detection 
-        let creatureTrans = this.creature.object; 
-        let predictedPosition = new THREE.Vector3(); 
-        predictedPosition.copy(creatureTrans.position); 
- 
-        // Predicting Future Position 
-        if (this.inputs.forward) predictedPosition.y += translateDistance; 
-        if (this.inputs.backward) predictedPosition.y -= translateDistance; 
-        if (this.inputs.left) predictedPosition.x -= translateDistance; 
-        if (this.inputs.right) predictedPosition.x += translateDistance;
+        let creaturePos = this.creature.object.position; 
  
         // Checking Collision With Every Other Player 
         for (let playerIndex = 0; playerIndex < playerArray.length; playerIndex++) { 
@@ -196,36 +188,29 @@ class controller{
 
             // For Calculating Manhattan Distance
             let otherPlayerPosition = playerArray[playerIndex].object.position;
-            let diffX = predictedPosition.x - otherPlayerPosition.x;
-			let diffY = predictedPosition.y - otherPlayerPosition.y;
+            let diffX = creaturePos.x + translateDistance[0] - otherPlayerPosition.x;
+			let diffY = creaturePos.y + translateDistance[1] - otherPlayerPosition.y;
             if (Math.abs(diffX) + Math.abs(diffY) > 2) continue; 
             
 
             // If Collision Occur, Move In Opposite Direction And Return True
             // Calculate Direct Distance To Squared
-            let diffZ = predictedPosition.z - otherPlayerPosition.z;
-            if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 1) { 
+            let amount = diffX * diffX + diffY * diffY;
+            if (amount <= 1) { 
                 //console.log("Collided With Player", playerIndex);
 
-                // Sliding The Block 
-                if (this.inputs.forward) creatureTrans.translateY(-translateDistance); 
-                else if (this.inputs.backward) creatureTrans.translateY(translateDistance); 
-                else if (this.inputs.left) creatureTrans.translateX(translateDistance); 
-                else if (this.inputs.right) creatureTrans.translateX(-translateDistance); 
- 
-                // Update Position On Server 
-                if (this.inputs.forward || this.inputs.backward || this.inputs.left || this.inputs.right || !this.onGround) { 
-                    var event = new Event('position event', {bubbles: true, cancelable: false}) 
-                    document.dispatchEvent(event); 
-                } 
-                 
+                let rate = 1 - Math.sqrt(amount);
+
                 // Indicate Collision Occurred 
-                return true; 
+                return [translateDistance[0] + diffX * rate,
+                        translateDistance[1] + diffY * rate];
+                
+                 
             } 
         } 
  
         // No Collision Has Occurred 
-        return false; 
+        return translateDistance; 
     } 
  
     // Item Collision Detection 
@@ -278,210 +263,10 @@ class controller{
         return collision; 
     } 
 
-    // Map Collision Detection
-    // Always Return Return False (Intentional)
-    mapCollisionOLD(translateDistance){ 
-        // For Collision Detection 
-        let creatureTrans = this.creature.object; 
-
-        // Reset Input Boolean
-        this.forwardCollision = false;
-        this.backwardCollision = false;
-        this.leftCollision = false;
-        this.rightCollision = false;
-
-        // Initialize Position Array
-        let predictedPosition = new THREE.Vector3();
-        predictedPosition.copy(creatureTrans.position);
-
-        // Next Position
-        let predictedMapX;
-        let predictedMapY;
-        
-        // Forward Collision
-        if (this.inputs.forward) {
-            predictedPosition.y += translateDistance;
-            // Variable Declaration For Checking Collision
-            // Center Of The Circle
-            let cx = predictedPosition.x + 0.5;
-            let cy = predictedPosition.y + 0.5;
-            predictedMapX = Math.floor(cx);
-            predictedMapY = Math.floor(cy + 1);
-
-            for (let mapShift = -1; mapShift <= 1; mapShift++) {
-                let unit = game_map.getUnit([predictedMapX + mapShift, predictedMapY]);
-                // Check If Hit A Border
-                if (unit == null) {
-                    this.forwardCollision = true;
-                    break;
-                }
-
-                // Bottom Left Of The Square
-                let rx = predictedMapX + mapShift;
-                let ry = predictedMapY;
-
-                // Getting Which Edge Or Corner The Circle Is Closest To
-                let testX = cx;
-                let testY = cy;
-
-                if (testX < rx) testX = rx;
-                else if (testX > rx + 1) testX = rx + 1;
-                if (testY < ry) testY = ry;
-                else if (testY > ry + 1) testY = ry + 1;
-                
-                // Getting Difference In Distance
-                let distX = cx - testX;
-                let distY = cy - testY;
-
-                // Collision Has Occur
-                if (distX * distX + distY * distY < 0.25 && game_map.getAllChildUnitCollision(unit)) {
-                    this.forwardCollision = true;
-                    break;
-                }
-            }
-        }
-        if (this.inputs.forward) predictedPosition.y -= translateDistance;
-        
-        // Backward Collision
-        if (this.inputs.backward) {
-            predictedPosition.y -= translateDistance;
-            // Variable Declaration For Checking Collision
-            // Center Of The Circle
-            let cx = predictedPosition.x + 0.5;
-            let cy = predictedPosition.y + 0.5;
-            predictedMapX = Math.floor(cx);
-            predictedMapY = Math.floor(cy - 1);
-
-            for (let mapShift = -1; mapShift <= 1; mapShift++) {
-                let unit = game_map.getUnit([predictedMapX + mapShift, predictedMapY]);
-                // Check If Hit A Border
-                if (unit == null) {
-                    this.backwardCollision = true;
-                    break;
-                }
-
-                // Bottom Left Of The Square
-                let rx = predictedMapX + mapShift;
-                let ry = predictedMapY;
-
-                // Getting Which Edge Or Corner The Circle Is Closest To
-                let testX = cx;
-                let testY = cy;
-
-                if (testX < rx) testX = rx;
-                else if (testX > rx + 1) testX = rx + 1;
-                if (testY < ry) testY = ry;
-                else if (testY > ry + 1) testY = ry + 1;
-                
-                // Getting Difference In Distance
-                let distX = cx - testX;
-                let distY = cy - testY;
-
-                // Collision Has Occur
-                if (distX * distX + distY * distY < 0.25 && game_map.getAllChildUnitCollision(unit)) {
-                    this.backwardCollision = true;
-                    break;
-                }
-            }
-        }
-        if (this.inputs.backward) predictedPosition.y += translateDistance;
-
-        // Left Collision
-        if (this.inputs.left) {
-            predictedPosition.x -= translateDistance;
-            // Variable Declaration For Checking Collision
-            // Center Of The Circle
-            let cx = predictedPosition.x + 0.5;
-            let cy = predictedPosition.y + 0.5;
-            predictedMapX = Math.floor(cx - 1);
-            predictedMapY = Math.floor(cy);
-
-            for (let mapShift = -1; mapShift <= 1; mapShift++) {
-                let unit = game_map.getUnit([predictedMapX, predictedMapY + mapShift]);
-                // Check If Hit A Border
-                if (unit == null) {
-                    this.leftCollision = true;
-                    break;
-                }
-
-                // Bottom Left Of The Square
-                let rx = predictedMapX;
-                let ry = predictedMapY + mapShift;
-
-                // Getting Which Edge Or Corner The Circle Is Closest To
-                let testX = cx;
-                let testY = cy;
-
-                if (testX < rx) testX = rx;
-                else if (testX > rx + 1) testX = rx + 1;
-                if (testY < ry) testY = ry;
-                else if (testY > ry + 1) testY = ry + 1;
-                
-                // Getting Difference In Distance
-                let distX = cx - testX;
-                let distY = cy - testY;
-                
-                // Collision Has Occur
-                if (distX * distX + distY * distY < 0.25 && game_map.getAllChildUnitCollision(unit)) {
-                    this.leftCollision = true;
-                    break;
-                }
-            }
-        }
-        if (this.inputs.left) predictedPosition.x += translateDistance;
-
-        // Right Collision
-        if (this.inputs.right) {
-            predictedPosition.x += translateDistance;
-            // Variable Declaration For Checking Collision
-            // Center Of The Circle
-            let cx = predictedPosition.x + 0.5;
-            let cy = predictedPosition.y + 0.5;
-            predictedMapX = Math.floor(cx + 1);
-            predictedMapY = Math.floor(cy);
-
-            for (let mapShift = -1; mapShift <= 1; mapShift++) {
-                let unit = game_map.getUnit([predictedMapX, predictedMapY + mapShift]);
-                // Check If Hit A Border
-                if (unit == null) {
-                    this.rightCollision = true;
-                    break;
-                }
-
-                // Bottom Left Of The Square
-                let rx = predictedMapX;
-                let ry = predictedMapY + mapShift;
-
-                // Getting Which Edge Or Corner The Circle Is Closest To
-                let testX = cx;
-                let testY = cy;
-
-                if (testX <= rx) testX = rx;
-                else if (testX >= rx + 1) testX = rx + 1;
-                if (testY <= ry) testY = ry;
-                else if (testY >= ry + 1) testY = ry + 1;
-                
-                // Getting Difference In Distance
-                let distX = cx - testX;
-                let distY = cy - testY;
-
-                // Collision Has Occur
-                if (distX * distX + distY * distY < 0.25 && game_map.getAllChildUnitCollision(unit)) {
-                    this.rightCollision = true;
-                    break;
-                }
-            }
-        }
-        if (this.inputs.right) predictedPosition.x -= translateDistance;
-
-        // No Map Collision Has Occurred 
-        return false; 
-    } 
  
-    // Map Collision Detection
-    mapCollision(translateDistance){ 
-        // For Collision Detection 
-        let creatureTrans = this.creature.object; 
+    // Surrounding Unit Collision Detection
+    surroundingCollision(currentPosition, translateDistance){ 
+        // Player Use 0.21 For Collision Instead Of 0.25 (The Radius 0.5^2) To Avoid Unable Passing Through One-Unit Wide Wall
 
         // Next Position
         let predictedMapX;
@@ -489,15 +274,17 @@ class controller{
 
         let [offSetX, offSetY] = translateDistance;
         
+        let directionX = translateDistance[0] >= 0 ? 1 : -1;
+        let directionY = translateDistance[1] >= 0 ? 1 : -1;
+
         // Y Collision
         if (translateDistance[1] != 0) {
             // Variable Declaration For Checking Collision
             // Center Of The Circle
-            let cx = creatureTrans.position.x + 0.5;
-            let cy = creatureTrans.position.y + offSetY + 0.5;
-            let isPositiveDir = translateDistance[1] > 0;
+            let cx = currentPosition[0] + 0.5;
+            let cy = currentPosition[1] + offSetY + 0.5;
             predictedMapX = Math.floor(cx);
-            predictedMapY = Math.floor(cy + (isPositiveDir ? 1 : -1));
+            predictedMapY = Math.floor(cy + directionY);
 
             for (let mapShift = -1; mapShift <= 1; ++mapShift) {
                 // Bottom Left Of The Square
@@ -510,45 +297,36 @@ class controller{
                 let testX = cx;
                 let testY = cy;
 
-                if (testX <= rx) testX = rx;
-                else if (testX >= rx + 1) testX = rx + 1;
-                if (testY <= ry) testY = ry;
-                else if (testY >= ry + 1) testY = ry + 1;
+                if (testX < rx) testX = rx;
+                else if (testX > rx + 1) testX = rx + 1;
+                if (testY < ry) testY = ry;
+                else if (testY > ry + 1) testY = ry + 1;
                 
                 // Getting Difference In Distance
                 let distX = cx - testX;
                 let distY = cy - testY;
 
-
-                console.log(distX * distX + distY * distY < 0.25, unit == null, game_map.getAllChildUnitCollision(unit))
-
                 // Collision Has Occur 
-                if (distX * distX + distY * distY < 0.25 && (unit == null || game_map.getAllChildUnitCollision(unit)) ) {
+                if (distX * distX + distY * distY < 0.21 && (unit == null || game_map.getAllChildUnitCollision(unit))) {
                     if (distX == 0){
-                        if (isPositiveDir) offSetY = translateDistance[1] - distY - 0.5;
-                        else offSetY = translateDistance[1] - distY + 0.5;
+                        offSetY = translateDistance[1] - distY - 0.5 * directionY;
                         break;
                     }else{ 
-                        let newOffset;
-                        if (isPositiveDir) newOffset = translateDistance[1] - distY - Math.sqrt(0.25 - distX * distX);
-                        else newOffset = translateDistance[1] - distY + Math.sqrt(0.25 - distX * distX);
+                        let newOffset = translateDistance[1] - distY - Math.sqrt(0.21 - distX * distX) * directionY;
                         if (Math.abs(offSetY) > Math.abs(newOffset)) offSetY = newOffset;
                     }
                 }
             }
-
         }
 
     
-
         // X Collision
         if (translateDistance[0] != 0) {
             // Variable Declaration For Checking Collision
             // Center Of The Circle
-            let cx = creatureTrans.position.x + offSetX + 0.5;
-            let cy = creatureTrans.position.y + offSetY + 0.5;
-            let isPositiveDir = translateDistance[0] > 0;
-            predictedMapX = Math.floor(cx + (isPositiveDir ? 1 : -1));
+            let cx = currentPosition[0] + offSetX + 0.5;
+            let cy = currentPosition[1] + offSetY + 0.5;
+            predictedMapX = Math.floor(cx + directionX);
             predictedMapY = Math.floor(cy);
 
             for (let mapShift = -1; mapShift <= 1; ++mapShift) {
@@ -570,17 +348,14 @@ class controller{
                 // Getting Difference In Distance
                 let distX = cx - testX;
                 let distY = cy - testY;
-                
+
                 // Collision Has Occur
-                if (distX * distX + distY * distY < 0.25 && (unit == null || game_map.getAllChildUnitCollision(unit)) ) {
+                if (distX * distX + distY * distY < 0.21 && (unit == null || game_map.getAllChildUnitCollision(unit))) {
                     if (distY == 0){
-                        if (isPositiveDir) offSetX = translateDistance[0] - distX - 0.5;
-                        else offSetX = translateDistance[0] - distX + 0.5;
+                        offSetX = translateDistance[0] - distX - 0.5 * directionX
                         break;
                     }else{
-                        let newOffset;
-                        if (isPositiveDir) newOffset = translateDistance[0] - distX - Math.sqrt(0.25 - distY * distY);
-                        else newOffset = translateDistance[0] - distX + Math.sqrt(0.25 - distY * distY);
+                        let newOffset = translateDistance[0] - distX - Math.sqrt(0.21 - distY * distY) * directionX;
                         if (Math.abs(offSetX) > Math.abs(newOffset)) offSetX = newOffset;
                     }
                 }
@@ -589,7 +364,67 @@ class controller{
         
         return [offSetX, offSetY];
     } 
+
+    // Map Collision Detection
+    mapCollision(unitTranslateDistance){
+        let checkAmount = 0.3;
+        let creatureTrans = this.creature.object;
+        let [xCount, yCount] = [1, 1];
+        let [xDir, yDir] = [unitTranslateDistance[0] > 0 ? 1 : -1, unitTranslateDistance[1] > 0 ? 1 : -1];
+        let [xCollision, yCollision] = [false, false];
+        let currentPosition = [creatureTrans.position.x, creatureTrans.position.y];
+        let newTranslateDistance;
+        while (unitTranslateDistance[0] * xDir > 0 || unitTranslateDistance[1] * yDir > 0){
+            if (xCollision){
+                xCount = 0;
+            }else{
+                if (unitTranslateDistance[0] * xDir > checkAmount){
+                    xCount = xDir * checkAmount;
+                } else if (unitTranslateDistance[0] * xDir > 0){
+                    xCount = unitTranslateDistance[0];
+                } else {
+                    xCount = 0;
+                }
+            }
+
+            if (yCollision){
+                yCount = 0;
+            }else{
+                if (unitTranslateDistance[1] * yDir > checkAmount){
+                    yCount = yDir * checkAmount;
+                } else if (unitTranslateDistance[1] * yDir > 0){
+                    yCount = unitTranslateDistance[1];
+                } else {
+                    yCount = 0;
+                }
+            }
+
+            unitTranslateDistance[0] -= xDir * checkAmount;
+            unitTranslateDistance[1] -= yDir * checkAmount;
+
+            
+            newTranslateDistance = this.surroundingCollision(currentPosition,[xCount, yCount]);
+            
+            currentPosition[0] += newTranslateDistance[0];
+            currentPosition[1] += newTranslateDistance[1];
+
+            if (Math.abs(xCount) > Math.abs(newTranslateDistance[0])) {
+                xCollision = true;
+                if (yCollision) break;
  
+            };
+
+            if (Math.abs(yCount) > Math.abs(newTranslateDistance[1])) {
+                yCollision = true;
+                if (xCollision) break;
+            };
+        }
+        
+        return [currentPosition[0] - creatureTrans.position.x,
+                currentPosition[1] - creatureTrans.position.y]; 
+    }
+
+
     // Getting The Creature's Block Position
     getPlayerBlockPos2D(){ 
         return [(this.creature.object.position.x / game_map.blockSize.x) >> 0,
@@ -712,65 +547,18 @@ class controller{
             totalTranslateDistance[i] += this.creature.velocity[i];
         }
 
-
+        totalTranslateDistance = this.playerCollision(totalTranslateDistance);
         totalTranslateDistance = this.mapCollision(totalTranslateDistance);
-        creatureTrans.translateX(totalTranslateDistance[0]); 
-        creatureTrans.translateY(totalTranslateDistance[1]); 
-
-        /*
-        if (!this.playerCollision(translateDistance) && !this.mapCollision(totalTranslateDistance)) { 
-            if (!this.forwardCollision) { 
-                creatureTrans.translateY(translateDistance); 
-            } 
- 
-            if (!this.backwardCollision) { 
-                creatureTrans.translateY(-translateDistance); 
-            } 
- 
-            if (!this.leftCollision) { 
-                creatureTrans.translateX(-translateDistance); 
-            } 
- 
-            if (!this.rightCollision) { 
-                creatureTrans.translateX(translateDistance); 
-            } 
-        }*/
-    
-        /*
-        // If No Collision Occur, Move The Creature 
-        if (!this.playerCollision(translateDistance) && !this.mapCollision(translateDistance)) { 
-            if (this.inputs.forward && !this.forwardCollision) { 
-                creatureTrans.translateY(translateDistance); 
-            } 
- 
-            if (this.inputs.backward && !this.backwardCollision) { 
-                creatureTrans.translateY(-translateDistance); 
-            } 
- 
-            if (this.inputs.left && !this.leftCollision) { 
-                creatureTrans.translateX(-translateDistance); 
-            } 
- 
-            if (this.inputs.right && !this.rightCollision) { 
-                creatureTrans.translateX(translateDistance); 
-            } 
-        }*/
         
-        /*
-        // Move To Nearest Integer
-        if (this.forwardCollision || this.backwardCollision || this.leftCollision || this.rightCollision) {
-            if (Math.abs(Math.round(creatureTrans.position.x) - creatureTrans.position.x) <= 0.03) creatureTrans.position.x = Math.round(creatureTrans.position.x);
-            if (Math.abs(Math.round(creatureTrans.position.y) - creatureTrans.position.y) <= 0.03) creatureTrans.position.y = Math.round(creatureTrans.position.y);    
-        }*/
-
-
-
-
         // Apply Item Collision 
         this.itemCollision(translateDistance); 
  
         // Update Position On Server 
-        if (this.inputs.forward || this.inputs.backward || this.inputs.left || this.inputs.right || !this.onGround) { 
+        if (totalTranslateDistance[0] != 0 || totalTranslateDistance[1] != 0 || !this.onGround) {
+
+            creatureTrans.translateX(totalTranslateDistance[0]);
+            creatureTrans.translateY(totalTranslateDistance[1]);
+            
             var event = new Event('position event', {bubbles: true, cancelable: false}) 
             document.dispatchEvent(event); 
             this.controllerUpdateBlock(this.getPlayerBlockPos2D()); 
