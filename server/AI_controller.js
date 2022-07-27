@@ -8,6 +8,8 @@ class AI_controller {
         this.searchRange = 32;
         this.aggro = {creature: null, amount: 0, base: 2, max: 5};
         this.attackCD = 0;
+
+        this.velocity = [0,0];
     }
 
     // Setting Creature Aggro
@@ -57,6 +59,166 @@ class AI_controller {
 
         // Updating To Projectile List
         return newProjectile;
+    }
+
+    // Surrounding Unit Collision Detection
+    surroundingCollision(currentPosition, translateDistance, theMap){ 
+        // Player Use 0.21 For Collision Instead Of 0.25 (The Radius 0.5^2) To Avoid Unable Passing Through One-Unit Wide Wall
+
+        // Next Position
+        let predictedMapX;
+        let predictedMapY;
+
+        let [offSetX, offSetY] = translateDistance;
+        
+        let directionX = translateDistance[0] >= 0 ? 1 : -1;
+        let directionY = translateDistance[1] >= 0 ? 1 : -1;
+
+        // Y Collision
+        if (translateDistance[1] != 0) {
+            // Variable Declaration For Checking Collision
+            // Center Of The Circle
+            let cx = currentPosition[0] + 0.5;
+            let cy = currentPosition[1] + offSetY + 0.5;
+            predictedMapX = Math.floor(cx);
+            predictedMapY = Math.floor(cy + directionY);
+
+            for (let mapShift = -1; mapShift <= 1; ++mapShift) {
+                // Bottom Left Of The Square
+                let rx = predictedMapX + mapShift;
+                let ry = predictedMapY;
+
+                let unit = theMap.mapLevel[this.creature.mapLevel].getUnit([rx, ry]);
+
+                // Getting Which Edge Or Corner The Circle Is Closest To
+                let testX = cx;
+                let testY = cy;
+
+                if (testX < rx) testX = rx;
+                else if (testX > rx + 1) testX = rx + 1;
+                if (testY < ry) testY = ry;
+                else if (testY > ry + 1) testY = ry + 1;
+                
+                // Getting Difference In Distance
+                let distX = cx - testX;
+                let distY = cy - testY;
+
+                // Collision Has Occur 
+                if (distX * distX + distY * distY < 0.21 && (unit == null || theMap.getAllChildUnitCollision(unit))) {
+                    if (distX == 0){
+                        offSetY = translateDistance[1] - distY - 0.5 * directionY;
+                        break;
+                    }else{ 
+                        let newOffset = translateDistance[1] - distY - Math.sqrt(0.21 - distX * distX) * directionY;
+                        if (Math.abs(offSetY) > Math.abs(newOffset)) offSetY = newOffset;
+                    }
+                }
+            }
+        }
+
+    
+        // X Collision
+        if (translateDistance[0] != 0) {
+            // Variable Declaration For Checking Collision
+            // Center Of The Circle
+            let cx = currentPosition[0] + offSetX + 0.5;
+            let cy = currentPosition[1] + offSetY + 0.5;
+            predictedMapX = Math.floor(cx + directionX);
+            predictedMapY = Math.floor(cy);
+
+            for (let mapShift = -1; mapShift <= 1; ++mapShift) {
+                // Bottom Left Of The Square
+                let rx = predictedMapX;
+                let ry = predictedMapY + mapShift;
+
+                let unit =  theMap.mapLevel[this.creature.mapLevel].getUnit([rx, ry]);
+
+                // Getting Which Edge Or Corner The Circle Is Closest To
+                let testX = cx;
+                let testY = cy;
+
+                if (testX < rx) testX = rx;
+                else if (testX > rx + 1) testX = rx + 1;
+                if (testY < ry) testY = ry;
+                else if (testY > ry + 1) testY = ry + 1;
+                
+                // Getting Difference In Distance
+                let distX = cx - testX;
+                let distY = cy - testY;
+
+                // Collision Has Occur
+                if (distX * distX + distY * distY < 0.21 && (unit == null || theMap.getAllChildUnitCollision(unit))) {
+                    if (distY == 0){
+                        offSetX = translateDistance[0] - distX - 0.5 * directionX
+                        break;
+                    }else{
+                        let newOffset = translateDistance[0] - distX - Math.sqrt(0.21 - distY * distY) * directionX;
+                        if (Math.abs(offSetX) > Math.abs(newOffset)) offSetX = newOffset;
+                    }
+                }
+            }
+        }
+        
+        return [offSetX, offSetY];
+    } 
+
+    // Map Collision Detection
+    mapCollision(translateDistance, theMap){
+        let unitTranslateDistance = [translateDistance[0], translateDistance[1]]; // Copy
+        let checkAmount = 0.3;
+        let [xCount, yCount] = [1, 1];
+        let [xDir, yDir] = [unitTranslateDistance[0] > 0 ? 1 : -1, unitTranslateDistance[1] > 0 ? 1 : -1];
+        let [xCollision, yCollision] = [false, false];
+        let currentPosition = [this.creature.position[0], this.creature.position[1]];
+        let newTranslateDistance;
+        while (unitTranslateDistance[0] * xDir > 0 || unitTranslateDistance[1] * yDir > 0){
+            if (xCollision){
+                xCount = 0;
+            }else{
+                if (unitTranslateDistance[0] * xDir > checkAmount){
+                    xCount = xDir * checkAmount;
+                } else if (unitTranslateDistance[0] * xDir > 0){
+                    xCount = unitTranslateDistance[0];
+                } else {
+                    xCount = 0;
+                }
+            }
+
+            if (yCollision){
+                yCount = 0;
+            }else{
+                if (unitTranslateDistance[1] * yDir > checkAmount){
+                    yCount = yDir * checkAmount;
+                } else if (unitTranslateDistance[1] * yDir > 0){
+                    yCount = unitTranslateDistance[1];
+                } else {
+                    yCount = 0;
+                }
+            }
+
+            unitTranslateDistance[0] -= xDir * checkAmount;
+            unitTranslateDistance[1] -= yDir * checkAmount;
+
+            
+            newTranslateDistance = this.surroundingCollision(currentPosition, [xCount, yCount], theMap);
+            
+            currentPosition[0] += newTranslateDistance[0];
+            currentPosition[1] += newTranslateDistance[1];
+
+            if (Math.abs(xCount) > Math.abs(newTranslateDistance[0])) {
+                xCollision = true;
+                if (yCollision) break;
+ 
+            };
+
+            if (Math.abs(yCount) > Math.abs(newTranslateDistance[1])) {
+                yCollision = true;
+                if (xCollision) break;
+            };
+        }
+        
+        return [currentPosition[0] - this.creature.position[0],
+                currentPosition[1] - this.creature.position[1]]; 
     }
 
     // Mahattan Heuristic Algorithm
@@ -123,7 +285,7 @@ class AI_controller {
     }
 
     // Moving The Controlled Object To A New Location
-    moveToPosition(delta) {
+    moveToPosition(delta, theMap) {
         if (this.targetPositionList.length <= 0) return;
 
         let targetPosition = this.targetPositionList[0];
@@ -136,8 +298,38 @@ class AI_controller {
         let vectorX = diffX / magnitude;
         let vectorY = diffY / magnitude;
 
-        this.creature.position[0] += delta * this.creature.properties["moveSpeed"] * vectorX;
-        this.creature.position[1] += delta * this.creature.properties["moveSpeed"] * vectorY;
+        let totalTranslateDistance = [delta * this.creature.properties["moveSpeed"] * vectorX,
+                                      delta * this.creature.properties["moveSpeed"] * vectorY];
+
+        if (this.velocity[0] != 0 || this.velocity[1] != 0){
+        
+            let resistance = 0.1;    
+
+            for (let i = 0; i < 2; ++i){
+                if (this.velocity[i] > 0){
+                    this.velocity[i] -= resistance * delta;
+                    if (this.velocity[i] < 0) {
+                        this.velocity[i] = 0;
+                    }
+                }else if(this.velocity[i] < 0){
+                    this.velocity[i] += resistance * delta;
+                    if (this.velocity[i] > 0) {
+                        this.velocity[i] = 0;
+                    }
+                }
+                totalTranslateDistance[i] += this.velocity[i];
+            }
+
+            let monsterTranslateDistance = [totalTranslateDistance[0], totalTranslateDistance[1]]; // Copy
+            totalTranslateDistance = this.mapCollision(monsterTranslateDistance, theMap);
+            if (Math.abs(monsterTranslateDistance[0] - totalTranslateDistance[0]) > 0.0001) this.velocity[0] = 0;
+            if (Math.abs(monsterTranslateDistance[1] - totalTranslateDistance[1]) > 0.0001) this.velocity[1] = 0;
+        }
+
+
+        this.creature.position[0] += totalTranslateDistance[0];
+        this.creature.position[1] += totalTranslateDistance[1];
+
 
         // After movement if the difference of two position is oppsite compare to before
         if (((diffX < 0) != (targetPosition[0] - this.creature.position[0] < 0)) ||
@@ -145,6 +337,7 @@ class AI_controller {
             // Shift the targetPositionList
             this.targetPositionList.shift();
         }
+
     }
 
     // Update Function
@@ -239,7 +432,7 @@ class AI_controller {
 
 
         this.routeCount++;
-        this.moveToPosition(delta);
+        this.moveToPosition(delta, theMap);
 
         
         

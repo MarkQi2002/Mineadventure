@@ -10,6 +10,7 @@ class controller{
         this.cameraOffset = 0;
         
         this.speed = this.creature.properties["moveSpeed"]; // Per Second 
+        this.velocity = [0,0];
         
         // Jump Related
         this.initJumpVelocity = 1; // Per Second 
@@ -366,7 +367,8 @@ class controller{
     } 
 
     // Map Collision Detection
-    mapCollision(unitTranslateDistance){
+    mapCollision(translateDistance){
+        let unitTranslateDistance = [translateDistance[0], translateDistance[1]]; // Copy
         let checkAmount = 0.3;
         let creatureTrans = this.creature.object;
         let [xCount, yCount] = [1, 1];
@@ -533,29 +535,30 @@ class controller{
         let resistance = 0.1;    
 
         for (let i = 0; i < 2; ++i){
-            if (this.creature.velocity[i] > 0){
-                this.creature.velocity[i] -= resistance * delta;
-                if (this.creature.velocity[i] < 0) {
-                    this.creature.velocity[i] = 0;
+            if (this.velocity[i] > 0){
+                this.velocity[i] -= resistance * delta;
+                if (this.velocity[i] < 0) {
+                    this.velocity[i] = 0;
                 }
-            }else if(this.creature.velocity[i] < 0){
-                this.creature.velocity[i] += resistance * delta;
-                if (this.creature.velocity[i] > 0) {
-                    this.creature.velocity[i] = 0;
+            }else if(this.velocity[i] < 0){
+                this.velocity[i] += resistance * delta;
+                if (this.velocity[i] > 0) {
+                    this.velocity[i] = 0;
                 }
             }
-            totalTranslateDistance[i] += this.creature.velocity[i];
+            totalTranslateDistance[i] += this.velocity[i];
         }
 
-        totalTranslateDistance = this.playerCollision(totalTranslateDistance);
-        totalTranslateDistance = this.mapCollision(totalTranslateDistance);
+        let playerTranslateDistance = this.playerCollision(totalTranslateDistance);
+        totalTranslateDistance = this.mapCollision(playerTranslateDistance);
+        if (Math.abs(playerTranslateDistance[0] - totalTranslateDistance[0]) > 0.0001) this.velocity[0] = 0;
+        if (Math.abs(playerTranslateDistance[1] - totalTranslateDistance[1]) > 0.0001) this.velocity[1] = 0;
         
         // Apply Item Collision 
         this.itemCollision(translateDistance); 
  
         // Update Position On Server 
         if (totalTranslateDistance[0] != 0 || totalTranslateDistance[1] != 0 || !this.onGround) {
-
             creatureTrans.translateX(totalTranslateDistance[0]);
             creatureTrans.translateY(totalTranslateDistance[1]);
             

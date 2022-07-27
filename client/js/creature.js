@@ -11,9 +11,9 @@ class creature{
         this.ID = creatureInfo.ID;
         this.creatureType = creatureInfo.creatureType;
         this.camp = creatureInfo.camp;
+        this.state = creatureInfo.state;
         this.campInfo = creatureInfo.campInfo;
         this.object = new THREE.Object3D();
-        this.velocity = creatureInfo.velocity;
         this.object.position.set(creatureInfo.position[0], creatureInfo.position[1], creatureInfo.position[2]);
         scene.add(this.object);
 

@@ -127,6 +127,81 @@ function sendCreaturePropertyChange([creatureType, id], propertyList){
 }
 
 
+var stateTypeInfo = {
+	"Burning": {
+		/*
+		stateBegin: 
+			function(theState){
+			},
+
+		stateAdd: 
+			function(theState, element){
+			},
+
+		atState: 
+			function(theState){
+			},
+
+		stateShift: 
+			function(theState, element){
+			},
+
+
+		stateEnd: null,
+		*/
+	},
+
+
+	"Poisoning": {
+
+
+	},
+
+
+	"Freezing": {
+
+	},
+
+
+
+	"Knock Back": {
+		stateAdd: 
+			function(theState, element){
+				if (theState.creature[0] == player_controller.creature.creatureType && theState.creature[1] == player_controller.creature.ID){
+
+					let speed = (theState.list[theState.list.length - 1].endTime - element.startTime) / 5000 * (0.5 + element.typeInput.stack * 0.05);
+
+					player_controller.velocity[0] = theState.movementVector[0] * speed;
+					player_controller.velocity[1] = theState.movementVector[1] * speed;
+				}
+				
+			},
+
+	},
+
+
+};
+
+function addState(newState, theCreature){
+	for (let [type, inputs] of Object.entries(newState)) {
+		if (inputs.command == "New"){
+			theCreature.state[type] = inputs.info;
+		}else if (inputs.command == "Add"){
+			theCreature.state[type] = inputs.info.state;
+			if (stateTypeInfo[type] != null && stateTypeInfo[type].stateAdd != null){
+				stateTypeInfo[type].stateAdd(theCreature.state[type], theCreature.state[type].list[inputs.info.addIndex]);
+			}
+		}else if (inputs.command == "Shift"){
+			theCreature.state[type] = inputs.info.state;
+			if (stateTypeInfo[type] != null && stateTypeInfo[type].stateShift != null){
+				stateTypeInfo[type].stateShift(theCreature.state[type], inputs.info.deletedElement);
+			}
+		}else if (inputs.command == "Delete"){
+			theCreature.state[type] = null;
+		}
+	}
+}
+
 function addAbility(newAbility, theCreature){
 	for (let [type, inputs] of Object.entries(newAbility)) {
 		theCreature.properties.ability[type] = inputs;
@@ -156,7 +231,7 @@ const creatureInfoChange = (creatureInfo) => {
 			if (key == "damage"){
 				createDamageTextList(value, theCreature);
 			} else if (key == "state"){
-			
+				addState(value, theCreature);
 			} else if (key == "ability"){
 				addAbility(value, theCreature);
 			} else {
