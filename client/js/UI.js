@@ -2,6 +2,7 @@
 const menuHtml = document.querySelector('#noSelect');
 const creatureInfoUI = document.querySelector("#creatureInfo");
 const chatBoxUI = document.querySelector("#chatBox");
+const stateDisplayUI = document.querySelector("#stateDisplay");
 const terminalInput = document.getElementById("terminalInput");
 var creatureInfoUIList = {};
 
@@ -108,14 +109,35 @@ class messageUI {
         chatBoxUI.scrollTo(0, chatBoxUI.scrollHeight);
     }
 
-    // Setting UI Size
-    setSize(){
-        this.text.style.fontSize = window.innerHeight * 0.02 + 'px';
-    }
-
     // Setting UI Information
     update(value){
         this.text.innerHTML = this.key + ": " + value;
+    }
+}
+
+// State UI Class
+class stateUI {
+    // State Constructor
+    constructor(type, theState) {
+        this.type = type;
+        this.state = document.createElement('div');
+        this.state.classList.add("stateClass");
+        this.update(theState);
+        this.state.style.color = "rgb(255,255,255)";
+        stateDisplayUI.appendChild(this.state);
+    
+    }
+
+    // Setting UI Information
+    update(theState){
+        this.state.innerHTML = theState.stack;
+    }
+
+    // Remove The UI
+    delete(){
+        delete player_controller.stateUI[this.type];
+        stateDisplayUI.removeChild(this.state);
+        delete this;
     }
 }
 
@@ -401,6 +423,9 @@ function unlockedCommand(inputArray) {
 
 // Teleport Player To Corresponding Coordinate
 function teleport([mapX, mapY]){
+    // Updating Renderer Information
+    player_controller.controllerUpdateBlock(game_map.mapPosToBlockPos([mapX, mapY]));
+
     // Moving Player To New Position
     player_controller.creature.object.position.x = mapX;
     player_controller.creature.object.position.y = mapY;
@@ -414,7 +439,7 @@ function teleport([mapX, mapY]){
         if (playerArray[playerIndex] != null && 
             !(playerArray[playerIndex].creatureType == player_controller.creature.creatureType &&
             playerArray[playerIndex].ID == player_controller.creature.ID)){
-
+                
             playerArray[playerIndex].update();
         }
     }
@@ -429,9 +454,6 @@ function teleport([mapX, mapY]){
     // Update Player Position Event
     var event = new Event('position event', {bubbles: true, cancelable: false}) 
     document.dispatchEvent(event);
-
-    // Updating Renderer Information
-    player_controller.controllerUpdateBlock(game_map.mapPosToBlockPos([mapX, mapY]));
 }
 
 // Commands That Need To Be Unlocked

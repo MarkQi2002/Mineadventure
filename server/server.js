@@ -840,7 +840,7 @@ function addState(newState, theCreature){
 		} else {
 			theCreature.state[type].add(inputs.duration, inputs.typeInput);
 		}
-		newState[type] = {command: "New", info: theCreature.state[type]};
+		newState[type] = {command: "New", info: {state: theCreature.state[type]}};
 		
 	}
 }

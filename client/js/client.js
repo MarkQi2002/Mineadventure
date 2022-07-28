@@ -185,19 +185,42 @@ var stateTypeInfo = {
 function addState(newState, theCreature){
 	for (let [type, inputs] of Object.entries(newState)) {
 		if (inputs.command == "New"){
-			theCreature.state[type] = inputs.info;
+			theCreature.state[type] = inputs.info.state;
+			if (theCreature.ID == player_controller.creature.ID &&
+				theCreature.creatureType == player_controller.creature.creatureType &&
+				player_controller.stateUI[type] == null){
+				player_controller.stateUI[type] = new stateUI(type, theCreature.state[type]);
+			}
 		}else if (inputs.command == "Add"){
 			theCreature.state[type] = inputs.info.state;
-			if (stateTypeInfo[type] != null && stateTypeInfo[type].stateAdd != null){
+			if (theCreature.state[type] != null && stateTypeInfo[type].stateAdd != null){
 				stateTypeInfo[type].stateAdd(theCreature.state[type], theCreature.state[type].list[inputs.info.addIndex]);
+			}
+
+			if (theCreature.ID == player_controller.creature.ID &&
+				theCreature.creatureType == player_controller.creature.creatureType &&
+				player_controller.stateUI[type] != null){
+				player_controller.stateUI[type].update(theCreature.state[type]);
 			}
 		}else if (inputs.command == "Shift"){
 			theCreature.state[type] = inputs.info.state;
-			if (stateTypeInfo[type] != null && stateTypeInfo[type].stateShift != null){
+			if (theCreature.state[type] != null && stateTypeInfo[type].stateShift != null){
 				stateTypeInfo[type].stateShift(theCreature.state[type], inputs.info.deletedElement);
+			}
+
+			if (theCreature.ID == player_controller.creature.ID &&
+				theCreature.creatureType == player_controller.creature.creatureType &&
+				player_controller.stateUI[type] != null){
+				player_controller.stateUI[type].update(theCreature.state[type]);
 			}
 		}else if (inputs.command == "Delete"){
 			theCreature.state[type] = null;
+			if (theCreature.ID == player_controller.creature.ID &&
+				theCreature.creatureType == player_controller.creature.creatureType &&
+				player_controller.stateUI[type] != null){
+				player_controller.stateUI[type].delete();
+			}
+			
 		}
 	}
 }
