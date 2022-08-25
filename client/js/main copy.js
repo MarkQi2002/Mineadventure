@@ -1,7 +1,9 @@
 // Game Setting
-const gravity = 20;
-var game_map, mapIndex, defaultProperties;
+const groundLevel = 1;
+const gravity = 10;
+var game_map;
 var gameTime = new Date();
+var gameMapLevel;
 
 // THREE.js Initial Set Up Variable
 const scene = new THREE.Scene();
@@ -9,9 +11,9 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 scene.add( camera );
 
 // scene.background = new THREE.Color( 0xffffff );
-var cameraAngle = Math.PI / 8;
+var cameraAngle = Math.PI / 8
 var carmeraHeight = 10;
-var carmeraOffsetY = Math.tan(cameraAngle) * carmeraHeight;
+var carmeraOffsetY = Math.tan(cameraAngle) * (carmeraHeight - groundLevel);
 camera.rotation.x = cameraAngle;
 camera.position.z = carmeraHeight;
 
@@ -23,10 +25,6 @@ const resizeWindow = () => {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
-
-    if (player_controller != null){
-        player_controller.windowUpdate();
-    }
 };
 
 // Fix window size event
@@ -58,9 +56,6 @@ scene.add(directionLight.target);
 // Client Side playerArray, Used To Store Player Object
 var playerArray = [];
 
-// Client Side creatureList, Used To Store Creature Object
-var objectList = [];
-
 // Client Side Personal Player ID
 var clientPlayerID;
 var player_controller;
@@ -69,17 +64,14 @@ var player_controller;
 var itemArray = [];
 
 // Projectile Relate
-var sendProjectileList = [];
-var requestObjectList = [];
-var updateFrameSwitch = true;
+var newProjectileList = [];
+var projectileList = [];
+var updateProjectileList = [];
 
 // Stats Module
 var stats = new Stats();
 stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild(stats.dom);
-
-const raycaster = new THREE.Raycaster();
-
 
 // Game Frame Update
 var clock = new THREE.Clock();
@@ -87,10 +79,10 @@ var delta = 0;
 
 // Game Event Related
 function updateTimeEvent(){
-    /*
+    document.dispatchEvent(new Event('frameEvent', {bubbles: true, cancelable: false}));
     if (changingCreatureInfo.length > 0){
         document.dispatchEvent(new Event('changingCreatureInfo', {bubbles: true, cancelable: false}));
-    }*/
+    }
 }
 
 // Create Thread
@@ -103,17 +95,13 @@ var changingCreatureInfo = [];
 function animate() {
     // Beginning Of The Frame
     stats.begin();
-    if (updateFrameSwitch){
-        sendFrameData();
-        updateFrameSwitch = false;
-    }
-
     // helper.update()
     delta = clock.getDelta();
     player_controller.update(delta);
     
-    // Updating Event
+
     /*
+    // Updating Event
     for (let i = 0; i < playerArray.length; i++){
         if (playerArray[i] != null && i != clientPlayerID){
             playerArray[i].update();
@@ -125,12 +113,11 @@ function animate() {
         if (damageTextList[i] != null){
             damageTextList[i].update(delta, i);
         }
-    }*/
-    
-
+    }
+    */
+   
     // Setting The Renderer Of The Scene And Camera
     renderer.render(scene, camera);
-
     stats.end();
 
     // THREE.js Animation Requirement, Looping The Animation Function

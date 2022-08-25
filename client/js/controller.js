@@ -11,12 +11,11 @@ class controller{
         this.stateUI = {};
         
         this.speed = this.creature.properties["moveSpeed"]; // Per Second 
-        this.velocity = [0,0];
+        this.velocity = [0, 0, 0];
         
         // Jump Related
-        this.initJumpVelocity = 1; // Per Second 
-        this.jumpVelocity = 0; // Per Second 
-        this.onGround = true; 
+        this.initJumpVelocity = 10; // Per Second 
+        this.onGround = false; 
         
         // Collision Related Boolean Variables
         this.forwardCollision = false;
@@ -24,7 +23,14 @@ class controller{
         this.leftCollision = false;
         this.rightCollision = false;
         
-        this.lastBlockPos = [0, 0];
+        this.windowUpdate();
+
+        this.lastIntRange = {
+            xMin: 0,
+            xMax: 0,
+            yMin: 0,
+            yMax: 0
+        };
         
         // Input Boolean
         this.inputs = { 
@@ -54,7 +60,15 @@ class controller{
 
         // Attack Speed
         this.attackCD = 0;
-    } 
+
+
+        // For Ray Hide
+        this.lastRayHideUnit = [];
+    }
+
+    windowUpdate(){
+        this.displayHalfSize = {x: 20 * window.innerWidth / window.innerHeight, y: 20};
+    }
  
     // When KeyBoard Is Pressed Down 
     KeyDown(event){ 
@@ -72,10 +86,6 @@ class controller{
                 this.inputs.right = true; 
                 break; 
             case 32: // space 
-                if (this.onGround){ 
-                    this.jumpVelocity = this.initJumpVelocity;// jump 
-                    this.onGround = false; 
-                } 
                 this.inputs.space = true; 
                 break; 
             case 16: // shift 
@@ -146,7 +156,7 @@ class controller{
     }
 
     // Sending A Projectile
-    sendProjectile(){
+    sendProjectile(totalTranslateDistance, delta){
         // Get Unit Vector
         let groundX, groundY;
         groundX = this.mouse.x * window.innerWidth;
@@ -157,55 +167,49 @@ class controller{
         let vectorX = groundX / magnitude;
         let vectorY = groundY / magnitude;
 
-        // Setting Projectile Information
-        var newDamageInfo = {
-            type: {"true": (this.creature.properties.attackDamage / 10) >> 0, "normal": this.creature.properties.attackDamage},
-            attacker: [this.creature.creatureType, this.creature.ID, this.creature.campInfo],
-            properties: this.creature.properties
-        }
-
         // New Projectile
         var newProjectile = {
-            position: [this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z],
-            initVelocity: [8 * vectorX, 8 * vectorY],
-            damageInfo: newDamageInfo
+            initVelocity: [vectorX, vectorY]
         };
 
         // Updating To Projectile List
-        newProjectileList.push(newProjectile);
-        var event = new Event('createProjectile', {bubbles: true, cancelable: false}) 
-        document.dispatchEvent(event); 
+        sendProjectileList.push(newProjectile);
+
     }
 
-    // Player Collision Detection 
-    playerCollision(translateDistance){ 
+    // Creature Collision Detection 
+    creatureCollision(translateDistance){ 
         // For Collision Detection 
         let creaturePos = this.creature.object.position; 
- 
-        // Checking Collision With Every Other Player 
-        for (let playerIndex = 0; playerIndex < playerArray.length; playerIndex++) { 
+        let theCreature;
+        // Checking Collision With Every Other Creature 
+        for (let i = 0; i < lastDisplayCreatureList.length; ++i) { 
+            theCreature = objectList[lastDisplayCreatureList[i]];
+            
             // A Few Condition To Skip Collision Detection 
-            if (playerArray[playerIndex] == null) continue; 
-            if (clientPlayerID == playerIndex) continue;
+            if (theCreature == null) continue; 
+            if (player_controller.creature.ID == theCreature.ID) continue;
 
             // For Calculating Manhattan Distance
-            let otherPlayerPosition = playerArray[playerIndex].object.position;
+            let otherPlayerPosition = theCreature.object.position;
             let diffX = creaturePos.x + translateDistance[0] - otherPlayerPosition.x;
 			let diffY = creaturePos.y + translateDistance[1] - otherPlayerPosition.y;
-            if (Math.abs(diffX) + Math.abs(diffY) > 2) continue; 
+            let centerSizeDiff = this.creature.radius + theCreature.radius;
+            if (Math.abs(diffX) + Math.abs(diffY) > centerSizeDiff + centerSizeDiff) continue; 
             
 
             // If Collision Occur, Move In Opposite Direction And Return True
             // Calculate Direct Distance To Squared
             let amount = diffX * diffX + diffY * diffY;
-            if (amount <= 1) { 
-                //console.log("Collided With Player", playerIndex);
-
-                let rate = 1 - Math.sqrt(amount);
-
+            if (amount < centerSizeDiff * centerSizeDiff) { 
+                //console.log("Collided With Creature", creatureIndex);
+                
+                let rate = centerSizeDiff / Math.sqrt(amount) - 1;
+                if (rate === Infinity) rate = 1;
                 // Indicate Collision Occurred 
                 return [translateDistance[0] + diffX * rate,
-                        translateDistance[1] + diffY * rate];
+                        translateDistance[1] + diffY * rate,
+                        translateDistance[2]];
                 
                  
             } 
@@ -268,116 +272,97 @@ class controller{
  
     // Surrounding Unit Collision Detection
     surroundingCollision(currentPosition, translateDistance){ 
-        // Player Use 0.21 For Collision Instead Of 0.25 (The Radius 0.5^2) To Avoid Unable Passing Through One-Unit Wide Wall
+        let [offSetX, offSetY, offSetZ] = translateDistance;
 
-        // Next Position
-        let predictedMapX;
-        let predictedMapY;
+        if (translateDistance[0] != 0 || translateDistance[1] != 0 || translateDistance[2] != 0) {
 
-        let [offSetX, offSetY] = translateDistance;
-        
-        let directionX = translateDistance[0] >= 0 ? 1 : -1;
-        let directionY = translateDistance[1] >= 0 ? 1 : -1;
+            let limitRange = this.creature.radius * this.creature.radius;
+            let directionX = translateDistance[0] > 0 ? 1 : -1;
+            let directionY = translateDistance[1] > 0 ? 1 : -1;
 
-        // Y Collision
-        if (translateDistance[1] != 0) {
             // Variable Declaration For Checking Collision
-            // Center Of The Circle
-            let cx = currentPosition[0] + 0.5;
-            let cy = currentPosition[1] + offSetY + 0.5;
-            predictedMapX = Math.floor(cx);
-            predictedMapY = Math.floor(cy + directionY);
+            
+            let predictedMapX = Math.floor(currentPosition[0] + 0.5);
+            let predictedMapY = Math.floor(currentPosition[1] + 0.5);
 
-            for (let mapShift = -1; mapShift <= 1; ++mapShift) {
-                // Bottom Left Of The Square
-                let rx = predictedMapX + mapShift;
-                let ry = predictedMapY;
+            let unitRange = Math.ceil(this.creature.radius);
+            for (let mapShiftY = -unitRange; mapShiftY <= unitRange; ++mapShiftY) {
+                for (let mapShiftX = -unitRange; mapShiftX <= unitRange; ++mapShiftX) {
+                    // Center Of The Circle
+                    let cx = currentPosition[0] + offSetX;
+                    let cy = currentPosition[1] + offSetY;
+                    let cz = currentPosition[2] + offSetZ;
 
-                let unit = game_map.getUnit([rx, ry]);
+                    // Bottom Left Of The Square
+                    let rx = predictedMapX + mapShiftX * directionX;
+                    let ry = predictedMapY + mapShiftY * directionY;
+                    let rz = Infinity;
 
-                // Getting Which Edge Or Corner The Circle Is Closest To
-                let testX = cx;
-                let testY = cy;
+                    let unit = game_map.getUnit([rx, ry]);
 
-                if (testX < rx) testX = rx;
-                else if (testX > rx + 1) testX = rx + 1;
-                if (testY < ry) testY = ry;
-                else if (testY > ry + 1) testY = ry + 1;
-                
-                // Getting Difference In Distance
-                let distX = cx - testX;
-                let distY = cy - testY;
+                    if (unit != null){
+                        rz = unit.height;
+                        if (unit.childID != 0 && game_map.unitIDList[unit.childID].collision){
+                            rz += 1; //childUnit Height
+                        }
 
-                // Collision Has Occur 
-                if (distX * distX + distY * distY < 0.21 && (unit == null || game_map.getAllChildUnitCollision(unit))) {
-                    if (distX == 0){
-                        offSetY = translateDistance[1] - distY - 0.5 * directionY;
-                        break;
-                    }else{ 
-                        let newOffset = translateDistance[1] - distY - Math.sqrt(0.21 - distX * distX) * directionY;
-                        if (Math.abs(offSetY) > Math.abs(newOffset)) offSetY = newOffset;
                     }
-                }
-            }
-        }
 
-    
-        // X Collision
-        if (translateDistance[0] != 0) {
-            // Variable Declaration For Checking Collision
-            // Center Of The Circle
-            let cx = currentPosition[0] + offSetX + 0.5;
-            let cy = currentPosition[1] + offSetY + 0.5;
-            predictedMapX = Math.floor(cx + directionX);
-            predictedMapY = Math.floor(cy);
 
-            for (let mapShift = -1; mapShift <= 1; ++mapShift) {
-                // Bottom Left Of The Square
-                let rx = predictedMapX;
-                let ry = predictedMapY + mapShift;
+                    rx -= 0.5;
+                    ry -= 0.5;
+                    
+                    // Getting Which Edge Or Corner The Circle Is Closest To
+                    let testX = cx;
+                    let testY = cy;
+                    let testZ = cz;
 
-                let unit = game_map.getUnit([rx, ry]);
+                    if (testX < rx) testX = rx;
+                    else if (testX > rx + 1) testX = rx + 1;
 
-                // Getting Which Edge Or Corner The Circle Is Closest To
-                let testX = cx;
-                let testY = cy;
+                    if (testY < ry) testY = ry;
+                    else if (testY > ry + 1) testY = ry + 1;
 
-                if (testX < rx) testX = rx;
-                else if (testX > rx + 1) testX = rx + 1;
-                if (testY < ry) testY = ry;
-                else if (testY > ry + 1) testY = ry + 1;
-                
-                // Getting Difference In Distance
-                let distX = cx - testX;
-                let distY = cy - testY;
+                    if (testZ > rz) testZ = rz;
 
-                // Collision Has Occur
-                if (distX * distX + distY * distY < 0.21 && (unit == null || game_map.getAllChildUnitCollision(unit))) {
-                    if (distY == 0){
-                        offSetX = translateDistance[0] - distX - 0.5 * directionX
-                        break;
-                    }else{
-                        let newOffset = translateDistance[0] - distX - Math.sqrt(0.21 - distY * distY) * directionX;
-                        if (Math.abs(offSetX) > Math.abs(newOffset)) offSetX = newOffset;
+                    
+                    // Getting Difference In Distance
+                    let distX = cx - testX;
+                    let distY = cy - testY;
+                    let distZ = cz - testZ;
+                    let amount = distX * distX + distY * distY + distZ * distZ;
+                    
+                    // Collision Has Occur 
+                    if (amount < limitRange) {
+
+                        
+                        let rate = this.creature.radius / Math.sqrt(amount) - 1;
+                        if (rate === Infinity) rate = 1;
+
+                        offSetX += distX * rate;
+                        offSetY += distY * rate;
+                        offSetZ += distZ * rate;
                     }
                 }
             }
         }
         
-        return [offSetX, offSetY];
-    } 
+
+        return [offSetX, offSetY, offSetZ];
+    }
+
 
     // Map Collision Detection
     mapCollision(translateDistance){
-        let unitTranslateDistance = [translateDistance[0], translateDistance[1]]; // Copy
-        let checkAmount = 0.3;
+        let unitTranslateDistance = [translateDistance[0], translateDistance[1], translateDistance[2]]; // Copy
+        let checkAmount = this.creature.radius / 2 > 0.3 ? 0.3 : this.creature.radius / 2;
         let creatureTrans = this.creature.object;
-        let [xCount, yCount] = [1, 1];
-        let [xDir, yDir] = [unitTranslateDistance[0] > 0 ? 1 : -1, unitTranslateDistance[1] > 0 ? 1 : -1];
-        let [xCollision, yCollision] = [false, false];
-        let currentPosition = [creatureTrans.position.x, creatureTrans.position.y];
+        let [xCount, yCount, zCount] = [1, 1, 1];
+        let [xDir, yDir, zDir] = [unitTranslateDistance[0] > 0 ? 1 : -1, unitTranslateDistance[1] > 0 ? 1 : -1, unitTranslateDistance[2] > 0 ? 1 : -1];
+        let [xCollision, yCollision, zCollision] = [false, false, false];
+        let currentPosition = [creatureTrans.position.x, creatureTrans.position.y, creatureTrans.position.z];
         let newTranslateDistance;
-        while (unitTranslateDistance[0] * xDir > 0 || unitTranslateDistance[1] * yDir > 0){
+        while (unitTranslateDistance[0] * xDir > 0 || unitTranslateDistance[1] * yDir > 0|| unitTranslateDistance[2] * zDir > 0){
             if (xCollision){
                 xCount = 0;
             }else{
@@ -402,14 +387,28 @@ class controller{
                 }
             }
 
+            if (zCollision){
+                zCount = 0;
+            }else{
+                if (unitTranslateDistance[2] * zDir > checkAmount){
+                    zCount = zDir * checkAmount;
+                } else if (unitTranslateDistance[2] * zDir > 0){
+                    zCount = unitTranslateDistance[2];
+                } else {
+                    zCount = 0;
+                }
+            }
+
             unitTranslateDistance[0] -= xDir * checkAmount;
             unitTranslateDistance[1] -= yDir * checkAmount;
+            unitTranslateDistance[2] -= zDir * checkAmount;
 
             
-            newTranslateDistance = this.surroundingCollision(currentPosition,[xCount, yCount]);
+            newTranslateDistance = this.surroundingCollision(currentPosition,[xCount, yCount, zCount]);
             
             currentPosition[0] += newTranslateDistance[0];
             currentPosition[1] += newTranslateDistance[1];
+            currentPosition[2] += newTranslateDistance[2];
 
             if (Math.abs(xCount) > Math.abs(newTranslateDistance[0])) {
                 xCollision = true;
@@ -421,79 +420,18 @@ class controller{
                 yCollision = true;
                 if (xCollision) break;
             };
+
+            if (Math.abs(zCount) > Math.abs(newTranslateDistance[2])) {
+                zCollision = true;
+                if (zCollision) break;
+            };
         }
         
-        return [currentPosition[0] - creatureTrans.position.x,
-                currentPosition[1] - creatureTrans.position.y]; 
-    }
-
-
-    // Getting The Creature's Block Position
-    getPlayerBlockPos2D(){ 
-        return [(this.creature.object.position.x / game_map.blockSize.x) >> 0,
-                (this.creature.object.position.y / game_map.blockSize.y) >> 0]; 
- 
-    } 
- 
-    // Updating Client Block If Moving Between Blocks 
-    controllerUpdateBlock([blockX,blockY]){ 
-        if (blockX != this.lastBlockPos[0] || 
-            blockY != this.lastBlockPos[1]){ 
- 
-            this.lastBlockPos = [blockX,blockY]; 
-             
-            // Sending Update Block Command As An Event 
-            var event = new Event('updateBlock', {bubbles: true, cancelable: false}) 
-            document.dispatchEvent(event); 
-        } 
-    } 
- 
-    // Getting All The Surrounding Nine Blocks (3 By 3) 
-    getSurroundingBlockPos([blockHalfRangeX, blockHalfRangeY]){ 
-        // Modifying The View Tag 
-        for (let i = 0; i < game_map.blockObjectClass.length; i++){ 
-            game_map.blockObjectClass[i].view = false; 
-        } 
- 
-        var blockPosList = []; 
-        // Get All Surrounding Blocks
-        for (let y_Axis = -blockHalfRangeY; y_Axis <= blockHalfRangeY; y_Axis++) { 
-            for (let x_Axis = -blockHalfRangeX; x_Axis <= blockHalfRangeX; x_Axis++) { 
-                // Variable Declaration 
-                let BlockX = this.lastBlockPos[0] + x_Axis; 
-                let BlockY = this.lastBlockPos[1] + y_Axis; 
-                if (game_map.blockNumber.x > BlockX && 0 <= BlockX && game_map.blockNumber.y > BlockY && 0 <= BlockY){
-
-                    var blockPos = { 
-                        position: [BlockX,BlockY]
-                    }; 
-    
-    
-                    if (game_map.blockList[BlockY][BlockX] == null){ 
-                        blockPosList.push(blockPos); 
-                    } else { 
-                        game_map.spawnBlockObject(BlockX, BlockY); 
-                    } 
-                }
-            } 
-        } 
- 
-        for (let i = 0; i < game_map.blockObjectClass.length; ++i){ 
-            if (!game_map.blockObjectClass[i].view){ 
-                if (game_map.blockObjectClass[i].block != null){ 
-                    game_map.deleteBlock(game_map.blockObjectClass[i].block); 
-                    game_map.blockObjectClass[i].block = null; 
-                } 
-                
-            } else { 
-                game_map.newBlockObjectClass.push(game_map.blockObjectClass[i]); 
-            } 
-        } 
- 
-        game_map.blockObjectClass = game_map.newBlockObjectClass; 
-        game_map.newBlockObjectClass = []; 
-         
-        return blockPosList; 
+        return [
+                currentPosition[0] - creatureTrans.position.x,
+                currentPosition[1] - creatureTrans.position.y,
+                currentPosition[2] - creatureTrans.position.z
+            ]; 
     }
 
     // Damge Handler
@@ -501,20 +439,102 @@ class controller{
         sendCreaturePropertyChange(["player", clientPlayerID], {"health": ["-", amount]});
     }
 
+    displayUnit(x, y, isNewDisplayUnit){
+        let theUnit = game_map.getUnit([x,y]);
+        if (theUnit == null) return;
+
+        if (isNewDisplayUnit){
+            if (theUnit.mesh == null) game_map.spawnUnit(theUnit);
+        }else if(theUnit.mesh != null){
+            game_map.object.remove(theUnit.mesh);
+            theUnit.mesh = null;
+            theUnit.childMesh = null;
+        }
+    }
+    
+    displayUnits(){
+        let newIntRange = {
+            xMin: this.creature.object.position.x - this.displayHalfSize.x + 1 >> 0,
+            xMax: this.creature.object.position.x + this.displayHalfSize.x + 1 >> 0,
+            yMin: this.creature.object.position.y - this.displayHalfSize.y + carmeraOffsetY + 1 >> 0,
+            yMax: this.creature.object.position.y + this.displayHalfSize.y + carmeraOffsetY + 1 >> 0
+        };
+        if (newIntRange.xMin == this.lastIntRange.xMin && newIntRange.xMax == this.lastIntRange.xMax &&
+            newIntRange.yMin == this.lastIntRange.yMin && newIntRange.yMax == this.lastIntRange.yMax) return;
+
+        let x, y, rangeA, rangeB, isNewDisplayUnit,
+            q1x, q1y, q2x, q2y, q3x, q3y, q4x, q4y;
+        
+
+        //  Quadrant 1 | Quadrant 2
+        // -----Center Of RangeA-----
+        //  Quadrant 4 | Quadrant 3
+
+        for (let i = 0; i < 2; ++i){
+            if (i == 0){
+                rangeA = this.lastIntRange;
+                rangeB = newIntRange;
+                isNewDisplayUnit = true;
+            }else{
+                rangeA = newIntRange;
+                rangeB = this.lastIntRange;
+                isNewDisplayUnit = false;
+            }
+
+            q1x = rangeA.xMax < rangeB.xMax ? rangeA.xMax : rangeB.xMax;
+            q1y = rangeA.yMax > rangeB.yMin ? rangeA.yMax : rangeB.yMin;
+
+            q2x = rangeA.xMax > rangeB.xMin ? rangeA.xMax : rangeB.xMin;
+            q2y = rangeA.yMin > rangeB.yMin ? rangeA.yMin : rangeB.yMin;
+
+            q3x = rangeA.xMin > rangeB.xMin ? rangeA.xMin : rangeB.xMin;
+            q3y = rangeA.yMin < rangeB.yMax ? rangeA.yMin : rangeB.yMax;
+
+            q4x = rangeA.xMin < rangeB.xMax ? rangeA.xMin : rangeB.xMax;
+            q4y = rangeA.yMax < rangeB.yMax ? rangeA.yMax : rangeB.yMax;
+
+            // Quadrant 1
+            for (y = q1y; y < rangeB.yMax; ++y){
+                for (x = rangeB.xMin; x < q1x; ++x){
+                    this.displayUnit(x, y, isNewDisplayUnit);
+                }
+            }
+
+            // Quadrant 2
+            for (y = q2y; y < rangeB.yMax; ++y){
+                for (x = q2x; x < rangeB.xMax; ++x){
+                    this.displayUnit(x, y, isNewDisplayUnit);
+                }
+            }
+
+            // Quadrant 3
+            for (y = rangeB.yMin; y < q3y; ++y){
+                for (x = q3x; x < rangeB.xMax; ++x){
+                    this.displayUnit(x, y, isNewDisplayUnit);
+                }
+            }
+
+            // Quadrant 4
+            for (y = rangeB.yMin; y < q4y; ++y){
+                for (x = rangeB.xMin; x < q4x; ++x){
+                    this.displayUnit(x, y, isNewDisplayUnit);
+                }
+            }
+        }
+        this.lastIntRange = newIntRange;
+    }
+
     // Updating The Position 
     update(delta){ 
 
         // Change Movement Speed By Shift 
-        if (!this.inputs.shift) { 
+        if (!this.inputs.shift && this.onGround) { 
             // Walk 
             this.speed = this.creature.properties.moveSpeed;
         } else { 
             // Run 
             this.speed = this.creature.properties.moveSpeed * 1.5;
         } 
- 
-        // Correct Speed With Frame 
-        let speedPerFrame = this.speed * delta; 
          
         // If The Two Keys Are Pressed At The Same Time 
         let dy = this.inputs.forward - this.inputs.backward; 
@@ -522,78 +542,156 @@ class controller{
         let magnitude = Math.sqrt(dx * dx + dy * dy); 
         // Magnitude Can't Be Zero 
         if (magnitude == 0) magnitude = 1; 
- 
+        
+        let dirSpeed = this.speed / magnitude;
+
         // Variable Declaration 
-        let translateDistance = speedPerFrame / magnitude; 
+        let translateSpeed = 30 * (0.9 + this.creature.radius / 5) * delta * dirSpeed; 
         let creatureTrans = this.creature.object; 
 
-        let totalTranslateDistance = [0,0];
-        if (this.inputs.forward) totalTranslateDistance[1] += translateDistance;
-        if (this.inputs.backward) totalTranslateDistance[1] -= translateDistance;
-        if (this.inputs.left) totalTranslateDistance[0] -= translateDistance;
-        if (this.inputs.right) totalTranslateDistance[0] += translateDistance;
-        
-        let resistance = 0.1;    
+        let totalTranslateDistance = [0, 0, 0];
+        let friction = [0, 0, 0]; // Friction
 
-        for (let i = 0; i < 2; ++i){
+        this.velocity[2] -= gravity * delta; // Gravity Update 
+
+        if (this.onGround){
+            friction[0] += 0.5 * gravity + dirSpeed * 2;
+            friction[1] += 0.5 * gravity + dirSpeed * 2;
+            if (this.inputs.space){
+                this.velocity[2] = this.initJumpVelocity;// jump 
+            }
+        }else{
+            friction[0] += 0.1 * gravity;
+            friction[1] += 0.1 * gravity;
+            translateSpeed /= 10;
+        }
+
+        if (this.velocity[0] * this.velocity[0] + this.velocity[1] * this.velocity[1] < this.speed * this.speed){
+            if (Math.abs(this.velocity[1]) < dirSpeed){
+                if (this.inputs.forward) this.velocity[1] += translateSpeed;
+                if (this.inputs.backward) this.velocity[1] -= translateSpeed;
+            }
+
+            if (Math.abs(this.velocity[0]) < dirSpeed){
+                if (this.inputs.left) this.velocity[0] -= translateSpeed;
+                if (this.inputs.right) this.velocity[0] += translateSpeed;
+            }
+        }
+        
+
+        for (let i = 0; i < 3; ++i){
             if (this.velocity[i] > 0){
-                this.velocity[i] -= resistance * delta;
+                this.velocity[i] -= friction[i] * delta;
                 if (this.velocity[i] < 0) {
                     this.velocity[i] = 0;
                 }
             }else if(this.velocity[i] < 0){
-                this.velocity[i] += resistance * delta;
+                this.velocity[i] += friction[i] * delta;
                 if (this.velocity[i] > 0) {
                     this.velocity[i] = 0;
                 }
             }
-            totalTranslateDistance[i] += this.velocity[i];
+            totalTranslateDistance[i] += this.velocity[i] * delta;
         }
 
-        let playerTranslateDistance = this.playerCollision(totalTranslateDistance);
+        let playerTranslateDistance = this.creatureCollision(totalTranslateDistance);
         totalTranslateDistance = this.mapCollision(playerTranslateDistance);
-        if (Math.abs(playerTranslateDistance[0] - totalTranslateDistance[0]) > 0.0001) this.velocity[0] = 0;
-        if (Math.abs(playerTranslateDistance[1] - totalTranslateDistance[1]) > 0.0001) this.velocity[1] = 0;
-        
-        // Apply Item Collision 
-        this.itemCollision(translateDistance); 
- 
-        // Update Position On Server 
-        if (totalTranslateDistance[0] != 0 || totalTranslateDistance[1] != 0 || !this.onGround) {
-            creatureTrans.translateX(totalTranslateDistance[0]);
-            creatureTrans.translateY(totalTranslateDistance[1]);
-            
-            var event = new Event('position event', {bubbles: true, cancelable: false}) 
-            document.dispatchEvent(event); 
-            this.controllerUpdateBlock(this.getPlayerBlockPos2D()); 
-        } 
- 
-        // Jump Update 
-        if (this.jumpVelocity > -this.initJumpVelocity){ 
-            this.jumpVelocity -= gravity*delta; 
-        } 
- 
-        // Jumping Related Detection 
-        if (creatureTrans.position.z + this.jumpVelocity > groundLevel) { 
-            creatureTrans.translateZ(this.jumpVelocity); 
-        } else { 
-            creatureTrans.position.z = groundLevel; 
-            this.onGround = true; 
+
+        // If Map Collision Happens, Set That Direction Velocity To Zero
+
+        //this.velocity[0] += (totalTranslateDistance[0] - playerTranslateDistance[0]) * 2;
+        //this.velocity[1] += (totalTranslateDistance[1] - playerTranslateDistance[1]) * 2;
+        //if (Math.abs(playerTranslateDistance[0] - totalTranslateDistance[0]) > 0.3) this.velocity[0] = playerTranslateDistance[0] - totalTranslateDistance[0];
+        //if (Math.abs(playerTranslateDistance[1] - totalTranslateDistance[1]) > 0.3) this.velocity[1] = playerTranslateDistance[1] - totalTranslateDistance[1];
+
+        //this.velocity[2] += (totalTranslateDistance[2] - playerTranslateDistance[2]) * 10;
+        if (Math.abs(playerTranslateDistance[2] - totalTranslateDistance[2]) > 0.001) {
+            this.velocity[2] = 0;
+            this.onGround = true;
+        }else{
+            this.onGround = false;
         }
-             
+
+
+        //console.log(this.onGround, Math.abs(playerTranslateDistance[0] - totalTranslateDistance[0]))
+
+        creatureTrans.position.x += totalTranslateDistance[0];
+        creatureTrans.position.y += totalTranslateDistance[1];
+        creatureTrans.position.z += totalTranslateDistance[2];
+
+        this.displayUnits();
+
+
+        // Apply Item Collision 
+        //this.itemCollision(translateDistance); 
+        
+
         // Updating Camera Position
         this.camera.position.x = this.creature.object.position.x;
         this.camera.position.y = this.creature.object.position.y - carmeraOffsetY;
+        this.camera.position.z = this.creature.object.position.z + carmeraHeight;
 
         // Attack
         if (this.mouse.left == true && this.attackCD <= 0){
-            this.sendProjectile();
+            this.sendProjectile(totalTranslateDistance, delta);
             this.attackCD = 1;
         }
 
         // Attack CoolDown (CD)
         if (this.attackCD > 0){
-            this.attackCD -= this.creature.properties["attackSpeed"] * delta;
+            this.attackCD -= this.creature.properties.attackSpeed * delta;
         }
+
+
+
+
+
+        // set Transparent Of All lastRayHideUnit To False;
+        for ( let i = 0; i < this.lastRayHideUnit.length; ++i) {
+            let theUnit = this.lastRayHideUnit[i];
+            theUnit.transparent = false;
+        }
+
+        // Check If Unit Is Blocking the Ray;
+        let newRayHideUnit = [];
+        let rayRange = this.creature.radius - 0.3;
+        if (rayRange < 0) rayRange = 0.3;
+        let raySpace = rayRange / Math.ceil(rayRange);
+        for (let i = -rayRange; i <= rayRange; i += raySpace) {
+            let newPosition = new THREE.Vector3(i, carmeraOffsetY -  Math.sqrt(rayRange * rayRange - i * i), -carmeraHeight);
+            raycaster.set(this.camera.position, newPosition.clone().normalize());
+            raycaster.far = Math.sqrt(newPosition.x * newPosition.x + newPosition.y * newPosition.y + newPosition.z * newPosition.z);
+            let intersects = raycaster.intersectObjects(game_map.object.children);
+            for ( let j = 0; j < intersects.length; ++j) {
+                let target = new THREE.Vector3();
+                intersects[j].object.getWorldPosition(target)
+                let theUnit = game_map.getUnit([target.x >> 0, target.y >> 0]);
+
+                if (theUnit == null && theUnit.transparent) continue;
+
+                intersects[j].object.material = game_map.unitIDList[theUnit.ID].transparentMaterial;
+                newRayHideUnit.push(theUnit);
+                theUnit.transparent = true;
+                
+            }
+        }
+
+        // Respawn The Unit That Is Not Blocking the Ray
+        for ( let i = 0; i < this.lastRayHideUnit.length; ++i) {
+            let theUnit = this.lastRayHideUnit[i];
+            if (theUnit.transparent == false && theUnit.mesh != null){
+                game_map.object.remove(theUnit.mesh);
+                theUnit.mesh = null;
+                game_map.spawnUnit(theUnit);
+            }
+        }
+
+        this.lastRayHideUnit = newRayHideUnit;
+
+
+
+
+
+
     } 
 } 

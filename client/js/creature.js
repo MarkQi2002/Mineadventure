@@ -1,30 +1,82 @@
 // Loading Creature THREE Geometry
 var creatureLoader = {
-    geometry: new THREE.SphereGeometry(0.5, 3, 3)
+    creatureGeometry: new THREE.SphereGeometry(1, 3, 3),
+    playerGeometry: new THREE.SphereGeometry(1, 10, 10)
 };
 
+class object{
+	constructor(info) {
+		this.ID = info.ID;
+        this.objectType = info.objectType;
+        this.object = new THREE.Object3D();
+        this.object.position.set(info.position[0], info.position[1], info.position[2]);
+        this.setRadius(info.radius)
+        scene.add(this.object);
+
+        if (objectList.length <= this.ID) objectList.length = this.ID + 100;
+        objectList[this.ID] = this;
+    }
+
+    setRadius(value){
+        this.radius = value;
+        this.object.scale.set(this.radius, this.radius, this.radius);
+    }
+
+
+	changePosition([x, y, z]){
+		this.object.position.x = x;
+		this.object.position.y = y;
+		this.object.position.z = z;
+	}
+
+	getPositionArray(){
+		return [
+            this.object.position.x,
+            this.object.position.y,
+            this.object.position.z
+        ];
+	}
+
+    remove(){
+        // Remove All Child Object
+        var obj;
+        for (var i = this.object.children.length - 1; i >= 0; i--) { 
+            obj = this.object.children[i];
+            this.object.remove(obj); 
+        }
+        scene.remove(this.object);
+        objectList[this.ID] = null;
+    };
+}
+
 // The Most Basic Class, All Other Class (Player, Monster) Will Built Upon This By Inheritance
-class creature{
+class creature extends object{
     // Creature Constructor
     constructor(creatureInfo) {
+        super(creatureInfo);
+
         // Creating THREE Object
-        this.ID = creatureInfo.ID;
-        this.creatureType = creatureInfo.creatureType;
         this.camp = creatureInfo.camp;
         this.state = creatureInfo.state;
         this.campInfo = creatureInfo.campInfo;
-        this.object = new THREE.Object3D();
-        this.object.position.set(creatureInfo.position[0], creatureInfo.position[1], creatureInfo.position[2]);
-        scene.add(this.object);
 
         // Creature Information
         this.name = creatureInfo.name;
         this.properties = creatureInfo.properties;
+
         this.creatureItemArray = creatureInfo.creatureItemArray;
 
         // On Head UI
         this.onHeadUI = new creatureUI(this);
         this.updateHealthBarPercent();
+
+
+
+        // creature Body
+        let geometry = this.objectType == "player" ? creatureLoader.playerGeometry : creatureLoader.creatureGeometry;
+        let material = new THREE.MeshPhongMaterial({color: new THREE.Color(Math.random(), Math.random(), Math.random(), 0.4)});
+        let mesh = new THREE.Mesh(geometry, material);
+        this.object.add(mesh);
     }
 
     // Damage Handler
@@ -63,8 +115,8 @@ class creature{
     update(delta) {
         let localPlayerObject = player_controller.creature.object;
         // Close To Local Player Event
-        if (Math.abs(localPlayerObject.position.x - this.object.position.x) < game_map.blockSize.x &&
-            Math.abs(localPlayerObject.position.y - this.object.position.y) < game_map.blockSize.y){
+        if (Math.abs(localPlayerObject.position.x - this.object.position.x) < game_map.size.x &&
+            Math.abs(localPlayerObject.position.y - this.object.position.y) < game_map.size.y){
                 if (this.object.visible == false){
                     this.object.visible = true;
                 }
@@ -83,19 +135,8 @@ class creature{
     }
     
     // Destructor
-    delete() {
-        this.onHeadUI.delete();
-
-        // Remove All Child Object
-        var obj;
-        for (var i = this.object.children.length - 1; i >= 0; i--) { 
-            obj = this.object.children[i];
-            obj.geometry.dispose();
-            obj.material.dispose();
-            this.object.remove(obj); 
-        }
-        scene.remove(this.object);
-        delete this;
+    remove() {
+        object.prototype.remove.call(this); // call parent remove function
     }
 }
 
@@ -105,24 +146,17 @@ class player extends creature {
         // Calling Parent Constructor
         super(playerInfo);
 
-        // Spherical Body
-        let geometry = new THREE.SphereGeometry(0.5, 10, 10);
-        let material = new THREE.MeshPhongMaterial({color: new THREE.Color(Math.random(), Math.random(), Math.random(), 0.4)});
-        let mesh = new THREE.Mesh(geometry, material);
+        this.playerID = playerInfo.playerID;
 
-        this.object.add(mesh);
+        if (playerArray.length <=  this.playerID) playerArray.length =  this.playerID + 1;
+        playerArray[this.playerID] = this;
+
     }
-}
 
-// Monster Class
-class monster extends creature {
-    constructor(monsterInfo) {
-        // Calling Parent Constructor
-        super(monsterInfo);
 
-        // Spherical Body
-        let material = new THREE.MeshPhongMaterial({color: new THREE.Color(Math.random(), Math.random(), Math.random())});
-        let mesh = new THREE.Mesh(creatureLoader.geometry, material);
-        this.object.add(mesh);
+    remove(){
+        creature.prototype.remove.call(this); // call parent remove function
+        playerArray[this.playerID] = null;
+        delete this;
     }
 }

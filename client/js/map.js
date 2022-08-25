@@ -2,238 +2,281 @@
 // unitX, unitY - Relative To The Quarter Map, To Select A Unit In The Quarter Map
 // blockX, blockY - Relative To The Quarter Map, To Select A Block In The Quarter Map
 
+var unitProperties, unitPropertyNumber;
+
+var planeGeometry =  new THREE.PlaneGeometry(1, 1); // Geometry For All Plane
+
+var blockgeometry = new THREE.BoxGeometry(1, 1, 6); // Geometry For All Block
+blockgeometry.translate(0, 0, -3);
+
 // Map Class
 class map {
     // Map Constructor
-    constructor([serverBlocks, blockNumber, blockSize, unitIDList]) {
+    constructor(data) {
+        let mapData = data.map
+
         this.object = new THREE.Object3D();
         this.object.position.set(0, 0, 0);
-        //this.spawnMap(serverMapClass);
-        this.blockSize = blockSize;
 
-        this.blockNumber =  blockNumber;
+        this.size = mapData.size;
+        this.unitList = [];
 
-        this.blockList = [];
         this.createEmptyMap();
 
-        this.blockObjectClass = [];
-        this.newBlockObjectClass = [];
-
-        this.unitIDList = unitIDList;// get unit ID list from server
+        this.unitIDList = mapData.unitIDList;// get unit ID list from server
         this.loader = new THREE.TextureLoader();// texture loader
         this.GLTFLoader = new THREE.GLTFLoader();// OBJ loader
-        this.materialList = []; // Material List
-        this.geometryList = []; // Geometry List
-
-        this.loadMaterials(); // Load Materials
-        this.loadGeometry(); // Load Geometry
-        this.loadModel(this, 0, [serverBlocks]); // Load GLTF Model, including afterLoadFunction()
+        this.loadModel(this, 0, data); // Load GLTF Model, including afterLoadFunction()
     }
 
-    // For Map Level Change
-    loadNewMapLevel([serverBlocks, blockNumber, blockSize, unitIDList]){
-        this.clearAllBlock();
-
-        this.blockSize = blockSize;
-        this.blockNumber =  blockNumber;
-
-        this.blockList = [];
+    // For Map Change
+    loadNewMap(mapData){
+        this.size = mapData.size;
+        this.unitList = [];
         this.createEmptyMap();
-    
-        this.blockObjectClass = [];
-        this.newBlockObjectClass = [];
-
-        this.spawnBlocks(serverBlocks);
+        this.spawnMap(mapData.dataSpace);
     }
 
     // After Load Function
-    afterLoadFunction([serverBlocks]){
-        this.spawnBlocks(serverBlocks);
+    afterLoadFunction(data){
+        this.spawnMap(data.map.dataSpace);
         scene.add(this.object);
-        sock.compress(true).emit('newName', sessionStorage.getItem("playerInitialName"));
-    }
-
-    // For Each Unit ID, Load Materials
-    loadMaterials(){
-        let imageDir = "image/unit_material/";
-        this.materialList.length = this.unitIDList.length;
-        for (let i = 0; i < this.unitIDList.length; i++) {
-            // If It Has No geometryType, Don't Load Texture
-            if (this.unitIDList[i].geometryType == null) continue;
-            let texture;
-            if (this.unitIDList[i].fileName.length == 1){
-                texture = this.loader.load(imageDir + this.unitIDList[i].fileName[0]);
-                if (this.unitIDList[i].IsPhongMaterial){
-                    this.materialList[i] =  new THREE.MeshPhongMaterial({map: texture});
-                }else{
-                    this.materialList[i] =  new THREE.MeshBasicMaterial({map: texture});
-                }
-
-            } else { // For Multi Material
-                let materials = [];
-                for (let ii = 0; ii < this.unitIDList[i].fileName.length; ii++) {
-                    texture = this.loader.load(imageDir + this.unitIDList[i].fileName[ii]);
-                    if (this.unitIDList[i].IsPhongMaterial){
-                        materials.push(new THREE.MeshPhongMaterial({map: texture}));
-                    }else{
-                        materials.push(new THREE.MeshBasicMaterial({map: texture}));
-                    }
-                }
-                this.materialList[i] =  materials;
-            }
-        }
-    }
-
-    // Load THREE Geometry For Map
-    loadGeometry(){
-        var geometry;
-        geometry = new THREE.PlaneGeometry(1, 1); // Geometry For All Plane
-        this.geometryList.push(geometry); // 0
-
-        //******************************************************************
-        geometry = new THREE.BoxGeometry(1, 1, 6); // Geometry For All Cubes
-        this.geometryList.push(geometry); // 1
-        //******************************************************************
+        afterMapEvent(data);
     }
 
     // Loading The Model Using Imported Module
-    loadModel(scope, index, passInfo) {
-        if (scope.unitIDList[index].modelType == null){
-            if (scope.unitIDList.length > index + 1) {
-                scope.loadModel(scope, index + 1, passInfo)
-            } else {
-                scope.afterLoadFunction(passInfo);
-            }
-            return;
-        }
-        scope.GLTFLoader.load("model/" + scope.unitIDList[index].fileName, function (gltf) {
-            
-            var newModel = gltf.scene;
-            // Set Scale
-            newModel.scale.set(scope.unitIDList[index].modelType, scope.unitIDList[index].modelType, scope.unitIDList[index].modelType);
-            scope.unitIDList[index].modelType = newModel;
+    loadModel(scope, index, data) {
+        console.log(index)
+        let unitIDInfo = scope.unitIDList[index];
+        let texture;
+
+        switch(unitIDInfo.typeInfo.type){
+            case "plane":
+                unitIDInfo["geometry"] = planeGeometry;
+                console.log("image/unit_material/" + unitIDInfo.fileName[0])
+                texture = scope.loader.load("image/unit_material/" + unitIDInfo.fileName[0]);
+                if (unitIDInfo.IsPhongMaterial){
+                    unitIDInfo["material"] =  new THREE.MeshPhongMaterial({map: texture});
+                    unitIDInfo["transparentMaterial"] = new THREE.MeshPhongMaterial({map: texture, transparent: true, opacity: 0.2});
+                }else{
+                    unitIDInfo["material"] =  new THREE.MeshBasicMaterial({map: texture});
+                    unitIDInfo["transparentMaterial"] = new THREE.MeshBasicMaterial({map: texture, transparent: true, opacity: 0.2});
+                }
+
+                break;
+
+            case "block":
+                unitIDInfo["geometry"] = blockgeometry;
+                let materials = [];
+                let transparentMaterial = [];
+                for (let i = 0; i < unitIDInfo.fileName.length; ++i) {
+                    texture = scope.loader.load("image/unit_material/" + unitIDInfo.fileName[i]);
+                    if (unitIDInfo.IsPhongMaterial){
+                        materials.push(new THREE.MeshPhongMaterial({map: texture}));
+                        transparentMaterial.push(new THREE.MeshPhongMaterial({map: texture, transparent: true, opacity: 0.2}));
+                    }else{
+                        materials.push(new THREE.MeshBasicMaterial({map: texture}));
+                        transparentMaterial.push(new THREE.MeshBasicMaterial({map: texture, transparent: true, opacity: 0.2}));
+                    }
+                }
+                unitIDInfo["material"] = materials;
+                unitIDInfo["transparentMaterial"] = transparentMaterial
     
-            if (scope.unitIDList.length > index + 1){
-                scope.loadModel(scope, index + 1, passInfo)
-            } else {
-                scope.afterLoadFunction(passInfo);
-            }
-        });
+                break;
+
+            case "childUnit":
+                scope.GLTFLoader.load("model/" + unitIDInfo.fileName[0], function (gltf) {
+            
+                    var newModel = gltf.scene.children[0];
+                    // Set Scale
+                    //newModel.scale.set(unitIDInfo.scale, unitIDInfo.scale, unitIDInfo.scale);
+                    
+                    console.log(newModel)
+
+                    unitIDInfo["geometry"] = newModel.geometry;
+                    unitIDInfo["material"] = newModel.material;
+                    if (newModel.material != null){
+                        unitIDInfo["transparentMaterial"] = newModel.material.clone();
+                        unitIDInfo.transparentMaterial.transparent = true;
+                        unitIDInfo.transparentMaterial.opacity = 0.2;
+                    }else{
+                        unitIDInfo["transparentMaterial"] = null;
+                    }
+
+
+
+                    if (scope.unitIDList.length > index + 1){
+                        scope.loadModel(scope, index + 1, data)
+                    } else {
+                        scope.afterLoadFunction(data);
+                    }
+                });
+                return;
+        }
+
+
+        if (scope.unitIDList.length > index + 1){
+            scope.loadModel(scope, index + 1, data)
+        } else {
+            scope.afterLoadFunction(data);
+        }
     }
 
     // Generating A Completely Empty Map
     createEmptyMap() {
-        for (let i = 0; i < this.blockNumber.y; i++) {
-            this.blockList.push(new Array(this.blockNumber.x));
+        for (let i = 0; i < this.size.y; i++) {
+            this.unitList.push(new Array(this.size.x));
         }
     }
 
-    getAllChildUnitCollision(unit){
-        return this.unitIDList[unit.ID].collision || (unit.childUnit == null ? false : this.getAllChildUnitCollision(unit.childUnit));
-    }
-
-    // Converting xy Coordinate To Block Coordinate
-    mapPosToBlockPos([mapX, mapY]){
-        return [mapY / this.blockSize.y >> 0, mapX / this.blockSize.x >> 0];
-    }
-
-    // Return Block Based On xy Coordinate
-    getBlock([mapX, mapY]){
-        let [floatBlockX, floatBlockY] = [mapX / this.blockSize.x, mapY / this.blockSize.y];
-        if (this.blockNumber.x <= floatBlockX || 0 > floatBlockX || this.blockNumber.y <= floatBlockY || 0 > floatBlockY) return null;
-        return this.blockList[floatBlockY >> 0][floatBlockX >> 0];
+    // Check If Within Map Rnage
+    IsNotInMapRange(floatX, floatY){
+        return this.size.x <= floatX || 0 > floatX || this.size.y <= floatY || 0 > floatY;
     }
 
     // Return The Unit Based On xy Coordinate
     getUnit([mapX, mapY]){
-        let theBlock = this.getBlock([mapX, mapY]);
-        if (theBlock == null || theBlock.class == null) return null;
-        return  theBlock.class.unitList[mapY % this.blockSize.y][mapX % this.blockSize.x];
+        if (this.IsNotInMapRange(mapX, mapY)) return null;
+        return this.unitList[mapY][mapX];
     }
 
     // Creating Client Side Blocks
-    spawnBlocks(blockInfoList){
-        for (let i = 0; i < blockInfoList.length; i++) {
-            this.spawnBlock(blockInfoList[i].x, blockInfoList[i].y, blockInfoList[i].block);
-        }
-    }
+    spawnMap(dataSpace){
+        let dataView = new DataView(dataSpace);
+        let unitClass, offset;
+        let dataShift = 0;
+        // Set DataView to unitList
+        for (let y = 0; y < this.unitList.length; ++y) {
+            for (let x = 0; x < this.unitList[y].length; ++x) {
+                unitClass = {
+                    x: x,
+                    y: y,
+                    mesh: null,
+                    childMesh: null,
+                    transparent: false
+                };
 
-    // Creating Client Side Block
-    spawnBlock(x, y, blockClass){
-        if (this.blockList[y][x] == null && this.blockNumber.x > x && this.blockNumber.y > y){
-            this.blockList[y][x] = {
-                class: blockClass,
-                block: null,
-                view: false,
-                mesh: null
-            };
-
-            this.spawnBlockObject(x, y);
-        }
-    }
-
-    // Creating Client Side Block
-    spawnBlockObject(x, y){
-        let theBlock = this.blockList[y][x];
-        if (theBlock != null){
-            if (theBlock.block == null){
-                var block = new THREE.Object3D();
-                let blockClass = theBlock.class;
-                
-                block.position.set(x * blockClass.unitList.length, y * blockClass.unitList[0].length, 0);
-                
-                // Double For Loop To Spawn Each Unit Within The Block
-                for (let y_Axis = 0; y_Axis < blockClass.unitList.length; y_Axis++) {
-                    for (let x_Axis = 0; x_Axis < blockClass.unitList[y_Axis].length; x_Axis++) {
-                        this.spawnUnit(x_Axis, y_Axis, blockClass.unitList[y_Axis][x_Axis], block);
+                offset = 0;
+                for (let [key, value] of Object.entries(unitProperties)) {
+                    switch (value){
+                        case "uint":
+                            unitClass[key] = dataView.getUint32(dataShift + offset);
+                            break;
+                        case "int":
+                            unitClass[key] = dataView.getInt32(dataShift + offset);
+                            break;
+                        case "float":
+                            unitClass[key] = dataView.getFloat32(dataShift + offset);
+                            break;
                     }
+                    offset += Int32Array.BYTES_PER_ELEMENT;
                 }
 
-                // Adding New Block Into The Entire Map
-                this.object.add(block);
-                this.blockList[y][x].block = block;
-                this.blockObjectClass.push(this.blockList[y][x]);
-            }
+                this.unitList[y][x] = unitClass;
 
-            // Setting Its View Tag To True
-            this.blockList[y][x].view = true;
+                dataShift += Int32Array.BYTES_PER_ELEMENT * unitPropertyNumber;
+            }
         }
     }
 
     // Creating Client Side Unit
-    spawnUnit(x, y, unitClass, parent){
-        let mesh;
-        if (this.unitIDList[unitClass.ID].geometryType != null) {
-            // Getting Geometry And Materials
-            let geometry = this.geometryList[this.unitIDList[unitClass.ID].geometryType];
-            let material = this.materialList[unitClass.ID];
-            mesh = new THREE.Mesh(geometry, material);      
+    spawnUnit(unitClass){
+        //let height = unitClass.height;
+
+
+        let unitInfo = this.unitIDList[unitClass.ID];
+
+        let mesh = new THREE.Mesh(unitInfo.geometry, unitInfo.material);
+
+
+        if (unitClass.height > 6 && unitInfo.typeInfo.type == "block"){
+            mesh.scale.z = unitClass.height / 6;
+        }
+
+            //if (this.unitIDList[unitClass.ID].geometryType == 1){
+                //console.log(material)
+
+              //let newMaterial = []
+              //for (let i = 0; i < material.length; ++i){
+                //newMaterial.push(material[i].clone())
+              //}
+              //material = newMaterial;
+                /*
+                geometry.attributes.uv.array = new Float32Array([
+                    0, height, height,
+                    height, 0, 0,
+                    height, 0, 0, 
+                    height, height, height, 
+                    0, 0, height, 
+                    0, 0, height, 
+                    height, height, 0, 
+                    0, height, 0, 
+                    0, height, height, 
+                    height, 0, 0, 
+                    height, 0, 0, 
+                    height, height, height, 
+                    0, 0, height, 
+                    0, 0, height, 
+                    height, height, 0, 
+                    0, height, 0]);
+                /*
+                geometry.faceVertexUvs[0][0] = [new THREE.Vector2(0,1), new THREE.Vector2(0,height), new THREE.Vector2(1, 1)];
+                geometry.faceVertexUvs[0][1] = [new THREE.Vector2(0,height), new THREE.Vector2(1,height), new THREE.Vector2(1, 1)];
+                geometry.faceVertexUvs[0][2] = [new THREE.Vector2(1,1), new THREE.Vector2(1,height), new THREE.Vector2(1, 1)];
+                geometry.faceVertexUvs[0][3] = [new THREE.Vector2(1,height), new THREE.Vector2(1,height), new THREE.Vector2(1, 1)];
+                geometry.faceVertexUvs[0][4] = [new THREE.Vector2(0,height), new THREE.Vector2(0,height), new THREE.Vector2(1, height)];
+                geometry.faceVertexUvs[0][5] = [new THREE.Vector2(0,height), new THREE.Vector2(1,height), new THREE.Vector2(1, height)];
+                geometry.faceVertexUvs[0][6] = [new THREE.Vector2(1,height), new THREE.Vector2(1,height), new THREE.Vector2(1, height)];
+                geometry.faceVertexUvs[0][7] = [new THREE.Vector2(1,height), new THREE.Vector2(1,height), new THREE.Vector2(1, height)];
+                geometry.faceVertexUvs[0][8] = [new THREE.Vector2(0,height), new THREE.Vector2(0,0), new THREE.Vector2(1, height)];
+                geometry.faceVertexUvs[0][9] = [new THREE.Vector2(0,0), new THREE.Vector2(1,0), new THREE.Vector2(1, height)];
+                geometry.faceVertexUvs[0][10] = [new THREE.Vector2(1,height), new THREE.Vector2(1,0), new THREE.Vector2(1, height)];
+                geometry.faceVertexUvs[0][11] = [new THREE.Vector2(1,0), new THREE.Vector2(1,0), new THREE.Vector2(1, height)];
+                */
+            //}
+
+
+
+                        /*
+
+            mesh = new THREE.Mesh(geometry, material); 
+            //mesh.toStatic();    
         } else if(this.unitIDList[unitClass.ID].modelType != null) {
             mesh = this.unitIDList[unitClass.ID].modelType.clone();
         } else {
             return;
-        }
-
-        if (unitClass.childUnit != null){
-            this.spawnUnit(0, 0, unitClass.childUnit, mesh);
-        }
+        }*/
 
         // Adding Unit To Parent
-        parent.add(mesh);
+        this.object.add(mesh);
         unitClass.mesh = mesh;
-        mesh.position.set(x, y, unitClass.Height);
-        mesh.rotation.z = unitClass.rotation;
+        mesh.position.set(unitClass.x, unitClass.y, unitClass.height);
+
+        if (unitClass.childID != 0){
+            this.spawnChildUnit(unitClass);
+        }
+    }
+
+    // Creating Client Side Unit
+    spawnChildUnit(unitClass){
+        let childInfo = this.unitIDList[unitClass.childID];
+        
+        if (childInfo.geometry == null || childInfo.material == null) return;
+        let mesh = new THREE.Mesh(childInfo.geometry, childInfo.material);
+        let scale = childInfo.typeInfo.scale;
+        mesh.scale.set(scale, scale, scale);
+            
+        // Adding Unit To Parent
+        unitClass.mesh.add(mesh);
+        unitClass.childMesh = mesh;
+        //mesh.rotation.z = unitClass.rotation;
     }
 
 
-    // Removing A Block (No Longer Render This Block)
-    deleteBlock(block){
-        // Remove All Child Object
-        this.removeAllChildUnit(block);
-        this.object.remove(block);
-    }
+
     
     // return true when deletion successful
+    /*
     deleteUnit([[mapX, mapY], replaceUnitInfo]){ 
         let theBlock = this.getBlock([mapX, mapY]);
         if (theBlock != null && theBlock.class != null){
@@ -260,30 +303,15 @@ class map {
         } else {
             return false;
         }
-    }
+    }*/
 
     // Remove All Child Units
+    /*
     removeAllChildUnit(parent){
         for (var i = parent.children.length - 1; i >= 0; i--) {
             this.removeAllChildUnit(parent.children[i]);
             parent.remove(parent.children[i]);
         }
-    }
+    }*/
 
-    // Remove All Block
-    clearAllBlock(){
-        let theBlock;
-        // Looping Through All Block
-        for (let y_Axis = 0; y_Axis < this.blockList.length; ++y_Axis) {
-            for (let x_Axis = 0; x_Axis < this.blockList[y_Axis].length; ++x_Axis) {
-                if (this.blockList[y_Axis][x_Axis] != null){
-                    theBlock = this.blockList[y_Axis][x_Axis].block;
-                    if (theBlock != null){
-                        this.deleteBlock(theBlock);
-                    }
-                    delete this.blockList[y_Axis][x_Axis];
-                } 
-            }
-        }
-    }
 }

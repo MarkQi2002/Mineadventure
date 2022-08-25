@@ -364,8 +364,7 @@ command.addEventListener("keypress", function(event) {
 
 // SHA256 Unlock
 var hashKey = "kodiaks";
-var sendingMessage = ["System", "Init Message"];
-var sendingCommand = [null, null];
+var hexCode = "28713e0f7e8b977dcd866fcf8686d1242413e661162e68c0a02d9084b90d4a53";
 
 // Terminal Button Function
 function terminalSubmit() {
@@ -378,164 +377,145 @@ function terminalSubmit() {
     md.start();
     md.update(hashKey, "utf8");
 
-    // Check If Hash Key Input Correctly
-    if (md.digest().toHex() != "28713e0f7e8b977dcd866fcf8686d1242413e661162e68c0a02d9084b90d4a53") {
-        // Commands That Doesn't Need Cheat
-        unlockedCommand(inputArray);
-    } else {
-        // Commands That Doesn't Need Cheat
-        unlockedCommand(inputArray);
-
-        // Commands That Need Cheat
-
-        if (inputArray[0][0] == "/"){
-            inputArray[0] = inputArray[0].substr(1, inputArray[0].length - 1);
-            lockedCommand(inputArray);
-        }else if (inputCommand !=''){
-            sendingMessage = [player_controller.creature.name, inputCommand];
-            document.dispatchEvent(new Event('sendMessage', {bubbles: true, cancelable: false}));
-            terminalInput.value = '';
-        }
+    if (inputArray[0][0] == "/"){
+        inputArray[0] = inputArray[0].substr(1, inputArray[0].length - 1);
         
-    }
-}
-
-// Commands That Doesn't Need Unlock
-function unlockedCommand(inputArray) {
-    // For Unlocking Cheat Menu
-    if (inputArray[0] == "unlock") {
-        hashKey = inputArray[1];
-        console.log(hashKey);
-
-        // Forge Instance Initialized SHA-256
-        var md = forge.md.sha256.create();
-        md.start();
-        md.update(hashKey, "utf8");
-
-        // For Unlocking Cheat Menu
-        if (md.digest().toHex() != "28713e0f7e8b977dcd866fcf8686d1242413e661162e68c0a02d9084b90d4a53") console.log("Hash Failed! No Cheat For You!");
-        else console.log("Hash Correctly");
-    // Displaying Current Player Location In Console
-    } else if (inputArray[0] == "location") {
-        console.log(playerArray[clientPlayerID].object.position);
-    }
-}
-
-// Teleport Player To Corresponding Coordinate
-function teleport([mapX, mapY]){
-    // Updating Renderer Information
-    player_controller.controllerUpdateBlock(game_map.mapPosToBlockPos([mapX, mapY]));
-
-    // Moving Player To New Position
-    player_controller.creature.object.position.x = mapX;
-    player_controller.creature.object.position.y = mapY;
-
-    // Moving The Camera With The Player
-    player_controller.camera.position.x = mapX;
-    player_controller.camera.position.y = mapY - carmeraOffsetY;
-
-    // Loop Through All Player
-    for (let playerIndex = 0; playerIndex < playerArray.length; ++playerIndex){
-        if (playerArray[playerIndex] != null && 
-            !(playerArray[playerIndex].creatureType == player_controller.creature.creatureType &&
-            playerArray[playerIndex].ID == player_controller.creature.ID)){
-                
-            playerArray[playerIndex].update();
+        let theCommand = commandList[inputArray[0]];
+        if (theCommand != null){
+            let result = theCommand.execute(inputArray, md.digest().toHex() != hexCode);
+            if (result[0] != null) new messageUI("System", result[0], result[1]);
+        }else{
+            new messageUI("System", "Invalid Command !!!", "red");
         }
-    }
 
-    // Loop Through All Monster
-    for (let monsterIndex = 0; monsterIndex < monsterArray.length; ++monsterIndex){
-        if (monsterArray[monsterIndex] != null){
-            monsterArray[monsterIndex].update();
-        }
+    }else if (inputCommand !=''){
+        sock.compress(true).emit('newMessage', player_controller.creature.name, inputCommand);
+        terminalInput.value = '';
     }
-
-    // Update Player Position Event
-    var event = new Event('position event', {bubbles: true, cancelable: false}) 
-    document.dispatchEvent(event);
 }
+
+
+
+class textCommand{
+    // Damage Text Class Constructor
+    constructor({
+        commandInputType = [],
+        isLockedCommand = true,
+        executeFunction = function(){}
+    }) {
+
+        this.commandInputType = commandInputType;
+        this.isLockedCommand = isLockedCommand;
+        this.executeFunction = executeFunction;
+    }
+
+    // Removing Damage Text
+    execute(inputArray, hashState){
+        // Check If It Is Locked Command And Hash Key Input Correctly
+        if (this.isLockedCommand && hashState) return ["This Command Is Locked!", "red"];
+
+        if (inputArray.length != this.commandInputType.length + 1) return ["Number of Inputs is not correct!", "red"];
+
+        let inputs = new Array(this.commandInputType.length);
+
+        let count;
+        for (let i = 0; i < this.commandInputType.length; ++i){
+            count = i + 1;
+
+            switch (this.commandInputType[i]){
+                case "int":
+                    inputs[i] = parseInt(inputArray[count]);
+                    if (isNaN(inputs[i])) return ["Element " + count + " is Not Int!", "red"];
+                    break;
+                case "float":
+                    inputs[i] = parseFloat(inputArray[count]);
+                    if(isNaN(inputs[i])) return ["Element " + count + " is Not Float!", "red"];
+                    break;
+                case "string":
+                    inputs[i] = inputArray[count];
+                    break;
+            }
+        }
+
+        let result = this.executeFunction(inputs);
+        if (result == null) return ["The command runs successfully!", "green"];
+        else return result;
+    }   
+}
+
+
+
+
+var commandList = {
+    "unlock": new textCommand({
+        commandInputType: ["string"],
+        isLockedCommand: false,
+        executeFunction: function(inputs){
+            hashKey = inputs[0];
+            console.log(hashKey);
+
+            // Forge Instance Initialized SHA-256
+            var md = forge.md.sha256.create();
+            md.start();
+            md.update(hashKey, "utf8");
+
+            // For Unlocking Cheat Menu
+            if (md.digest().toHex() != hexCode) return ["Hash Failed! No Cheat For You!", "red"];
+            else return ["Hash Correctly", "green"];
+        
+        }
+    }),
+
+    "location": new textCommand({
+        commandInputType: [],
+        isLockedCommand: false,
+        executeFunction: function(inputs){
+            new messageUI("System", "Current Position: " + player_controller.creature.getPositionArray(), "while");
+            return [null, null];
+        }
+    }),
+
+    "tp": new textCommand({
+        commandInputType: ["float", "float"],
+        executeFunction: function(inputs){
+            player_controller.creature.object.position.x = inputs[0];
+            player_controller.creature.object.position.y = inputs[1];
+        }
+    }),
+
+    "tpa": new textCommand({
+        commandInputType: ["int"],
+        executeFunction: function(inputs){
+            sock.compress(true).emit('commandFromClient', ["tpa", inputs[0]]);
+            return [null, null];
+        }
+    }),
+
+    "tpn": new textCommand({
+        commandInputType: ["string"],
+        executeFunction: function(inputs){
+            sock.compress(true).emit('commandFromClient', ["tpn", inputs[0]]);
+            return [null, null];
+        }
+    }),
+
+    "radius": new textCommand({
+        commandInputType: ["float"],
+        executeFunction: function(inputs){
+            sock.compress(true).emit('commandFromClient', ["radius", inputs[0]]);
+            return [null, null];
+        }
+    }),
+
+}
+
+
+
 
 // Commands That Need To Be Unlocked
 function lockedCommand(inputArray) {
-    // Teleport The Player
-    if (inputArray[0] == "tp") {
-        // Input Control
-        let [playerX, playerY] = [parseInt(inputArray[1]), parseInt(inputArray[2])];
-
-        // Input Control
-        if (isNaN(parseInt(playerX)) || isNaN(parseInt(playerY))) {
-            console.log("The TP Location Is Invalid!");
-            return;
-        }
-
-        // Call Teleportation Function
-        teleport([playerX, playerY]);
-    // Teleport To Playe By Player ID
-    } else if (inputArray[0] == "tpa") {
-        // Input Control
-        if (isNaN(parseInt(inputArray[1]))) {
-            console.log("The Player Number Input Is Invalid!");
-            return;
-        }
-
-        // Input Control
-        if (playerArray[parseInt(inputArray[1])] == null) {
-            console.log("Player Number ", parseInt(inputArray[1]), " Not Found");
-            return;
-        }
-        
-        // Calculate Player Position
-        let playerX = Math.floor(playerArray[parseInt(inputArray[1])].object.position.x);
-        let playerY = Math.floor(playerArray[parseInt(inputArray[1])].object.position.y);
-
-        let xPosOffset, yPosOffset;
-        let count = 0
-        
-        // Avoid Spawn Location That Make Player Stuck In The Wall
-        while (count < 10) {
-            xPosOffset = Math.floor((Math.random() < 0.5) ? 1 : -1) + playerX;
-            yPosOffset = Math.floor((Math.random() < 0.5) ? 1 : -1) + playerY;
-            let unit = game_map.getUnit([xPosOffset, yPosOffset]);
-            if ( unit != null && !(game_map.unitIDList[unit.ID].collision)){
-                break;
-            }
-            count ++;
-        }
-
-        // If No Valid Location Found In While Loop
-        if (count >= 10){
-            xPosOffset = playerX;
-            yPosOffset = playerY;
-        }
-
-        // Call Teleportation Function
-        teleport([xPosOffset, yPosOffset]);
-    // Teleport To Player By Name
-    } else if (inputArray[0] == "tpn") {
-        let trueIndex = -1;
-        // Input Control
-        for (let playerIndex = 0; playerIndex < playerArray.length; playerIndex++) {
-            if (playerArray[playerIndex] != null && playerArray[playerIndex].name == inputArray[1]) {
-                trueIndex = playerIndex;
-                break;
-            }
-        }
-
-        // Input Control (Didn't Find The Player)
-        if (trueIndex == -1) {
-            console.log("Couldn't Find Player Named: ", inputArray[1]);
-            return;
-        }
-        
-        // Calculate Position
-        let xPosOffset = playerArray[trueIndex].object.position.x + 1;
-        let yPosOffset = playerArray[trueIndex].object.position.y + 1;
-
-        // Call Teleporatation Function
-        teleport([xPosOffset, yPosOffset]);
-    // Teleport Between MapLevels
-    } else if (inputArray[0] == "mapLevel"){
+   
+    if (inputArray[0] == "mapLevel"){
         // Input Control
         if (inputArray[1] == null || isNaN(parseInt(inputArray[1]))) {
             console.log("The Number Is Invalid!");
@@ -543,8 +523,7 @@ function lockedCommand(inputArray) {
         }
 
         // Sending Teleportation Event To Server
-        sendingCommand = ["mapLevel", parseInt(inputArray[1])];
-        document.dispatchEvent(new Event('sendCommand', {bubbles: true, cancelable: false}));
+         
     // All Other Commands
     } else {
         // Input Control
