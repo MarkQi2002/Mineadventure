@@ -194,13 +194,14 @@ class controller{
             let otherPlayerPosition = theCreature.object.position;
             let diffX = creaturePos.x + translateDistance[0] - otherPlayerPosition.x;
 			let diffY = creaturePos.y + translateDistance[1] - otherPlayerPosition.y;
+            let diffZ = creaturePos.z + translateDistance[2] - otherPlayerPosition.z;
             let centerSizeDiff = this.creature.radius + theCreature.radius;
-            if (Math.abs(diffX) + Math.abs(diffY) > centerSizeDiff + centerSizeDiff) continue; 
+            if (Math.abs(diffX) + Math.abs(diffY) + Math.abs(diffZ) > centerSizeDiff + centerSizeDiff + centerSizeDiff) continue; 
             
 
             // If Collision Occur, Move In Opposite Direction And Return True
             // Calculate Direct Distance To Squared
-            let amount = diffX * diffX + diffY * diffY;
+            let amount = diffX * diffX + diffY * diffY + diffZ * diffZ;
             if (amount < centerSizeDiff * centerSizeDiff) { 
                 //console.log("Collided With Creature", creatureIndex);
                 
@@ -209,7 +210,7 @@ class controller{
                 // Indicate Collision Occurred 
                 return [translateDistance[0] + diffX * rate,
                         translateDistance[1] + diffY * rate,
-                        translateDistance[2]];
+                        translateDistance[2] + diffZ * rate];
                 
                  
             } 
@@ -357,74 +358,41 @@ class controller{
         let unitTranslateDistance = [translateDistance[0], translateDistance[1], translateDistance[2]]; // Copy
         let checkAmount = this.creature.radius / 2 > 0.3 ? 0.3 : this.creature.radius / 2;
         let creatureTrans = this.creature.object;
-        let [xCount, yCount, zCount] = [1, 1, 1];
-        let [xDir, yDir, zDir] = [unitTranslateDistance[0] > 0 ? 1 : -1, unitTranslateDistance[1] > 0 ? 1 : -1, unitTranslateDistance[2] > 0 ? 1 : -1];
-        let [xCollision, yCollision, zCollision] = [false, false, false];
+        let count = [1, 1, 1];
+        let dir = [unitTranslateDistance[0] > 0 ? 1 : -1, unitTranslateDistance[1] > 0 ? 1 : -1, unitTranslateDistance[2] > 0 ? 1 : -1];
+        let isCollision = [false, false, false];
         let currentPosition = [creatureTrans.position.x, creatureTrans.position.y, creatureTrans.position.z];
-        let newTranslateDistance;
-        while (unitTranslateDistance[0] * xDir > 0 || unitTranslateDistance[1] * yDir > 0|| unitTranslateDistance[2] * zDir > 0){
-            if (xCollision){
-                xCount = 0;
-            }else{
-                if (unitTranslateDistance[0] * xDir > checkAmount){
-                    xCount = xDir * checkAmount;
-                } else if (unitTranslateDistance[0] * xDir > 0){
-                    xCount = unitTranslateDistance[0];
-                } else {
-                    xCount = 0;
+        let newTranslateDistance, i;
+        while (unitTranslateDistance[0] * dir[0] > 0 || unitTranslateDistance[1] * dir[1] > 0|| unitTranslateDistance[2] * dir[2] > 0){
+
+            for (i = 0; i < 3; ++i){
+                if (isCollision[i]){
+                    count[i] = 0;
+                }else{
+                    if (unitTranslateDistance[i] * dir[i] > checkAmount){
+                        count[i] = dir[i] * checkAmount;
+                    } else if (unitTranslateDistance[i] * dir[i] > 0){
+                        count[i] = unitTranslateDistance[i];
+                    } else {
+                        count[i] = 0;
+                    }
                 }
+
+                unitTranslateDistance[i] -= dir[i] * checkAmount;
             }
-
-            if (yCollision){
-                yCount = 0;
-            }else{
-                if (unitTranslateDistance[1] * yDir > checkAmount){
-                    yCount = yDir * checkAmount;
-                } else if (unitTranslateDistance[1] * yDir > 0){
-                    yCount = unitTranslateDistance[1];
-                } else {
-                    yCount = 0;
-                }
-            }
-
-            if (zCollision){
-                zCount = 0;
-            }else{
-                if (unitTranslateDistance[2] * zDir > checkAmount){
-                    zCount = zDir * checkAmount;
-                } else if (unitTranslateDistance[2] * zDir > 0){
-                    zCount = unitTranslateDistance[2];
-                } else {
-                    zCount = 0;
-                }
-            }
-
-            unitTranslateDistance[0] -= xDir * checkAmount;
-            unitTranslateDistance[1] -= yDir * checkAmount;
-            unitTranslateDistance[2] -= zDir * checkAmount;
-
             
-            newTranslateDistance = this.surroundingCollision(currentPosition,[xCount, yCount, zCount]);
+            newTranslateDistance = this.surroundingCollision(currentPosition, count);
             
-            currentPosition[0] += newTranslateDistance[0];
-            currentPosition[1] += newTranslateDistance[1];
-            currentPosition[2] += newTranslateDistance[2];
 
-            if (Math.abs(xCount) > Math.abs(newTranslateDistance[0])) {
-                xCollision = true;
-                if (yCollision) break;
- 
-            };
+            for (i = 0; i < 3; ++i){
+                currentPosition[i] += newTranslateDistance[i];
 
-            if (Math.abs(yCount) > Math.abs(newTranslateDistance[1])) {
-                yCollision = true;
-                if (xCollision) break;
-            };
+                if (Math.abs(count[i]) > Math.abs(newTranslateDistance[i])) {
+                    isCollision[i] = true;
+                };
+            }
 
-            if (Math.abs(zCount) > Math.abs(newTranslateDistance[2])) {
-                zCollision = true;
-                if (zCollision) break;
-            };
+            if (isCollision.includes(true)) break;
         }
         
         return [
@@ -573,8 +541,8 @@ class controller{
             }
 
             if (Math.abs(this.velocity[0]) < dirSpeed){
-                if (this.inputs.left) this.velocity[0] -= translateSpeed;
                 if (this.inputs.right) this.velocity[0] += translateSpeed;
+                if (this.inputs.left) this.velocity[0] -= translateSpeed;
             }
         }
         
@@ -613,11 +581,18 @@ class controller{
         }
 
 
-        //console.log(this.onGround, Math.abs(playerTranslateDistance[0] - totalTranslateDistance[0]))
-
         creatureTrans.position.x += totalTranslateDistance[0];
         creatureTrans.position.y += totalTranslateDistance[1];
         creatureTrans.position.z += totalTranslateDistance[2];
+
+
+        // If Fall Out The World
+        if (creatureTrans.position.z < -10){
+            let theUnit = game_map.getUnit([creatureTrans.position.x + 0.5 >> 0, creatureTrans.position.y + 0.5 >> 0]);
+            if (theUnit != null){
+                creatureTrans.position.z = theUnit.height + this.creature.radius + 1;
+            }
+        }
 
         this.displayUnits();
 

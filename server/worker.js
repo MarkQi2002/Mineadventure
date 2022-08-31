@@ -30,7 +30,7 @@ function initWorker(data){
 
 
 function workerLoop(delta){
-    let i, j, theProjectile, thePlayer, theMap;
+    let i, j, theProjectile, thePlayer, theAI, theMap;
     for (i = 0; i < workerMapList.length; ++i){
         theMap = workerMapList[i];
         unitModifiedList.length = 0;
@@ -70,8 +70,21 @@ function workerLoop(delta){
 
         }
 
+        // Add AI Into The Tree
+        for(j = 0; j < theMap.AIIDArray.length[0]; ++j) {
+            theAI = allObject.list[theMap.AIIDArray.list[j]];
+            
+            if (theAI == null) continue;
 
+            theMap.objectTree.insert({
+                x: theAI.position[0],
+		        y: theAI.position[1],
+		        width: theAI.getRadius(),
+			    height: theAI.getRadius(),
+                ID: theAI.ID,
+            });
 
+        }
 
 
 
@@ -83,6 +96,19 @@ function workerLoop(delta){
 
             thePlayer.update();
         }
+
+
+        // AI Update
+        for(j = 0; j < theMap.AIIDArray.length[0]; ++j) {
+            theAI = allObject.list[theMap.AIIDArray.list[j]];
+
+            if (theAI == null) continue;
+
+            theAI.update(delta);
+        }
+
+
+
         
 
 
@@ -130,6 +156,10 @@ function newObject(data){
     switch(theObject.objectType){
         case "projectile":
             Object.setPrototypeOf(theObject, projectile.prototype);
+            break;
+
+        case "AI":
+            Object.setPrototypeOf(theObject, AI.prototype);
             break;
 
         case "player":

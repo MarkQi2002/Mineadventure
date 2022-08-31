@@ -173,17 +173,30 @@ function clientFrameUpdate(newPos, sendProjectileList, requestObjectList, thePla
 }
 
 
-// -------------------Projectile-------------------
 // Spawning New Projectiles
 function spawnProjectile(projectileInfo, sender){
 	let theProjectile = new projectile(projectileInfo, sender);
 
-	workerList[sender.mapIndex % workerNumber].postMessage({
+	workerList[theProjectile.mapIndex % workerNumber].postMessage({
 		type: "newObject",
 		theObject: theProjectile
 	});
 
 	return theProjectile;
+}
+
+
+
+// Spawning New AI
+function spawnAI(AIName, mapIndex, spawnPos){
+	let theAI = new AI(AIName, mapIndex, spawnPos);
+
+	workerList[theAI.mapIndex % workerNumber].postMessage({
+		type: "newObject",
+		theObject: theAI
+	});
+
+	return theAI;
 }
 
 
@@ -242,7 +255,10 @@ io.on('connection', (sock) => {
 		console.log("new player joined, name: " + thePlayer.name + "	ID: ", playerID);
 	});
 
-	
+
+	for (let i = 0; i < 100; i ++){
+		spawnAI("reee", 0);
+	}
 	// Receiving Information From Client And Calling Function
 	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
 	// First Parameter Data Name (Same As Client Side), Second Parameter The Actual Data

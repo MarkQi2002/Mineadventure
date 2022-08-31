@@ -141,6 +141,9 @@ const updateFrame = (
 			case "projectile":
 				new projectile(newObjectList[i]);
 				break;
+			case "AI":
+				new creature(newObjectList[i]);
+				break;
 			case "player":
 				new player(newObjectList[i]);
 				break;

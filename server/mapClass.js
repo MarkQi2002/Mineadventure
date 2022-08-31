@@ -319,6 +319,8 @@ class map{
 
         this.projectileIDArray = new sharedIndexArray(100000, "projectileIDArrayIndex");
 
+        this.AIIDArray = new sharedIndexArray(10000, "AIIDArrayIndex");
+
 
     }
 
@@ -342,6 +344,7 @@ class map{
     initWorkerMap(){
         Object.setPrototypeOf(this.playerIDArray, sharedIndexArray.prototype);
         Object.setPrototypeOf(this.projectileIDArray, sharedIndexArray.prototype);
+        Object.setPrototypeOf(this.AIIDArray, sharedIndexArray.prototype);
         this.newEmptyMap();
         if (mapList.length <= this.index) mapList.length = this.index + 1;
         mapList[this.index] = this;

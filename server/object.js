@@ -63,15 +63,14 @@ class sphere extends object{
 	}
 
 	isOverlapping(hitObject){
-		// Calculate XY Coordinate Difference
+		// Calculate XYZ Coordinate Difference
 		let diffX = hitObject.position[0] - this.position[0];
 		let diffY = hitObject.position[1] - this.position[1];
+		let diffZ = hitObject.position[2] - this.position[2];
 		let centerSizeDiff = hitObject.getRadius() + this.getRadius();
 		
 		// Calculate Manhattan Distance
-		if (Math.abs(diffX) + Math.abs(diffY) < centerSizeDiff + centerSizeDiff){
-			// Calculate Z Coordinate Difference
-			let diffZ = hitObject.position[2] - this.position[2];                                                                                                                                                                                                                                               
+		if (Math.abs(diffX) + Math.abs(diffY) + Math.abs(diffZ) < centerSizeDiff + centerSizeDiff + centerSizeDiff){                                                                                                                                                                                                       
 			
 			// Calculate Distance To Squared
 			if (diffX * diffX + diffY * diffY + diffZ * diffZ <= centerSizeDiff * centerSizeDiff){
