@@ -107,8 +107,9 @@ class creature extends sphere{
 
 
 	collisionReaction(hitCreature){
-		
-
+		if (hitCreature.objectType == "AI"){
+			hitCreature.collisionCreatureList.push(this);
+		}
 	}
 
 	
@@ -153,10 +154,7 @@ class player extends creature{
 	}
 
 	collisionReaction(hitCreature){
-		if (hitCreature.objectType == "player") return;
 		creature.prototype.collisionReaction.call(this, hitCreature); // call parent collisionReaction function
-
-		
 	}
 
 	update(){
@@ -216,11 +214,12 @@ class player extends creature{
 
 class AI extends creature{
 	constructor(name, mapIndex, spawnPos) {
-        super(name, "AI", spawnPos == null ? [0, 0, 0] : spawnPos, mapIndex, "defaultMonster", 0.45);  // explicitly call parent constructor.
+        super(name, "AI", spawnPos == null ? [0, 0, 0] : spawnPos, mapIndex, "defaultMonster", 1);  // explicitly call parent constructor.
 		if (spawnPos == null) this.changePosition(this.findNoCollisionPosition());
 
 		this.velocity = [0,0,0];
 		this.onGround = false;
+		this.collisionCreatureList = [];
     }
 
 	initWorker(){
@@ -231,11 +230,10 @@ class AI extends creature{
 
 	collisionReaction(hitCreature){
 		creature.prototype.collisionReaction.call(this, hitCreature); // call parent collisionReaction function
-
-		
 	}
 
 	update(delta){
+		this.collisionCreatureList = [];
 		creature.prototype.update.call(this); // call parent update function
 
 
@@ -292,7 +290,7 @@ class AI extends creature{
             totalTranslateDistance[i] += this.velocity[i] * delta;
         }
 
-        let playerTranslateDistance = totalTranslateDistance;//this.creatureCollision(totalTranslateDistance);
+        let playerTranslateDistance = this.creatureCollision(totalTranslateDistance);
         totalTranslateDistance = this.mapCollision(playerTranslateDistance);
 
         if (Math.abs(playerTranslateDistance[2] - totalTranslateDistance[2]) > 0.001) {
@@ -322,6 +320,43 @@ class AI extends creature{
 		};
 	}
 
+
+	// Creature Collision Detection 
+    creatureCollision(translateDistance){ 
+        // For Collision Detection 
+        let theCreature;
+        // Checking Collision With Every Other Creature 
+        for (let i = 0; i < this.collisionCreatureList.length; ++i) { 
+            theCreature = this.collisionCreatureList[i];
+
+            // For Calculating Manhattan Distance
+            let diffX = this.position[0] + translateDistance[0] - theCreature.position[0];
+			let diffY = this.position[1] + translateDistance[1] - theCreature.position[1];
+            let diffZ = this.position[2] + translateDistance[2] - theCreature.position[2];
+            let centerSizeDiff = this.getRadius() + theCreature.getRadius();
+            if (Math.abs(diffX) + Math.abs(diffY) + Math.abs(diffZ) > centerSizeDiff + centerSizeDiff + centerSizeDiff) continue; 
+            
+
+            // If Collision Occur, Move In Opposite Direction And Return True
+            // Calculate Direct Distance To Squared
+            let amount = diffX * diffX + diffY * diffY + diffZ * diffZ;
+            if (amount < centerSizeDiff * centerSizeDiff) { 
+                //console.log("Collided With Creature", creatureIndex);
+                
+                let rate = centerSizeDiff / Math.sqrt(amount) - 1;
+                if (rate === Infinity) rate = 1;
+                // Indicate Collision Occurred 
+                return [translateDistance[0] + diffX * rate,
+                        translateDistance[1] + diffY * rate,
+                        translateDistance[2] + diffZ * rate];
+                
+                 
+            } 
+        } 
+ 
+        // No Collision Has Occurred 
+        return translateDistance; 
+    } 
 
 	// Surrounding Unit Collision Detection
     surroundingCollision(currentPosition, translateDistance){ 
