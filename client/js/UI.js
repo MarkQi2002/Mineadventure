@@ -340,14 +340,14 @@ class creatureUI{
     }
 
     // Update Function
-    update(delta){
+    update(){
         let [posX, posY] = this.toXYCoords([this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z]);
         this.UI.style.top = posY + 'px';
         this.UI.style.left = posX + 'px';
     }
 
     // Deletion Function
-    delete(){
+    remove(){
         menuHtml.removeChild(this.UI);
         delete this;
     }

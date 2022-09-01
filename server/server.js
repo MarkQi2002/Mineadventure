@@ -256,7 +256,7 @@ io.on('connection', (sock) => {
 	});
 
 
-	for (let i = 0; i < 1000; i ++){
+	for (let i = 0; i < 100; i ++){
 		spawnAI("reee", 0);
 	}
 	// Receiving Information From Client And Calling Function

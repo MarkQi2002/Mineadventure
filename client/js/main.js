@@ -113,13 +113,15 @@ function animate() {
     player_controller.update(delta);
     
     // Updating Event
-    /*
-    for (let i = 0; i < playerArray.length; i++){
-        if (playerArray[i] != null && i != clientPlayerID){
-            playerArray[i].update();
+    let theCreature;
+    for (let i = 0; i < lastDisplayCreatureList.length; i++){
+        theCreature = objectList[lastDisplayCreatureList[i]];
+        if (theCreature != null){
+            theCreature.update();
         }
     }
 
+    /*
     // Updating Event
     for (let i = 0; i < damageTextList.length; ++i){
         if (damageTextList[i] != null){

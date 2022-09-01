@@ -188,7 +188,6 @@ class controller{
             
             // A Few Condition To Skip Collision Detection 
             if (theCreature == null) continue; 
-            if (player_controller.creature.ID == theCreature.ID) continue;
 
             // For Calculating Manhattan Distance
             let otherPlayerPosition = theCreature.object.position;

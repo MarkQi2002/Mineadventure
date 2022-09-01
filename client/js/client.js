@@ -153,8 +153,14 @@ const updateFrame = (
 
 	// Displayer Creature
 	for (let i = 0; i < lastDisplayObjectList.length; ++i){
-		if (objectList[lastDisplayObjectList[i]] != null){
-			objectList[lastDisplayObjectList[i]].object.visible = false;
+		theObject = objectList[lastDisplayObjectList[i]];
+		if (theObject != null){
+			theObject.object.visible = false;
+			if (theObject.onHeadUI != null) {
+				if (theObject.onHeadUI.UI.style.visibility == 'visible'){
+					theObject.onHeadUI.UI.style.visibility = 'hidden';
+				}
+			}
 		}
 	}
 
@@ -165,7 +171,9 @@ const updateFrame = (
 		if (theObject != null){
 			theObject.changePosition(displayObjectList[i][1]);
 			lastDisplayObjectList.push(displayObjectList[i][0]);
-			if (["player", "AI"].includes(theObject.objectType)) lastDisplayCreatureList.push(displayObjectList[i][0]);
+			if (theObject.onHeadUI != null) {
+				lastDisplayCreatureList.push(displayObjectList[i][0]);
+			}
 			theObject.object.visible = true;
 		}else{
 			requestObjectList.push(displayObjectList[i][0]);
