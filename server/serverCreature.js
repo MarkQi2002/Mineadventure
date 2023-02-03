@@ -1,4 +1,4 @@
-const { Vector2 } = require('three');
+const { Vector2 } = require('../client/js/module/three.js');
 const {dynamicList} = require('./dataStructure/dynamicList.js');
 const {sharedIndexArray} = require('./dataStructure/sharedIndexArray.js');
 const {mapList} = require('./mapClass.js')
