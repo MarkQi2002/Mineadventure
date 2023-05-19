@@ -3,7 +3,7 @@ const initSelf = (data) => {
 	clientPlayerID = data.thePlayer.playerID;
 	mapIndex = data.mapIndex;
 	defaultProperties = data.defaultProperties;
-	
+
 	// Input Control
 	if (game_map != null){
 
@@ -39,7 +39,7 @@ function afterMapEvent (data){
 }
 
 
- 
+
 
 // -------------------Item-------------------
 // Variable Declaration
@@ -77,7 +77,7 @@ function spawnItem(itemID, itemPosition, itemIndex){
 
 	// Creating Item Object
 	var new_item = new item(itemInfoArray[itemID], itemPosition);
-	
+
 	// Storing Passive Item Object Into itemArray
 	itemArray[itemIndex] = new_item;
 	console.log("Spawning", itemInfoArray[itemID], " At ItemIndex: ", itemIndex);
@@ -149,7 +149,7 @@ const updateFrame = (
 				break;
 		}
 	}
-	
+
 
 	// Displayer Creature
 	for (let i = 0; i < lastDisplayObjectList.length; ++i){
@@ -228,7 +228,7 @@ const updateMap = (
 		theProjectile.remove();
 		objectList[projectileRemoveList[i]]
 	}
-	
+
 };
 
 // -------------------Connection Exception Related-------------------
@@ -278,7 +278,7 @@ var sock;
 
 	// Connection
 	sock.on('connect_error', connectionError);
-	
+
 	// Sending Information To Server Only Once
 	// First Parameter Is The Tag, Second Parameter Is What We Send To The Server
 	// Receiving Information From Server
@@ -286,7 +286,7 @@ var sock;
 	sock.on('initSelf', initSelf);
 	sock.on('clientDisconnect', playerDisconnect);
 
-	
+
 	// Update Frame
 	sock.on('updateFrame', updateFrame);
 	sock.on('updateMap', updateMap);
@@ -317,7 +317,7 @@ var sock;
 							player_controller.creature.object.position.y,
 							player_controller.creature.object.position.z]);
 	};
-	
+
 	// Sending New Item List To Server
 	const updateItem = () => {
 		sock.compress(true).emit('serverCreatureItemArray', additionalItemID, clientPlayerID, removeItemID);
@@ -342,18 +342,15 @@ var sock;
 	};
 	document.addEventListener('updateBlock', updateBlock);
 
-	
+
 	// Creature Information Related
 	const creatureInfo = () => {
 		sock.compress(true).emit('creatureInfo', changingCreatureInfo);
 		changingCreatureInfo = [];
 	}
 	document.addEventListener('changingCreatureInfo', creatureInfo);
-
 	*/
 
-
-	
 	// New Server Message
 	sock.on('serverMessage', newServerMessage);
 
