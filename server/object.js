@@ -68,15 +68,13 @@ class sphere extends object{
 		let diffY = hitObject.position[1] - this.position[1];
 		let diffZ = hitObject.position[2] - this.position[2];
 		let centerSizeDiff = hitObject.getRadius() + this.getRadius();
-		
+
 		// Calculate Manhattan Distance
-		if (Math.abs(diffX) + Math.abs(diffY) + Math.abs(diffZ) < centerSizeDiff + centerSizeDiff + centerSizeDiff){                                                                                                                                                                                                       
-			
+		if (Math.abs(diffX) + Math.abs(diffY) + Math.abs(diffZ) < centerSizeDiff + centerSizeDiff + centerSizeDiff){
+
 			// Calculate Distance To Squared
-			if (diffX * diffX + diffY * diffY + diffZ * diffZ <= centerSizeDiff * centerSizeDiff){
-
+			if (diffX * diffX + diffY * diffY + diffZ * diffZ <= centerSizeDiff * centerSizeDiff) {
 				this.collisionReaction(hitObject);
-
 			}
 		}
 	}
@@ -89,14 +87,13 @@ class sphere extends object{
 		};
 	}
 
-
 	findNoCollisionPosition() {
 		// Variable Declaration
 		let theMap = mapList[this.mapIndex];
 		let mapX, mapY, mapShiftX, mapShiftY, theUnit;
 		let unitRange = Math.floor(this.getRadius());
-	
 		let findCount = 0;
+
 		// Randomly Generate XY Coordinate Until Found One That Doesn't Collide With The Wall
 		checkRandomPosition:
 			while (findCount < 100) {
@@ -109,10 +106,10 @@ class sphere extends object{
 						if (theUnit == null || theUnit.getCollision()) continue checkRandomPosition;
 					}
 				}
-		
+
 				break;
 			}
-	
+
 		// Return Valid Position XY Coordinate
 		return [mapX, mapY, 10];
 	}

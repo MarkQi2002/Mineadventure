@@ -212,8 +212,6 @@ const updateMap = (
 			theUnit[unitModifiedList[i][2][j][0]] = unitModifiedList[i][2][j][1];// Change Unit Property
 		}
 
-		
-
 		if (theUnit.mesh != null){
 			game_map.object.remove(theUnit.mesh);
             theUnit.mesh = null;
@@ -257,11 +255,6 @@ const newServerMessage = (name, text, color) => {
 };
 
 // -------------------End Of Message-------------------
-
-
-
-
-
 const commandFromServer = (theCommand) => {
 	switch (theCommand[0]){
 		case "changePlayerPos":
@@ -276,19 +269,8 @@ const commandFromServer = (theCommand) => {
 	}
 };
 
-
-
-
-
-
-
-
-
-
-
-
-var sock;
 // -------------------Sending And Receiving Information-------------------
+var sock;
 (() => {
 	// When Connected To Server, Create A Sock (MySelf)
 	sock = io();
@@ -377,7 +359,4 @@ var sock;
 
 	// Run Command From Server
 	sock.on('commandFromServer', commandFromServer);
-
-
-
 })();

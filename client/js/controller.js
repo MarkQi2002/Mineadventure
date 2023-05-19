@@ -1,28 +1,28 @@
-// Controller Class 
-class controller{ 
+// Controller Class
+class controller{
     // Controller Constructor
-    constructor(creature, camera) { 
+    constructor(creature, camera) {
         // Position Related
-        this.creature = creature; 
+        this.creature = creature;
         this.camera = camera;
         this.camera.position.x = this.creature.object.position.x;
         this.camera.position.y = this.creature.object.position.y;
         this.cameraOffset = 0;
         this.stateUI = {};
-        
-        this.speed = this.creature.properties["moveSpeed"]; // Per Second 
+
+        this.speed = this.creature.properties["moveSpeed"]; // Per Second
         this.velocity = [0, 0, 0];
-        
+
         // Jump Related
-        this.initJumpVelocity = 10; // Per Second 
-        this.onGround = false; 
-        
+        this.initJumpVelocity = 10; // Per Second
+        this.onGround = false;
+
         // Collision Related Boolean Variables
         this.forwardCollision = false;
         this.backwardCollision = false;
         this.leftCollision = false;
         this.rightCollision = false;
-        
+
         this.windowUpdate();
 
         this.lastIntRange = {
@@ -31,16 +31,16 @@ class controller{
             yMin: 0,
             yMax: 0
         };
-        
+
         // Input Boolean
-        this.inputs = { 
-            forward: false, 
-            backward: false, 
-            left: false, 
-            right: false, 
-            space: false, 
-            shift: false, 
-        }; 
+        this.inputs = {
+            forward: false,
+            backward: false,
+            left: false,
+            right: false,
+            space: false,
+            shift: false,
+        };
 
         // Mouse Position
         this.mouse = {
@@ -50,12 +50,12 @@ class controller{
             right: false,
             middle: false
         }
-        
+
         // Adding Event Listener
-        document.addEventListener("keydown", (e) => this.KeyDown(e), false); 
-        document.addEventListener("keyup", (e) => this.KeyUp(e), false); 
-        document.addEventListener("mousedown", (e) => this.MouseDown(e), false); 
-        document.addEventListener("mouseup", (e) => this.MouseUp(e), false); 
+        document.addEventListener("keydown", (e) => this.KeyDown(e), false);
+        document.addEventListener("keyup", (e) => this.KeyUp(e), false);
+        document.addEventListener("mousedown", (e) => this.MouseDown(e), false);
+        document.addEventListener("mouseup", (e) => this.MouseUp(e), false);
         document.addEventListener('mousemove', (e) => this.MouseMove(e), false);
 
         // Attack Speed
@@ -69,57 +69,57 @@ class controller{
     windowUpdate(){
         this.displayHalfSize = {x: 20 * window.innerWidth / window.innerHeight, y: 20};
     }
- 
-    // When KeyBoard Is Pressed Down 
-    KeyDown(event){ 
-        switch (event.keyCode){ 
-            case 87: // w 
-                this.inputs.forward = true; 
-                break; 
-            case 65: // a 
-                this.inputs.left = true; 
-                break; 
-            case 83: // s 
-                this.inputs.backward= true; 
-                break; 
-            case 68: // d 
-                this.inputs.right = true; 
-                break; 
-            case 32: // space 
-                this.inputs.space = true; 
-                break; 
-            case 16: // shift 
-                this.inputs.shift = true; 
-                break; 
-        } 
-    } 
- 
-    // When The KeyBoard Key Is Released 
-    KeyUp(event){ 
-        switch (event.keyCode){ 
-            case 87: // w 
-                this.inputs.forward = false; 
-                break; 
-            case 65: // a 
-                this.inputs.left = false; 
-                break; 
-            case 83: // s 
-                this.inputs.backward= false; 
-                break; 
-            case 68: // d 
-                this.inputs.right = false; 
-                break; 
-            case 32: // space 
-                this.inputs.space = false; 
-                break; 
-            case 16: // shift 
-                this.inputs.shift = false; 
-                break; 
-        } 
-    } 
-     
-    // When Mouse Is Pressed Down 
-    MouseDown(event){ 
+
+    // When KeyBoard Is Pressed Down
+    KeyDown(event){
+        switch (event.keyCode){
+            case 87: // w
+                this.inputs.forward = true;
+                break;
+            case 65: // a
+                this.inputs.left = true;
+                break;
+            case 83: // s
+                this.inputs.backward= true;
+                break;
+            case 68: // d
+                this.inputs.right = true;
+                break;
+            case 32: // space
+                this.inputs.space = true;
+                break;
+            case 16: // shift
+                this.inputs.shift = true;
+                break;
+        }
+    }
+
+    // When The KeyBoard Key Is Released
+    KeyUp(event){
+        switch (event.keyCode){
+            case 87: // w
+                this.inputs.forward = false;
+                break;
+            case 65: // a
+                this.inputs.left = false;
+                break;
+            case 83: // s
+                this.inputs.backward= false;
+                break;
+            case 68: // d
+                this.inputs.right = false;
+                break;
+            case 32: // space
+                this.inputs.space = false;
+                break;
+            case 16: // shift
+                this.inputs.shift = false;
+                break;
+        }
+    }
+
+    // When Mouse Is Pressed Down
+    MouseDown(event){
         switch ( event.button ) {
             case 0: // left
                 this.mouse.left = true;
@@ -131,12 +131,12 @@ class controller{
                 this.mouse.right = true;
                 break;
         }
-    } 
- 
-    // When The Mouse Is Released 
-    MouseUp(event){ 
+    }
+
+    // When The Mouse Is Released
+    MouseUp(event){
         switch ( event.button ) {
-            case 0: // left 
+            case 0: // left
                 this.mouse.left = false;
                 break;
             case 1: // middle
@@ -177,17 +177,17 @@ class controller{
 
     }
 
-    // Creature Collision Detection 
-    creatureCollision(translateDistance){ 
-        // For Collision Detection 
-        let creaturePos = this.creature.object.position; 
+    // Creature Collision Detection
+    creatureCollision(translateDistance){
+        // For Collision Detection
+        let creaturePos = this.creature.object.position;
         let theCreature;
-        // Checking Collision With Every Other Creature 
-        for (let i = 0; i < lastDisplayCreatureList.length; ++i) { 
+        // Checking Collision With Every Other Creature
+        for (let i = 0; i < lastDisplayCreatureList.length; ++i) {
             theCreature = objectList[lastDisplayCreatureList[i]];
-            
-            // A Few Condition To Skip Collision Detection 
-            if (theCreature == null) continue; 
+
+            // A Few Condition To Skip Collision Detection
+            if (theCreature == null) continue;
 
             // For Calculating Manhattan Distance
             let otherPlayerPosition = theCreature.object.position;
@@ -195,83 +195,83 @@ class controller{
 			let diffY = creaturePos.y + translateDistance[1] - otherPlayerPosition.y;
             let diffZ = creaturePos.z + translateDistance[2] - otherPlayerPosition.z;
             let centerSizeDiff = this.creature.radius + theCreature.radius;
-            if (Math.abs(diffX) + Math.abs(diffY) + Math.abs(diffZ) > centerSizeDiff + centerSizeDiff + centerSizeDiff) continue; 
-            
+            if (Math.abs(diffX) + Math.abs(diffY) + Math.abs(diffZ) > centerSizeDiff + centerSizeDiff + centerSizeDiff) continue;
+
 
             // If Collision Occur, Move In Opposite Direction And Return True
             // Calculate Direct Distance To Squared
             let amount = diffX * diffX + diffY * diffY + diffZ * diffZ;
-            if (amount < centerSizeDiff * centerSizeDiff) { 
+            if (amount < centerSizeDiff * centerSizeDiff) {
                 //console.log("Collided With Creature", creatureIndex);
-                
+
                 let rate = centerSizeDiff / Math.sqrt(amount) - 1;
                 if (rate === Infinity) rate = 1;
-                // Indicate Collision Occurred 
+                // Indicate Collision Occurred
                 return [translateDistance[0] + diffX * rate,
                         translateDistance[1] + diffY * rate,
                         translateDistance[2] + diffZ * rate];
-                
-                 
-            } 
-        } 
- 
-        // No Collision Has Occurred 
-        return translateDistance; 
-    } 
- 
-    // Item Collision Detection 
-    itemCollision(translateDistance){ 
+
+
+            }
+        }
+
+        // No Collision Has Occurred
+        return translateDistance;
+    }
+
+    // Item Collision Detection
+    itemCollision(translateDistance){
         // For Collision Detection
         let collision = false;
-        let creatureTrans = this.creature.object; 
-        let predictedPosition = new THREE.Vector3(); 
-        predictedPosition.copy(creatureTrans.position); 
- 
-        // Predicting Future Position 
+        let creatureTrans = this.creature.object;
+        let predictedPosition = new THREE.Vector3();
+        predictedPosition.copy(creatureTrans.position);
+
+        // Predicting Future Position
         if (this.inputs.forward) predictedPosition.y += translateDistance;
         if (this.inputs.backward) predictedPosition.y -= translateDistance;
         if (this.inputs.left) predictedPosition.x -= translateDistance;
         if (this.inputs.right) predictedPosition.x += translateDistance;
- 
-        // Checking Collision With Every Collectable Item 
-        for (let itemIndex = 0; itemIndex < itemArray.length; itemIndex++) { 
-            // A Few Condition To Skip Collision Detection 
-            if (itemArray[itemIndex] == null) continue; 
+
+        // Checking Collision With Every Collectable Item
+        for (let itemIndex = 0; itemIndex < itemArray.length; itemIndex++) {
+            // A Few Condition To Skip Collision Detection
+            if (itemArray[itemIndex] == null) continue;
             if (itemArray[itemIndex].collected) continue;
             // For Calculating Manhattan Distance
             let itemPosition = itemArray[itemIndex].object.position;
             let diffX = predictedPosition.x - itemPosition.x;
 			let diffY = predictedPosition.y - itemPosition.y;
-            if (Math.abs(diffX) + Math.abs(diffY) > 2) continue; 
-            
+            if (Math.abs(diffX) + Math.abs(diffY) > 2) continue;
 
-            // If Collision Occur, Increment Item Count Using Event 
+
+            // If Collision Occur, Increment Item Count Using Event
             // Calculate Direct Distance To Squared
             let diffZ = predictedPosition.z - itemPosition.z;
-            if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.64) { 
+            if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.64) {
                 //console.log("Collided With Item", itemArray[itemIndex]);
 
                 itemArray[itemIndex].collected = true;
 
                 // Removing The Item Collided With And Increse Player Item
                 removeItemID = itemIndex;
-                additionalItemID = itemArray[itemIndex].itemInfo.itemID; 
-                var event = new Event('player collected item', {bubbles: true, cancelable: false}) 
-                document.dispatchEvent(event); 
+                additionalItemID = itemArray[itemIndex].itemInfo.itemID;
+                var event = new Event('player collected item', {bubbles: true, cancelable: false})
+                document.dispatchEvent(event);
 
-                // Indicate Item Collision Occurred 
+                // Indicate Item Collision Occurred
                 collision = true;
                 break;
-            } 
-        } 
- 
-        // Indicate If Item Collision Has Occurred Or Not
-        return collision; 
-    } 
+            }
+        }
 
- 
+        // Indicate If Item Collision Has Occurred Or Not
+        return collision;
+    }
+
+
     // Surrounding Unit Collision Detection
-    surroundingCollision(currentPosition, translateDistance){ 
+    surroundingCollision(currentPosition, translateDistance){
         let [offSetX, offSetY, offSetZ] = translateDistance;
 
         if (translateDistance[0] != 0 || translateDistance[1] != 0 || translateDistance[2] != 0) {
@@ -281,7 +281,7 @@ class controller{
             let directionY = translateDistance[1] > 0 ? 1 : -1;
 
             // Variable Declaration For Checking Collision
-            
+
             let predictedMapX = Math.floor(currentPosition[0] + 0.5);
             let predictedMapY = Math.floor(currentPosition[1] + 0.5);
 
@@ -311,7 +311,7 @@ class controller{
 
                     rx -= 0.5;
                     ry -= 0.5;
-                    
+
                     // Getting Which Edge Or Corner The Circle Is Closest To
                     let testX = cx;
                     let testY = cy;
@@ -325,17 +325,17 @@ class controller{
 
                     if (testZ > rz) testZ = rz;
 
-                    
+
                     // Getting Difference In Distance
                     let distX = cx - testX;
                     let distY = cy - testY;
                     let distZ = cz - testZ;
                     let amount = distX * distX + distY * distY + distZ * distZ;
-                    
-                    // Collision Has Occur 
+
+                    // Collision Has Occur
                     if (amount < limitRange) {
 
-                        
+
                         let rate = this.creature.radius / Math.sqrt(amount) - 1;
                         if (rate === Infinity) rate = 1;
 
@@ -346,7 +346,7 @@ class controller{
                 }
             }
         }
-        
+
 
         return [offSetX, offSetY, offSetZ];
     }
@@ -379,9 +379,9 @@ class controller{
 
                 unitTranslateDistance[i] -= dir[i] * checkAmount;
             }
-            
+
             newTranslateDistance = this.surroundingCollision(currentPosition, count);
-            
+
 
             for (i = 0; i < 3; ++i){
                 currentPosition[i] += newTranslateDistance[i];
@@ -393,12 +393,12 @@ class controller{
 
             if (isCollision.includes(true)) break;
         }
-        
+
         return [
                 currentPosition[0] - creatureTrans.position.x,
                 currentPosition[1] - creatureTrans.position.y,
                 currentPosition[2] - creatureTrans.position.z
-            ]; 
+            ];
     }
 
     // Damge Handler
@@ -418,7 +418,7 @@ class controller{
             theUnit.childMesh = null;
         }
     }
-    
+
     displayUnits(){
         let newIntRange = {
             xMin: this.creature.object.position.x - this.displayHalfSize.x + 1 >> 0,
@@ -431,7 +431,7 @@ class controller{
 
         let x, y, rangeA, rangeB, isNewDisplayUnit,
             q1x, q1y, q2x, q2y, q3x, q3y, q4x, q4y;
-        
+
 
         //  Quadrant 1 | Quadrant 2
         // -----Center Of RangeA-----
@@ -491,41 +491,41 @@ class controller{
         this.lastIntRange = newIntRange;
     }
 
-    // Updating The Position 
-    update(delta){ 
+    // Updating The Position
+    update(delta){
 
-        // Change Movement Speed By Shift 
-        if (!this.inputs.shift && this.onGround) { 
-            // Walk 
+        // Change Movement Speed By Shift
+        if (!this.inputs.shift && this.onGround) {
+            // Walk
             this.speed = this.creature.properties.moveSpeed;
-        } else { 
-            // Run 
+        } else {
+            // Run
             this.speed = this.creature.properties.moveSpeed * 1.5;
-        } 
-         
-        // If The Two Keys Are Pressed At The Same Time 
-        let dy = this.inputs.forward - this.inputs.backward; 
-        let dx = this.inputs.right - this.inputs.left; 
-        let magnitude = Math.sqrt(dx * dx + dy * dy); 
-        // Magnitude Can't Be Zero 
-        if (magnitude == 0) magnitude = 1; 
-        
+        }
+
+        // If The Two Keys Are Pressed At The Same Time
+        let dy = this.inputs.forward - this.inputs.backward;
+        let dx = this.inputs.right - this.inputs.left;
+        let magnitude = Math.sqrt(dx * dx + dy * dy);
+        // Magnitude Can't Be Zero
+        if (magnitude == 0) magnitude = 1;
+
         let dirSpeed = this.speed / magnitude;
 
-        // Variable Declaration 
-        let translateSpeed = 30 * (0.9 + this.creature.radius / 5) * delta * dirSpeed; 
-        let creatureTrans = this.creature.object; 
+        // Variable Declaration
+        let translateSpeed = 30 * (0.9 + this.creature.radius / 5) * delta * dirSpeed;
+        let creatureTrans = this.creature.object;
 
         let totalTranslateDistance = [0, 0, 0];
         let friction = [0, 0, 0]; // Friction
 
-        this.velocity[2] -= gravity * delta; // Gravity Update 
+        this.velocity[2] -= gravity * delta; // Gravity Update
 
         if (this.onGround){
             friction[0] += 0.5 * gravity + dirSpeed * 2;
             friction[1] += 0.5 * gravity + dirSpeed * 2;
             if (this.inputs.space){
-                this.velocity[2] = this.initJumpVelocity;// jump 
+                this.velocity[2] = this.initJumpVelocity;// jump
             }
         }else{
             friction[0] += 0.1 * gravity;
@@ -544,7 +544,7 @@ class controller{
                 if (this.inputs.left) this.velocity[0] -= translateSpeed;
             }
         }
-        
+
 
         for (let i = 0; i < 3; ++i){
             if (this.velocity[i] > 0){
@@ -596,9 +596,9 @@ class controller{
         this.displayUnits();
 
 
-        // Apply Item Collision 
-        //this.itemCollision(translateDistance); 
-        
+        // Apply Item Collision
+        //this.itemCollision(translateDistance);
+
 
         // Updating Camera Position
         this.camera.position.x = this.creature.object.position.x;
@@ -615,10 +615,6 @@ class controller{
         if (this.attackCD > 0){
             this.attackCD -= this.creature.properties.attackSpeed * delta;
         }
-
-
-
-
 
         // set Transparent Of All lastRayHideUnit To False;
         for ( let i = 0; i < this.lastRayHideUnit.length; ++i) {
@@ -646,7 +642,6 @@ class controller{
                 intersects[j].object.material = game_map.unitIDList[theUnit.ID].transparentMaterial;
                 newRayHideUnit.push(theUnit);
                 theUnit.transparent = true;
-                
             }
         }
 
@@ -661,11 +656,5 @@ class controller{
         }
 
         this.lastRayHideUnit = newRayHideUnit;
-
-
-
-
-
-
-    } 
-} 
+    }
+}

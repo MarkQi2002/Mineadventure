@@ -125,7 +125,7 @@ class stateUI {
         this.update(theState);
         this.state.style.color = "rgb(255,255,255)";
         stateDisplayUI.appendChild(this.state);
-    
+
     }
 
     // Setting UI Information
@@ -157,7 +157,7 @@ class damageText{
         this.text.innerHTML = Math.abs(value.amount);
         this.size = (8 / Math.PI * Math.atan(Math.abs(value.amount) / 100) + 1);
         this.text.style.fontSize = this.size + 'vh';
-        
+
         // Check Damage Type
         let color = [0, 0, 0];
         if (type == "true") {
@@ -175,7 +175,7 @@ class damageText{
         }
 
 
-        
+
 
         if (value.criticalAttack){
             this.text.style['-webkit-text-stroke'] = this.size / 40 + "vh rgb(" + color[0] + "," + color[1] + "," + color[2] + ")";
@@ -192,7 +192,7 @@ class damageText{
         // Damage Text Timer
         this.sqrtSize = Math.sqrt(this.size);
         this.rate = this.deleteTimer / (2 * this.sqrtSize);
-        
+
         // Damage Text Locatoin Update
         let [posX, posY] = this.toXYCoords(this.position);
         this.text.style.top = posY + 'px';
@@ -218,7 +218,7 @@ class damageText{
         let num = this.deleteTimer / this.rate - this.sqrtSize;
         this.text.style.top = posY - (this.size - num * num) + 'px';
         this.text.style.left = posX + 'px';
-        
+
         // Decrement Timer
         this.deleteTimer -= delta;
 
@@ -268,7 +268,7 @@ class creatureUI{
         this.healthBackground.style.width = 80 + '%';
         this.healthBackground.style.height = 30 + '%';
         this.healthBackground.style.left = 20 + '%';
-        
+
         // HealthBar CSS
         this.healthBar = document.createElement('div');
         this.healthBackground.appendChild(this.healthBar);
@@ -379,7 +379,7 @@ function terminalSubmit() {
 
     if (inputArray[0][0] == "/"){
         inputArray[0] = inputArray[0].substr(1, inputArray[0].length - 1);
-        
+
         let theCommand = commandList[inputArray[0]];
         if (theCommand != null){
             let result = theCommand.execute(inputArray, md.digest().toHex() != hexCode);
@@ -440,7 +440,7 @@ class textCommand{
         let result = this.executeFunction(inputs);
         if (result == null) return ["The command runs successfully!", "green"];
         else return result;
-    }   
+    }
 }
 
 
@@ -462,7 +462,7 @@ var commandList = {
             // For Unlocking Cheat Menu
             if (md.digest().toHex() != hexCode) return ["Hash Failed! No Cheat For You!", "red"];
             else return ["Hash Correctly", "green"];
-        
+
         }
     }),
 
@@ -514,7 +514,6 @@ var commandList = {
 
 // Commands That Need To Be Unlocked
 function lockedCommand(inputArray) {
-   
     if (inputArray[0] == "mapLevel"){
         // Input Control
         if (inputArray[1] == null || isNaN(parseInt(inputArray[1]))) {
@@ -523,7 +522,7 @@ function lockedCommand(inputArray) {
         }
 
         // Sending Teleportation Event To Server
-         
+
     // All Other Commands
     } else {
         // Input Control
@@ -547,11 +546,11 @@ function lockedCommand(inputArray) {
 
         // Get Creature Type
         let creatureType = (inputArray.length >= 5 && inputArray[4] == "monster") ? "monster" : "player";
-        
+
         // Update Player Properties
         let propertyList = {};
         propertyList[inputArray[0]] = [inputArray[1], parseInt(inputArray[2])];
-        sendCreaturePropertyChange([creatureType, id], propertyList);   
+        sendCreaturePropertyChange([creatureType, id], propertyList);
     }
 }
 

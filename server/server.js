@@ -44,7 +44,7 @@ for (let i = 0; i < mapList.length; ++i) workerMapList[i % workerNumber].push(ma
 for (let i = 0; i < workerNumber; ++i){
     var worker = new Worker('./server/worker.js')
 	workerList.push(worker);
-	
+
     worker.on('message', (data) => {
 		switch(data.type){
 			case "updateMap":
@@ -55,7 +55,6 @@ for (let i = 0; i < workerNumber; ++i){
 					theProjectile.remove();
 
 				}
-				
 
 				io.to("level " + data.mapIndex).compress(true).emit('updateMap', data.unitModifiedList, data.projectileRemoveList);
 				break;
@@ -133,9 +132,8 @@ function sendPlayerToMap(thePlayer, mapIndex, sock){
 			size: mapList[mapIndex].size,
 			unitIDList: unitIDList
 		},
-	});  
+	});
 }
-
 
 function clientFrameUpdate(newPos, sendProjectileList, requestObjectList, thePlayer, sock){
 	thePlayer.changePosition(newPos);
@@ -156,7 +154,7 @@ function clientFrameUpdate(newPos, sendProjectileList, requestObjectList, thePla
 		if (theObject == null) continue;
 		newObjectList.push(theObject.getInfo());
 	}
-	
+
 	// Client Display Creatures
 	let displayObjectList = [];
 
@@ -165,13 +163,12 @@ function clientFrameUpdate(newPos, sendProjectileList, requestObjectList, thePla
 		if (theObject == null) continue;
 		displayObjectList.push([theObject.ID, theObject.getPositionArray()]);
 	}
-	
+
 	sock.compress(true).emit('updateFrame',
 		newObjectList,
 		displayObjectList,
 	);
 }
-
 
 // Spawning New Projectiles
 function spawnProjectile(projectileInfo, sender){
@@ -185,8 +182,6 @@ function spawnProjectile(projectileInfo, sender){
 	return theProjectile;
 }
 
-
-
 // Spawning New AI
 function spawnAI(AIName, mapIndex, spawnPos){
 	let theAI = new AI(AIName, mapIndex, spawnPos);
@@ -199,14 +194,11 @@ function spawnAI(AIName, mapIndex, spawnPos){
 	return theAI;
 }
 
-
 // Command Handler
 const commandFromClient = (thePlayer, theCommand, sock) => {
 	let otherPlayer;
 	switch (theCommand[0]){
 		case "ChangeMap":
-			
-
 			return;
 
 		case "tpa":
@@ -272,16 +264,12 @@ io.on('connection', (sock) => {
 	//sock.on('serverCreatureItemArray', (additionalItemID, updatePlayerID, removeItemID) => creatureItemArrayUpdate(additionalItemID, updatePlayerID, removeItemID));
 	//sock.on('deleteItem', (removeItemID) => deleteItem(removeItemID, playerArray[playerID].mapLevel));
 
-
 	// Client Frame Update
 	sock.on('clientFrame', (newPos, sendProjectileList, requestObjectList) => clientFrameUpdate(newPos, sendProjectileList, requestObjectList, thePlayer, sock));
 
 	// New Message From Client
 	sock.on('newMessage', (name, text) => io.compress(true).emit('serverMessage', name, text, "white"));
-
-
 	sock.on('commandFromClient', (newCommand) => commandFromClient(thePlayer, newCommand, sock));
-
 });
 
 // Whenever An Error Occur, Log The Error

@@ -5,9 +5,6 @@ const {
     parentPort,
 } = require('worker_threads')
 
-
-
-
 var {map, mapList, unitModifiedList} = require('./mapClass.js');
 const {object, sphere, allObject} = require('./object.js');
 const {player, AI, properties, allPlayer, defaultProperties} = require('./serverCreature.js');
@@ -28,7 +25,6 @@ function initWorker(data){
     parentPort.postMessage({type: "init"})
 }
 
-
 function workerLoop(delta){
     let i, j, theProjectile, thePlayer, theAI, theMap;
     for (i = 0; i < workerMapList.length; ++i){
@@ -39,10 +35,9 @@ function workerLoop(delta){
         // Add Projectile Into The Tree
         for(j = 0; j < theMap.projectileIDArray.length[0]; ++j) {
             theProjectile = allObject.list[theMap.projectileIDArray.list[j]];
-            
+
             if (theProjectile == null || theProjectile.update(delta)) continue;
 
-            
             theMap.objectTree.insert({
                 x: theProjectile.position[0],
 		        y: theProjectile.position[1],
@@ -53,11 +48,10 @@ function workerLoop(delta){
 
         }
 
-
         // Add Player Into The Tree
         for(j = 0; j < theMap.playerIDArray.length[0]; ++j) {
             thePlayer = allObject.list[theMap.playerIDArray.list[j]];
-            
+
             if (thePlayer == null) continue;
 
             theMap.objectTree.insert({
@@ -73,7 +67,7 @@ function workerLoop(delta){
         // Add AI Into The Tree
         for(j = 0; j < theMap.AIIDArray.length[0]; ++j) {
             theAI = allObject.list[theMap.AIIDArray.list[j]];
-            
+
             if (theAI == null) continue;
 
             theMap.objectTree.insert({
@@ -86,8 +80,6 @@ function workerLoop(delta){
 
         }
 
-
-
         // Player Update
         for(j = 0; j < theMap.playerIDArray.length[0]; ++j) {
             thePlayer = allObject.list[theMap.playerIDArray.list[j]];
@@ -97,7 +89,6 @@ function workerLoop(delta){
             thePlayer.update();
         }
 
-
         // AI Update
         for(j = 0; j < theMap.AIIDArray.length[0]; ++j) {
             theAI = allObject.list[theMap.AIIDArray.list[j]];
@@ -106,11 +97,6 @@ function workerLoop(delta){
 
             theAI.update(delta);
         }
-
-
-
-        
-
 
         if (unitModifiedList.length != 0 ||
             projectileRemoveList.length != 0 ){
@@ -125,11 +111,7 @@ function workerLoop(delta){
 
         theMap.objectTree.clear();
     }
-    
-
-
 }
-
 
 function updateWorker(){
     let currentTime, delta;
@@ -145,7 +127,6 @@ function updateWorker(){
 
     setImmediate(updateWorker);
 }
-
 
 function newObject(data){
     let theObject = data.theObject;
@@ -168,7 +149,6 @@ function newObject(data){
     }
 
     theObject.initWorker();
-
 }
 
 parentPort.on('message', (data) => {

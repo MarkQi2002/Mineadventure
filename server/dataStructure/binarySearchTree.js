@@ -20,12 +20,12 @@ class BinarySearchTree {
         // Binary Search Tree Root
         this.root = null;
     }
- 
+
     // Helper Method Which Creates A New Node To Be Inserted And Call insertNode
     insert(data) {
         // Creating A Node Initialzied With Data
         var newNode = new BinarySearchTreeNode(data);
-                        
+
         // Empty BST -> Make newNode Root
         if (this.root === null) {
             this.root = newNode;
@@ -34,7 +34,7 @@ class BinarySearchTree {
             this.insertNode(this.root, newNode);
         }
     }
-    
+
     // Recursive Method To Insert BST Node Into BST
     insertNode(node, newNode) {
         // Data Less Than Current Node
@@ -60,7 +60,7 @@ class BinarySearchTree {
         // this.root -> New BST
         this.root = this.removeNode(this.root, data);
     }
-    
+
     // Recursive Node Deletion Method
     removeNode(node, key){
         // Empty BST
@@ -89,7 +89,7 @@ class BinarySearchTree {
                 node = node.left;
                 return node;
             }
-            
+
             // BST Node With Two Children, Move Minimum Node In Right Subtree To Current Node
             var aux = this.findMinNode(node.right);
             node.data = aux.data;

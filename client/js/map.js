@@ -81,16 +81,16 @@ class map {
                 }
                 unitIDInfo["material"] = materials;
                 unitIDInfo["transparentMaterial"] = transparentMaterial
-    
+
                 break;
 
             case "childUnit":
                 scope.GLTFLoader.load("model/" + unitIDInfo.fileName[0], function (gltf) {
-            
+
                     var newModel = gltf.scene.children[0];
                     // Set Scale
                     //newModel.scale.set(unitIDInfo.scale, unitIDInfo.scale, unitIDInfo.scale);
-                    
+
                     console.log(newModel)
 
                     unitIDInfo["geometry"] = newModel.geometry;
@@ -205,19 +205,19 @@ class map {
                 geometry.attributes.uv.array = new Float32Array([
                     0, height, height,
                     height, 0, 0,
-                    height, 0, 0, 
-                    height, height, height, 
-                    0, 0, height, 
-                    0, 0, height, 
-                    height, height, 0, 
-                    0, height, 0, 
-                    0, height, height, 
-                    height, 0, 0, 
-                    height, 0, 0, 
-                    height, height, height, 
-                    0, 0, height, 
-                    0, 0, height, 
-                    height, height, 0, 
+                    height, 0, 0,
+                    height, height, height,
+                    0, 0, height,
+                    0, 0, height,
+                    height, height, 0,
+                    0, height, 0,
+                    0, height, height,
+                    height, 0, 0,
+                    height, 0, 0,
+                    height, height, height,
+                    0, 0, height,
+                    0, 0, height,
+                    height, height, 0,
                     0, height, 0]);
                 /*
                 geometry.faceVertexUvs[0][0] = [new THREE.Vector2(0,1), new THREE.Vector2(0,height), new THREE.Vector2(1, 1)];
@@ -239,8 +239,8 @@ class map {
 
                         /*
 
-            mesh = new THREE.Mesh(geometry, material); 
-            //mesh.toStatic();    
+            mesh = new THREE.Mesh(geometry, material);
+            //mesh.toStatic();
         } else if(this.unitIDList[unitClass.ID].modelType != null) {
             mesh = this.unitIDList[unitClass.ID].modelType.clone();
         } else {
@@ -260,12 +260,12 @@ class map {
     // Creating Client Side Unit
     spawnChildUnit(unitClass){
         let childInfo = this.unitIDList[unitClass.childID];
-        
+
         if (childInfo.geometry == null || childInfo.material == null) return;
         let mesh = new THREE.Mesh(childInfo.geometry, childInfo.material);
         let scale = childInfo.typeInfo.scale;
         mesh.scale.set(scale, scale, scale);
-            
+
         // Adding Unit To Parent
         unitClass.mesh.add(mesh);
         unitClass.childMesh = mesh;
@@ -274,10 +274,10 @@ class map {
 
 
 
-    
+
     // return true when deletion successful
     /*
-    deleteUnit([[mapX, mapY], replaceUnitInfo]){ 
+    deleteUnit([[mapX, mapY], replaceUnitInfo]){
         let theBlock = this.getBlock([mapX, mapY]);
         if (theBlock != null && theBlock.class != null){
             let [x, y] = [mapX % this.blockSize.x, mapY % this.blockSize.y];
@@ -288,7 +288,7 @@ class map {
                 this.removeAllChildUnit(unit.mesh);
                 theBlock.block.remove(unit.mesh);
             }
-            
+
             // If ReplaceUnitInfo Is Valid
             if (replaceUnitInfo.ID != null){
                 unit.ID = replaceUnitInfo.ID;

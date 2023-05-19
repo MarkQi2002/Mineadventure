@@ -40,9 +40,9 @@ class object{
     remove(){
         // Remove All Child Object
         var obj;
-        for (var i = this.object.children.length - 1; i >= 0; i--) { 
+        for (var i = this.object.children.length - 1; i >= 0; i--) {
             obj = this.object.children[i];
-            this.object.remove(obj); 
+            this.object.remove(obj);
         }
         scene.remove(this.object);
         objectList[this.ID] = null;
@@ -69,8 +69,6 @@ class creature extends object{
         // On Head UI
         this.onHeadUI = new creatureUI(this);
         this.updateHealthBarPercent();
-
-
 
         // creature Body
         let geometry = this.objectType == "player" ? creatureLoader.playerGeometry : creatureLoader.creatureGeometry;
@@ -118,7 +116,7 @@ class creature extends object{
         }
         this.onHeadUI.update();
     }
-    
+
     // Destructor
     remove() {
         object.prototype.remove.call(this); // call parent remove function
@@ -136,9 +134,7 @@ class player extends creature {
 
         if (playerArray.length <=  this.playerID) playerArray.length =  this.playerID + 1;
         playerArray[this.playerID] = this;
-
     }
-
 
     remove(){
         creature.prototype.remove.call(this); // call parent remove function

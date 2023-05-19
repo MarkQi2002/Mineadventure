@@ -40,9 +40,9 @@ class item {
     delete() {
         // Remove All Child Object
         var obj;
-        for (var i = this.object.children.length - 1; i >= 0; i--) { 
+        for (var i = this.object.children.length - 1; i >= 0; i--) {
             obj = this.object.children[i];
-            this.object.remove(obj); 
+            this.object.remove(obj);
         }
 
         // Removing It From The Scene

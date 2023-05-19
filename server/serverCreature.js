@@ -7,9 +7,7 @@ const {object, sphere, allObject} = require('./object.js');
 const gravity = 20;
 
 var allPlayer = new dynamicList("Player List", 30, 10);
-
 var displayRange = {x: 30, y: 30}; // The Range For Player To Get Object Information On Server
-
 var defaultProperties = {
 	// Level Related Properties
 	// Exp Required To Level Up Is Increased Exponentially
@@ -52,7 +50,7 @@ for (let [key, value] of Object.entries(defaultProperties)) {
 	++propertyNumber;
 }
 
-class creature extends sphere{
+class creature extends sphere {
     constructor(name, objectType, spawnPos, mapIndex, camp, radius) {
 		super(spawnPos, objectType, radius, mapIndex);  // explicitly call parent constructor.
 	
@@ -73,7 +71,6 @@ class creature extends sphere{
 
 		// Ability
 		this["ability"] = {};
-        
     }
 
 	initWorker(){
@@ -90,29 +87,24 @@ class creature extends sphere{
 		});
 
 		let theObject;
-		for(let i = 0; i < candidates.length; ++i) {
-
+		for (let i = 0; i < candidates.length; ++i) {
 			theObject = allObject.list[candidates[i].ID];
 
 			if (theObject == null || this.ID == theObject.ID || this.ID == theObject.senderID) continue;
 			
 			theObject.isOverlapping(this);
-			
 		}
 	}
 
-	update(){
+	update() {
 		this.collision();
 	}
-
 
 	collisionReaction(hitCreature){
 		if (hitCreature.objectType == "AI"){
 			hitCreature.collisionCreatureList.push(this);
 		}
 	}
-
-	
 
 	remove(){
 		sphere.prototype.remove.call(this); // call parent remove function
@@ -132,7 +124,7 @@ class creature extends sphere{
 	}
 }
 
-class player extends creature{
+class player extends creature {
     constructor(name, mapIndex, spawnPos) {
         super(name, "player", spawnPos == null ? [0, 0, 0] : spawnPos, mapIndex, "defaultPlayer", 0.45);  // explicitly call parent constructor.
 		if (spawnPos == null) this.changePosition(this.findNoCollisionPosition());
@@ -141,7 +133,6 @@ class player extends creature{
 		this.displayObjects = new Uint32Array(new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT * 150000));
         this.displayObjectsLength = new Uint32Array(new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT));
         this.displayObjectsLength[0] = 0;
-
     }
 
 	initWorker(){
@@ -153,11 +144,11 @@ class player extends creature{
 		mapList[this.mapIndex].playerIDArray.add(allObject.list, this.ID);
 	}
 
-	collisionReaction(hitCreature){
+	collisionReaction(hitCreature) {
 		creature.prototype.collisionReaction.call(this, hitCreature); // call parent collisionReaction function
 	}
 
-	update(){
+	update() {
 		let theMap = mapList[this.mapIndex];
 
 		creature.prototype.update.call(this); // call parent update function
@@ -171,7 +162,6 @@ class player extends creature{
 			width: displayRange.x * 2,
 			height: displayRange.y * 2
 		});
-		
 
 		let theObject;
 		for(let i = 0; i < displayObjects.length; ++i) {
@@ -183,27 +173,22 @@ class player extends creature{
 				Math.abs(this.position[1] - theObject.position[1]) < displayRange.y){
 				this.displayObjects[displayCount++] = theObject.ID;
 			}
-
 		}
 
 		this.displayObjectsLength[0] = displayCount;
-
 	}
 
-
-	removeOnWorker(){ // Worker side
+	removeOnWorker() { // Worker side
 		mapList[this.mapIndex].playerIDArray.remove(allObject.list, this.ID);
 		this.remove();
 	}
 
-	remove(){
+	remove() {
 		creature.prototype.remove.call(this); // call parent remove function
 		allPlayer.remove(this.playerID);
-		
 	}
-	
 
-	getInfo(){
+	getInfo() {
 		return {
 			... creature.prototype.getInfo.call(this),
 			playerID: this.playerID
@@ -211,8 +196,7 @@ class player extends creature{
 	}
 }
 
-
-class AI extends creature{
+class AI extends creature {
 	constructor(name, mapIndex, spawnPos) {
         super(name, "AI", spawnPos == null ? [0, 0, 0] : spawnPos, mapIndex, "defaultMonster", 1);  // explicitly call parent constructor.
 		if (spawnPos == null) this.changePosition(this.findNoCollisionPosition());
@@ -236,18 +220,13 @@ class AI extends creature{
 		this.collisionCreatureList = [];
 		creature.prototype.update.call(this); // call parent update function
 
-
         //this.position[0] += 2 * delta;
         //this.position[1] += 2 * delta;
 		let moveVector = [1,0];
-
-
 		let speed = this.properties.get("moveSpeed");
-
 
         // Variable Declaration 
         let translateSpeed = 30 * (0.9 + this.getRadius() / 5) * delta * speed; 
-
         let totalTranslateDistance = [0, 0, 0];
         let friction = [0, 0, 0]; // Friction
 
@@ -274,14 +253,13 @@ class AI extends creature{
             }
         }
         
-
         for (let i = 0; i < 3; ++i){
-            if (this.velocity[i] > 0){
+            if (this.velocity[i] > 0) {
                 this.velocity[i] -= friction[i] * delta;
                 if (this.velocity[i] < 0) {
                     this.velocity[i] = 0;
                 }
-            }else if(this.velocity[i] < 0){
+            } else if(this.velocity[i] < 0) {
                 this.velocity[i] += friction[i] * delta;
                 if (this.velocity[i] > 0) {
                     this.velocity[i] = 0;
@@ -296,33 +274,30 @@ class AI extends creature{
         if (Math.abs(playerTranslateDistance[2] - totalTranslateDistance[2]) > 0.001) {
             this.velocity[2] = 0;
             this.onGround = true;
-        }else{
+        } else {
             this.onGround = false;
         }
 
         for (let i = 0; i < 3; ++i) this.position[i] += totalTranslateDistance[i];
 	}
 
-
-	removeOnWorker(){ // Worker side
+	removeOnWorker() { // Worker side
 		mapList[this.mapIndex].AIIDArray.remove(allObject.list, this.ID);
 		this.remove();
 	}
 
-	remove(){
+	remove() {
 		creature.prototype.remove.call(this); // call parent remove function
 	}
-	
 
-	getInfo(){
+	getInfo() {
 		return {
 			... creature.prototype.getInfo.call(this)
 		};
 	}
 
-
 	// Creature Collision Detection 
-    creatureCollision(translateDistance){ 
+    creatureCollision(translateDistance) { 
         // For Collision Detection 
         let theCreature;
         // Checking Collision With Every Other Creature 
@@ -349,8 +324,6 @@ class AI extends creature{
                 return [translateDistance[0] + diffX * rate,
                         translateDistance[1] + diffY * rate,
                         translateDistance[2] + diffZ * rate];
-                
-                 
             } 
         } 
  
@@ -394,9 +367,7 @@ class AI extends creature{
                         if (theUnit.getChildIDProperty("collision")){
                             rz += 1; //childUnit Height
                         }
-
                     }
-
 
                     rx -= 0.5;
                     ry -= 0.5;
@@ -414,7 +385,6 @@ class AI extends creature{
 
                     if (testZ > rz) testZ = rz;
 
-                    
                     // Getting Difference In Distance
                     let distX = cx - testX;
                     let distY = cy - testY;
@@ -423,8 +393,6 @@ class AI extends creature{
                     
                     // Collision Has Occur 
                     if (amount < limitRange) {
-
-                        
                         let rate = radius / Math.sqrt(amount) - 1;
                         if (rate === Infinity) rate = 1;
 
@@ -435,11 +403,9 @@ class AI extends creature{
                 }
             }
         }
-        
 
         return [offSetX, offSetY, offSetZ];
     }
-
 
     // Map Collision Detection
     mapCollision(translateDistance){
@@ -456,7 +422,7 @@ class AI extends creature{
             for (i = 0; i < 3; ++i){
                 if (isCollision[i]){
                     count[i] = 0;
-                }else{
+                } else {
                     if (unitTranslateDistance[i] * dir[i] > checkAmount){
                         count[i] = dir[i] * checkAmount;
                     } else if (unitTranslateDistance[i] * dir[i] > 0){
@@ -471,7 +437,6 @@ class AI extends creature{
             
             newTranslateDistance = this.surroundingCollision(currentPosition, count);
             
-
             for (i = 0; i < 3; ++i){
                 currentPosition[i] += newTranslateDistance[i];
 
@@ -483,11 +448,9 @@ class AI extends creature{
             if (isCollision.includes(true)) break;
         }
         
-        return [
-                currentPosition[0] - this.position[0],
+        return [currentPosition[0] - this.position[0],
                 currentPosition[1] - this.position[1],
-                currentPosition[2] - this.position[2]
-            ]; 
+                currentPosition[2] - this.position[2]]; 
     }
 }
 
@@ -543,5 +506,5 @@ function campInfo(){
 	this["monsterKiller"] = 0
 }
 
-
+// Export Module
 module.exports = {player, AI, properties, allPlayer, defaultProperties};

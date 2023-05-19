@@ -15,7 +15,7 @@ class projectile extends object{
         this.spawnMesh()
 
     }
-    
+
     // Spawing The Projectile Mesh
     spawnMesh(){
         let mesh = new THREE.Mesh(projectileLoader.geometry, projectileLoader.material);

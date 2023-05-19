@@ -42,11 +42,10 @@ document.body.appendChild(renderer.domElement);
 
 // Light Setting
 
-// Hemisphere Light 
+// Hemisphere Light
 const hemisphereLight = new THREE.HemisphereLight(0xFFFFFF, 0x000000, 4); // SkyColor, GroundColor, Intensity
 hemisphereLight.position.set(0, 0, 1);
 scene.add(hemisphereLight);
-
 
 // Direction Light
 const directionLight = new THREE.DirectionalLight(0xFFFFFF, 1); // Color, Intensity
@@ -80,7 +79,6 @@ document.body.appendChild(stats.dom);
 
 const raycaster = new THREE.Raycaster();
 
-
 // Game Frame Update
 var clock = new THREE.Clock();
 var delta = 0;
@@ -111,7 +109,7 @@ function animate() {
     // helper.update()
     delta = clock.getDelta();
     player_controller.update(delta);
-    
+
     // Updating Event
     let theCreature;
     for (let i = 0; i < lastDisplayCreatureList.length; i++){
@@ -128,7 +126,7 @@ function animate() {
             damageTextList[i].update(delta, i);
         }
     }*/
-    
+
 
     // Setting The Renderer Of The Scene And Camera
     renderer.render(scene, camera);

@@ -13,7 +13,7 @@ class dynamicList{
         this.increment = increment;
         this.count = 0;
     }
-    
+
     // Method To Add An Element To Dynamic List
     add(element) {
         let exceedCount = 0;
@@ -22,14 +22,14 @@ class dynamicList{
         while (this.list[this.count] != null) {
             this.count = (this.count + 1) % this.list.length;
             ++exceedCount;
-    
+
             // If Exceed Max DynamicList Length
             if (exceedCount >= this.list.length) {
                 this.list.length += this.increment;
                 console.log("Exceed Max " + this.name + " Length, Increase The " + this.name + " Length! Current Length: " + this.list.length);
             }
         }
-        
+
         // Insert Element Into Dynamic List
         this.list[this.count] = element;
 

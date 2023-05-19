@@ -7,7 +7,7 @@ class sharedIndexArray{
         this.length[0] = 0;
         this.tag = tag;
     }
-    
+
     // Method To Add Element
     add(mainList, index) {
         mainList[index][this.tag] = this.length[0]; // Use For Faster Search

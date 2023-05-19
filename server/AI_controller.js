@@ -62,7 +62,7 @@ class AI_controller {
     }
 
     // Surrounding Unit Collision Detection
-    surroundingCollision(currentPosition, translateDistance, theMap){ 
+    surroundingCollision(currentPosition, translateDistance, theMap){
         // Player Use 0.21 For Collision Instead Of 0.25 (The Radius 0.5^2) To Avoid Unable Passing Through One-Unit Wide Wall
 
         // Next Position
@@ -70,7 +70,7 @@ class AI_controller {
         let predictedMapY;
 
         let [offSetX, offSetY] = translateDistance;
-        
+
         let directionX = translateDistance[0] >= 0 ? 1 : -1;
         let directionY = translateDistance[1] >= 0 ? 1 : -1;
 
@@ -98,17 +98,17 @@ class AI_controller {
                 else if (testX > rx + 1) testX = rx + 1;
                 if (testY < ry) testY = ry;
                 else if (testY > ry + 1) testY = ry + 1;
-                
+
                 // Getting Difference In Distance
                 let distX = cx - testX;
                 let distY = cy - testY;
 
-                // Collision Has Occur 
+                // Collision Has Occur
                 if (distX * distX + distY * distY < 0.21 && (unit == null || theMap.getAllChildUnitCollision(unit))) {
                     if (distX == 0){
                         offSetY = translateDistance[1] - distY - 0.5 * directionY;
                         break;
-                    }else{ 
+                    }else{
                         let newOffset = translateDistance[1] - distY - Math.sqrt(0.21 - distX * distX) * directionY;
                         if (Math.abs(offSetY) > Math.abs(newOffset)) offSetY = newOffset;
                     }
@@ -116,7 +116,7 @@ class AI_controller {
             }
         }
 
-    
+
         // X Collision
         if (translateDistance[0] != 0) {
             // Variable Declaration For Checking Collision
@@ -141,7 +141,7 @@ class AI_controller {
                 else if (testX > rx + 1) testX = rx + 1;
                 if (testY < ry) testY = ry;
                 else if (testY > ry + 1) testY = ry + 1;
-                
+
                 // Getting Difference In Distance
                 let distX = cx - testX;
                 let distY = cy - testY;
@@ -158,9 +158,9 @@ class AI_controller {
                 }
             }
         }
-        
+
         return [offSetX, offSetY];
-    } 
+    }
 
     // Map Collision Detection
     mapCollision(translateDistance, theMap){
@@ -199,16 +199,16 @@ class AI_controller {
             unitTranslateDistance[0] -= xDir * checkAmount;
             unitTranslateDistance[1] -= yDir * checkAmount;
 
-            
+
             newTranslateDistance = this.surroundingCollision(currentPosition, [xCount, yCount], theMap);
-            
+
             currentPosition[0] += newTranslateDistance[0];
             currentPosition[1] += newTranslateDistance[1];
 
             if (Math.abs(xCount) > Math.abs(newTranslateDistance[0])) {
                 xCollision = true;
                 if (yCollision) break;
- 
+
             };
 
             if (Math.abs(yCount) > Math.abs(newTranslateDistance[1])) {
@@ -216,9 +216,9 @@ class AI_controller {
                 if (xCollision) break;
             };
         }
-        
+
         return [currentPosition[0] - this.creature.position[0],
-                currentPosition[1] - this.creature.position[1]]; 
+                currentPosition[1] - this.creature.position[1]];
     }
 
     // Mahattan Heuristic Algorithm
@@ -229,10 +229,10 @@ class AI_controller {
     // Using A Star As The Path Finding Algorithm
     aStarAlgorithm(theMap, goal){
         let start = [Math.floor(this.creature.position[0] + 0.5), Math.floor(this.creature.position[1] + 0.5)];
-        
+
         let frontier = new PriorityQueue();
         frontier.enqueue({x: start[0], y: start[1], cost: 0, last: null}, 0);
-        
+
         let current;
         let count = 0;
         while (!frontier.isEmpty() && count < 100){
@@ -302,8 +302,8 @@ class AI_controller {
                                       delta * this.creature.properties["moveSpeed"] * vectorY];
 
         if (this.velocity[0] != 0 || this.velocity[1] != 0){
-        
-            let resistance = 0.1;    
+
+            let resistance = 0.1;
 
             for (let i = 0; i < 2; ++i){
                 if (this.velocity[i] > 0){
@@ -363,7 +363,7 @@ class AI_controller {
             let goal = [Math.floor(aggroCreature.position[0] + Math.random() * 2 - 1), Math.floor(aggroCreature.position[1] + Math.random() * 2 - 1)];
 
             if (this.routeCount > 10){
-                
+
                 if (Math.abs(goal[0] - this.creature.position[0]) + Math.abs(goal[1] - this.creature.position[1]) < this.searchRange * 2){
                     this.routeCount = 0;
                     let newRoute = [];
@@ -394,7 +394,7 @@ class AI_controller {
                         }
                         this.aggro.creature = null;
                     }
-            
+
                 } else {
                     this.aggro.creature = null;
                 }
@@ -434,8 +434,8 @@ class AI_controller {
         this.routeCount++;
         this.moveToPosition(delta, theMap);
 
-        
-        
+
+
         let [blockX, blockY] = [this.creature.position[0] / theMap.blockSize.x >> 0, this.creature.position[1] / theMap.blockSize.y >> 0];
 		if (blockX != this.creature.lastBlockPos[0] || blockY != this.creature.lastBlockPos[1]){
 			let theMapLevel = theMap.mapLevel[this.creature.mapLevel];
@@ -451,7 +451,7 @@ class AI_controller {
                         }
                     }
                 }
-                
+
 
                 theBlock.blockCreatureArray.push([this.creature.creatureType, this.creature.ID]);
                 this.creature.lastBlockPos = [blockX, blockY];
@@ -474,7 +474,7 @@ class QElement {
         this.priority = priority;
     }
 }
- 
+
 // PriorityQueue class
 class PriorityQueue {
     // An array is used to implement priority
@@ -488,7 +488,7 @@ class PriorityQueue {
         // Creating Object From Queue Element
         var qElement = new QElement(element, priority);
         var contain = false;
-    
+
         // Iterating Through The Entire
         // Item Array To Add Element At The
         // Correct Location Of The Queue
@@ -501,7 +501,7 @@ class PriorityQueue {
                 break;
             }
         }
-    
+
         // If The Element Have The Highest Priority
         // It Is Added At The End Of The Queue
         if (!contain) {

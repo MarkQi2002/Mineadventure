@@ -40,7 +40,7 @@ document.body.appendChild(renderer.domElement);
 
 // Light Setting
 
-// Hemisphere Light 
+// Hemisphere Light
 const hemisphereLight = new THREE.HemisphereLight(0xFFFFFF, 0x000000, 4); // SkyColor, GroundColor, Intensity
 hemisphereLight.position.set(0, 0, 1);
 scene.add(hemisphereLight);
@@ -98,7 +98,7 @@ function animate() {
     // helper.update()
     delta = clock.getDelta();
     player_controller.update(delta);
-    
+
 
     /*
     // Updating Event
@@ -115,7 +115,7 @@ function animate() {
         }
     }
     */
-   
+
     // Setting The Renderer Of The Scene And Camera
     renderer.render(scene, camera);
     stats.end();

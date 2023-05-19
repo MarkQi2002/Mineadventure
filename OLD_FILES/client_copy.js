@@ -11,10 +11,10 @@ function spawnPlayer(playerInfo){
 const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap,
 				  serverProjectileList, serverMonsterArray, monsterArrayLength, initMapLevel,
 				  serverItemArray, serverItemInfoArray) => {
-	
+
 
 	gameMapLevel = initMapLevel;
-	
+
 	// Input Control
 	if (game_map != null){
 		// Delete Old Player
@@ -24,12 +24,12 @@ const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap
 				playerArray[i] = null;
 			}
 		}
-	
+
 		// Delete Old Monster
 		for (let i = 0; i < monsterArray.length; ++i) {
 			deleteMonster(i);
 		}
-	
+
 		// Delete Old Projectile
 		for (let i = 0; i < projectileList.length; ++i) {
 			if (projectileList[i] != null){
@@ -37,13 +37,13 @@ const initSelf = (severPlayerID, serverPlayerArray, playerArrayLength, serverMap
 				projectileList[i] = null;
 			}
 		}
-		
+
 		// Delete Old item
 		for (let i = 0; i < itemArray.length; ++i) {
 			removeItem(i);
 		}
 
-		game_map.loadNewMapLevel(serverMap); 
+		game_map.loadNewMapLevel(serverMap);
 	} else {
 		// Create New Map
 		game_map = new map(serverMap);
@@ -83,7 +83,7 @@ const newPlayer = (playerInfo, playerArrayLength) => {
 		playerArray.length = playerArrayLength;
 	}
 	let new_player = spawnPlayer(playerInfo);
-	
+
 	// Setting The Controller To The Player When First Enter
 	if (playerInfo.ID == clientPlayerID){
 		player_controller = new controller(new_player, camera);
@@ -96,7 +96,7 @@ const newPlayer = (playerInfo, playerArrayLength) => {
 		animate();
 
 		// thread event
-		
+
 		intervalWorker.onmessage = updateTimeEvent;
 
 	}
@@ -130,19 +130,19 @@ function sendCreaturePropertyChange([creatureType, id], propertyList){
 var stateTypeInfo = {
 	"Burning": {
 		/*
-		stateBegin: 
+		stateBegin:
 			function(theState){
 			},
 
-		stateAdd: 
+		stateAdd:
 			function(theState, element){
 			},
 
-		atState: 
+		atState:
 			function(theState){
 			},
 
-		stateShift: 
+		stateShift:
 			function(theState, element){
 			},
 
@@ -165,7 +165,7 @@ var stateTypeInfo = {
 
 
 	"Knock Back": {
-		stateAdd: 
+		stateAdd:
 			function(theState, element){
 				if (theState.creature[0] == player_controller.creature.creatureType && theState.creature[1] == player_controller.creature.ID){
 
@@ -174,7 +174,7 @@ var stateTypeInfo = {
 					player_controller.velocity[0] = theState.movementVector[0] * speed;
 					player_controller.velocity[1] = theState.movementVector[1] * speed;
 				}
-				
+
 			},
 
 	},
@@ -220,7 +220,7 @@ function addState(newState, theCreature){
 				player_controller.stateUI[type] != null){
 				player_controller.stateUI[type].delete();
 			}
-			
+
 		}
 	}
 }
@@ -248,7 +248,7 @@ const creatureInfoChange = (creatureInfo) => {
 			if (monsterArray[creatureInfo[i][0][1]] == null) continue;
 			theCreature = monsterArray[creatureInfo[i][0][1]];
 		}
-		
+
 		// Loop Through Properties Update
 		for (let [key, value] of Object.entries(creatureInfo[i][1])) {
 			if (key == "damage"){
@@ -277,7 +277,7 @@ const creatureInfoChange = (creatureInfo) => {
 				} else {
 					theCreature.properties[key] = setValue;
 				}
-				
+
 				// Update Local Player UI
 				if (updateLocalPlayerUI) {
 					displayCreatureProperty(key);
@@ -319,7 +319,7 @@ const newMonster = (monsterInfo, monsterArrayLength) => {
 	if (monsterArray.length < monsterArrayLength){
 		monsterArray.length = monsterArrayLength;
 	}
-	
+
 	spawnMonster(monsterInfo);
 }
 
@@ -368,7 +368,7 @@ function spawnItem(itemID, itemPosition, itemIndex){
 
 	// Creating Item Object
 	var new_item = new item(itemInfoArray[itemID], itemPosition);
-	
+
 	// Storing Passive Item Object Into itemArray
 	itemArray[itemIndex] = new_item;
 	console.log("Spawning", itemInfoArray[itemID], " At ItemIndex: ", itemIndex);
@@ -461,7 +461,7 @@ const updateFrame = ([projectilePosList, monsterPosList]) => {
 	for (let i = 0; i < monsterPosList.length; i++){
 		theMonster = monsterArray[monsterPosList[i][1]];
 		if (theMonster != null){
-			theMonster.object.position.set(monsterPosList[i][0][0], monsterPosList[i][0][1], monsterPosList[i][0][2]); 
+			theMonster.object.position.set(monsterPosList[i][0][0], monsterPosList[i][0][1], monsterPosList[i][0][2]);
 			theMonster.update();
 		}
 	}
@@ -475,7 +475,7 @@ const deleteEvent = ([deleteProjectileList, deleteUnitList]) => {
 				projectileList[deleteProjectileList[i]].delete();
 				projectileList[deleteProjectileList[i]] = null;
 			}
-			
+
 		}
 	}
 
@@ -535,7 +535,7 @@ var sock;
 
 	// Connection
 	sock.on('connect_error', connectionError);
-	
+
 	// Projectile Related
 	sock.on('spawnProjectile', spawnProjectile);
 
@@ -553,7 +553,7 @@ var sock;
 							player_controller.creature.object.position.y,
 							player_controller.creature.object.position.z]);
 	};
-	
+
 	// Sending New Item List To Server
 	const updateItem = () => {
 		sock.compress(true).emit('serverCreatureItemArray', additionalItemID, clientPlayerID, removeItemID);
