@@ -1,0 +1,12 @@
+Data Structure Information Documentation
+Description: This file documents all self defined data structures.
+
+binarySearchTree.js
+File Path: /server/dataStructure/binarySearchTree.js
+class BinarySearchTreeNode
+this.data -> Data Stored In BST Node
+this.left -> Left Pointer To Another BST Node
+this.right -> Right Pointer To Another BST Node
+
+class BinarySearchTree
+this.root -> BST Root Which Point To A BST Node

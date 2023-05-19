@@ -1,7 +1,7 @@
 // Server Side Map Class
 // blockNumber - How Many Block Are In A QuarterMap
 // blockSize - The Size Of The Block (Number Of Unit)
-const BinarySearchTree = require('./tree.js');
+const {BinarySearchTree} = require('./tree.js');
 
 class map {
     constructor(blockNumber, blockSize) {

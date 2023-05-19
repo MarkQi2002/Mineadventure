@@ -1,7 +1,10 @@
 // JavaScript Have Garbage Collection Properties
 // Binary Tree Node Class
-class Node {
+class BinarySearchTreeNode {
     // Binary Tree Node Constructor
+    // this.data -> Data Stored In BST Node
+    // this.left -> Left Pointer To Another BST Node
+    // this.right -> Right Pointer To Another BST Node
     constructor(data) {
         this.data = data;
         this.left = null;
@@ -10,8 +13,9 @@ class Node {
 }
 
 // Binary Search Tree Class
-class BinarySearchTree{
+class BinarySearchTree {
     // BinarySearchTree Constructor
+    // this.root -> BST Root Which Point To A BST Node
     constructor() {
         // Binary Search Tree Root
         this.root = null;
@@ -20,7 +24,7 @@ class BinarySearchTree{
     // Helper Method Which Creates A New Node To Be Inserted And Call insertNode
     insert(data) {
         // Creating A Node Initialzied With Data
-        var newNode = new Node(data);
+        var newNode = new BinarySearchTreeNode(data);
                         
         // Empty BST -> Make newNode Root
         if (this.root === null) {
@@ -136,4 +140,4 @@ class BinarySearchTree{
 }
 
 // Exports BinarySearchTree
-module.exports = BinarySearchTree;
+module.exports = {BinarySearchTree};
