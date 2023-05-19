@@ -1,5 +1,5 @@
 const {sharedIndexArray} = require('./dataStructure/sharedIndexArray.js');
-const {Quadtree} = require('./dataStructure/quadtree.js');
+const {Quadtree} = require('./dataStructure/quadTree.js');
 // Server Side Map Class
 // blockNumber - How Many Block Are In A QuarterMap
 // blockSize - The Size Of The Block (Number Of Unit)
@@ -7,11 +7,11 @@ const {Quadtree} = require('./dataStructure/quadtree.js');
 var unitIDList = [
     setUnitIDInfo(["0_ground.jpg"], {IsPhongMaterial: true}),// 0
     setUnitIDInfo(["0_ground.jpg",// Vertical
-                        "0_ground.jpg",// Vertical
-                        "0_ground.jpg",// Horizontal
-                        "0_ground.jpg",// Horizontal
-                        "rock1.jpg",
-                        "rock1.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true}, {type: "block"}),
+                   "0_ground.jpg",// Vertical
+                   "0_ground.jpg",// Horizontal
+                   "0_ground.jpg",// Horizontal
+                   "rock1.jpg",
+                   "rock1.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true}, {type: "block"}),
     setUnitIDInfo(["tree1.glb"], {collision: true, destroyable: true}, {type: "childUnit", scale: 0.3}),
     setUnitIDInfo(["tree2.glb"], {collision: true, destroyable: true}, {type: "childUnit", scale: 0.6}),
     setUnitIDInfo(["tree3.glb"], {collision: true, destroyable: true}, {type: "childUnit", scale: 0.6}),
@@ -49,23 +49,23 @@ var unitIDList = [
     setUnitIDInfo(["guider.glb"], {collision: true}, {type: "childUnit", scale: 0.5}),
     setUnitIDInfo(["0_ground.jpg"], {collision: true}), // 37  Invisible wall
     setUnitIDInfo(["rockSideH.jpg", // Horizontal
-                        "rockSideH.jpg", // Horizontal
-                        "rockSideV.jpg", // Vertical
-                        "rockSideV.jpg", // Vertical
-                        "rock1.jpg",
-                        "rock1.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true, replacingUnit: 39}, {type: "block"}),
+                   "rockSideH.jpg", // Horizontal
+                   "rockSideV.jpg", // Vertical
+                   "rockSideV.jpg", // Vertical
+                   "rock1.jpg",
+                   "rock1.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true, replacingUnit: 39}, {type: "block"}),
     setUnitIDInfo(["rockSideH2.jpg", // Horizontal
-                        "rockSideH2.jpg", // Horizontal
-                        "rockSideV2.jpg", // Vertical
-                        "rockSideV2.jpg", // Vertical
-                        "rock2.jpg",
-                        "rock2.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true, replacingUnit: 40}, {type: "block"}),
+                   "rockSideH2.jpg", // Horizontal
+                   "rockSideV2.jpg", // Vertical
+                   "rockSideV2.jpg", // Vertical
+                   "rock2.jpg",
+                   "rock2.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true, replacingUnit: 40}, {type: "block"}),
     setUnitIDInfo(["rockSideH3.jpg", // Horizontal
-                        "rockSideH3.jpg", // Horizontal
-                        "rockSideV3.jpg", // Vertical
-                        "rockSideV3.jpg", // Vertical
-                        "rock3.jpg",
-                        "rock3.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true}, {type: "block"}),
+                   "rockSideH3.jpg", // Horizontal
+                   "rockSideV3.jpg", // Vertical
+                   "rockSideV3.jpg", // Vertical
+                   "rock3.jpg",
+                   "rock3.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true}, {type: "block"}),
 ];
 
 
@@ -459,7 +459,6 @@ class mapUnit {
         this.modifiedHistory = [];
     }
 }
-
 
 // Required Because server.js Uses This JavaScript File
 module.exports = {map, pushMap, mapList, unitProperties, unitIDList, unitModifiedList};

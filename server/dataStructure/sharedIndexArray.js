@@ -1,5 +1,6 @@
+// Shared Index Array Class
 class sharedIndexArray{
-    // Projectile Constructor
+    // Shared Index Array Constructor
     constructor(maxLength, tag) {
         this.list = new Uint32Array(new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT * maxLength));
         this.length = new Uint32Array(new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT));
@@ -7,13 +8,15 @@ class sharedIndexArray{
         this.tag = tag;
     }
     
-    add(mainList, index){
+    // Method To Add Element
+    add(mainList, index) {
         mainList[index][this.tag] = this.length[0]; // Use For Faster Search
         this.list[this.length[0]] = index;
         ++this.length[0];
     }
 
-    remove(mainList, index){
+    // Method To Remove Element
+    remove(mainList, index) {
         let switchSharedIndex = mainList[index][this.tag];
         let lastMainListIndex = this.list[--this.length[0]];
         mainList[lastMainListIndex][this.tag] = switchSharedIndex;

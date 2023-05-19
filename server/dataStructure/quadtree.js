@@ -108,7 +108,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }, this.max_objects, this.max_levels, nextLevel);
     };
     
-    
     /**
      * Determine which node the object belongs to
      * @param {Rect} pRect      bounds of the area to be checked ({ x, y, width, height })
@@ -116,7 +115,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      * @memberof Quadtree
      */
     Quadtree.prototype.getIndex = function(pRect) {
-        
         var indexes = [],
             verticalMidpoint    = this.bounds.x + (this.bounds.width/2),
             horizontalMidpoint  = this.bounds.y + (this.bounds.height/2);    
@@ -126,29 +124,28 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             endIsEast    = pRect.x + pRect.width > verticalMidpoint,
             endIsSouth   = pRect.y + pRect.height > horizontalMidpoint;    
 
-        //top-right quad
+        // top-right quad
         if(startIsNorth && endIsEast) {
             indexes.push(0);
         }
         
-        //top-left quad
+        // top-left quad
         if(startIsWest && startIsNorth) {
             indexes.push(1);
         }
 
-        //bottom-left quad
+        // bottom-left quad
         if(startIsWest && endIsSouth) {
             indexes.push(2);
         }
 
-        //bottom-right quad
+        // bottom-right quad
         if(endIsEast && endIsSouth) {
             indexes.push(3);
         }
      
         return indexes;
     };
-    
     
     /**
      * Insert the object into the node. If the node
@@ -158,32 +155,31 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      * @memberof Quadtree
      */
     Quadtree.prototype.insert = function(pRect) {
-        
         var i = 0,
             indexes;
          
-        //if we have subnodes, call insert on matching subnodes
-        if(this.nodes.length) {
+        // if we have subnodes, call insert on matching subnodes
+        if (this.nodes.length) {
             indexes = this.getIndex(pRect);
      
-            for(i=0; i<indexes.length; i++) {
+            for(i = 0; i < indexes.length; i++) {
                 this.nodes[indexes[i]].insert(pRect);     
             }
             return;
         }
      
-        //otherwise, store object here
+        // otherwise, store object here
         this.objects.push(pRect);
 
-        //max_objects reached
+        // max_objects reached
         if(this.objects.length > this.max_objects && this.level < this.max_levels) {
 
-            //split if we don't already have subnodes
+            // split if we don't already have subnodes
             if(!this.nodes.length) {
                 this.split();
             }
             
-            //add all objects to their corresponding subnode
+            // add all objects to their corresponding subnode
             for(i=0; i<this.objects.length; i++) {
                 indexes = this.getIndex(this.objects[i]);
                 for(var k=0; k<indexes.length; k++) {
@@ -191,11 +187,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 }
             }
 
-            //clean up this node
+            // clean up this node
             this.objects = [];
         }
      };
-     
      
     /**
      * Return all objects that could collide with the given object
@@ -204,18 +199,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      * @memberof Quadtree
      */
     Quadtree.prototype.retrieve = function(pRect) {
-         
         var indexes = this.getIndex(pRect),
             returnObjects = this.objects;
             
-        //if we have subnodes, retrieve their objects
-        if(this.nodes.length) {
-            for(var i=0; i<indexes.length; i++) {
+        // if we have subnodes, retrieve their objects
+        if (this.nodes.length) {
+            for (var i = 0; i < indexes.length; i++) {
                 returnObjects = returnObjects.concat(this.nodes[indexes[i]].retrieve(pRect));
             }
         }
 
-        //remove duplicates
+        // remove duplicates
         returnObjects = returnObjects.filter(function(item, index) {
             return returnObjects.indexOf(item) >= index;
         });
@@ -223,26 +217,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return returnObjects;
     };
     
-    
     /**
      * Clear the quadtree
      * @memberof Quadtree
      */
     Quadtree.prototype.clear = function() {
-        
         this.objects = [];
      
-        for(var i=0; i < this.nodes.length; i++) {
-            if(this.nodes.length) {
+        for (var i = 0; i < this.nodes.length; i++) {
+            if (this.nodes.length) {
                 this.nodes[i].clear();
-              }
+            }
         }
-
         this.nodes = [];
     };
 
-    //export for commonJS or browser
-    if(typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    // export for commonJS or browser
+    if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
         module.exports = Quadtree;
     } else {
         window.Quadtree = Quadtree;    

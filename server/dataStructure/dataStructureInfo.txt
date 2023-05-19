@@ -10,3 +10,18 @@ this.right -> Right Pointer To Another BST Node
 
 class BinarySearchTree
 this.root -> BST Root Which Point To A BST Node
+
+dynamicList.js
+File Path: /server/dataStructure/dynamicList.js
+class dynamicList
+this.name -> Dynamic List Name
+this.list -> Dynamic List
+this.list.length -> Dynamic List Length
+this.increment -> Whenever Dynamic List Exceed Length Increment By This Amount
+this.count
+
+quadTree.js
+File Path: /server/dataStructure/quadTree.js
+
+sharedIndexArray.js
+File Path: /server/dataStructure/sharedIndexArray.js
