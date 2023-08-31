@@ -31,7 +31,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 ;(function() {
-
     /**
      * The Quadtree uses rectangle objects for all areas ("Rect").
      * All rectangles require the properties x, y, width, height
@@ -51,7 +50,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      * @param {number} [level=0]            (optional) depth level, required for subnodes (default: 0)
      */
     function Quadtree(bounds, max_objects, max_levels, level) {
-
         this.max_objects    = max_objects || 10;
         this.max_levels     = max_levels || 4;
 
@@ -62,13 +60,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.nodes      = [];
     };
 
-
     /**
      * Split the node into 4 subnodes
      * @memberof Quadtree
      */
     Quadtree.prototype.split = function() {
-
         var nextLevel   = this.level + 1,
             subWidth    = this.bounds.width/2,
             subHeight   = this.bounds.height/2,
@@ -239,5 +235,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         window.Quadtree = Quadtree;
     }
 
+    // Export Module
     module.exports = {Quadtree};
 })();

@@ -385,7 +385,7 @@ function terminalSubmit() {
             let result = theCommand.execute(inputArray, md.digest().toHex() != hexCode);
             if (result[0] != null) new messageUI("System", result[0], result[1]);
         }else{
-            new messageUI("System", "Invalid Command !!!", "red");
+            new messageUI("System", "Invalid Command!!!", "red");
         }
 
     }else if (inputCommand !=''){

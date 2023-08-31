@@ -1,50 +1,49 @@
-// SHA256
-// KEY: kodiaks
-// Hashed Value: 28713e0f7e8b977dcd866fcf8686d1242413e661162e68c0a02d9084b90d4a53
-// Used For Client Side Unlock Command
-
-// Certain Acronym Used
+// Acronym List
 // EXP -> Experience
 
 // CommonJS Syntax
 // Hyper Text Transfer Protocol (HTTP)
-// Setting Socket Related Modules
+// Express (Minimal and Flexible Node.js Web Application Framework)
+// Socket.io (Low Latency, Bidirectional and Event Based Communication Between Server and Client)
 const http = require('http');
 const express = require('express');
 const socketio = require('socket.io');
 
 // Map Related Setting
 const {map, pushMap, mapList, unitProperties, unitIDList} = require('./mapClass.js');
-pushMap();
 const {object, sphere, allObject} = require('./object.js');
 const {player, AI, allPlayer, defaultProperties} = require('./serverCreature.js');
 const {projectile} = require('./serverProjectile.js');
+pushMap();
 
-// An Express Function
+// Express Function
 const app = express();
 
 // Current Directory, Back One Level, Client Folder
 app.use(express.static(`${__dirname}/../client`));
 
-// Create An Server Instance
+// Create A Server Instance
 const server = http.createServer(app);
 const io = socketio(server);
 
+// Node.js Multithread Workers On JavaScript Tasks
 const CPUNumber = require('os').cpus().length;
 const usingThreadNumber = 7;
 const workerNumber = usingThreadNumber < CPUNumber ? usingThreadNumber : CPUNumber - 1;
 const { Worker } = require('worker_threads');
 var workerList = [];
 
+// Distribute Map Levels To Workers
 workerMapList = new Array(workerNumber);
 for (let i = 0; i < workerNumber; ++i) workerMapList[i] = [];
-
 for (let i = 0; i < mapList.length; ++i) workerMapList[i % workerNumber].push(mapList[i]);
 
+// Assign Tasks And Event Listeners To Workers
 for (let i = 0; i < workerNumber; ++i){
     var worker = new Worker('./server/worker.js')
 	workerList.push(worker);
 
+	// Message Event
     worker.on('message', (data) => {
 		switch(data.type){
 			case "updateMap":
@@ -53,7 +52,6 @@ for (let i = 0; i < workerNumber; ++i){
 					theProjectile = allObject.list[data.projectileRemoveList[i]];;
 					if (theProjectile == null) continue;
 					theProjectile.remove();
-
 				}
 
 				io.to("level " + data.mapIndex).compress(true).emit('updateMap', data.unitModifiedList, data.projectileRemoveList);
@@ -64,10 +62,12 @@ for (let i = 0; i < workerNumber; ++i){
 		}
     });
 
+	// Error Event
 	worker.on('error', (err) => {
 		throw err.stack;
 	});
 
+	// Send Initialization Message To Worker
     worker.postMessage({
 		type: "init",
 		workerIndex: i,
@@ -77,20 +77,17 @@ for (let i = 0; i < workerNumber; ++i){
 }
 
 // Init All Map
-for (let i = 0; i < mapList.length; ++i){
+for (let i = 0; i < mapList.length; ++i) {
 	mapList[i].newEmptyMap();
 	mapList[i].initMap();
 }
 
-// -------------------Server Loop-------------------
-// Start Loop
-for(i = 0; i < workerList.length; ++i) {
+// Server Loop
+for (let i = 0; i < workerList.length; ++i) {
 	workerList[i].postMessage({
 		type: "update"
 	});
 }
-
-// -------------------End Of Server Loop-------------------
 
 // Client Is Disconnected
 const clientDisconnect = (Info, thePlayer) => {
@@ -100,21 +97,21 @@ const clientDisconnect = (Info, thePlayer) => {
 		ID: thePlayer.ID
 	});
 
-
 	// Send To All Player In Same Map
 	io.to("level " + thePlayer.mapIndex).compress(true).emit('clientDisconnect', thePlayer.playerID);
 
 	// Delete This Player's Info
-	console.log("Player ID:", thePlayer.playerID, " Name:", thePlayer.name, "is disconnected!  Info:", Info);
+	console.log("Player ID: ", thePlayer.playerID, " Name: ", thePlayer.name, " disconnected! Info: ", Info);
 	thePlayer.remove();
 	delete thePlayer;
 };
 
-
 // Send Player To Map
-function sendPlayerToMap(thePlayer, mapIndex, sock){
+function sendPlayerToMap(thePlayer, mapIndex, sock) {
+	// The Player Level
 	thePlayer.mapIndex = mapIndex;
 
+	// Notify Worker New Player Object
 	workerList[mapIndex % workerNumber].postMessage({
 		type: "newObject",
 		theObject: thePlayer
@@ -135,7 +132,9 @@ function sendPlayerToMap(thePlayer, mapIndex, sock){
 	});
 }
 
-function clientFrameUpdate(newPos, sendProjectileList, requestObjectList, thePlayer, sock){
+// Client Fram Update
+function clientFrameUpdate(newPos, sendProjectileList, requestObjectList, thePlayer, sock) {
+	// Player Location Update
 	thePlayer.changePosition(newPos);
 
 	let newObjectList = [];
@@ -158,12 +157,14 @@ function clientFrameUpdate(newPos, sendProjectileList, requestObjectList, thePla
 	// Client Display Creatures
 	let displayObjectList = [];
 
+	// Client Display Update
 	for(i = 0; i < thePlayer.displayObjectsLength[0]; ++i) {
 		theObject = allObject.list[thePlayer.displayObjects[i]];
 		if (theObject == null) continue;
 		displayObjectList.push([theObject.ID, theObject.getPositionArray()]);
 	}
 
+	// Send Update Information To Client
 	sock.compress(true).emit('updateFrame',
 		newObjectList,
 		displayObjectList,
@@ -194,19 +195,22 @@ function spawnAI(AIName, mapIndex, spawnPos){
 	return theAI;
 }
 
-// Command Handler
+// Client Sent Command To Server Handler
 const commandFromClient = (thePlayer, theCommand, sock) => {
 	let otherPlayer;
 	switch (theCommand[0]){
+		// Change To Other Levels
 		case "ChangeMap":
 			return;
 
+		// Teleport To Player With Certain ID
 		case "tpa":
 			otherPlayer = allPlayer.list[theCommand[1]];
             if (otherPlayer == null) sock.compress(true).emit('serverMessage', "System", "Can't Find The Player With The ID", "red");
 			else sock.compress(true).emit('commandFromServer', ["changePlayerPos", otherPlayer.getPositionArray()]);
 			return;
 
+		// Teleport To Player With Certain Name
 		case "tpn":
 			otherPlayer;
             for (let playerIndex = 0; playerIndex < allPlayer.list.length; ++playerIndex) {
@@ -219,21 +223,22 @@ const commandFromClient = (thePlayer, theCommand, sock) => {
 			sock.compress(true).emit('serverMessage', "System", "Can't Find The Player With The Name", "red");
 			return;
 
+		// Modify Player Radius
 		case "radius":
 			thePlayer.setRadius(theCommand[1]);
 			sock.compress(true).emit('commandFromServer', ["radius", thePlayer.getRadius()]);
 			return;
-
 	}
 };
 
-// -------------------Sending And Receiving Information-------------------
+// Sending And Receiving Information
 // Once A New Player Join, Update To All Other Clients
 io.on('connection', (sock) => {
 	// Setting The New PlayerID
 	let mapIndex = 0;
 	var thePlayer, playerID;
 
+	// New Player Joined
 	sock.on('newName', (playerName) => {
 		thePlayer = new player(playerName, mapIndex);
 
@@ -244,13 +249,14 @@ io.on('connection', (sock) => {
 		// Initializing The Player To The Client
 		sendPlayerToMap(thePlayer, mapIndex, sock);
 
-		console.log("new player joined, name: " + thePlayer.name + "	ID: ", playerID);
+		console.log("New player joined, Player Name: " + thePlayer.name + "	Player ID: ", playerID);
 	});
 
-
+	// Generate 100 Default Monster At Random Locations
 	for (let i = 0; i < 100; i ++){
-		spawnAI("reee", 0);
+		spawnAI("DeafultMonster", 0);
 	}
+
 	// Receiving Information From Client And Calling Function
 	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
 	// First Parameter Data Name (Same As Client Side), Second Parameter The Actual Data
@@ -279,9 +285,7 @@ server.on('error', (err) => {
 
 // Cannot Use 3000 As It Creates A New HTTP Server
 // Listening To Requests From The Port 8080
+// Default Port 8080
 server.listen(8080, () => {
   	console.log('server is ready');
 });
-
-
-

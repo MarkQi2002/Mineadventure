@@ -1,0 +1,11 @@
+Cheats
+SHA256
+KEY: kodiaks
+Hashed Value: 28713e0f7e8b977dcd866fcf8686d1242413e661162e68c0a02d9084b90d4a53
+Used For Client Side Unlock Command
+
+Commands
+Change To Other Levels: /ChangeMap (Not Implemented)
+Teleport To Player With Certain ID: /tpa other_player_ID
+Teleport To Player With Certain Name: /tpn other_player_name
+Modify Player Radius: /radius player_radius

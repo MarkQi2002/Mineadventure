@@ -25,4 +25,5 @@ class sharedIndexArray{
     }
 }
 
+// Export sharedIndexArray
 module.exports = {sharedIndexArray};

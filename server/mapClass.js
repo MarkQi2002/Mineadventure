@@ -1,15 +1,19 @@
+// Import Modules
 const {sharedIndexArray} = require('./dataStructure/sharedIndexArray.js');
 const {Quadtree} = require('./dataStructure/quadTree.js');
+
 // Server Side Map Class
 // blockNumber - How Many Block Are In A QuarterMap
 // blockSize - The Size Of The Block (Number Of Unit)
 
+// Variable Declaration
 var unitIDList = [
-    setUnitIDInfo(["0_ground.jpg"], {IsPhongMaterial: true}),// 0
-    setUnitIDInfo(["0_ground.jpg",// Vertical
-                   "0_ground.jpg",// Vertical
-                   "0_ground.jpg",// Horizontal
-                   "0_ground.jpg",// Horizontal
+    // Unit 0
+    setUnitIDInfo(["0_ground.jpg"], {IsPhongMaterial: true}),
+    setUnitIDInfo(["0_ground.jpg", // Vertical
+                   "0_ground.jpg", // Vertical
+                   "0_ground.jpg", // Horizontal
+                   "0_ground.jpg", // Horizontal
                    "rock1.jpg",
                    "rock1.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true}, {type: "block"}),
     setUnitIDInfo(["tree1.glb"], {collision: true, destroyable: true}, {type: "childUnit", scale: 0.3}),
@@ -20,7 +24,8 @@ var unitIDList = [
     setUnitIDInfo(["tree6.glb"], {collision: true, destroyable: true}, {type: "childUnit", scale: 0.3}),
     setUnitIDInfo(["bush1.glb"], {collision: true, destroyable: true}, {type: "childUnit", scale: 0.2}),
     setUnitIDInfo(["bush2.glb"], {collision: true, destroyable: true}, {type: "childUnit", scale: 0.4}),
-    setUnitIDInfo(["bush3.glb"], {collision: true, destroyable: true}, {type: "childUnit", scale: 0.4}),// 10
+    // Unit 10
+    setUnitIDInfo(["bush3.glb"], {collision: true, destroyable: true}, {type: "childUnit", scale: 0.4}),
     setUnitIDInfo(["flower1.glb"], {destroyable: true}, {type: "childUnit", scale: 0.3}),
     setUnitIDInfo(["flower2.glb"], {destroyable: true}, {type: "childUnit", scale: 0.3}),
     setUnitIDInfo(["flower3.glb"], {destroyable: true}, {type: "childUnit", scale: 0.3}),
@@ -30,7 +35,8 @@ var unitIDList = [
     setUnitIDInfo(["grass2.jpg"], {base: true, IsPhongMaterial: true}),
     setUnitIDInfo(["grass3.jpg"], {base: true, IsPhongMaterial: true}),
     setUnitIDInfo(["grass4.jpg"], {base: true, IsPhongMaterial: true}),
-    setUnitIDInfo(["grass5.jpg"], {base: true, IsPhongMaterial: true}),// 20
+    // Unit 20
+    setUnitIDInfo(["grass5.jpg"], {base: true, IsPhongMaterial: true}),
     setUnitIDInfo(["grass6.jpg"], {base: true, IsPhongMaterial: true}),
     setUnitIDInfo(["grass7.jpg"], {base: true, IsPhongMaterial: true}),
     setUnitIDInfo(["grass8.jpg"], {base: true, IsPhongMaterial: true}),
@@ -40,7 +46,8 @@ var unitIDList = [
     setUnitIDInfo(["mushroom1.glb"], {destroyable: true}, {type: "childUnit", scale: 0.6}),
     setUnitIDInfo(["mushroom2.glb"], {destroyable: true}, {type: "childUnit", scale: 0.6}),
     setUnitIDInfo(["mushroom3.glb"], {destroyable: true}, {type: "childUnit", scale: 0.6}),
-    setUnitIDInfo(["mushroom4.glb"], {destroyable: true}, {type: "childUnit", scale: 0.6}), // 30
+    // Unit 30
+    setUnitIDInfo(["mushroom4.glb"], {destroyable: true}, {type: "childUnit", scale: 0.6}),
     setUnitIDInfo(["mushroom5.glb"], {destroyable: true}, {type: "childUnit", scale: 0.6}),
     setUnitIDInfo(["mushroom6.glb"], {destroyable: true}, {type: "childUnit", scale: 0.6}),
     setUnitIDInfo(["mushroom7.glb"], {destroyable: true}, {type: "childUnit", scale: 0.6}),
@@ -68,26 +75,26 @@ var unitIDList = [
                    "rock3.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true}, {type: "block"}),
 ];
 
-
-// set UnitIDInfo by (texture url address, collision bool)
+// Set Unit ID Information By Various Input Parameters
 function setUnitIDInfo(fileName, additionalInfo = {},  additionaTypeInfo = {}) {
+    // Default Values For UnitID
     var unitIDInfo = {
-        "fileName": fileName, // FileName For url Address
-        "collision": false, // Can Walk Through (True Or False)
-        "destroyable": false, // Can Be Destroyed (True Or False)
-        "base": false, // Can Have childUnit On (True Or False)
-        "IsPhongMaterial": false, // Material Can Reflect Light (True or False)
-        "replacingUnit": null, // Replacing Unit After Destroy
-        "typeInfo": {type: "plane"},
+        "fileName": fileName,           // FileName For URL Address
+        "collision": false,             // Can Walk Through (True Or False)
+        "destroyable": false,           // Can Be Destroyed (True Or False)
+        "base": false,                  // Can Have childUnit On (True Or False)
+        "IsPhongMaterial": false,       // Material Can Reflect Light (True or False)
+        "replacingUnit": null,          // Replacing Unit After Destroy
+        "typeInfo": {type: "plane"},    // Material Type
     }
 
-    // Additional Info
+    // Non Default Values For UnitID
     for (let [key, value] of Object.entries(additionalInfo)) {
         unitIDInfo[key] = value;
     }
 
-
-    switch(unitIDInfo.typeInfo.type){
+    // UnitID Type
+    switch(unitIDInfo.typeInfo.type) {
         case "plane":
             break;
         case "block":
@@ -97,18 +104,16 @@ function setUnitIDInfo(fileName, additionalInfo = {},  additionaTypeInfo = {}) {
             break;
     }
 
-
-    // Additiona Typ eInfo
+    // Additiona Type Info
     for (let [key, value] of Object.entries(additionaTypeInfo)) {
         unitIDInfo.typeInfo[key] = value;
     }
 
-    // Return The Unit Information ID
+    // Return The Unit ID Information
     return unitIDInfo
 }
 
-
-// ****************************************************** End Of Map Method ******************************************************
+// Random Map Generation Method
 var mapSpawnMethod = {
     "perlinNoise": {
         init: function(ChangeSpawnMethodInputs) {
@@ -118,21 +123,19 @@ var mapSpawnMethod = {
                 "groundIDList": [0],
                 "wallIDList": [1],
                 "maxWallHeight": 30,
-                "perlinRate": 30, // amplitude of wall (The Max Height Of Unit)
-                "perlinOffset": 0, // Offset for determind is ground or wall (between -1 and 1. For -1 there will be no wall, and 1 will be all wall)
+                "perlinRate": 30,           // Amplitude Of Wall (The Max Height Of Unit)
+                "perlinOffset": 0,          // Offset To Determind Ground or Wall (No Wall: -1, Normal: 0, All Wall: 1)
                 "defaultReplacingUnit": 15,
-
             }
 
-            // Change
+            // Custom Map Spawn Method Parameter
             for (let [key, value] of Object.entries(ChangeSpawnMethodInputs)) {
                 spawnMethodInputs[key] = value;
             }
 
-
-            // Get The Total Weight For Random
+            // Calculate Total Child Unit Spawn Weight
             spawnMethodInputs["totalChildUnitWeight"] = 0;
-            for (let i = 0; i < spawnMethodInputs.childUnitIDList.length; ++i){
+            for (let i = 0; i < spawnMethodInputs.childUnitIDList.length; ++i) {
                 spawnMethodInputs.totalChildUnitWeight += spawnMethodInputs.childUnitIDList[i].weight;
             }
 
@@ -143,13 +146,14 @@ var mapSpawnMethod = {
                 y: Math.floor(Math.random() * 255)
             }
 
+            // Return Map Generation Method And Spawn Method Input
             return {
                 method: "perlinNoise",
                 inputs: spawnMethodInputs
             };
         },
 
-
+        // PerlinNoise Function
         perlinFunction: new function() {
             this.noise = function(x, y, z) {
                 // Variable Declaration
@@ -173,76 +177,76 @@ var mapSpawnMethod = {
                 for (var i = 0; i < 256 ; i++)
                     p[256 + i] = p[i] = permutation[i];
 
-                var X = Math.floor(x) & 255,                  // FIND UNIT CUBE THAT
-                    Y = Math.floor(y) & 255,                  // CONTAINS POINT.
+                var X = Math.floor(x) & 255,                                            // FIND UNIT CUBE THAT
+                    Y = Math.floor(y) & 255,                                            // CONTAINS POINT.
                     Z = Math.floor(z) & 255;
 
-                x -= Math.floor(x);                                // FIND RELATIVE X,Y,Z
-                y -= Math.floor(y);                                // OF POINT IN CUBE.
+                x -= Math.floor(x);                                                     // FIND RELATIVE X,Y,Z
+                y -= Math.floor(y);                                                     // OF POINT IN CUBE.
                 z -= Math.floor(z);
 
-                var u = fade(x),                                // COMPUTE FADE CURVES
-                    v = fade(y),                                // FOR EACH OF X,Y,Z.
+                var u = fade(x),                                                        // COMPUTE FADE CURVES
+                v = fade(y),                                                            // FOR EACH OF X,Y,Z.
                     w = fade(z);
 
-                var A = p[X  ]+Y, AA = p[A]+Z, AB = p[A+1]+Z,      // HASH COORDINATES OF
-                    B = p[X+1]+Y, BA = p[B]+Z, BB = p[B+1]+Z;      // THE 8 CUBE CORNERS,
+                var A = p[X  ]+Y, AA = p[A]+Z, AB = p[A+1]+Z,                           // HASH COORDINATES OF
+                    B = p[X+1]+Y, BA = p[B]+Z, BB = p[B+1]+Z;                           // THE 8 CUBE CORNERS,
 
-                return scale(lerp(w, lerp(v, lerp(u, grad(p[AA  ], x  , y  , z   ),  // AND ADD
-                                                grad(p[BA  ], x-1, y  , z   )), // BLENDED
-                                        lerp(u, grad(p[AB  ], x  , y-1, z   ),  // RESULTS
-                                                grad(p[BB  ], x-1, y-1, z   ))),// FROM  8
-                                lerp(v, lerp(u, grad(p[AA+1], x  , y  , z-1 ),  // CORNERS
-                                                grad(p[BA+1], x-1, y  , z-1 )), // OF CUBE
+                return scale(lerp(w, lerp(v, lerp(u, grad(p[AA  ], x  , y  , z   ),     // AND ADD
+                                                grad(p[BA  ], x-1, y  , z   )),         // BLENDED
+                                        lerp(u, grad(p[AB  ], x  , y-1, z   ),          // RESULTS
+                                                grad(p[BB  ], x-1, y-1, z   ))),        // FROM  8
+                                lerp(v, lerp(u, grad(p[AA+1], x  , y  , z-1 ),          // CORNERS
+                                                grad(p[BA+1], x-1, y  , z-1 )),         // OF CUBE
                                         lerp(u, grad(p[AB+1], x  , y-1, z-1 ),
                                                 grad(p[BB+1], x-1, y-1, z-1 )))));
             }
             function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
             function lerp( t, a, b) { return a + t * (b - a); }
             function grad(hash, x, y, z) {
-                var h = hash & 15;                      // CONVERT LO 4 BITS OF HASH CODE
-                var u = h < 8 ? x : y,                 // INTO 12 GRADIENT DIRECTIONS.
+                var h = hash & 15;                                                      // CONVERT LO 4 BITS OF HASH CODE
+                var u = h < 8 ? x : y,                                                  // INTO 12 GRADIENT DIRECTIONS.
                         v = h < 4 ? y : h == 12 || h == 14 ? x : z;
                 return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
             }
             function scale(n) { return (1 + n)/2; }
         },
 
-
-
-        // Perlin Noise Map Method
-        spawnUnit: function(spawnMethodInputs, x, y, unitClass){
+        // Perlin Noise Map Generation
+        spawnUnit: function(spawnMethodInputs, x, y, unitClass) {
             var ID;
             var Height = spawnMethodInputs.perlinRate * (
-                    spawnMethodInputs.perlinOffset - 1 +
-                    mapSpawnMethod.perlinNoise.perlinFunction.noise(
+                        spawnMethodInputs.perlinOffset - 1 +
+                        mapSpawnMethod.perlinNoise.perlinFunction.noise(
                             (spawnMethodInputs.PerlinSeed.x + x) / 10,
                             (spawnMethodInputs.PerlinSeed.y + y) / 10,
                             0.1
-                    ) * 2
+                        ) * 2
             );
 
-
-            if (Height <= 0) { // Ground
+            // Ground
+            if (Height <= 0) {
                 ID = spawnMethodInputs.groundIDList[(2 / Math.PI * Math.atan(- Height * 1.5 * Math.random()) * spawnMethodInputs.groundIDList.length) >> 0];
                 Height = 0;
-
-            } else  { // Wall
+            // Wall
+            } else {
                 ID = spawnMethodInputs.wallIDList[(2 / Math.PI * Math.atan(- Height * 1.5 * Math.random()) * spawnMethodInputs.wallIDList.length) >> 0];
 
-                // If Exceed Max Height
-                if (Height > spawnMethodInputs.maxWallHeight) Height = spawnMethodInputs.maxWallHeight;
+                // Max Height Exceeded
+                if (Height > spawnMethodInputs.maxWallHeight)
+                    Height = spawnMethodInputs.maxWallHeight;
             }
 
+            // Generate Random Child
             let childID;
-            if (unitIDList[ID].base && spawnMethodInputs.totalChildUnitWeight != 0 && Math.random() <= spawnMethodInputs.childUnitSpawnRate){
+            if (unitIDList[ID].base && spawnMethodInputs.totalChildUnitWeight != 0 && Math.random() <= spawnMethodInputs.childUnitSpawnRate) {
                 let childIDList;
 
                 // Get A Random ChildIDList From ALL List By Their Weight
                 let randomChildListWeight = Math.random() * spawnMethodInputs.totalChildUnitWeight;
-                for (let i = 0; i < spawnMethodInputs.childUnitIDList.length; ++i){
+                for (let i = 0; i < spawnMethodInputs.childUnitIDList.length; ++i) {
                     childIDList = spawnMethodInputs.childUnitIDList[i];
-                    if (randomChildListWeight < childIDList.weight){
+                    if (randomChildListWeight < childIDList.weight) {
                         // Get A Random ChildUnit From The List
                         childID = childIDList.list[(Math.random() * childIDList.list.length) >> 0];
                         break;
@@ -251,7 +255,7 @@ var mapSpawnMethod = {
                 }
 
                 rotation = Math.random() * Math.PI * 2
-            }else{
+            } else {
                 childID = 0;
                 rotation = 0;
             }
@@ -261,36 +265,37 @@ var mapSpawnMethod = {
             unitClass.set("rotation", rotation);
             unitClass.set("childID", childID);
         }
-
-
     }
-
-
-
-
-
-
 };
 
-// ****************************************************** End Of Map Method ******************************************************
+// Map Related Variables
+// Unit Properties
+var unitProperties = {
+	"ID": "uint",
+    "height": "float",
+    "rotation": "float",
+    "childID": "uint"
+}
 
+var unitPropertyNumber = 0;
+for (let [key, value] of Object.entries(unitProperties)) {
+	++unitPropertyNumber;
+}
 
+var unitModifiedList = [];
 
-
-
-
+// Map List
 var mapList = [];
-
-function pushMap(){
+function pushMap() {
     new map({
         mapMethod:
             mapSpawnMethod.perlinNoise.init({
                 childUnitSpawnRate: 0.04,
                 childUnitIDList: [
-                    {list: [2, 3, 4, 5, 6, 7, 8, 9, 10], weight: 3},// (trees and bushes)
-                    {list: [13, 14, 31], weight: 15}, // (blue flowers and green mushrooms)
-                    {list: [11, 12, 27, 28, 29, 30, 32], weight: 1}, // (other color flowers and mushrooms)
-                    {list: [34], weight: 1}, // (stone)
+                    {list: [2, 3, 4, 5, 6, 7, 8, 9, 10], weight: 3},                // (trees and bushes)
+                    {list: [13, 14, 31], weight: 15},                               // (blue flowers and green mushrooms)
+                    {list: [11, 12, 27, 28, 29, 30, 32], weight: 1},                // (other color flowers and mushrooms)
+                    {list: [34], weight: 1},                                        // (stone)
                 ],
                 groundIDList: [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26],
                 wallIDList: [38]
@@ -298,14 +303,9 @@ function pushMap(){
     });
 }
 
-
-
-
-
-
-
-// Map level
-class map{
+// Map Class
+class map {
+    // Map Constructor
     constructor({size = {x: 200, y: 200}, mapMethod = null, creatureMethod = null}) {
         this.index = mapList.length;
         mapList.push(this);
@@ -316,18 +316,14 @@ class map{
         this.creatureMethod = creatureMethod;
 
         this.playerIDArray = new sharedIndexArray(1000, "playerIDArrayIndex");
-
         this.projectileIDArray = new sharedIndexArray(100000, "projectileIDArrayIndex");
-
         this.AIIDArray = new sharedIndexArray(10000, "AIIDArrayIndex");
-
-
     }
 
     // Create A Empty 2D Array
     newEmptyMap() {
-        // Set empty unitList
-        for (let i = 0; i < this.size.y; i++) {
+        // Set Empty UnitList
+        for (let i = 0; i < this.size.y; ++i) {
             this.unitList.push(new Array(this.size.x));
         }
 
@@ -341,7 +337,8 @@ class map{
         }
     }
 
-    initWorkerMap(){
+    // Initialize Map Worker
+    initWorkerMap() {
         Object.setPrototypeOf(this.playerIDArray, sharedIndexArray.prototype);
         Object.setPrototypeOf(this.projectileIDArray, sharedIndexArray.prototype);
         Object.setPrototypeOf(this.AIIDArray, sharedIndexArray.prototype);
@@ -357,7 +354,8 @@ class map{
         });
     }
 
-    initMap(){
+    // Initialize Map
+    initMap() {
         for (let y = 0; y < this.unitList.length; ++y) {
             for (let x = 0; x < this.unitList[y].length; ++x) {
                 mapSpawnMethod[this.mapMethod.method].spawnUnit(this.mapMethod.inputs, x, y, this.unitList[y][x]);
@@ -366,34 +364,20 @@ class map{
     }
 
     // Check If Within Map Rnage
-    IsNotInMapRange(floatX, floatY){
+    IsNotInMapRange(floatX, floatY) {
         return this.size.x <= floatX || 0 > floatX || this.size.y <= floatY || 0 > floatY;
     }
 
     // Return The Unit Based On xy Coordinate
-    getUnit([mapX, mapY]){
+    getUnit([mapX, mapY]) {
         if (this.IsNotInMapRange(mapX, mapY)) return null;
         return this.unitList[mapY][mapX];
     }
-
 }
-
-var unitProperties = {
-	"ID": "uint",
-    "height": "float",
-    "rotation": "float",
-    "childID": "uint"
-}
-
-var unitPropertyNumber = 0;
-for (let [key, value] of Object.entries(unitProperties)) {
-	++unitPropertyNumber;
-}
-
-var unitModifiedList = [];
 
 // Map Unit
 class mapUnit {
+    // Map Unit Constructor
 	constructor(x, y, offSet, dataSpace) {
         this.x = x;
         this.y = y;
@@ -405,22 +389,25 @@ class mapUnit {
         this.modifiedHistory = [];
 	}
 
-    getCollision(){
+    // Get Map Unit Collision Property
+    getCollision() {
         let childID = this.get("childID");
         return unitIDList[this.get("ID")].collision || (childID != 0 && unitIDList[childID].collision);
     }
 
-    getIDProperty(type){
+    // Get Map Unit ID
+    getIDProperty(type) {
         return unitIDList[this.get("ID")][type];
     }
 
-    getChildIDProperty(type){
+    // Get Map Unit Child ID
+    getChildIDProperty(type) {
         let childID = this.get("childID");
         return childID == 0 ? null : unitIDList[childID][type];
     }
 
-
-	getAllProperties(){
+    // Get All Map Unit Properties
+	getAllProperties() {
 		let allProperties = {};
 		for (let [key, info] of Object.entries(unitProperties)) {
 			allProperties[key] = this.get(key);
@@ -428,8 +415,9 @@ class mapUnit {
 		return allProperties;
 	}
 
-	set(key, value){
-		switch (unitProperties[key]){
+    // Set Map Unit Properties
+	set(key, value) {
+		switch (unitProperties[key]) {
 			case "uint":
 				this[key].setUint32(0, value);
 				break;
@@ -443,8 +431,9 @@ class mapUnit {
         this.modifiedHistory.push([key, value]);
 	}
 
-	get(key){
-		switch (unitProperties[key]){
+    // Get Map Unit Property
+	get(key) {
+		switch (unitProperties[key]) {
 			case "uint":
 				return this[key].getUint32(0);
 			case "int":
@@ -454,7 +443,8 @@ class mapUnit {
 		}
 	}
 
-    updateToClient(){
+    // Update To Client
+    updateToClient() {
         unitModifiedList.push([this.x, this.y, this.modifiedHistory]);
         this.modifiedHistory = [];
     }

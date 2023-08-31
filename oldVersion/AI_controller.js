@@ -9,22 +9,23 @@ class AI_controller {
         this.aggro = {creature: null, amount: 0, base: 2, max: 5};
         this.attackCD = 0;
 
-        this.velocity = [0,0];
+        this.velocity = [0, 0];
     }
 
     // Setting Creature Aggro
-    setAggro(creatureType, ID, amount){
+    setAggro(creatureType, ID, amount) {
+        // Creature Inexist
         if (creatureType == null || ID == null) return;
 
-        if (this.aggro.creature == null || !(this.aggro.creature[1] == ID && this.aggro.creature[0] == creatureType)){
-            // Come From A Different Creature
+        // Aggro Come From Different Creature From Current
+        if (this.aggro.creature == null || !(this.aggro.creature[1] == ID && this.aggro.creature[0] == creatureType)) {
             this.aggro.amount -= amount;
             if (this.aggro.amount <= 0){
                 this.aggro.creature = [creatureType, ID];
                 this.aggro.amount = this.aggro.amount * -1 + this.aggro.base;
             }
-        }else{
-            // Come From The Same Creature
+        // Aggro Come From Current Creature
+        } else {
             this.aggro.amount += amount;
             if (this.aggro.amount > this.aggro.max){
                 this.aggro.amount = this.aggro.max;
@@ -32,7 +33,7 @@ class AI_controller {
         }
     }
 
-    // Sending A Projectile To Goal Location
+    // Sending Projectile To Goal Location
     sendProjectile(goal) {
         // Get Unit Vector
         let [diffX, diffY] = [goal[0] - this.creature.position[0], goal[1] - this.creature.position[1]];
@@ -43,7 +44,6 @@ class AI_controller {
         let vectorY = diffY / magnitude;
 
         // Setting Projectile Information
-
         var newDamageInfo = {
             type: {"true": (this.creature.properties.attackDamage / 10) >> 0, "normal": this.creature.properties.attackDamage},
             attacker: [this.creature.creatureType, this.creature.ID, this.creature.campInfo],
@@ -108,14 +108,13 @@ class AI_controller {
                     if (distX == 0){
                         offSetY = translateDistance[1] - distY - 0.5 * directionY;
                         break;
-                    }else{
+                    } else {
                         let newOffset = translateDistance[1] - distY - Math.sqrt(0.21 - distX * distX) * directionY;
                         if (Math.abs(offSetY) > Math.abs(newOffset)) offSetY = newOffset;
                     }
                 }
             }
         }
-
 
         // X Collision
         if (translateDistance[0] != 0) {
@@ -174,7 +173,7 @@ class AI_controller {
         while (unitTranslateDistance[0] * xDir > 0 || unitTranslateDistance[1] * yDir > 0){
             if (xCollision){
                 xCount = 0;
-            }else{
+            } else {
                 if (unitTranslateDistance[0] * xDir > checkAmount){
                     xCount = xDir * checkAmount;
                 } else if (unitTranslateDistance[0] * xDir > 0){
@@ -199,7 +198,6 @@ class AI_controller {
             unitTranslateDistance[0] -= xDir * checkAmount;
             unitTranslateDistance[1] -= yDir * checkAmount;
 
-
             newTranslateDistance = this.surroundingCollision(currentPosition, [xCount, yCount], theMap);
 
             currentPosition[0] += newTranslateDistance[0];
@@ -222,12 +220,12 @@ class AI_controller {
     }
 
     // Mahattan Heuristic Algorithm
-    heuristic([fx, fy], [cx, cy]){
+    heuristic([fx, fy], [cx, cy]) {
         return (Math.abs(fx - cx) + Math.abs(fy - cy)) * 10;
     }
 
-    // Using A Star As The Path Finding Algorithm
-    aStarAlgorithm(theMap, goal){
+    // A Star Path Finding Algorithm
+    aStarAlgorithm(theMap, goal) {
         let start = [Math.floor(this.creature.position[0] + 0.5), Math.floor(this.creature.position[1] + 0.5)];
 
         let frontier = new PriorityQueue();
@@ -250,10 +248,10 @@ class AI_controller {
 
                 let existData = frontier.isIn(next);
 
-                if ( existData == null) {
+                if (existData == null) {
                     let priority = new_cost + this.heuristic(goal, next);
                     frontier.enqueue({x: next[0], y: next[1], cost: new_cost, last: current}, priority);
-                } else if(new_cost < existData[0].element.cost) {
+                } else if (new_cost < existData[0].element.cost) {
                     let priority = new_cost + this.heuristic(goal, next);
                     frontier.remove(existData[1]);
                     frontier.enqueue({x: existData[0].element.x, y: existData[0].element.y, cost: new_cost, last: current}, priority);
@@ -302,16 +300,15 @@ class AI_controller {
                                       delta * this.creature.properties["moveSpeed"] * vectorY];
 
         if (this.velocity[0] != 0 || this.velocity[1] != 0){
-
             let resistance = 0.1;
 
             for (let i = 0; i < 2; ++i){
-                if (this.velocity[i] > 0){
+                if (this.velocity[i] > 0) {
                     this.velocity[i] -= resistance * delta;
                     if (this.velocity[i] < 0) {
                         this.velocity[i] = 0;
                     }
-                }else if(this.velocity[i] < 0){
+                } else if(this.velocity[i] < 0) {
                     this.velocity[i] += resistance * delta;
                     if (this.velocity[i] > 0) {
                         this.velocity[i] = 0;
@@ -326,29 +323,26 @@ class AI_controller {
             if (Math.abs(monsterTranslateDistance[1] - totalTranslateDistance[1]) > 0.0001) this.velocity[1] = 0;
         }
 
-
         this.creature.position[0] += totalTranslateDistance[0];
         this.creature.position[1] += totalTranslateDistance[1];
 
-
         // After movement if the difference of two position is oppsite compare to before
         if (((diffX < 0) != (targetPosition[0] - this.creature.position[0] < 0)) ||
-            ((diffY < 0) != (targetPosition[1] - this.creature.position[1] < 0))){
+            ((diffY < 0) != (targetPosition[1] - this.creature.position[1] < 0))) {
             // Shift the targetPositionList
             this.targetPositionList.shift();
         }
 
     }
 
-    // Update Function
+    // AI Controller Update Function
     update(delta, theMap, spawnProjectile, playerArray, monsterArray) {
         // Get Path Using The Path Finding Algorithm
-
         let aggroCreature = null;
-        if (this.aggro.creature != null){
-            if (this.aggro.creature[0] == "player"){
+        if (this.aggro.creature != null) {
+            if (this.aggro.creature[0] == "player") {
                 aggroCreature = playerArray[this.aggro.creature[1]];
-            }else{
+            } else {
                 aggroCreature = monsterArray[this.aggro.creature[1]];
             }
         }
@@ -358,20 +352,21 @@ class AI_controller {
             this.aggro.creature = null;
         }
 
-        // WHAT IS THIS
+        // Find Path To Aggro Target, Move To It, And Attack It
+        // Aggro Target Exists
         if (this.aggro.creature != null) {
             let goal = [Math.floor(aggroCreature.position[0] + Math.random() * 2 - 1), Math.floor(aggroCreature.position[1] + Math.random() * 2 - 1)];
 
-            if (this.routeCount > 10){
-
-                if (Math.abs(goal[0] - this.creature.position[0]) + Math.abs(goal[1] - this.creature.position[1]) < this.searchRange * 2){
+            if (this.routeCount > 10) {
+                if (Math.abs(goal[0] - this.creature.position[0]) + Math.abs(goal[1] - this.creature.position[1]) < this.searchRange * 2) {
                     this.routeCount = 0;
                     let newRoute = [];
-                    if (aggroCreature.mapLevel == this.creature.mapLevel){
+                    if (aggroCreature.mapLevel == this.creature.mapLevel) {
                         newRoute = this.getRoute(theMap, goal);
                     }
 
-                    // find target
+                    // Find Path To Target
+                    // Path Found
                     if(newRoute != "not find") {
                         this.targetPositionList = newRoute;
 
@@ -380,13 +375,13 @@ class AI_controller {
                             spawnProjectile([[this.sendProjectile([aggroCreature.position[0], aggroCreature.position[1]])], this.creature.mapLevel]);
                             this.attackCD = 1;
                         }
-
+                    // No Path To Target
                     } else {
                         if (this.targetPositionList.length <= 0) {
                             // Find A Random Position
                             newRoute = this.getRoute(theMap, [(this.creature.position[0] + 0.5 + (Math.random() - 0.5) * 2 * this.searchRange) >> 0,
                                                                              (this.creature.position[1] + 0.5 + (Math.random() - 0.5) * 2 * this.searchRange) >> 0]);
-                            if (this.targetPositionList != "not find"){
+                            if (this.targetPositionList != "not find") {
                                 this.targetPositionLis = newRoute;
                             } else {
                                 this.targetPositionLis = [];
@@ -394,17 +389,18 @@ class AI_controller {
                         }
                         this.aggro.creature = null;
                     }
-
+                // Target Too Far, Reset Aggro
                 } else {
                     this.aggro.creature = null;
                 }
             }
-
+        // No Aggro Target
         } else {
             if (this.routeCount > 30){
                 let minDistance = this.searchRange;
                 let distance, otherCreature;
 
+                // Search For Closest Player And Set Aggro
                 let surroundingBlocks = theMap.getSurroundingBlock([this.creature.position[0] / theMap.blockSize.x >> 0, this.creature.position[1] / theMap.blockSize.y >> 0], this.creature.mapLevel, [1, 1])
                 for (let i = 0; i < surroundingBlocks.length; ++i) {
                     for (let ii = 0; ii < surroundingBlocks[i][2].blockCreatureArray.length; ++ii) {
@@ -459,14 +455,13 @@ class AI_controller {
 		}
 
         // Attack CoolDown (CD)
-        if (this.attackCD > 0){
+        if (this.attackCD > 0) {
             this.attackCD -= this.creature.properties["attackSpeed"] * delta;
         }
     }
 }
 
-// User defined class
-// to store element and its priority
+// PriorityQueue Element
 class QElement {
     constructor(element, priority)
     {
@@ -522,6 +517,7 @@ class PriorityQueue {
         return this.items.shift();
     }
 
+    // Remove Element From Queue
     remove(index){
         this.items.splice(index, 1);
     }
@@ -544,5 +540,5 @@ class PriorityQueue {
     }
 }
 
-// Required Because server.js Uses This JavaScript File
+// Export Module
 module.exports = AI_controller;
