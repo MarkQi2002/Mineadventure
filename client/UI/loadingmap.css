@@ -1,4 +1,4 @@
-/* Loading Map Div*/
+/* Loading Map Div */
 .loadingMap {
     overflow: hidden;
     position: fixed;
@@ -11,7 +11,7 @@
     z-index: -1; /* Only Display When Loading The Map*/
 }
 
-/* Loader Animation*/
+/* Loader Animation */
 .loadingAnimation {
     border: 2vw solid #f3f3f3;
     border-radius: 50%;
