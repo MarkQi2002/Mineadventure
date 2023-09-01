@@ -5,10 +5,12 @@ const {sharedIndexArray} = require('./dataStructure/sharedIndexArray.js');
 const {mapList} = require('./mapClass.js')
 const {object, sphere, allObject} = require('./object.js');
 
+// Variable Declaration
 const gravity = 20;
 
 var allPlayer = new dynamicList("Player List", 30, 10);
-var displayRange = {x: 30, y: 30}; // The Range For Player To Get Object Information On Server
+// The Range For Player To Get Object Information On Server
+var displayRange = {x: 30, y: 30};
 var defaultProperties = {
 	// Level Related Properties
 	// Exp Required To Level Up Is Increased Exponentially
@@ -46,18 +48,23 @@ var defaultProperties = {
 	"projectileSpeed": {type: "float", value: 8},
 }
 
+// Count Total Number Of Properties
 var propertyNumber = 0;
 for (let [key, value] of Object.entries(defaultProperties)) {
 	++propertyNumber;
 }
 
+// Creature Class Inherite Sphere Class
 class creature extends sphere {
+	// Creature Class Constructor
     constructor(name, objectType, spawnPos, mapIndex, camp, radius) {
-		super(spawnPos, objectType, radius, mapIndex);  // explicitly call parent constructor.
+		// Explicitly Call Parent Constructor
+		super(spawnPos, objectType, radius, mapIndex);
 
 		// Creature Identification Information
 		this["name"] = name;
 
+		// Creature Camp
 		this["camp"] = camp
 		this["campInfo"] = new campInfo();
 
@@ -74,10 +81,12 @@ class creature extends sphere {
 		this["ability"] = {};
     }
 
+	// Creature Initialization Worker
 	initWorker() {
 		Object.setPrototypeOf(this.properties, properties.prototype);
 	}
 
+	// Creature Collision Detection
 	collision() {
 		// Hit Projectile
 		let candidates = mapList[this.mapIndex].objectTree.retrieve({
@@ -97,21 +106,26 @@ class creature extends sphere {
 		}
 	}
 
+	// Creature Update
 	update() {
 		this.collision();
 	}
 
+	// Creature Collision Reaction
 	collisionReaction(hitCreature) {
-		if (hitCreature.objectType == "AI"){
+		if (hitCreature.objectType == "AI") {
 			hitCreature.collisionCreatureList.push(this);
 		}
 	}
 
+	// Remove Creature
 	remove() {
-		sphere.prototype.remove.call(this); // call parent remove function
+		// Call Parent Remove Function
+		sphere.prototype.remove.call(this);
 	}
 
-	getInfo(){
+	// Get Creature Information
+	getInfo() {
 		return{
 			... sphere.prototype.getInfo.call(this),
 			name: this.name,
@@ -125,9 +139,12 @@ class creature extends sphere {
 	}
 }
 
+// Player Class Inherite Creature Class
 class player extends creature {
+	// Player Class Constructor
     constructor(name, mapIndex, spawnPos) {
-        super(name, "player", spawnPos == null ? [0, 0, 0] : spawnPos, mapIndex, "defaultPlayer", 0.45);  // explicitly call parent constructor.
+		// Explicitly Call Parent Constructor
+        super(name, "player", spawnPos == null ? [0, 0, 0] : spawnPos, mapIndex, "defaultPlayer", 0.45);
 		if (spawnPos == null) this.changePosition(this.findNoCollisionPosition());
         this.playerID = allPlayer.add(this);
 
@@ -136,8 +153,10 @@ class player extends creature {
         this.displayObjectsLength[0] = 0;
     }
 
+	// Player Initialization Worker
 	initWorker() {
-		creature.prototype.initWorker.call(this); // call parent initWorker function
+		// Call Parent initWorker Function
+		creature.prototype.initWorker.call(this);
 
 		if (allPlayer.list.length <= this.playerID) allPlayer.list.length = this.playerID + 10;
 		allPlayer.list[this.playerID] = this;
@@ -145,14 +164,18 @@ class player extends creature {
 		mapList[this.mapIndex].playerIDArray.add(allObject.list, this.ID);
 	}
 
+	// Player Collision Reaction
 	collisionReaction(hitCreature) {
-		creature.prototype.collisionReaction.call(this, hitCreature); // call parent collisionReaction function
+		// Call Parent collisionReaction Function
+		creature.prototype.collisionReaction.call(this, hitCreature);
 	}
 
+	// Player Update Function
 	update() {
 		let theMap = mapList[this.mapIndex];
 
-		creature.prototype.update.call(this); // call parent update function
+		// Call Parent Update Function
+		creature.prototype.update.call(this);
 
 		// Find Surrounding Object For Displaying
 		let displayCount = 0;
@@ -179,16 +202,20 @@ class player extends creature {
 		this.displayObjectsLength[0] = displayCount;
 	}
 
-	removeOnWorker() { // Worker side
+	// Worker Side Remove Player
+	removeOnWorker() {
 		mapList[this.mapIndex].playerIDArray.remove(allObject.list, this.ID);
 		this.remove();
 	}
 
+	// Remove Player
 	remove() {
-		creature.prototype.remove.call(this); // call parent remove function
+		// Call Parent Remove Function
+		creature.prototype.remove.call(this);
 		allPlayer.remove(this.playerID);
 	}
 
+	// Get Player Information
 	getInfo() {
 		return {
 			... creature.prototype.getInfo.call(this),
@@ -197,9 +224,12 @@ class player extends creature {
 	}
 }
 
+// AI Class Interite Creature Class
 class AI extends creature {
+	// AI Class Constructor
 	constructor(name, mapIndex, spawnPos) {
-        super(name, "AI", spawnPos == null ? [0, 0, 0] : spawnPos, mapIndex, "defaultMonster", 1);  // explicitly call parent constructor.
+		// Explicitly Call Parent Constructor
+        super(name, "AI", spawnPos == null ? [0, 0, 0] : spawnPos, mapIndex, "defaultMonster", 1);
 		if (spawnPos == null) this.changePosition(this.findNoCollisionPosition());
 
 		this.velocity = [0,0,0];
@@ -207,19 +237,25 @@ class AI extends creature {
 		this.collisionCreatureList = [];
     }
 
+	// AI Initialization Worker
 	initWorker() {
-		creature.prototype.initWorker.call(this); // call parent initWorker function
+		// Call Parent initWorker Function
+		creature.prototype.initWorker.call(this);
 
 		mapList[this.mapIndex].AIIDArray.add(allObject.list, this.ID);
 	}
 
+	// AI Collision Reaction
 	collisionReaction(hitCreature) {
-		creature.prototype.collisionReaction.call(this, hitCreature); // call parent collisionReaction function
+		// Call Parent collisionReaction Function
+		creature.prototype.collisionReaction.call(this, hitCreature);
 	}
 
+	// AI Update Function
 	update(delta) {
 		this.collisionCreatureList = [];
-		creature.prototype.update.call(this); // call parent update function
+		// Call Parent update Function
+		creature.prototype.update.call(this);
 
         //this.position[0] += 2 * delta;
         //this.position[1] += 2 * delta;
@@ -242,7 +278,7 @@ class AI extends creature {
             translateSpeed /= 10;
         }
 
-        if (this.velocity[0] * this.velocity[0] + this.velocity[1] * this.velocity[1] < speed * speed){
+        if (this.velocity[0] * this.velocity[0] + this.velocity[1] * this.velocity[1] < speed * speed) {
             if (Math.abs(this.velocity[1]) < speed * moveVector[1]) {
                 if (moveVector[1] > 0) this.velocity[1] += translateSpeed * moveVector[1];
                 else if (moveVector[1] < 0) this.velocity[1] -= translateSpeed * moveVector[1];
@@ -282,15 +318,19 @@ class AI extends creature {
         for (let i = 0; i < 3; ++i) this.position[i] += totalTranslateDistance[i];
 	}
 
-	removeOnWorker() { // Worker side
+	// Worker Side Remove Player
+	removeOnWorker() {
 		mapList[this.mapIndex].AIIDArray.remove(allObject.list, this.ID);
 		this.remove();
 	}
 
+	// Remove AI
 	remove() {
-		creature.prototype.remove.call(this); // call parent remove function
+		// Call Parent Remove Function
+		creature.prototype.remove.call(this);
 	}
 
+	// Get AI Information
 	getInfo() {
 		return {
 			... creature.prototype.getInfo.call(this)
@@ -301,6 +341,7 @@ class AI extends creature {
     creatureCollision(translateDistance) {
         // For Collision Detection
         let theCreature;
+
         // Checking Collision With Every Other Creature
         for (let i = 0; i < this.collisionCreatureList.length; ++i) {
             theCreature = this.collisionCreatureList[i];
@@ -317,7 +358,7 @@ class AI extends creature {
             // Calculate Direct Distance To Squared
             let amount = diffX * diffX + diffY * diffY + diffZ * diffZ;
             if (amount < centerSizeDiff * centerSizeDiff) {
-                //console.log("Collided With Creature", creatureIndex);
+                // console.log("Collided With Creature", creatureIndex);
 
                 let rate = centerSizeDiff / Math.sqrt(amount) - 1;
                 if (rate === Infinity) rate = 1;
@@ -344,7 +385,6 @@ class AI extends creature {
             let directionY = translateDistance[1] > 0 ? 1 : -1;
 
             // Variable Declaration For Checking Collision
-
             let predictedMapX = Math.floor(currentPosition[0] + 0.5);
             let predictedMapY = Math.floor(currentPosition[1] + 0.5);
 
@@ -418,15 +458,14 @@ class AI extends creature {
         let isCollision = [false, false, false];
         let currentPosition = this.getPositionArray();
         let newTranslateDistance, i;
-        while (unitTranslateDistance[0] * dir[0] > 0 || unitTranslateDistance[1] * dir[1] > 0|| unitTranslateDistance[2] * dir[2] > 0){
-
-            for (i = 0; i < 3; ++i){
-                if (isCollision[i]){
+        while (unitTranslateDistance[0] * dir[0] > 0 || unitTranslateDistance[1] * dir[1] > 0|| unitTranslateDistance[2] * dir[2] > 0) {
+            for (i = 0; i < 3; ++i) {
+                if (isCollision[i]) {
                     count[i] = 0;
                 } else {
-                    if (unitTranslateDistance[i] * dir[i] > checkAmount){
+                    if (unitTranslateDistance[i] * dir[i] > checkAmount) {
                         count[i] = dir[i] * checkAmount;
-                    } else if (unitTranslateDistance[i] * dir[i] > 0){
+                    } else if (unitTranslateDistance[i] * dir[i] > 0) {
                         count[i] = unitTranslateDistance[i];
                     } else {
                         count[i] = 0;
@@ -438,7 +477,7 @@ class AI extends creature {
 
             newTranslateDistance = this.surroundingCollision(currentPosition, count);
 
-            for (i = 0; i < 3; ++i){
+            for (i = 0; i < 3; ++i) {
                 currentPosition[i] += newTranslateDistance[i];
 
                 if (Math.abs(count[i]) > Math.abs(newTranslateDistance[i])) {
@@ -466,6 +505,7 @@ class properties {
 		}
 	}
 
+	// Get All Properties
 	getAllProperties(){
 		let allProperties = {};
 		for (let [key, info] of Object.entries(defaultProperties)) {
@@ -474,7 +514,8 @@ class properties {
 		return allProperties;
 	}
 
-	set(key, value){
+	// Set Certain Property
+	set(key, value) {
 		switch (defaultProperties[key].type){
 			case "uint":
 				this[key].setUint32(0, value);
@@ -488,7 +529,8 @@ class properties {
 		}
 	}
 
-	get(key){
+	// Get Certain Property
+	get(key) {
 		switch (defaultProperties[key].type){
 			case "uint":
 				return this[key].getUint32(0);

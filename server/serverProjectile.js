@@ -1,9 +1,11 @@
 // Import Modules
 const {object, sphere, allObject} = require('./object.js');
 const {mapList} = require('./mapClass.js');
+
+// Variable Declaration
 var projectileRemoveList = [];
 
-// Projectile Class
+// Projectile Class Inherite Sphere Class
 class projectile extends sphere {
     // Projectile Constructor
     constructor(projectileInfo, sender) {
@@ -20,23 +22,29 @@ class projectile extends sphere {
         this.damageInfo =  null;
     }
 
-    initWorker(){
+    // Projectile Initialization Worker
+    initWorker() {
 		mapList[this.mapIndex].projectileIDArray.add(allObject.list, this.ID);
 	}
 
-    collisionReaction(hitCreature){
+    // Projectile Collision Reaction
+    collisionReaction(hitCreature) {
 		console.log("Projectile Collision");
 	}
 
-    removeOnWorker() { // Worker side
+    // Worker Side Remove Projectile
+    removeOnWorker() {
         mapList[this.mapIndex].projectileIDArray.remove(allObject.list, this.ID);
 		this.remove();
 	}
 
+    // Remove Projectile
     remove() {
-		sphere.prototype.remove.call(this); // call parent remove function
+        // Call Parent Remove Function
+		sphere.prototype.remove.call(this);
 	}
 
+    // Get Projectile Information
     getInfo() {
         return {
             ... sphere.prototype.getInfo.call(this),
@@ -46,6 +54,7 @@ class projectile extends sphere {
         };
     }
 
+    // Projectile Update Function
     update(delta) {
         let theMap = mapList[this.mapIndex];
         this.position[0] += this.initVelocity[0] * delta;
@@ -60,7 +69,6 @@ class projectile extends sphere {
         let limitRange = this.getRadius() * this.getRadius();
         for (let mapShiftY = -unitRange; mapShiftY <= unitRange; ++mapShiftY) {
             for (let mapShiftX = -unitRange; mapShiftX <= unitRange; ++mapShiftX) {
-
                 // Bottom Left Of The Square
                 let rx = predictedMapX + mapShiftX;
                 let ry = predictedMapY + mapShiftY;
@@ -99,13 +107,16 @@ class projectile extends sphere {
 
                 // Collision Has Occur
                 if (distX * distX + distY * distY + distZ * distZ < limitRange) {
-                    if (theUnit == null) { // Hit Empty Space
+                    // Hit Empty Space
+                    if (theUnit == null) {
                         removing = true;
-                    } else if (isChildDestroyable) { // Hit Child Unit
+                    // Hit Child Unit
+                    } else if (isChildDestroyable) {
                         removing = true;
                         theUnit.set("childID", 0);
                         theUnit.updateToClient();
-                    } else if (theUnit.getIDProperty("destroyable")) { // Hit Unit
+                    // Hit Unit
+                    } else if (theUnit.getIDProperty("destroyable")) {
                         removing = true;
                         let replacingUnit = theUnit.getIDProperty("replacingUnit");
                         if (replacingUnit == null) {
@@ -123,6 +134,7 @@ class projectile extends sphere {
             }
         }
 
+        // Remove Projectile
         if (removing) {
             projectileRemoveList.push(this.ID);
             this.removeOnWorker();
@@ -132,4 +144,5 @@ class projectile extends sphere {
     }
 }
 
+// Export Module
 module.exports = {projectile, projectileRemoveList};
