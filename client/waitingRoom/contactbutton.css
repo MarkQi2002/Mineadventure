@@ -1,3 +1,4 @@
+/* Slide In Animation */
 @keyframes slidein {
     from {
         margin-left: 0%;
@@ -8,6 +9,7 @@
     }
 }
 
+/* Contact Us Submit Button CSS */
 .contact-us-box #contact-button {
     animation: 1s slidein;
     border: 2px solid blue;

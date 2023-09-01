@@ -1,78 +1,82 @@
-<!-- Actual Game Server-->
+<!-- Actual Game Server -->
 <!DOCTYPE html>
 <html lang="en-US">
 	<head>
-		<!-- Prevent Iphone User From Resizing The Window-->
+		<!-- Prevent Iphone User From Resizing The Window -->
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-		<!-- Title And Favicon-->
+		<!-- Title And Favicon -->
 		<title>Mineadventure</title>
 		<link rel="icon" type="image/png" href="image/favicon.png">
-		<!-- External CSS-->
+
+		<!-- External CSS -->
 		<link rel="styleSheet" href="UI/bottominformationUI.css">
 		<link rel="styleSheet" href="UI/loadingmap.css">
 		<link rel="styleSheet" href="UI/itemUI.css">
 		<link rel="styleSheet" href="UI/playerstat.css">
 
-		<!-- Internal CSS-->
+		<!-- Internal CSS -->
 		<style>
 			body {
 				color: white;
 				margin: auto;
 				width: 100%;
 				height: 100%;
-				overflow: hidden; /* Ban Functionality Of Scroll Bar*/
+				overflow: hidden; /* Ban Functionality Of Scroll Bar */
 			}
 		</style>
 	</head>
 	<body>
-		<!-- Special socket.io Importation-->
+		<!-- Special socket.io Importation -->
 		<script src="/socket.io/socket.io.js"></script>
 
-		<!-- Import The Necessary Module-->
+		<!-- Import The Necessary Module -->
 		<script src="js/module/three.js"></script>
 		<script src="js/module/GLTFLoader.js"></script>
         <script src="js/module/stats.js"></script>
 
-		<!-- Cutome JavaScript For Game Logic-->
+		<!-- Cutome JavaScript For Game Logic -->
 		<script src="js/controller.js"></script>
         <script src="js/creature.js"></script>
 		<script src="js/map.js"></script>
 		<script src="js/item.js"></script>
 		<script src="js/projectile.js"></script>
 
-		<!-- Main Running JavaScript-->
+		<!-- Main Running JavaScript -->
 		<script src="js/main.js"></script>
 		<script src="js/client.js"></script>
 
-		<!-- SHA 256 Encryption-->
+		<!-- SHA 256 Encryption -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
     	<script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.8.2/forge.all.min.js"></script>
 
-
-		<!-- Inside Content Can't Be Selected-->
+		<!-- Inside Content Can't Be Selected -->
 		<div id="noSelect" class="noSelect">
-			<!-- Loading Page-->
+			<!-- Loading Page -->
 			<div class="loadingMap">
 				<div class="loadingAnimation"></div>
 			</div>
 
-			<!-- Top Left UI (Player Stat)-->
+			<!-- Top Left UI (Player Stat) -->
 			<div class="playerStat">
+				<!-- Player Equipment -->
 				<div class="activeEquipment">
 					<img src="image/UI_Image/Active Equipment Background.png">
 				</div>
+
+				<!-- Player Health -->
 				<div id="playerHealthBackground">
 					<div id="playerHealthBar"></div>
-					<p id="playerHealthInfo">1/1</p>
+					<p id="playerHealthInfo">100/100</p>
 				</div>
 
+				<!-- Player State -->
 				<div id="stateDisplay">
 
 				</div>
 			</div>
 
-			<!-- Left Side Item Menu-->
+			<!-- Left Side Item Menu -->
 			<div class="itemUI">
 				<table class="itemTable">
 					<tr class="itemTableRow">
@@ -123,21 +127,24 @@
 				<button id="creaturePropertiesButton" type="button" class="collapsible">Creature Properties</button>
 				<div id="creatureInfo" class="creatureInfo">
 			</div>
-
 		</div>
 
-
-		<!-- Bottom Information UI-->
+		<!-- Bottom Information UI -->
 		<div class="bottomInformationUI">
+			<!-- Chat Box UI -->
 			<div id="chatBox" class="chatBox"></div>
+			<!-- Chat Box Terminal UI -->
 			<div class="terminal">
+				<!-- Terminal Message Display Button -->
 				<button id="messageDisplayButton" type="button" class="messageDisplayButton"> ^ </button>
+				<!-- Terminal Text Input -->
 				<input type="text" id="terminalInput" placeholder="Enter The Command">
+				<!-- Terminal Input Submit -->
 				<button id="terminalSubmit" onclick="terminalSubmit()">Submit</button>
 			</div>
 		</div>
 	</body>
 </html>
 
-<!-- External JavaScript-->
+<!-- External JavaScript -->
 <script src="js/UI.js"></script>

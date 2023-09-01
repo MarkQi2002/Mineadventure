@@ -1,3 +1,4 @@
+/* Game Start Button CSS */
 #start-button {
     background-color: #72ccc9;
     border: 2px solid dodgerblue;
@@ -13,6 +14,8 @@
     transition-duration: 0.5s;
     width: 150px;
 }
+
+/* Game Start Button Hover CSS */
 #start-button:hover {
     background-color: rebeccapurple;
     border: 2px solid #72ccc9;
@@ -20,12 +23,16 @@
     cursor: pointer;
     width: 200px;
 }
+
+/* Coloring Game Start Buttom Text */
 #start-button span {
     cursor: pointer;
     display: inline-block;
     position: relative;
     transition: 0.5s;
 }
+
+/* Coloring Game Start Buttom Text */
 #start-button span:after {
     content: '\00bb';
     position: absolute;
@@ -34,9 +41,13 @@
     right: -20px;
     transition: 0.5s;
 }
+
+/* Coloring Game Start Buttom Text */
 #start-button:hover span {
     padding-right: 25px;
 }
+
+/* Coloring Game Start Buttom Text */
 #start-button:hover span:after {
     opacity: 1;
     right: 0;

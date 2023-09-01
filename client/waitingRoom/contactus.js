@@ -1,4 +1,4 @@
-/* Function To Save The User Input*/
+/* Function To Save The User Input */
 function saveMessage() {
     var userInput = "First Name: ";
     userInput += document.getElementById("firstName").value;

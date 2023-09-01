@@ -1,14 +1,16 @@
-<!-- Waiting Server, Player Will Input Their Name-->
+<!-- Waiting Server, Player Will Input Their Name -->
 <!DOCTYPE html>
 <html lang="en-US">
     <head>
-        <!-- Title And Favicon-->
+        <!-- Title And Favicon -->
         <title>Mineadventure</title>
         <link rel="icon" type="image/png" href="image/favicon.png">
-        <!-- External CSS-->
+
+        <!-- External CSS -->
         <link rel="styleSheet" href="waitingRoom/startbutton.css">
         <link rel="styleSheet" href="waitingRoom/navigationbar.css">
-        <!-- Internal CSS-->
+
+        <!-- Internal CSS -->
         <style>
             body {
                 background-color:lightpink;
@@ -20,7 +22,7 @@
         </style>
     </head>
     <body onload="onloadUpdateTime()" id="home">
-        <!-- Top Navigation Bar-->
+        <!-- Top Navigation Bar -->
         <ul id="navigation-bar">
             <div class="navigation-list">
                 <li><a href="index.html#home">Home</a></li>
@@ -38,24 +40,24 @@
         </ul>
 
 
-        <!-- Headings-->
+        <!-- Headings -->
         <h1>Mineadventure</h1>
         <h2>Waiting Room</h2>
 
-        <!-- Basic Information-->
+        <!-- Basic Information -->
         <p>This is a web based 3D adventure game created by <i>Erik Zeng</i> and <i>Mark Qi</i> for educational purposes.</p>
         <span>The Current Time Is: </span>
         <span id="currentDate"></span>
         <p></p>
 
-        <!-- Getting The Player Name-->
+        <!-- Getting The Player Name -->
         <span>Please Enter Player Name: </span>
         <input type="text" id="playerInput" value="">
 
-        <!-- Starting The Game-->
+        <!-- Starting The Game -->
         <button id="start-button" onclick="startGame()"><span>Start Game</span></button>
     </body>
 </html>
 
-<!-- External JavaScript-->
+<!-- External JavaScript -->
 <script src="waitingRoom/waitingRoom.js"></script>

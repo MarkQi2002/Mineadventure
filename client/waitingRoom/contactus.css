@@ -1,3 +1,4 @@
+/* Contact Us CSS */
 .contact-us-first-line {
     width: 100%;
     display: flex;
@@ -42,6 +43,7 @@
     margin-right: 5%;
 }
 
+/* Wechat Donation CSS */
 .wechat-donation {
     background-color:lightgrey;
     width: 50%;

@@ -1,9 +1,9 @@
-/* Top Left UI (Player Stat)*/
+/* Top Left UI (Player Stat) */
 .playerStat {
     background-color: rgba(255, 192, 203, 0);
     overflow: hidden;
     position: fixed;
-    
+
     top: 0;
     left: 0;
 
@@ -12,7 +12,7 @@
     z-index: 1;
 }
 
-/* Active Equipment Slot*/
+/* Active Equipment Slot */
 .playerStat .activeEquipment {
     background-color: rgba(233, 150, 122, 0);
     position: fixed;
@@ -25,12 +25,24 @@
     height: 12vh;
 }
 
-/* Active Equipment Image*/
+/* Active Equipment Image */
 .activeEquipment img {
     width: 100%;
     height: 100%;
 }
 
+/* Player State Class */
+.stateClass {
+    background-color: rgba(255, 0, 255, 0.5);
+    position: relative;
+    margin-left: 3%;
+    margin-bottom: 1%;
+    height: 2vh;
+    width: 2vh;
+
+}
+
+/* Player Health Background */
 .playerStat #playerHealthBackground {
     background-color: rgba(25, 25, 25, 0.5);
     position: absolute;
@@ -41,16 +53,18 @@
     top: 10%;
 }
 
+/* Player Health Bar */
 .playerStat #playerHealthBar {
     background-color: red;
     position: absolute;
     margin-left: 1%;
     top: 5%;
-    
+
     width: 98%;
     height: 90%;
 }
 
+/* Player Health Information */
 .playerStat #playerHealthInfo {
     position: absolute;
     text-align: right;
@@ -61,6 +75,7 @@
     font-size: 1.5vh;
 }
 
+/* Player Status */
 .playerStat #stateDisplay {
     background-color: rgba(25, 25, 25, 0.5);
     position: absolute;
@@ -70,14 +85,4 @@
     top: 60%;
     display: flex;
     flex-direction: row;
-}
-
-.stateClass {
-    background-color: rgba(255, 0, 255, 0.5);
-    position: relative;
-    margin-left: 3%;
-    margin-bottom: 1%;
-    height: 2vh;
-    width: 2vh;
-    
 }

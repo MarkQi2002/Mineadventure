@@ -1,3 +1,5 @@
+
+/* Bottom Information UI Style */
 .bottomInformationUI {
     background-color: rgba(255, 192, 203, 0) ;
     margin-left: 7.5%;
@@ -7,27 +9,7 @@
     height: 80vh;
 }
 
-.terminal { 
-    position: fixed;
-    bottom: 0%;
-    width: 30%;
-    height: 2.5%;
-    margin-bottom: 2%;
-}
-
-.terminal input {
-    width: 65%;
-    height: 100%;
-    font-size: 2vh;
-}
-
-.terminal button {
-    right: 0;
-    width: 15%;
-    height: 100%;
-    font-size: 2vh;
-}
-
+/* Chat Box Wrapper */
 .chatBox {
     background-color: rgba(50, 50, 50, 0.25) ;
     margin-bottom: 5.5%;
@@ -39,6 +21,31 @@
     direction: rtl;
 }
 
+/* Bottom Information UI Terminal Text Terminal Style */
+.terminal {
+    position: fixed;
+    bottom: 0%;
+    width: 30%;
+    height: 2.5%;
+    margin-bottom: 2%;
+}
+
+/* Bottom Information UI Terminal Text Input Style */
+.terminal input {
+    width: 65%;
+    height: 100%;
+    font-size: 2vh;
+}
+
+/* Bottom Information UI Terminal Text  Style */
+.terminal button {
+    right: 0;
+    width: 15%;
+    height: 100%;
+    font-size: 2vh;
+}
+
+/* Terminal Message Wrapper */
 .messageClass {
     margin-left: 5%;
     margin-bottom: 2%;
@@ -48,9 +55,10 @@
     width: 90%;
     word-wrap:break-word;
     direction:ltr;
-    
+
 }
 
+/* Terminal Message Display Button */
 .messageDisplayButton {
     background-color: #777;
     color: white;
@@ -62,11 +70,25 @@
     font-size: 2vh;
 }
 
+/* Terminal Message Display Button Hover */
 .active, .messageDisplayButton:hover {
     background-color: #555;
 }
 
+/* Creature Information Style */
+.creatureInfo {
+    background-color: rgba(50, 50, 50, 0.25) ;
+    overflow: hidden;
+    position: fixed;
+    bottom: 5vh;
+    right: 0;
+    width: 20vw;
+    height: 80vh;
+    padding: 0 18px;
+    display: none;
+}
 
+/* Collapsible Property */
 .collapsible {
     background-color: #777;
     color: white;
@@ -80,19 +102,8 @@
     outline: none;
     font-size: 15px;
 }
-  
+
+/* Collapsible Hover Property */
 .active, .collapsible:hover {
     background-color: #555;
-}
-
-.creatureInfo {
-    background-color: rgba(50, 50, 50, 0.25) ;
-    overflow: hidden;
-    position: fixed;
-    bottom: 5vh;
-    right: 0;
-    width: 20vw;
-    height: 80vh;
-    padding: 0 18px;
-    display: none;
 }
