@@ -150,7 +150,6 @@ const updateFrame = (
 		}
 	}
 
-
 	// Displayer Creature
 	for (let i = 0; i < lastDisplayObjectList.length; ++i){
 		theObject = objectList[lastDisplayObjectList[i]];
@@ -180,9 +179,6 @@ const updateFrame = (
 		}
 	}
 
-
-
-
 	// Data Is Updated
 	updateFrameSwitch = true;
 };
@@ -205,10 +201,10 @@ const updateMap = (
 
 	let i, j, theUnit;
 	// Update Unit
-	for (i = 0; i < unitModifiedList.length; ++i){
+	for (i = 0; i < unitModifiedList.length; ++i) {
 		theUnit = game_map.getUnit([unitModifiedList[i][0], unitModifiedList[i][1]]);
         if (theUnit == null) continue;
-		for (j = 0; j < unitModifiedList[i][2].length; ++j){
+		for (j = 0; j < unitModifiedList[i][2].length; ++j) {
 			theUnit[unitModifiedList[i][2][j][0]] = unitModifiedList[i][2][j][1];// Change Unit Property
 		}
 
@@ -222,7 +218,7 @@ const updateMap = (
 	}
 
 	let theProjectile;
-	for (i = 0; i < projectileRemoveList.length; ++i){
+	for (i = 0; i < projectileRemoveList.length; ++i) {
 		theProjectile = objectList[projectileRemoveList[i]];;
         if (theProjectile == null) continue;
 		theProjectile.remove();

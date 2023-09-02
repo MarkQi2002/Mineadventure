@@ -8,6 +8,13 @@ const {object, sphere, allObject} = require('./object.js');
 // Variable Declaration
 const gravity = 20;
 
+// Default Camp Information
+function campInfo() {
+	this["defaultPlayer"] = -100
+	this["defaultMonster"] = 0
+	this["monsterKiller"] = 0
+}
+
 var allPlayer = new dynamicList("Player List", 30, 10);
 // The Range For Player To Get Object Information On Server
 var displayRange = {x: 30, y: 30};
@@ -106,16 +113,28 @@ class creature extends sphere {
 		}
 	}
 
-	// Creature Update
-	update() {
-		this.collision();
-	}
-
 	// Creature Collision Reaction
 	collisionReaction(hitCreature) {
+		// Collision With Projectile
+		if (hitCreature.objectType == "projectile") {
+			// TODO Creature Collision With Projectile
+			this.properties.set("health", 0);
+		}
+
+		// Collision With AI Creature
 		if (hitCreature.objectType == "AI") {
 			hitCreature.collisionCreatureList.push(this);
 		}
+
+		// Collision With Player Creature
+		if (hitCreature.object == "player") {
+			// TODO Creature Collision With Player
+		}
+	}
+
+	// Creature Update
+	update() {
+		this.collision();
 	}
 
 	// Remove Creature
@@ -188,7 +207,7 @@ class player extends creature {
 		});
 
 		let theObject;
-		for(let i = 0; i < displayObjects.length; ++i) {
+		for (let i = 0; i < displayObjects.length; ++i) {
 			theObject = allObject.list[displayObjects[i].ID];
 
 			if (theObject == null || this.ID == theObject.ID) continue;
@@ -259,7 +278,7 @@ class AI extends creature {
 
         //this.position[0] += 2 * delta;
         //this.position[1] += 2 * delta;
-		let moveVector = [1,0];
+		let moveVector = [1, 0];
 		let speed = this.properties.get("moveSpeed");
 
         // Variable Declaration
@@ -374,7 +393,7 @@ class AI extends creature {
     }
 
 	// Surrounding Unit Collision Detection
-    surroundingCollision(currentPosition, translateDistance){
+    surroundingCollision(currentPosition, translateDistance) {
         let [offSetX, offSetY, offSetZ] = translateDistance;
 		let radius = this.getRadius();
 		let theMap = mapList[this.mapIndex];
@@ -449,7 +468,7 @@ class AI extends creature {
     }
 
     // Map Collision Detection
-    mapCollision(translateDistance){
+    mapCollision(translateDistance) {
         let unitTranslateDistance = [translateDistance[0], translateDistance[1], translateDistance[2]]; // Copy
 		let radius = this.getRadius();
         let checkAmount = radius / 2 > 0.3 ? 0.3 : radius / 2;
@@ -506,7 +525,7 @@ class properties {
 	}
 
 	// Get All Properties
-	getAllProperties(){
+	getAllProperties() {
 		let allProperties = {};
 		for (let [key, info] of Object.entries(defaultProperties)) {
 			allProperties[key] = this.get(key);
@@ -540,13 +559,6 @@ class properties {
 				return this[key].getFloat32(0);
 		}
 	}
-}
-
-// Default Camp Information
-function campInfo(){
-	this["defaultPlayer"] = -100
-	this["defaultMonster"] = 0
-	this["monsterKiller"] = 0
 }
 
 // Export Module

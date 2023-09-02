@@ -53,7 +53,7 @@ function workerLoop(delta) {
         }
 
         // Add Player Into Quad Tree
-        for(j = 0; j < theMap.playerIDArray.length[0]; ++j) {
+        for (j = 0; j < theMap.playerIDArray.length[0]; ++j) {
             thePlayer = allObject.list[theMap.playerIDArray.list[j]];
 
             if (thePlayer == null) continue;
@@ -92,7 +92,7 @@ function workerLoop(delta) {
         }
 
         // AI Update
-        for(j = 0; j < theMap.AIIDArray.length[0]; ++j) {
+        for (j = 0; j < theMap.AIIDArray.length[0]; ++j) {
             theAI = allObject.list[theMap.AIIDArray.list[j]];
 
             if (theAI == null) continue;

@@ -19,7 +19,7 @@ class projectile extends sphere {
         ];
 
         this.senderID = sender.ID;
-        this.damageInfo =  null;
+        this.damageInfo = null;
     }
 
     // Projectile Initialization Worker
@@ -29,7 +29,7 @@ class projectile extends sphere {
 
     // Projectile Collision Reaction
     collisionReaction(hitCreature) {
-		console.log("Projectile Collision");
+        hitCreature.collisionReaction(this);
 	}
 
     // Worker Side Remove Projectile
@@ -67,6 +67,8 @@ class projectile extends sphere {
         let predictedMapX = Math.floor(this.position[0] + 0.5);
         let predictedMapY = Math.floor(this.position[1] + 0.5);
         let limitRange = this.getRadius() * this.getRadius();
+
+        // Iterate Through Projectile Range By UnitRange
         for (let mapShiftY = -unitRange; mapShiftY <= unitRange; ++mapShiftY) {
             for (let mapShiftX = -unitRange; mapShiftX <= unitRange; ++mapShiftX) {
                 // Bottom Left Of The Square
@@ -80,7 +82,7 @@ class projectile extends sphere {
 
                 let isChildDestroyable = false;
 
-                if (theUnit != null){
+                if (theUnit != null) {
                     rz = theUnit.get("height");
                     isChildDestroyable = theUnit.getChildIDProperty("destroyable")
                     if (isChildDestroyable){
@@ -130,6 +132,7 @@ class projectile extends sphere {
                         if (replacingUnit != null) theUnit.set("ID", replacingUnit);
                         theUnit.updateToClient();
                     }
+                    // TODO Add Projectile Collision With Creature
                 }
             }
         }

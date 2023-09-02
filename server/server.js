@@ -1,4 +1,4 @@
-// Acronym List
+// Acronym sdList
 // EXP -> Experience
 
 // CommonJS Syntax
@@ -141,14 +141,14 @@ function clientFrameUpdate(newPos, sendProjectileList, requestObjectList, thePla
 	let theObject;
 
 	// Client Send A New Projectile
-	for(i = 0; i < sendProjectileList.length; ++i) {
+	for (i = 0; i < sendProjectileList.length; ++i) {
 		theObject = spawnProjectile(sendProjectileList[i], thePlayer);
 		if (theObject == null) continue;
 		newObjectList.push(theObject.getInfo());
 	}
 
 	// Client Get Info To display the Object (First Time)
-	for(i = 0; i < requestObjectList.length; ++i) {
+	for (i = 0; i < requestObjectList.length; ++i) {
 		theObject = allObject.list[requestObjectList[i]];
 		if (theObject == null) continue;
 		newObjectList.push(theObject.getInfo());
@@ -158,10 +158,11 @@ function clientFrameUpdate(newPos, sendProjectileList, requestObjectList, thePla
 	let displayObjectList = [];
 
 	// Client Display Update
-	for(i = 0; i < thePlayer.displayObjectsLength[0]; ++i) {
+	for (i = 0; i < thePlayer.displayObjectsLength[0]; ++i) {
 		theObject = allObject.list[thePlayer.displayObjects[i]];
 		if (theObject == null) continue;
 		displayObjectList.push([theObject.ID, theObject.getPositionArray()]);
+		// TODO Update Creture After Projectile Hit
 	}
 
 	// Send Update Information To Client

@@ -9,3 +9,10 @@ Change To Other Levels: /ChangeMap (Not Implemented)
 Teleport To Player With Certain ID: /tpa other_player_ID
 Teleport To Player With Certain Name: /tpn other_player_name
 Modify Player Radius: /radius player_radius
+
+Inheritance
+Player/AI -> Creature -> Sphere -> Object
+Projectile -> Sphere -> Object
+
+Map
+Tow Classes: map and mapUnit
