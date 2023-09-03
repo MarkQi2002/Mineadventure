@@ -17,9 +17,9 @@ const initSelf = (data) => {
 		// Create New Map
 		game_map = new map(data);
 	}
-
 };
 
+// After Map Event
 function afterMapEvent(data) {
 	let new_player = new player(data.thePlayer);
 	new messageUI("System", new_player.name + " joined the game.", "yellow");
@@ -68,8 +68,8 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 
 // Initialization Myself And All Future Players
 // Constructing An Player Object And Storing In The Client Side playerArray
-function spawnItem(itemID, itemPosition, itemIndex){
-	if (itemIndex >= itemArray.length){
+function spawnItem(itemID, itemPosition, itemIndex) {
+	if (itemIndex >= itemArray.length) {
 		itemArray.length = itemIndex + 1;
 	}
 
@@ -96,7 +96,7 @@ const initItem = (serverItemArray, serverItemInfoArray) => {
 	// Format And Copy The Item Array From Server Item Array
 	itemArray.length = serverItemArray.length;
 	for (let itemIndex = 0; itemIndex < serverItemArray.length; itemIndex++) {
-		if (serverItemArray[itemIndex] != null){
+		if (serverItemArray[itemIndex] != null) {
 			spawnItem(serverItemArray[itemIndex].itemID, serverItemArray[itemIndex].itemPosition, itemIndex);
 		}
 	}
@@ -121,9 +121,7 @@ function removeItem(itemIndex) {
 }
 
 // -------------------End Of Item-------------------
-
-
-
+// Variable Declaration
 var lastDisplayObjectList = [];
 var lastDisplayCreatureList = [];
 const updateFrame = (
@@ -132,10 +130,9 @@ const updateFrame = (
 	) => {
 
 	let theObject;
-
 	// Spawn Creature
-	for (let i = 0; i < newObjectList.length; ++i){
-		switch(newObjectList[i].objectType){
+	for (let i = 0; i < newObjectList.length; ++i) {
+		switch(newObjectList[i].objectType) {
 			case "projectile":
 				new projectile(newObjectList[i]);
 				break;
@@ -149,12 +146,12 @@ const updateFrame = (
 	}
 
 	// Displayer Creature
-	for (let i = 0; i < lastDisplayObjectList.length; ++i){
+	for (let i = 0; i < lastDisplayObjectList.length; ++i) {
 		theObject = objectList[lastDisplayObjectList[i]];
-		if (theObject != null){
+		if (theObject != null) {
 			theObject.object.visible = false;
 			if (theObject.onHeadUI != null) {
-				if (theObject.onHeadUI.UI.style.visibility == 'visible'){
+				if (theObject.onHeadUI.UI.style.visibility == 'visible') {
 					theObject.onHeadUI.UI.style.visibility = 'hidden';
 				}
 			}
@@ -163,16 +160,16 @@ const updateFrame = (
 
 	lastDisplayObjectList = [];
 	lastDisplayCreatureList = [];
-	for (let i = 0; i < displayObjectList.length; ++i){
+	for (let i = 0; i < displayObjectList.length; ++i) {
 		theObject = objectList[displayObjectList[i][0]];
-		if (theObject != null){
+		if (theObject != null) {
 			theObject.changePosition(displayObjectList[i][1]);
 			lastDisplayObjectList.push(displayObjectList[i][0]);
 			if (theObject.onHeadUI != null) {
 				lastDisplayCreatureList.push(displayObjectList[i][0]);
 			}
 			theObject.object.visible = true;
-		}else{
+		} else {
 			requestObjectList.push(displayObjectList[i][0]);
 		}
 	}
@@ -181,8 +178,8 @@ const updateFrame = (
 	updateFrameSwitch = true;
 };
 
-
-function sendFrameData(){
+// Send Fame Data To Server
+function sendFrameData() {
 	sock.compress(true).emit('clientFrame',
 		player_controller.creature.getPositionArray(),
 		sendProjectileList,
@@ -202,17 +199,17 @@ const updateMap = (
 	for (i = 0; i < unitModifiedList.length; ++i) {
 		theUnit = game_map.getUnit([unitModifiedList[i][0], unitModifiedList[i][1]]);
         if (theUnit == null) continue;
+		// Change Unit Property
 		for (j = 0; j < unitModifiedList[i][2].length; ++j) {
-			theUnit[unitModifiedList[i][2][j][0]] = unitModifiedList[i][2][j][1];// Change Unit Property
+			theUnit[unitModifiedList[i][2][j][0]] = unitModifiedList[i][2][j][1];
 		}
 
-		if (theUnit.mesh != null){
+		if (theUnit.mesh != null) {
 			game_map.object.remove(theUnit.mesh);
             theUnit.mesh = null;
 
 			game_map.spawnUnit(theUnit);
 		}
-
 	}
 
 	let theProjectile;
@@ -222,7 +219,6 @@ const updateMap = (
 		theProjectile.remove();
 		objectList[projectileRemoveList[i]]
 	}
-
 };
 
 // -------------------Connection Exception Related-------------------
@@ -234,7 +230,7 @@ const connectionError = (error) => {
 
 // When A Player Is Disconnected
 const playerDisconnect = (PlayerID) => {
-	if (playerArray[PlayerID] != null){
+	if (playerArray[PlayerID] != null) {
 		new messageUI("System", playerArray[PlayerID].name + " left the game.", "yellow");
 		objectList[playerArray[PlayerID].ID] = null;
 		playerArray[PlayerID].remove();
@@ -250,7 +246,7 @@ const newServerMessage = (name, text, color) => {
 
 // -------------------End Of Message-------------------
 const commandFromServer = (theCommand) => {
-	switch (theCommand[0]){
+	switch (theCommand[0]) {
 		case "changePlayerPos":
 			player_controller.creature.changePosition(theCommand[1]);
 			new messageUI("System", "Successfully changed player position!", "green");
@@ -302,8 +298,6 @@ var sock;
 	sock.on('clientNewItem', newItem);
 	sock.on('removeItem', deleteItem);
 
-
-
 	// Sending My New Position To Server
 	const updatePosition = () => {
 		// Return The Player's Accurate Position To The Server As A Tuple
@@ -335,7 +329,6 @@ var sock;
 		}
 	};
 	document.addEventListener('updateBlock', updateBlock);
-
 
 	// Creature Information Related
 	const creatureInfo = () => {
