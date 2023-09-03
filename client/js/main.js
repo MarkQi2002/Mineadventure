@@ -6,7 +6,7 @@ var gameTime = new Date();
 // THREE.js Initial Set Up Variable
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
-scene.add( camera );
+scene.add(camera);
 
 // scene.background = new THREE.Color( 0xffffff );
 var cameraAngle = Math.PI / 8;

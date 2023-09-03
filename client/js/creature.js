@@ -4,7 +4,9 @@ var creatureLoader = {
     playerGeometry: new THREE.SphereGeometry(1, 10, 10)
 };
 
-class object{
+// Object Class
+class object {
+    // Object Class Constructor
 	constructor(info) {
 		this.ID = info.ID;
         this.objectType = info.objectType;
@@ -17,19 +19,21 @@ class object{
         objectList[this.ID] = this;
     }
 
-    setRadius(value){
+    // Set Object Radius
+    setRadius(value) {
         this.radius = value;
         this.object.scale.set(this.radius, this.radius, this.radius);
     }
 
-
-	changePosition([x, y, z]){
+    // Change Object Position
+	changePosition([x, y, z]) {
 		this.object.position.x = x;
 		this.object.position.y = y;
 		this.object.position.z = z;
 	}
 
-	getPositionArray(){
+    // Get Object Position
+	getPositionArray() {
 		return [
             this.object.position.x,
             this.object.position.y,
@@ -37,7 +41,8 @@ class object{
         ];
 	}
 
-    remove(){
+    // Remove Object
+    remove() {
         // Remove All Child Object
         var obj;
         for (var i = this.object.children.length - 1; i >= 0; i--) {
@@ -50,8 +55,9 @@ class object{
 }
 
 // The Most Basic Class, All Other Class (Player, Monster) Will Built Upon This By Inheritance
+// Creature Class Inherite Object Class
 class creature extends object{
-    // Creature Constructor
+    // Creature Class Constructor
     constructor(creatureInfo) {
         super(creatureInfo);
 
@@ -117,14 +123,15 @@ class creature extends object{
         this.onHeadUI.update();
     }
 
-    // Destructor
+    // Creature Class Destructor
     remove() {
-        object.prototype.remove.call(this); // call parent remove function
+        // Call Parent Remove Function
+        object.prototype.remove.call(this);
         this.onHeadUI.remove();
     }
 }
 
-// Player Class
+// Player Class Inherite Creature Class
 class player extends creature {
     constructor(playerInfo) {
         // Calling Parent Constructor
@@ -136,8 +143,10 @@ class player extends creature {
         playerArray[this.playerID] = this;
     }
 
-    remove(){
-        creature.prototype.remove.call(this); // call parent remove function
+    // Player Class Destructor
+    remove() {
+        // Call Parent Remove Function
+        creature.prototype.remove.call(this);
         playerArray[this.playerID] = null;
         delete this;
     }

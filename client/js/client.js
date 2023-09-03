@@ -20,7 +20,7 @@ const initSelf = (data) => {
 
 };
 
-function afterMapEvent (data){
+function afterMapEvent(data) {
 	let new_player = new player(data.thePlayer);
 	new messageUI("System", new_player.name + " joined the game.", "yellow");
 
@@ -38,9 +38,6 @@ function afterMapEvent (data){
 	//intervalWorker.onmessage = updateTimeEvent;
 }
 
-
-
-
 // -------------------Item-------------------
 // Variable Declaration
 var additionalItemID;
@@ -56,10 +53,11 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 	if (removeItemID >= 0 && removeItemID < itemArray.length) removeItem(removeItemID);
 
 	// Update Server Side Player Item Array
-	if (playerArray[updatePlayerID].creatureItemArray[additionalItemID] != null)
+	if (playerArray[updatePlayerID].creatureItemArray[additionalItemID] != null) {
 		playerArray[updatePlayerID].creatureItemArray[additionalItemID]++;
-	else
+	} else {
 		playerArray[updatePlayerID].creatureItemArray[additionalItemID] = 1;
+	}
 
 	// Update Item UI
 	if (updatePlayerID == clientPlayerID) appendItemUIArray(itemInfoArray[additionalItemID].itemName);

@@ -6,24 +6,23 @@ var projectileLoader = {
 
 // Projectile Class
 class projectile extends object{
-    // Projectile Constructor
+    // Projectile Class Constructor
     constructor(projectileInfo) {
         super(projectileInfo);
         this.initVelocity = projectileInfo.initVelocity;
         this.damageInfo = projectileInfo.damageInfo;
         this.range;
         this.spawnMesh()
-
     }
 
     // Spawing The Projectile Mesh
-    spawnMesh(){
+    spawnMesh() {
         let mesh = new THREE.Mesh(projectileLoader.geometry, projectileLoader.material);
         this.object.add(mesh);
     }
 
     // Updating Projectile Position
-    positionChange(projectilePos){
+    positionChange(projectilePos) {
         this.object.position.x = projectilePos[0];
         this.object.position.y = projectilePos[1];
     }

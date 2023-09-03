@@ -17,9 +17,9 @@ function loadItemMaterials(){
     return itemMaterialsArray;
 }
 
-// The Entire Item Class
+// Item Class
 class item {
-    // Item Constructor
+    // Item Class Constructor
     constructor(itemInfo, itemPosition) {
         // Basic Item Information
         this.itemInfo = itemInfo;

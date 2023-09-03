@@ -174,9 +174,7 @@ class damageText{
             color = [0, 128, 255];
         }
 
-
-
-
+        // Critical Attack
         if (value.criticalAttack){
             this.text.style['-webkit-text-stroke'] = this.size / 40 + "vh rgb(" + color[0] + "," + color[1] + "," + color[2] + ")";
 
@@ -187,7 +185,6 @@ class damageText{
         }
 
         this.text.style.color = "rgb(" + color[0] + "," + color[1] + "," + color[2] + ")";
-
 
         // Damage Text Timer
         this.sqrtSize = Math.sqrt(this.size);
@@ -212,7 +209,7 @@ class damageText{
     }
 
     // Updating Damage Text Location
-    update(delta, index){
+    update(delta, index) {
         // Update Position
         let [posX, posY] = this.toXYCoords(this.position);
         let num = this.deleteTimer / this.rate - this.sqrtSize;
@@ -235,7 +232,7 @@ class damageText{
 }
 
 // Creature UI Class
-class creatureUI{
+class creatureUI {
     // Creature UI Constructor
     constructor(creature) {
         this.scale = 1;
@@ -321,7 +318,7 @@ class creatureUI{
     }
 
     // Update Level UI
-    updateLevel(){
+    updateLevel() {
         this.levelText.innerHTML = this.creature.properties.level;
     }
 
@@ -340,14 +337,14 @@ class creatureUI{
     }
 
     // Update Function
-    update(){
+    update() {
         let [posX, posY] = this.toXYCoords([this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z]);
         this.UI.style.top = posY + 'px';
         this.UI.style.left = posX + 'px';
     }
 
     // Deletion Function
-    remove(){
+    remove() {
         menuHtml.removeChild(this.UI);
         delete this;
     }
@@ -377,40 +374,38 @@ function terminalSubmit() {
     md.start();
     md.update(hashKey, "utf8");
 
-    if (inputArray[0][0] == "/"){
+    if (inputArray[0][0] == "/") {
         inputArray[0] = inputArray[0].substr(1, inputArray[0].length - 1);
 
         let theCommand = commandList[inputArray[0]];
         if (theCommand != null){
             let result = theCommand.execute(inputArray, md.digest().toHex() != hexCode);
             if (result[0] != null) new messageUI("System", result[0], result[1]);
-        }else{
+        } else {
             new messageUI("System", "Invalid Command!!!", "red");
         }
 
-    }else if (inputCommand !=''){
+    } else if (inputCommand !='') {
         sock.compress(true).emit('newMessage', player_controller.creature.name, inputCommand);
         terminalInput.value = '';
     }
 }
 
-
-
+// Text Command Class
 class textCommand{
-    // Damage Text Class Constructor
+    // Text Command Class Constructor
     constructor({
         commandInputType = [],
         isLockedCommand = true,
         executeFunction = function(){}
     }) {
-
         this.commandInputType = commandInputType;
         this.isLockedCommand = isLockedCommand;
         this.executeFunction = executeFunction;
     }
 
     // Removing Damage Text
-    execute(inputArray, hashState){
+    execute(inputArray, hashState) {
         // Check If It Is Locked Command And Hash Key Input Correctly
         if (this.isLockedCommand && hashState) return ["This Command Is Locked!", "red"];
 
@@ -422,7 +417,7 @@ class textCommand{
         for (let i = 0; i < this.commandInputType.length; ++i){
             count = i + 1;
 
-            switch (this.commandInputType[i]){
+            switch (this.commandInputType[i]) {
                 case "int":
                     inputs[i] = parseInt(inputArray[count]);
                     if (isNaN(inputs[i])) return ["Element " + count + " is Not Int!", "red"];
@@ -443,9 +438,7 @@ class textCommand{
     }
 }
 
-
-
-
+// Client Side Command List
 var commandList = {
     "unlock": new textCommand({
         commandInputType: ["string"],
@@ -506,15 +499,11 @@ var commandList = {
             return [null, null];
         }
     }),
-
 }
-
-
-
 
 // Commands That Need To Be Unlocked
 function lockedCommand(inputArray) {
-    if (inputArray[0] == "mapLevel"){
+    if (inputArray[0] == "mapLevel") {
         // Input Control
         if (inputArray[1] == null || isNaN(parseInt(inputArray[1]))) {
             console.log("The Number Is Invalid!");
