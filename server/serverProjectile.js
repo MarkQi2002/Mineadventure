@@ -123,7 +123,7 @@ class projectile extends sphere {
                         let replacingUnit = theUnit.getIDProperty("replacingUnit");
                         if (replacingUnit == null) {
                             let newHeight = theUnit.get("height") - 0.1
-                            if (newHeight <= 0){
+                            if (newHeight <= 0) {
                                 newHeight = 0;
                                 replacingUnit = theMap.mapMethod.inputs.defaultReplacingUnit;
                             }

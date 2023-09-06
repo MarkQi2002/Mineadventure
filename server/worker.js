@@ -4,7 +4,7 @@ const {parentPort} = require('worker_threads');
 
 var {map, mapList, unitModifiedList} = require('./mapClass.js');
 const {object, sphere, allObject} = require('./object.js');
-const {player, AI, properties, allPlayer, defaultProperties} = require('./serverCreature.js');
+const {player, AI, properties, allPlayer, defaultProperties, creatureRemoveList} = require('./serverCreature.js');
 const {projectile, projectileRemoveList} = require('./serverProjectile.js');
 
 // Variable Declaration
@@ -31,9 +31,10 @@ function initWorker(data) {
 function workerLoop(delta) {
     // Variable Declaration
     let i, j, theProjectile, thePlayer, theAI, theMap;
-    for (i = 0; i < workerMapList.length; ++i){
+    for (i = 0; i < workerMapList.length; ++i) {
         theMap = workerMapList[i];
         unitModifiedList.length = 0;
+        creatureRemoveList.length = 0;
         projectileRemoveList.length = 0;
 
         // Add Projectile Into Quad Tree
@@ -101,13 +102,13 @@ function workerLoop(delta) {
         }
 
         // Any Modified Unit Send Message To Parent Thread
-        if (unitModifiedList.length != 0 ||
-            projectileRemoveList.length != 0 ){
+        if (unitModifiedList.length != 0 || creatureRemoveList.length != 0 || projectileRemoveList.length != 0) {
 
             parentPort.postMessage({
                 type: "updateMap",
                 mapIndex: theMap.index,
                 unitModifiedList: unitModifiedList,
+                creatureRemoveList: creatureRemoveList,
                 projectileRemoveList: projectileRemoveList
             })
         }

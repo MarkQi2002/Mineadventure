@@ -7,6 +7,7 @@ const {object, sphere, allObject} = require('./object.js');
 
 // Variable Declaration
 const gravity = 20;
+var creatureRemoveList = [];
 
 // Default Camp Information
 function campInfo() {
@@ -47,7 +48,7 @@ var defaultProperties = {
 
 	// Attack Properties
 	"attackDamage": {type: "int", value: 10},
-	"attackSpeed": {type: "float", value: 100},
+	"attackSpeed": {type: "float", value: 1},
 	"criticalRate": {type: "float", value: 0.01},
 
 	// Movement Properties40
@@ -59,6 +60,54 @@ var defaultProperties = {
 var propertyNumber = 0;
 for (let [key, value] of Object.entries(defaultProperties)) {
 	++propertyNumber;
+}
+
+// Default Properties For All Creature
+class properties {
+	constructor() {
+		let data = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * propertyNumber);
+		let count = 0;
+		for (let [key, info] of Object.entries(defaultProperties)) {
+			this[key] = new DataView(data, Int32Array.BYTES_PER_ELEMENT * count++, Int32Array.BYTES_PER_ELEMENT);
+			this.set(key, info.value);
+		}
+	}
+
+	// Get All Properties
+	getAllProperties() {
+		let allProperties = {};
+		for (let [key, info] of Object.entries(defaultProperties)) {
+			allProperties[key] = this.get(key);
+		}
+		return allProperties;
+	}
+
+	// Set Certain Property
+	set(key, value) {
+		switch (defaultProperties[key].type){
+			case "uint":
+				this[key].setUint32(0, value);
+				break;
+			case "int":
+				this[key].setInt32(0, value);
+				break;
+			case "float":
+				this[key].setFloat32(0, value);
+				break;
+		}
+	}
+
+	// Get Certain Property
+	get(key) {
+		switch (defaultProperties[key].type){
+			case "uint":
+				return this[key].getUint32(0);
+			case "int":
+				return this[key].getInt32(0);
+			case "float":
+				return this[key].getFloat32(0);
+		}
+	}
 }
 
 // Creature Class Inherite Sphere Class
@@ -115,12 +164,6 @@ class creature extends sphere {
 
 	// Creature Collision Reaction
 	collisionReaction(hitCreature) {
-		// Collision With Projectile
-		if (hitCreature.objectType == "projectile") {
-			// TODO Creature Collision With Projectile
-			this.properties.set("health", 0);
-		}
-
 		// Collision With AI Creature
 		if (hitCreature.objectType == "AI") {
 			hitCreature.collisionCreatureList.push(this);
@@ -187,6 +230,14 @@ class player extends creature {
 	collisionReaction(hitCreature) {
 		// Call Parent collisionReaction Function
 		creature.prototype.collisionReaction.call(this, hitCreature);
+
+		// Collision With Projectile
+		if (hitCreature.objectType == "projectile") {
+			// TODO Creature Collision With Projectile
+			this.properties.set("health", 0);
+			creatureRemoveList.push(this.ID);
+			this.removeOnWorker();
+		}
 	}
 
 	// Player Update Function
@@ -251,7 +302,7 @@ class AI extends creature {
         super(name, "AI", spawnPos == null ? [0, 0, 0] : spawnPos, mapIndex, "defaultMonster", 1);
 		if (spawnPos == null) this.changePosition(this.findNoCollisionPosition());
 
-		this.velocity = [0,0,0];
+		this.velocity = [0, 0, 0];
 		this.onGround = false;
 		this.collisionCreatureList = [];
     }
@@ -260,7 +311,6 @@ class AI extends creature {
 	initWorker() {
 		// Call Parent initWorker Function
 		creature.prototype.initWorker.call(this);
-
 		mapList[this.mapIndex].AIIDArray.add(allObject.list, this.ID);
 	}
 
@@ -268,6 +318,19 @@ class AI extends creature {
 	collisionReaction(hitCreature) {
 		// Call Parent collisionReaction Function
 		creature.prototype.collisionReaction.call(this, hitCreature);
+
+		// Collision With Projectile
+		if (hitCreature.objectType == "projectile") {
+			// TODO Creature Collision With Projectile
+			console.log(hitCreature);
+			this.properties.set("health", this.properties.get("health") - 10);
+			console.log(this.properties.get("health"));
+			hitCreature.removeOnWorker();
+			if (this.properties.get("health") <= 0) {
+				creatureRemoveList.push(this.ID);
+				this.removeOnWorker();
+			}
+		}
 	}
 
 	// AI Update Function
@@ -337,7 +400,7 @@ class AI extends creature {
         for (let i = 0; i < 3; ++i) this.position[i] += totalTranslateDistance[i];
 	}
 
-	// Worker Side Remove Player
+	// Worker Side Remove AI
 	removeOnWorker() {
 		mapList[this.mapIndex].AIIDArray.remove(allObject.list, this.ID);
 		this.remove();
@@ -513,53 +576,5 @@ class AI extends creature {
     }
 }
 
-// Default Properties For All Creature
-class properties {
-	constructor() {
-		let data = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * propertyNumber);
-		let count = 0;
-		for (let [key, info] of Object.entries(defaultProperties)) {
-			this[key] = new DataView(data, Int32Array.BYTES_PER_ELEMENT * count++, Int32Array.BYTES_PER_ELEMENT);
-			this.set(key, info.value);
-		}
-	}
-
-	// Get All Properties
-	getAllProperties() {
-		let allProperties = {};
-		for (let [key, info] of Object.entries(defaultProperties)) {
-			allProperties[key] = this.get(key);
-		}
-		return allProperties;
-	}
-
-	// Set Certain Property
-	set(key, value) {
-		switch (defaultProperties[key].type){
-			case "uint":
-				this[key].setUint32(0, value);
-				break;
-			case "int":
-				this[key].setInt32(0, value);
-				break;
-			case "float":
-				this[key].setFloat32(0, value);
-				break;
-		}
-	}
-
-	// Get Certain Property
-	get(key) {
-		switch (defaultProperties[key].type){
-			case "uint":
-				return this[key].getUint32(0);
-			case "int":
-				return this[key].getInt32(0);
-			case "float":
-				return this[key].getFloat32(0);
-		}
-	}
-}
-
 // Export Module
-module.exports = {player, AI, properties, allPlayer, defaultProperties};
+module.exports = {player, AI, properties, allPlayer, defaultProperties, creatureRemoveList};

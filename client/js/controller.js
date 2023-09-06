@@ -1,5 +1,5 @@
 // Controller Class
-class controller{
+class controller {
     // Controller Constructor
     constructor(creature, camera) {
         // Position Related
@@ -66,13 +66,13 @@ class controller{
     }
 
     // Update Window
-    windowUpdate(){
+    windowUpdate() {
         this.displayHalfSize = {x: 20 * window.innerWidth / window.innerHeight, y: 20};
     }
 
     // When KeyBoard Is Pressed Down
-    KeyDown(event){
-        switch (event.keyCode){
+    KeyDown(event) {
+        switch (event.keyCode) {
             case 87: // w
                 this.inputs.forward = true;
                 break;
@@ -95,8 +95,8 @@ class controller{
     }
 
     // When The KeyBoard Key Is Released
-    KeyUp(event){
-        switch (event.keyCode){
+    KeyUp(event) {
+        switch (event.keyCode) {
             case 87: // w
                 this.inputs.forward = false;
                 break;
@@ -119,8 +119,8 @@ class controller{
     }
 
     // When Mouse Is Pressed Down
-    MouseDown(event){
-        switch ( event.button ) {
+    MouseDown(event) {
+        switch (event.button) {
             case 0: // left
                 this.mouse.left = true;
                 break;
@@ -135,7 +135,7 @@ class controller{
 
     // When The Mouse Is Released
     MouseUp(event) {
-        switch ( vent.button ) {
+        switch (event.button) {
             case 0: // left
                 this.mouse.left = false;
                 break;
@@ -156,7 +156,7 @@ class controller{
     }
 
     // Sending A Projectile
-    sendProjectile(totalTranslateDistance, delta){
+    sendProjectile(totalTranslateDistance, delta) {
         // Get Unit Vector
         let groundX, groundY;
         groundX = this.mouse.x * window.innerWidth;
@@ -177,7 +177,7 @@ class controller{
     }
 
     // Creature Collision Detection
-    creatureCollision(translateDistance){
+    creatureCollision(translateDistance) {
         // For Collision Detection
         let creaturePos = this.creature.object.position;
         let theCreature;
@@ -217,7 +217,7 @@ class controller{
     }
 
     // Item Collision Detection
-    itemCollision(translateDistance){
+    itemCollision(translateDistance) {
         // For Collision Detection
         let collision = false;
         let creatureTrans = this.creature.object;
@@ -267,7 +267,7 @@ class controller{
     }
 
     // Surrounding Unit Collision Detection
-    surroundingCollision(currentPosition, translateDistance){
+    surroundingCollision(currentPosition, translateDistance) {
         let [offSetX, offSetY, offSetZ] = translateDistance;
 
         if (translateDistance[0] != 0 || translateDistance[1] != 0 || translateDistance[2] != 0) {

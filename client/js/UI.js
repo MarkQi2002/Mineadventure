@@ -25,6 +25,7 @@ function displayCreatureProperties() {
 
 // Update Player Properties
 function displayCreatureProperty(key) {
+    console.log("displayCreatureProperty");
     creatureInfoUIList[key].update(player_controller.creature.properties[key]);
 }
 
@@ -117,7 +118,7 @@ class messageUI {
 
 // State UI Class
 class stateUI {
-    // State Constructor
+    // State UI Class Constructor
     constructor(type, theState) {
         this.type = type;
         this.state = document.createElement('div');
@@ -129,12 +130,12 @@ class stateUI {
     }
 
     // Setting UI Information
-    update(theState){
+    update(theState) {
         this.state.innerHTML = theState.stack;
     }
 
     // Remove The UI
-    delete(){
+    delete() {
         delete player_controller.stateUI[this.type];
         stateDisplayUI.removeChild(this.state);
         delete this;
@@ -142,7 +143,7 @@ class stateUI {
 }
 
 // Damage Text Class
-class damageText{
+class damageText {
     // Damage Text Class Constructor
     constructor(type, value, position) {
         this.deleteTimer = 1;
@@ -162,20 +163,20 @@ class damageText{
         let color = [0, 0, 0];
         if (type == "true") {
             color = [255, 255, 255];
-		} else if(type == "normal") {
+		} else if (type == "normal") {
             color = [255, 128, 0];
-		} else if(type == "heal") {
+		} else if (type == "heal") {
             color = [0, 255, 0];
-		} else if(type == "fire") {
+		} else if (type == "fire") {
             color = [255, 0, 0];
-        } else if(type == "poison") {
+        } else if (type == "poison") {
             color = [0, 100, 0];
-        } else if(type == "ice") {
+        } else if (type == "ice") {
             color = [0, 128, 255];
         }
 
         // Critical Attack
-        if (value.criticalAttack){
+        if (value.criticalAttack) {
             this.text.style['-webkit-text-stroke'] = this.size / 40 + "vh rgb(" + color[0] + "," + color[1] + "," + color[2] + ")";
 
             this.size *= 2;
@@ -224,7 +225,7 @@ class damageText{
     }
 
     // Removing Damage Text
-    delete(index){
+    delete(index) {
         damageTextList.splice(index, 1);
         menuHtml.removeChild(this.text);
         delete this;

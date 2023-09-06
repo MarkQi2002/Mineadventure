@@ -110,7 +110,7 @@ function animate() {
     delta = clock.getDelta();
     player_controller.update(delta);
 
-    // Updating Event
+    // Updating Creature
     let theCreature;
     for (let i = 0; i < lastDisplayCreatureList.length; i++){
         theCreature = objectList[lastDisplayCreatureList[i]];
@@ -119,13 +119,13 @@ function animate() {
         }
     }
 
-    /*
-    // Updating Event
+
+    // Update Damage Text
     for (let i = 0; i < damageTextList.length; ++i){
         if (damageTextList[i] != null){
             damageTextList[i].update(delta, i);
         }
-    }*/
+    }
 
 
     // Setting The Renderer Of The Scene And Camera

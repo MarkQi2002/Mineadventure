@@ -101,7 +101,7 @@ class creature extends object{
     }
 
     // Setting Game Level
-    setLevel(newLevel){
+    setLevel(newLevel) {
         this.properties.level = newLevel;
         this.onHeadUI.updateLevel();
     }

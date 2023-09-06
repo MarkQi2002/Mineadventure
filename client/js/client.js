@@ -163,7 +163,15 @@ const updateFrame = (
 	for (let i = 0; i < displayObjectList.length; ++i) {
 		theObject = objectList[displayObjectList[i][0]];
 		if (theObject != null) {
-			theObject.changePosition(displayObjectList[i][1]);
+			theObject.changePosition(displayObjectList[i][1]["position"]);
+			if (displayObjectList[i][1]["objectType"] == "AI") {
+				// TODO This Is Constantly Being Run If Not Full Health
+				if (displayObjectList[i][1]["properties"]["health"] != 100) {
+					objectList[displayObjectList[i][1].ID].setHealth(displayObjectList[i][1]["properties"]["health"]);
+					// TODO Damage Text UI
+					// new damageText("normal", ["+", 10], displayObjectList[i][1]["position"]);
+				}
+			}
 			lastDisplayObjectList.push(displayObjectList[i][0]);
 			if (theObject.onHeadUI != null) {
 				lastDisplayCreatureList.push(displayObjectList[i][0]);
@@ -191,10 +199,13 @@ function sendFrameData() {
 
 const updateMap = (
 	unitModifiedList,
+	creatureRemoveList,
 	projectileRemoveList
 	) => {
 
+	// Variable Declaration
 	let i, j, theUnit;
+
 	// Update Unit
 	for (i = 0; i < unitModifiedList.length; ++i) {
 		theUnit = game_map.getUnit([unitModifiedList[i][0], unitModifiedList[i][1]]);
@@ -211,13 +222,24 @@ const updateMap = (
 			game_map.spawnUnit(theUnit);
 		}
 	}
+	// Update Creature
+	let theCreature;
+	for (i = 0; i < creatureRemoveList.length; ++i) {
+		theCreature = objectList[creatureRemoveList[i]];
+		if (theCreature == null) continue;
+		theCreature.remove();
+		// TODO The Following Line Generate NULL Error
+		delete objectList[creatureRemoveList[i]];
+	}
 
+	// Update Projectile
 	let theProjectile;
 	for (i = 0; i < projectileRemoveList.length; ++i) {
 		theProjectile = objectList[projectileRemoveList[i]];;
         if (theProjectile == null) continue;
 		theProjectile.remove();
-		objectList[projectileRemoveList[i]]
+		// TODO The Following Line Generate NULL Error
+		// objectList[projectileRemoveList[i]].remove();
 	}
 };
 
@@ -338,9 +360,9 @@ var sock;
 	document.addEventListener('changingCreatureInfo', creatureInfo);
 	*/
 
-	// New Server Message
+	// Server -> Client: New Server Message
 	sock.on('serverMessage', newServerMessage);
 
-	// Run Command From Server
+	// Server -> Client: Run Command From Server
 	sock.on('commandFromServer', commandFromServer);
 })();

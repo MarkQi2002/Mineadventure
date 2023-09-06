@@ -47,14 +47,23 @@ for (let i = 0; i < workerNumber; ++i){
     worker.on('message', (data) => {
 		switch(data.type){
 			case "updateMap":
+				// Variable Declaration
+				let theCreature;
 				let theProjectile;
+
+				for (i = 0; i < data.creatureRemoveList.length; ++i){
+					theCreature = allObject.list[data.creatureRemoveList[i]];;
+					if (theCreature == null) continue;
+					theCreature.remove();
+				}
+
 				for (i = 0; i < data.projectileRemoveList.length; ++i){
 					theProjectile = allObject.list[data.projectileRemoveList[i]];;
 					if (theProjectile == null) continue;
 					theProjectile.remove();
 				}
 
-				io.to("level " + data.mapIndex).compress(true).emit('updateMap', data.unitModifiedList, data.projectileRemoveList);
+				io.to("level " + data.mapIndex).compress(true).emit('updateMap', data.unitModifiedList, data.creatureRemoveList, data.projectileRemoveList);
 				break;
 			case "init":
 				console.log("Thread " + i + " is completed!");
@@ -133,6 +142,7 @@ function sendPlayerToMap(thePlayer, mapIndex, sock) {
 }
 
 // Client Fram Update
+// TODO Add Creature Update
 function clientFrameUpdate(newPos, sendProjectileList, requestObjectList, thePlayer, sock) {
 	// Player Location Update
 	thePlayer.changePosition(newPos);
@@ -161,7 +171,7 @@ function clientFrameUpdate(newPos, sendProjectileList, requestObjectList, thePla
 	for (i = 0; i < thePlayer.displayObjectsLength[0]; ++i) {
 		theObject = allObject.list[thePlayer.displayObjects[i]];
 		if (theObject == null) continue;
-		displayObjectList.push([theObject.ID, theObject.getPositionArray()]);
+		displayObjectList.push([theObject.ID, theObject.getInfo()]);
 		// TODO Update Creture After Projectile Hit
 	}
 
@@ -271,12 +281,14 @@ io.on('connection', (sock) => {
 	//sock.on('serverCreatureItemArray', (additionalItemID, updatePlayerID, removeItemID) => creatureItemArrayUpdate(additionalItemID, updatePlayerID, removeItemID));
 	//sock.on('deleteItem', (removeItemID) => deleteItem(removeItemID, playerArray[playerID].mapLevel));
 
-	// Client Frame Update
+	// Client -> Server: Client Frame Update
 	sock.on('clientFrame', (newPos, sendProjectileList, requestObjectList) => clientFrameUpdate(newPos, sendProjectileList, requestObjectList, thePlayer, sock));
 
-	// New Message From Client
-	sock.on('newMessage', (name, text) => io.compress(true).emit('serverMessage', name, text, "white"));
+	// Client -> Server: New Message
 	sock.on('commandFromClient', (newCommand) => commandFromClient(thePlayer, newCommand, sock));
+
+	// Server -> Client: Send Server Message To Client
+	sock.on('newMessage', (name, text) => io.compress(true).emit('serverMessage', name, text, "white"));
 });
 
 // Whenever An Error Occur, Log The Error
