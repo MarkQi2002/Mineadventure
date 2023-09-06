@@ -103,7 +103,6 @@ function workerLoop(delta) {
 
         // Any Modified Unit Send Message To Parent Thread
         if (unitModifiedList.length != 0 || creatureRemoveList.length != 0 || projectileRemoveList.length != 0) {
-
             parentPort.postMessage({
                 type: "updateMap",
                 mapIndex: theMap.index,

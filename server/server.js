@@ -51,18 +51,21 @@ for (let i = 0; i < workerNumber; ++i){
 				let theCreature;
 				let theProjectile;
 
+				// Remove Creatures
 				for (i = 0; i < data.creatureRemoveList.length; ++i){
 					theCreature = allObject.list[data.creatureRemoveList[i]];;
 					if (theCreature == null) continue;
 					theCreature.remove();
 				}
 
+				// Remove Projectiles
 				for (i = 0; i < data.projectileRemoveList.length; ++i){
 					theProjectile = allObject.list[data.projectileRemoveList[i]];;
 					if (theProjectile == null) continue;
 					theProjectile.remove();
 				}
 
+				// Server -> Client: Remove Creatures And Projeciles
 				io.to("level " + data.mapIndex).compress(true).emit('updateMap', data.unitModifiedList, data.creatureRemoveList, data.projectileRemoveList);
 				break;
 			case "init":
@@ -275,7 +278,7 @@ io.on('connection', (sock) => {
 	sock.on('disconnect', (Info) => clientDisconnect(Info, thePlayer));
 
 	// Creature Related
-	//sock.on('creatureInfo', (creatureInfo) => creatureInfoChange(creatureInfo));
+	sock.on('creatureInfo', (creatureInfo) => creatureInfoChange(creatureInfo));
 
 	// Item Related
 	//sock.on('serverCreatureItemArray', (additionalItemID, updatePlayerID, removeItemID) => creatureItemArrayUpdate(additionalItemID, updatePlayerID, removeItemID));

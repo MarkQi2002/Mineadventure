@@ -94,7 +94,6 @@ class propertiesUI {
     update(value) {
         this.text.innerHTML = this.key + ": " + value;
     }
-
 }
 
 // Message UI Class
@@ -456,7 +455,6 @@ var commandList = {
             // For Unlocking Cheat Menu
             if (md.digest().toHex() != hexCode) return ["Hash Failed! No Cheat For You!", "red"];
             else return ["Hash Correctly", "green"];
-
         }
     }),
 
@@ -599,6 +597,6 @@ function appendItemUIArray(itemName) {
 
 // For Updating Item UI Image
 function updateItemUI(key) {
-    document.getElementById(key).children[0].src="image/UI_Image/" + itemUIArray[key].itemName + ".png";
+    document.getElementById(key).children[0].src = "image/UI_Image/" + itemUIArray[key].itemName + ".png";
     document.getElementById(key).children[1].textContent = itemUIArray[key].itemAmount;
 }

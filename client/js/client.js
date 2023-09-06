@@ -298,11 +298,13 @@ var sock;
 	sock.on('initSelf', initSelf);
 	sock.on('clientDisconnect', playerDisconnect);
 
-
 	// Update Frame
 	sock.on('updateFrame', updateFrame);
 	sock.on('updateMap', updateMap);
-	//sock.on('deleteEvent', deleteEvent);
+
+	// TODO Event Handler For Creature Info Chaneg
+	// TODO Event Handler For Item
+	// TODO Event Handler For Abilities
 
 /*
 	// Monster
