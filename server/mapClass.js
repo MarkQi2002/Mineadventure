@@ -3,15 +3,18 @@
 // blockSize - The Size Of The Block (Number Of Unit)
 const { BinarySearchTree } = require('./dataStructures/tree.js');
 
+// Map Class
 class map {
+    // Map Class Constructor
     constructor(blockNumber, blockSize) {
         // Set Unit ID List Information
         this.unitIDList = [
-            this.setUnitIDInfo(["0_ground.jpg"], {IsPhongMaterial: true, geometryType: 0}),// 0
-            this.setUnitIDInfo(["0_ground.jpg",// Vertical
-                                "0_ground.jpg",// Vertical
-                                "0_ground.jpg",// Horizontal
-                                "0_ground.jpg",// Horizontal
+            // Unit 0
+            this.setUnitIDInfo(["0_ground.jpg"], {IsPhongMaterial: true, geometryType: 0}),
+            this.setUnitIDInfo(["0_ground.jpg", // Vertical
+                                "0_ground.jpg", // Vertical
+                                "0_ground.jpg", // Horizontal
+                                "0_ground.jpg", // Horizontal
                                 "rock1.jpg",
                                 "rock1.jpg"], {collision: true, destroyable: true, IsPhongMaterial: true, geometryType: 1}),
             this.setUnitIDInfo(["tree1.glb"], {collision: true, destroyable: true, modelType: 0.3}),
@@ -22,7 +25,8 @@ class map {
             this.setUnitIDInfo(["tree6.glb"], {collision: true, destroyable: true, modelType: 0.3}),
             this.setUnitIDInfo(["bush1.glb"], {collision: true, destroyable: true, modelType: 0.2}),
             this.setUnitIDInfo(["bush2.glb"], {collision: true, destroyable: true, modelType: 0.4}),
-            this.setUnitIDInfo(["bush3.glb"], {collision: true, destroyable: true, modelType: 0.4}),// 10
+            // Unit 10
+            this.setUnitIDInfo(["bush3.glb"], {collision: true, destroyable: true, modelType: 0.4}),
             this.setUnitIDInfo(["flower1.glb"], {destroyable: true, modelType: 0.3}),
             this.setUnitIDInfo(["flower2.glb"], {destroyable: true, modelType: 0.3}),
             this.setUnitIDInfo(["flower3.glb"], {destroyable: true, modelType: 0.3}),
@@ -32,7 +36,8 @@ class map {
             this.setUnitIDInfo(["grass2.jpg"], {base: true, IsPhongMaterial: true, geometryType: 0}),
             this.setUnitIDInfo(["grass3.jpg"], {base: true, IsPhongMaterial: true, geometryType: 0}),
             this.setUnitIDInfo(["grass4.jpg"], {base: true, IsPhongMaterial: true, geometryType: 0}),
-            this.setUnitIDInfo(["grass5.jpg"], {base: true, IsPhongMaterial: true, geometryType: 0}),// 20
+            // Unit 20
+            this.setUnitIDInfo(["grass5.jpg"], {base: true, IsPhongMaterial: true, geometryType: 0}),
             this.setUnitIDInfo(["grass6.jpg"], {base: true, IsPhongMaterial: true, geometryType: 0}),
             this.setUnitIDInfo(["grass7.jpg"], {base: true, IsPhongMaterial: true, geometryType: 0}),
             this.setUnitIDInfo(["grass8.jpg"], {base: true, IsPhongMaterial: true, geometryType: 0}),
@@ -42,14 +47,16 @@ class map {
             this.setUnitIDInfo(["mushroom1.glb"], {destroyable: true, modelType: 0.6}),
             this.setUnitIDInfo(["mushroom2.glb"], {destroyable: true, modelType: 0.6}),
             this.setUnitIDInfo(["mushroom3.glb"], {destroyable: true, modelType: 0.6}),
-            this.setUnitIDInfo(["mushroom4.glb"], {destroyable: true, modelType: 0.6}), // 30
+            // Unit 30
+            this.setUnitIDInfo(["mushroom4.glb"], {destroyable: true, modelType: 0.6}),
             this.setUnitIDInfo(["mushroom5.glb"], {destroyable: true, modelType: 0.6}),
             this.setUnitIDInfo(["mushroom6.glb"], {destroyable: true, modelType: 0.6}),
             this.setUnitIDInfo(["mushroom7.glb"], {destroyable: true, modelType: 0.6}),
             this.setUnitIDInfo(["stone1.glb"], {destroyable: true, modelType: 3}),
             this.setUnitIDInfo(["portal1.glb"], {modelType: 1}),
             this.setUnitIDInfo(["guider.glb"], {collision: true, modelType: 0.5}),
-            this.setUnitIDInfo(null, {collision: true}), // 37  Invisible wall
+            // Unit 37 Invisible wall
+            this.setUnitIDInfo(null, {collision: true}),
             this.setUnitIDInfo(["rockSideH.jpg", // Horizontal
                                 "rockSideH.jpg", // Horizontal
                                 "rockSideV.jpg", // Vertical
@@ -86,37 +93,38 @@ class map {
         this.mapLevel;
     }
 
-    // Create New MapLevel
-    createMapLevel(){
+    // Create New Map Level
+    createMapLevel() {
         // Save Map Level (Multiple Map Level)
         this.mapLevel = [
+            // First Map Level
             new mapLevel(this.blockNumber, this.blockSize, this,
+                // Initialize Perlin Noise Map Spawn Method
                 this.init_perlinNoiseMapMethod({
                     childUnitSpawnRate: 0.04,
                     childUnitIDList: [
-                        {list: [2, 3, 4, 5, 6, 7, 8, 9, 10], weight: 3},// (trees and bushes)
-                        {list: [13, 14, 31], weight: 15}, // (blue flowers and green mushrooms)
-                        {list: [11, 12, 27, 28, 29, 30, 32], weight: 1}, // (other color flowers and mushrooms)
-                        {list: [34], weight: 1}, // (stone)
+                        {list: [2, 3, 4, 5, 6, 7, 8, 9, 10], weight: 3},        // (Trees And Bushes)
+                        {list: [13, 14, 31], weight: 15},                       // (Blue Flowers And Green Mushrooms)
+                        {list: [11, 12, 27, 28, 29, 30, 32], weight: 1},        // (Other Colored Flowers And Mushrooms)
+                        {list: [34], weight: 1},                                // (Stone)
                     ],
                     groundIDList: [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26],
                     wallIDList: [38]
                 }),
 
+                // Initialize Monster Method For Map Level
                 this.init_defaultMonsterMethod({
                     defaultMinLevel: 1,
                     defaultMaxLevel: 10,
                     monsterSpawnList: [
                         {ID: 0, weight: 2, minLevel: 1, maxLevel: 15}
-
-
                     ],
-
-                }),    //monsterSetting
+                }),
             ),
 
-
+            // Second Map Level
             new mapLevel(this.blockNumber, this.blockSize, this,
+                // Initialize Perlin Noise Map Spawn Method
                 this.init_perlinNoiseMapMethod({
                     childUnitSpawnRate: 0.1,
                     childUnitIDList: [
@@ -128,21 +136,20 @@ class map {
                     perlinRate: 10,
                     perlinOffset: -0.4
                 }),
+
+                // Initialize Monster Method For Map Level
                 this.init_defaultMonsterMethod({
                     defaultMinLevel: 10,
                     defaultMaxLevel: 20,
                     monsterSpawnList: [
                         {ID: 0, weight: 2}
-
-
                     ],
-
-                }), //monsterSetting
+                }),
             ),
 
-
-
+            // Third Map Level
             new mapLevel(this.blockNumber, this.blockSize, this,
+                // Initialize Perlin Noise Map Spawn Method
                 this.init_perlinNoiseMapMethod({
                     childUnitSpawnRate: 0.1,
                     childUnitIDList: [
@@ -153,37 +160,33 @@ class map {
                     perlinRate: 10,
                     perlinOffset: -0.4
                 }),
+
+                // Initialize Monster Method For Map Level
                 this.init_defaultMonsterMethod({
                     defaultMinLevel: 20,
                     defaultMaxLevel: 99999999,
                     monsterSpawnList: [
                         {ID: 0, weight: 2}
-
-
                     ],
-
-                }), //monsterSetting
+                }),
             ),
-
-
-
         ];
     }
 
-    // set UnitIDInfo by (texture url address, collision bool)
+    // Set UnitIDInfo Using (Texture URL Address, Collision Bool)
     setUnitIDInfo(fileName, additionalInfo) {
         var unitIDInfo = {
-            ["fileName"]: fileName, // FileName For url Address
-            ["collision"]: false, // Can Walk Through (True Or False)
-            ["destroyable"]: false, // Can Be Destroyed (True Or False)
-            ["base"]: false, // Can Have childUnit On (True Or False)
-            ["geometryType"]: null, // If Is Not null, Load Geometry And Texture (Need To Be Geometry Index)
-            ["modelType"]: null, // If Is Not null, Load Model (Inside Is Model Scale)
-            ["IsPhongMaterial"]: false, // Material Can Reflect Light (True or False)
-            ["replacingUnit"]: null, // Replacing Unit After Destroy
+            ["fileName"]: fileName,         // FileName For URL Address
+            ["collision"]: false,           // Can Walk Through (True Or False)
+            ["destroyable"]: false,         // Can Be Destroyed (True Or False)
+            ["base"]: false,                // Can Have childUnit On (True Or False)
+            ["geometryType"]: null,         // If Is Not null, Load Geometry And Texture (Need To Be Geometry Index)
+            ["modelType"]: null,            // If Is Not null, Load Model (Inside Is Model Scale)
+            ["IsPhongMaterial"]: false,     // Material Can Reflect Light (True or False)
+            ["replacingUnit"]: null,        // Replacing Unit After Destroy
         }
 
-        // AdditionalInfo
+        // Set Any Addition Information
 	    for (let [key, value] of Object.entries(additionalInfo)) {
 		    unitIDInfo[key] = value;
 	    }
@@ -191,31 +194,29 @@ class map {
         // Return The Unit Information ID
         return unitIDInfo
     }
-    // ****************************************************** Map Method ******************************************************
 
-    // ------------------- Method One - Perlin Noise -------------------
-    init_perlinNoiseMapMethod(ChangeSpawnMethodInputs){
+    // Initialize Perlin Noise Map Spawn Method
+    init_perlinNoiseMapMethod(ChangeSpawnMethodInputs) {
         let spawnMethodInputs = {
             ["childUnitSpawnRate"]: 0,
             ["childUnitIDList"]: [],
             ["groundIDList"]: [0],
-            ["wallIDList"]:[1],
+            ["wallIDList"]: [1],
             ["maxWallHeight"]: 3,
-            ["perlinRate"]: 10, // amplitude of wall
-            ["perlinOffset"]: 0, // Offset for determind is ground or wall (between -0.5 and 0.5. For -0.5 there will be no wall, and 0.5 will be all wall)
+            ["perlinRate"]: 10,     // Heigh Of Wall
+            ["perlinOffset"]: 0,    // -0.5: No Wall, 0: Normal, 1: All Wall
             ["defaultReplacingUnit"]: 15,
-
         }
 
-        // Change
+        // Custom Spawn Method Input
 	    for (let [key, value] of Object.entries(ChangeSpawnMethodInputs)) {
 		    spawnMethodInputs[key] = value;
 	    }
 
 
-        // Get The Total Weight For Random
+        // Get Total Weight For Random
         spawnMethodInputs["totalChildUnitWeight"] = 0;
-        for (let i = 0; i < spawnMethodInputs.childUnitIDList.length; ++i){
+        for (let i = 0; i < spawnMethodInputs.childUnitIDList.length; ++i) {
             spawnMethodInputs.totalChildUnitWeight += spawnMethodInputs.childUnitIDList[i].weight;
         }
 
@@ -247,27 +248,27 @@ class map {
                 for (var i = 0; i < 256 ; i++)
                     p[256 + i] = p[i] = permutation[i];
 
-                var X = Math.floor(x) & 255,                  // FIND UNIT CUBE THAT
-                    Y = Math.floor(y) & 255,                  // CONTAINS POINT.
+                var X = Math.floor(x) & 255,                        // FIND UNIT CUBE THAT
+                    Y = Math.floor(y) & 255,                        // CONTAINS POINT.
                     Z = Math.floor(z) & 255;
 
-                x -= Math.floor(x);                                // FIND RELATIVE X,Y,Z
-                y -= Math.floor(y);                                // OF POINT IN CUBE.
+                x -= Math.floor(x);                                 // FIND RELATIVE X,Y,Z
+                y -= Math.floor(y);                                 // OF POINT IN CUBE.
                 z -= Math.floor(z);
 
-                var u = fade(x),                                // COMPUTE FADE CURVES
-                    v = fade(y),                                // FOR EACH OF X,Y,Z.
+                var u = fade(x),                                    // COMPUTE FADE CURVES
+                    v = fade(y),                                    // FOR EACH OF X,Y,Z.
                     w = fade(z);
 
-                var A = p[X  ]+Y, AA = p[A]+Z, AB = p[A+1]+Z,      // HASH COORDINATES OF
-                    B = p[X+1]+Y, BA = p[B]+Z, BB = p[B+1]+Z;      // THE 8 CUBE CORNERS,
+                var A = p[X  ]+Y, AA = p[A]+Z, AB = p[A+1]+Z,       // HASH COORDINATES OF
+                    B = p[X+1]+Y, BA = p[B]+Z, BB = p[B+1]+Z;       // THE 8 CUBE CORNERS,
 
-                return scale(lerp(w, lerp(v, lerp(u, grad(p[AA  ], x  , y  , z   ),  // AND ADD
-                                                grad(p[BA  ], x-1, y  , z   )), // BLENDED
-                                        lerp(u, grad(p[AB  ], x  , y-1, z   ),  // RESULTS
-                                                grad(p[BB  ], x-1, y-1, z   ))),// FROM  8
-                                lerp(v, lerp(u, grad(p[AA+1], x  , y  , z-1 ),  // CORNERS
-                                                grad(p[BA+1], x-1, y  , z-1 )), // OF CUBE
+                return scale(lerp(w, lerp(v, lerp(u, grad(p[AA  ], x  , y  , z   ), // AND ADD
+                                                grad(p[BA  ], x-1, y  , z   )),     // BLENDED
+                                        lerp(u, grad(p[AB  ], x  , y-1, z   ),      // RESULTS
+                                                grad(p[BB  ], x-1, y-1, z   ))),    // FROM  8
+                                lerp(v, lerp(u, grad(p[AA+1], x  , y  , z-1 ),      // CORNERS
+                                                grad(p[BA+1], x-1, y  , z-1 )),     // OF CUBE
                                         lerp(u, grad(p[AB+1], x  , y-1, z-1 ),
                                                 grad(p[BB+1], x-1, y-1, z-1 )))));
             }
@@ -275,18 +276,19 @@ class map {
             function lerp( t, a, b) { return a + t * (b - a); }
             function grad(hash, x, y, z) {
                 var h = hash & 15;                      // CONVERT LO 4 BITS OF HASH CODE
-                var u = h < 8 ? x : y,                 // INTO 12 GRADIENT DIRECTIONS.
+                var u = h < 8 ? x : y,                  // INTO 12 GRADIENT DIRECTIONS.
                         v = h < 4 ? y : h == 12 || h == 14 ? x : z;
                 return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
             }
             function scale(n) { return (1 + n)/2; }
         }
 
+        // Return Final Output Generated By Perlin Noise Spawn Method
         return [this.perlinNoiseMapMethod, spawnMethodInputs];
     }
 
     // Perlin Noise Map Method
-    perlinNoiseMapMethod(spawnMethodInputs, blockX, blockY, unitX, unitY, theBlock, this_game_map){
+    perlinNoiseMapMethod(spawnMethodInputs, blockX, blockY, unitX, unitY, theBlock, this_game_map) {
         var ID;
         var Height = spawnMethodInputs.perlinRate *
                     (spawnMethodInputs.perlinOffset - 0.5 +
@@ -294,27 +296,28 @@ class map {
                                                         (spawnMethodInputs.PerlinNoise.initY + blockY * theBlock.unitList.length + unitY) / 10,
                                                         0.1));
 
-
-        if (Height <= 0) { // Ground
+        // Ground
+        if (Height <= 0) {
             ID = spawnMethodInputs.groundIDList[(2 / Math.PI * Math.atan(- Height * 1.5 * Math.random()) * spawnMethodInputs.groundIDList.length) >> 0];
             Height = 0;
-
-        } else  { // Wall
+        // Wall
+        } else {
             ID = spawnMethodInputs.wallIDList[(2 / Math.PI * Math.atan(- Height * 1.5 * Math.random()) * spawnMethodInputs.wallIDList.length) >> 0];
 
-            // If Exceed Max Height
+            // Exceed Max Height
             if (Height > spawnMethodInputs.maxWallHeight) Height = spawnMethodInputs.maxWallHeight;
         }
 
+        // Randomly Generate Child Unit
         let newChildUnit;
-        if (this_game_map.unitIDList[ID].base && spawnMethodInputs.totalChildUnitWeight != 0 && Math.random() <= spawnMethodInputs.childUnitSpawnRate){
+        if (this_game_map.unitIDList[ID].base && spawnMethodInputs.totalChildUnitWeight != 0 && Math.random() <= spawnMethodInputs.childUnitSpawnRate) {
             let childID, childIDList;
 
-            // Get A Random ChildIDList From ALL List By Their Weight
+            // Get A Random ChildIDList From All List By Their Weight
             let randomChildListWeight = Math.random() * spawnMethodInputs.totalChildUnitWeight;
-            for (let i = 0; i < spawnMethodInputs.childUnitIDList.length; ++i){
+            for (let i = 0; i < spawnMethodInputs.childUnitIDList.length; ++i) {
                 childIDList = spawnMethodInputs.childUnitIDList[i];
-                if (randomChildListWeight < childIDList.weight){
+                if (randomChildListWeight < childIDList.weight) {
                     // Get A Random ChildUnit From The List
                     childID = childIDList.list[(Math.random() * childIDList.list.length) >> 0];
                     break;
@@ -322,24 +325,19 @@ class map {
                 randomChildListWeight -= childIDList.weight;
             }
 
+            // Generate New Child Unit
             newChildUnit = new mapUnit(childID, 0, null, Math.random() * Math.PI * 2);
-        }else{
+        // Don't Generate Child Unit
+        } else {
             newChildUnit = null;
         }
 
+        // Return New Map Unit
         return new mapUnit(ID, Height, newChildUnit);
-
     }
-    // ------------------- End Of Method One -------------------
 
-    // ****************************************************** End Of Map Method ******************************************************
-
-
-    // ****************************************************** Monster Method ******************************************************
-
-
-    // ------------------- Method One - Default Monster -------------------
-    init_defaultMonsterMethod(ChangeMonsterSpawnInputs){
+    // Default Monster Method
+    init_defaultMonsterMethod(ChangeMonsterSpawnInputs) {
         let monsterSpawnInputs = {
             ["defaultMinLevel"]: 1,
             ["defaultMaxLevel"]: 99999,
@@ -347,22 +345,23 @@ class map {
             ["levelHalfRange"]: 2,
         }
 
-        // Change
+        // Set Any Addition Information
 	    for (let [key, value] of Object.entries(ChangeMonsterSpawnInputs)) {
 		    monsterSpawnInputs[key] = value;
 	    }
 
-        // Get The Total Weight For Random
+        // Get The Total Weight
         monsterSpawnInputs["totalMonsterWeight"] = 0;
         for (let i = 0; i < monsterSpawnInputs.monsterSpawnList.length; ++i){
             monsterSpawnInputs.totalMonsterWeight += monsterSpawnInputs.monsterSpawnList[i].weight;
         }
 
+        // Retrun Monster Method Information
         return [this.defaultMonsterMethod, monsterSpawnInputs];
     }
 
     // Default Monster Method
-    defaultMonsterMethod(monsterSpawnInputs){
+    defaultMonsterMethod(monsterSpawnInputs) {
         let spawnMonster;
         // Get A Random Monster From monsterSpawnList By Their Weight
         let randomMonsterWeight = Math.random() * monsterSpawnInputs.totalMonsterWeight;
@@ -374,7 +373,7 @@ class map {
             randomMonsterWeight -= monsterSpawnList[i].weight;
         }
 
-
+        // Setting Monster Level
         let minLevel = monsterSpawnInputs.defaultMinLevel;
         if ('minLevel' in spawnMonster) minLevel = spawnMonster.minLevel;
 
@@ -384,57 +383,59 @@ class map {
         return [spawnMonster.ID, minLevel, maxLevel, monsterSpawnInputs.levelHalfRange];
     }
 
-    // ------------------- End Of Method One -------------------
-
-    // ****************************************************** End Of Monster Method ******************************************************
-
-    getAllChildUnitCollision(unit){
+    // Get Every Child Unit Collision For Current Unit
+    getAllChildUnitCollision(unit) {
         return this.unitIDList[unit.ID].collision || (unit.childUnit == null ? false : this.getAllChildUnitCollision(unit.childUnit));
     }
 
-    // Find Neighboring Map Blocks
-    neighbors([mapX, mapY], mapLevelIndex){
+    // Get Neighboring Map Blocks
+    neighbors([mapX, mapY], mapLevelIndex) {
+        // Variable Declaration
         let neighborList = [];
-
         let theUnit;
-
         let dirSwitch = [false, false, false, false];
 
         // Get Direction Switch
+        // Right
         theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX + 1, mapY]);
-        if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
+        if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false) {
             neighborList.push([mapX + 1, mapY]);
             dirSwitch[0] = true;
         }
 
+        // Left
         theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX - 1, mapY]);
-        if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
+        if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false) {
             neighborList.push([mapX - 1, mapY]);
             dirSwitch[1] = true;
         }
 
+        // Top
         theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX, mapY + 1]);
-        if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
+        if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false) {
             neighborList.push([mapX, mapY + 1]);
             dirSwitch[2] = true;
         }
 
+        // Bottom
         theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX, mapY - 1]);
-        if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
+        if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false) {
             neighborList.push([mapX, mapY - 1]);
             dirSwitch[3] = true;
         }
 
         // Seting neighborList Based On Direction Switch
-        if (dirSwitch[0]){
-            if (dirSwitch[2]){
+        if (dirSwitch[0]) {
+            // Top Right
+            if (dirSwitch[2]) {
                 theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX + 1, mapY + 1]);
                 if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
                     neighborList.push([mapX + 1, mapY + 1]);
                 }
             }
 
-            if (dirSwitch[3]){
+            // Bottom Right
+            if (dirSwitch[3]) {
                 theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX + 1, mapY - 1]);
                 if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
                     neighborList.push([mapX + 1, mapY - 1]);
@@ -443,15 +444,17 @@ class map {
         }
 
         // Setting neightborList Based On Direction Switch
-        if (dirSwitch[1]){
-            if (dirSwitch[2]){
+        if (dirSwitch[1]) {
+            // Top Left
+            if (dirSwitch[2]) {
                 theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX - 1, mapY + 1]);
                 if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
                     neighborList.push([mapX - 1, mapY + 1]);
                 }
             }
 
-            if (dirSwitch[3]){
+            // Bottom Left
+            if (dirSwitch[3]) {
                 theUnit = this.mapLevel[mapLevelIndex].getUnit([mapX - 1, mapY - 1]);
                 if (theUnit != null && this.getAllChildUnitCollision(theUnit) == false){
                     neighborList.push([mapX - 1, mapY - 1]);
@@ -464,65 +467,76 @@ class map {
     }
 
     // FUnction To Return All Surrounding Block
-    getSurroundingBlock([centerBlockX, centerBlockY], mapLevelIndex, [blockHalfRangeX, blockHalfRangeY]){
+    getSurroundingBlock([centerBlockX, centerBlockY], mapLevelIndex, [blockHalfRangeX, blockHalfRangeY]) {
+        // Variable Declaration
         let theBlock;
         let surroundingBlocks = [];
+
+        // Get All Surrounding Blocks (Maximum 8 Blocks)
         for (let y_Axis = -blockHalfRangeY; y_Axis <= blockHalfRangeY; y_Axis++) {
             for (let x_Axis = -blockHalfRangeX; x_Axis <= blockHalfRangeX; x_Axis++) {
-
                 let [blockX, blockY] = [centerBlockX + x_Axis, centerBlockY + y_Axis];
-
 
                 theBlock = this.mapLevel[mapLevelIndex].getBlockByBlockPos([blockX, blockY]);
 
                 if (theBlock != null) surroundingBlocks.push([blockX, blockY, theBlock]);
             }
         }
+
+        // Return All Surrounding Blocks
         return surroundingBlocks;
     }
 
     // Function To Initialize The Block And Package It To Send To Client
     getInitMap([mapX, mapY], mapLevelIndex, [blockHalfRangeX, blockHalfRangeY]) {
+        // Variable Declaration
         let sendingBlock = [];
         let surroundingBlocks = this.getSurroundingBlock([mapX / this.blockSize.x >> 0, mapY / this.blockSize.y >> 0], mapLevelIndex, [blockHalfRangeX, blockHalfRangeY])
-        for (let i = 0; i < surroundingBlocks.length; ++i) {
 
+        // Grab All Surrounding Blocks
+        for (let i = 0; i < surroundingBlocks.length; ++i) {
             let blockInfo = {
                 x: surroundingBlocks[i][0],
                 y: surroundingBlocks[i][1],
                 block: {unitList: surroundingBlocks[i][2].unitList}
             }
             sendingBlock.push(blockInfo);
-
         }
+
+        // Return Surrounding Blocks
         return [sendingBlock, this.blockNumber, this.blockSize, this.unitIDList];
     }
 
-    // Function To Get Required Block Based On Client Request
+    // Function To Get Required Blocks Based On Client Request
     getUpdateBlock(blockPosList, mapLevelIndex) {
+        // Variable Declaration
         let theBlock;
         let sendingBlock = [];
+
+        // Get All Requested Blocks
         for (let i = 0; i < blockPosList.length; i++) {
-                let [blockX, blockY] = blockPosList[i].position;
+            let [blockX, blockY] = blockPosList[i].position;
 
-                theBlock = this.mapLevel[mapLevelIndex].blockList[blockY][blockX];
+            theBlock = this.mapLevel[mapLevelIndex].blockList[blockY][blockX];
 
-                if (theBlock == null) continue;
+            if (theBlock == null) continue;
 
-                let blockInfo = {
-                    x: blockX,
-                    y: blockY,
-                    block: {unitList: theBlock.unitList}
-                }
-                sendingBlock.push(blockInfo);
-
+            let blockInfo = {
+                x: blockX,
+                y: blockY,
+                block: {unitList: theBlock.unitList}
+            }
+            sendingBlock.push(blockInfo);
         }
+
+        // Return All Requested Blocks
         return [sendingBlock,[this.blockNumber.x, this.blockNumber.y],[this.blockSize.x,this.blockSize.y]];
     }
 }
 
-// Map level
-class mapLevel{
+// Map Level Class
+class mapLevel {
+    // Map Level Class Constructor
     constructor(blockNumber, blockSize, this_game_map, initSpawnMethodOutput, monsterMethodOutput) {
         this.blockList = [];
         this.blockNumber = blockNumber;
@@ -554,20 +568,20 @@ class mapLevel{
 
         this.resetBlockUpdated = [];
 
+        // Generate Empty Map Level And Initialize Map Level
         this.newEmptyLevel(blockNumber);
         this.initLevelMap(blockSize, this_game_map);
-
     }
 
-    // Create A Empty 2D Array
+    // Create A Empty 2D Array To Store Map Blocks
     newEmptyLevel(blockNumber) {
         for (let i = 0; i < blockNumber.y; i++) {
             this.blockList.push(new Array(blockNumber.x));
         }
     }
 
-    // Double For Loop To Generate The Block
-    initLevelMap(blockSize, this_game_map){
+    // Double For Loop To Generate Map Blocks
+    initLevelMap(blockSize, this_game_map) {
         for (let y_Axis = 0; y_Axis < this.blockList.length; ++y_Axis) {
             for (let x_Axis = 0; x_Axis < this.blockList[y_Axis].length; ++x_Axis) {
                 this.blockList[y_Axis][x_Axis] = new block(x_Axis, y_Axis, blockSize, this_game_map, this.initSpawnMethodOutput);
@@ -582,7 +596,7 @@ class mapLevel{
         let numberOfUnit = (halfRangeX * 2 + 1) * (halfRangeY * 2 + 1);
 
         // Looping Through Multiple Position To Spawn A Protal
-        while (count < 100){
+        while (count < 100) {
             ++count;
             portalX = (Math.random() * this_game_map.blockNumber.x * this_game_map.blockSize.x) >> 0;
 		    portalY = (Math.random() * this_game_map.blockNumber.y * this_game_map.blockSize.y) >> 0;
@@ -597,25 +611,27 @@ class mapLevel{
             }
             if (allBase) break;
         }
-        console.log ("Spawn Portal On:", portalX, portalY, "   Number Of Run:", count)
 
+        // DEBUG USE
+        console.log ("Spawn Portal On: " + portalX + " " + portalY + " Number Of Run: " + count)
+
+        // Resetting Child Unit
         for (let i = 0; i < surroundingUnitList.length; ++i) {
             surroundingUnitList[i].childUnit = null;
         }
 
         // Invisible Wall For Portal
-        let portalCollision =  [23, 25];
+        let portalCollision = [23, 25];
         for (let i = 0; i < portalCollision.length; ++i) {
             surroundingUnitList[portalCollision[i]].childUnit = new mapUnit(37, 0, null);
         }
         surroundingUnitList[numberOfUnit / 2 >> 0].childUnit = new mapUnit(35, 0, null);
 
         let guiderX, guiderY, guiderUnit;
-
         let numberOfGuider = this.blockNumber.x * this.blockSize.x * this.blockNumber.y * this.blockSize.y / 1000;
         for (let i = 0; i < numberOfGuider; ++i) {
             count = 0;
-            while (count < 100){
+            while (count < 100) {
                 ++count;
                 guiderX = (Math.random() * this_game_map.blockNumber.x * this_game_map.blockSize.x) >> 0;
                 guiderY = (Math.random() * this_game_map.blockNumber.y * this_game_map.blockSize.y) >> 0;
@@ -623,38 +639,37 @@ class mapLevel{
 
                 if (guiderUnit != null && this_game_map.unitIDList[guiderUnit.ID].base) break;
             }
-
             guiderUnit.childUnit = new mapUnit(36, 0, null, Math.atan2((guiderY - portalY), (guiderX - portalX)) - Math.PI / 2);
         }
     }
 
     // Check If Within Map Rnage
-    IsNotInMapRange(floatBlockX, floatBlockY){
+    IsNotInMapRange(floatBlockX, floatBlockY) {
         return this.blockNumber.x <= floatBlockX || 0 > floatBlockX || this.blockNumber.y <= floatBlockY || 0 > floatBlockY;
     }
 
     // Return The Block By Block Coordinate
-    getBlockByBlockPos([blockX, blockY]){
+    getBlockByBlockPos([blockX, blockY]) {
         if (this.IsNotInMapRange(blockX, blockY)) return null;
         return this.blockList[blockY][blockX];
     }
 
     // Return The Block Based On xy Coordinate
-    getBlock([mapX, mapY]){
+    getBlock([mapX, mapY]) {
         let [floatBlockX, floatBlockY] = [mapX / this.blockSize.x, mapY / this.blockSize.y];
         if (this.IsNotInMapRange(floatBlockX, floatBlockY)) return null;
         return this.blockList[floatBlockY >> 0][floatBlockX >> 0];
     }
 
     // Return The Unit Based On xy Coordinate
-    getUnit([mapX, mapY]){
+    getUnit([mapX, mapY]) {
         let theBlock = this.getBlock([mapX, mapY]);
         if (theBlock == null) return null;
         return theBlock.unitList[mapY % this.blockSize.y][mapX % this.blockSize.x];
     }
 
-    // Reutnr The Surrounding Unit
-    getSurroundingUnit([centerUnitX, centerUnitY], [unitHalfRangeX, unitHalfRangeY]){
+    // Return The Surrounding Unit
+    getSurroundingUnit([centerUnitX, centerUnitY], [unitHalfRangeX, unitHalfRangeY]) {
         let theUnit;
         let surroundingUnit = [];
         for (let y_Axis = -unitHalfRangeY; y_Axis <= unitHalfRangeY; y_Axis++) {
@@ -670,7 +685,7 @@ class mapLevel{
     }
 }
 
-// Map Block Class
+// Block Class
 class block {
     // Block Class Constructor
     constructor(x, y, blockSize, this_game_map, initSpawnMethodOutput) {
@@ -695,9 +710,7 @@ class block {
     initBlock(blockX, blockY, this_game_map, spawnMethod, spawnMethodInputs) {
         for (let y_Axis = 0; y_Axis < this.unitList.length; y_Axis++) {
             for (let x_Axis = 0; x_Axis < this.unitList[y_Axis].length; x_Axis++) {
-
                 this.unitList[y_Axis][x_Axis] = spawnMethod(spawnMethodInputs, blockX, blockY, x_Axis, y_Axis, this, this_game_map);
-
             }
         }
     }
@@ -711,6 +724,5 @@ function mapUnit(ID, Height, newChildUnit, rotation = 0) {
     this.rotation = rotation;
 }
 
-
-// Required Because server.js Uses This JavaScript File
+// Export Module
 module.exports = map;

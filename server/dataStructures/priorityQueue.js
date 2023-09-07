@@ -8,9 +8,9 @@ class QElement {
     }
 }
 
-// PriorityQueue class
+// Priority Queue Class
 class PriorityQueue {
-    // An array is used to implement priority
+    // Priority Queue Class Constructor
     constructor() {
         this.items = [];
     }
