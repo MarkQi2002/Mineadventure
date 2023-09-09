@@ -1,4 +1,4 @@
-// Variable Declaration
+// Import Modules
 const menuHtml = document.querySelector('#noSelect');
 const creatureInfoUI = document.querySelector("#creatureInfo");
 const chatBoxUI = document.querySelector("#chatBox");
@@ -72,7 +72,7 @@ function displayAllUI() {
 
 // Properties UI Class
 class propertiesUI {
-    // PropertiesUI Constructor
+    // Properties UI Class Constructor
     constructor(key, value) {
         this.key = key;
         this.text = document.createElement('div');
@@ -98,7 +98,7 @@ class propertiesUI {
 
 // Message UI Class
 class messageUI {
-    // messageUI Constructor
+    // message UI Class Constructor
     constructor(name, text, color) {
         this.name = name;
         this.text = document.createElement('div');
@@ -110,7 +110,7 @@ class messageUI {
     }
 
     // Setting UI Information
-    update(value){
+    update(value) {
         this.text.innerHTML = this.key + ": " + value;
     }
 }
@@ -125,16 +125,16 @@ class stateUI {
         this.update(theState);
         this.state.style.color = "rgb(255,255,255)";
         stateDisplayUI.appendChild(this.state);
-    
+
     }
 
     // Setting UI Information
-    update(theState){
+    update(theState) {
         this.state.innerHTML = theState.stack;
     }
 
     // Remove The UI
-    delete(){
+    delete() {
         delete player_controller.stateUI[this.type];
         stateDisplayUI.removeChild(this.state);
         delete this;
@@ -142,7 +142,7 @@ class stateUI {
 }
 
 // Damage Text Class
-class damageText{
+class damageText {
     // Damage Text Class Constructor
     constructor(type, value, position) {
         this.deleteTimer = 1;
@@ -157,7 +157,7 @@ class damageText{
         this.text.innerHTML = Math.abs(value.amount);
         this.size = (8 / Math.PI * Math.atan(Math.abs(value.amount) / 100) + 1);
         this.text.style.fontSize = this.size + 'vh';
-        
+
         // Check Damage Type
         let color = [0, 0, 0];
         if (type == "true") {
@@ -174,25 +174,21 @@ class damageText{
             color = [0, 128, 255];
         }
 
-
-        
-
-        if (value.criticalAttack){
+        if (value.criticalAttack) {
             this.text.style['-webkit-text-stroke'] = this.size / 40 + "vh rgb(" + color[0] + "," + color[1] + "," + color[2] + ")";
 
             this.size *= 2;
-            for (let i = 0; i < 3; ++i){
+            for (let i = 0; i < 3; ++i) {
                 color[i] = color[i] * 0.8 >> 0;
             }
         }
 
         this.text.style.color = "rgb(" + color[0] + "," + color[1] + "," + color[2] + ")";
 
-
         // Damage Text Timer
         this.sqrtSize = Math.sqrt(this.size);
         this.rate = this.deleteTimer / (2 * this.sqrtSize);
-        
+
         // Damage Text Locatoin Update
         let [posX, posY] = this.toXYCoords(this.position);
         this.text.style.top = posY + 'px';
@@ -212,13 +208,13 @@ class damageText{
     }
 
     // Updating Damage Text Location
-    update(delta, index){
+    update(delta, index) {
         // Update Position
         let [posX, posY] = this.toXYCoords(this.position);
         let num = this.deleteTimer / this.rate - this.sqrtSize;
         this.text.style.top = posY - (this.size - num * num) + 'px';
         this.text.style.left = posX + 'px';
-        
+
         // Decrement Timer
         this.deleteTimer -= delta;
 
@@ -227,7 +223,7 @@ class damageText{
     }
 
     // Removing Damage Text
-    delete(index){
+    delete(index) {
         damageTextList.splice(index, 1);
         menuHtml.removeChild(this.text);
         delete this;
@@ -235,8 +231,8 @@ class damageText{
 }
 
 // Creature UI Class
-class creatureUI{
-    // Creature UI Constructor
+class creatureUI {
+    // Creature UI Class Constructor
     constructor(creature) {
         this.scale = 1;
         this.creature = creature;
@@ -268,7 +264,7 @@ class creatureUI{
         this.healthBackground.style.width = 80 + '%';
         this.healthBackground.style.height = 30 + '%';
         this.healthBackground.style.left = 20 + '%';
-        
+
         // HealthBar CSS
         this.healthBar = document.createElement('div');
         this.healthBackground.appendChild(this.healthBar);
@@ -321,7 +317,7 @@ class creatureUI{
     }
 
     // Update Level UI
-    updateLevel(){
+    updateLevel() {
         this.levelText.innerHTML = this.creature.properties.level;
     }
 
@@ -340,14 +336,14 @@ class creatureUI{
     }
 
     // Update Function
-    update(delta){
+    update(delta) {
         let [posX, posY] = this.toXYCoords([this.creature.object.position.x, this.creature.object.position.y, this.creature.object.position.z]);
         this.UI.style.top = posY + 'px';
         this.UI.style.left = posX + 'px';
     }
 
     // Deletion Function
-    delete(){
+    delete() {
         menuHtml.removeChild(this.UI);
         delete this;
     }
@@ -388,15 +384,14 @@ function terminalSubmit() {
 
         // Commands That Need Cheat
 
-        if (inputArray[0][0] == "/"){
+        if (inputArray[0][0] == "/") {
             inputArray[0] = inputArray[0].substr(1, inputArray[0].length - 1);
             lockedCommand(inputArray);
-        }else if (inputCommand !=''){
+        } else if (inputCommand !='') {
             sendingMessage = [player_controller.creature.name, inputCommand];
             document.dispatchEvent(new Event('sendMessage', {bubbles: true, cancelable: false}));
             terminalInput.value = '';
         }
-        
     }
 }
 
@@ -422,7 +417,7 @@ function unlockedCommand(inputArray) {
 }
 
 // Teleport Player To Corresponding Coordinate
-function teleport([mapX, mapY]){
+function teleport([mapX, mapY]) {
     // Updating Renderer Information
     player_controller.controllerUpdateBlock(game_map.mapPosToBlockPos([mapX, mapY]));
 
@@ -435,24 +430,24 @@ function teleport([mapX, mapY]){
     player_controller.camera.position.y = mapY - carmeraOffsetY;
 
     // Loop Through All Player
-    for (let playerIndex = 0; playerIndex < playerArray.length; ++playerIndex){
-        if (playerArray[playerIndex] != null && 
+    for (let playerIndex = 0; playerIndex < playerArray.length; ++playerIndex) {
+        if (playerArray[playerIndex] != null &&
             !(playerArray[playerIndex].creatureType == player_controller.creature.creatureType &&
-            playerArray[playerIndex].ID == player_controller.creature.ID)){
-                
+            playerArray[playerIndex].ID == player_controller.creature.ID)) {
+
             playerArray[playerIndex].update();
         }
     }
 
     // Loop Through All Monster
-    for (let monsterIndex = 0; monsterIndex < monsterArray.length; ++monsterIndex){
-        if (monsterArray[monsterIndex] != null){
+    for (let monsterIndex = 0; monsterIndex < monsterArray.length; ++monsterIndex ){
+        if (monsterArray[monsterIndex] != null) {
             monsterArray[monsterIndex].update();
         }
     }
 
     // Update Player Position Event
-    var event = new Event('position event', {bubbles: true, cancelable: false}) 
+    var event = new Event('position event', {bubbles: true, cancelable: false})
     document.dispatchEvent(event);
 }
 
@@ -484,14 +479,14 @@ function lockedCommand(inputArray) {
             console.log("Player Number ", parseInt(inputArray[1]), " Not Found");
             return;
         }
-        
+
         // Calculate Player Position
         let playerX = Math.floor(playerArray[parseInt(inputArray[1])].object.position.x);
         let playerY = Math.floor(playerArray[parseInt(inputArray[1])].object.position.y);
 
         let xPosOffset, yPosOffset;
         let count = 0
-        
+
         // Avoid Spawn Location That Make Player Stuck In The Wall
         while (count < 10) {
             xPosOffset = Math.floor((Math.random() < 0.5) ? 1 : -1) + playerX;
@@ -504,7 +499,7 @@ function lockedCommand(inputArray) {
         }
 
         // If No Valid Location Found In While Loop
-        if (count >= 10){
+        if (count >= 10) {
             xPosOffset = playerX;
             yPosOffset = playerY;
         }
@@ -527,7 +522,7 @@ function lockedCommand(inputArray) {
             console.log("Couldn't Find Player Named: ", inputArray[1]);
             return;
         }
-        
+
         // Calculate Position
         let xPosOffset = playerArray[trueIndex].object.position.x + 1;
         let yPosOffset = playerArray[trueIndex].object.position.y + 1;
@@ -568,11 +563,11 @@ function lockedCommand(inputArray) {
 
         // Get Creature Type
         let creatureType = (inputArray.length >= 5 && inputArray[4] == "monster") ? "monster" : "player";
-        
+
         // Update Player Properties
         let propertyList = {};
         propertyList[inputArray[0]] = [inputArray[1], parseInt(inputArray[2])];
-        sendCreaturePropertyChange([creatureType, id], propertyList);   
+        sendCreaturePropertyChange([creatureType, id], propertyList);
     }
 }
 
