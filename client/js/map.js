@@ -31,7 +31,7 @@ class map {
     }
 
     // For Map Level Change
-    loadNewMapLevel([serverBlocks, blockNumber, blockSize, unitIDList]){
+    loadNewMapLevel([serverBlocks, blockNumber, blockSize, unitIDList]) {
         this.clearAllBlock();
 
         this.blockSize = blockSize;
@@ -39,7 +39,7 @@ class map {
 
         this.blockList = [];
         this.createEmptyMap();
-    
+
         this.blockObjectClass = [];
         this.newBlockObjectClass = [];
 
@@ -47,25 +47,25 @@ class map {
     }
 
     // After Load Function
-    afterLoadFunction([serverBlocks]){
+    afterLoadFunction([serverBlocks]) {
         this.spawnBlocks(serverBlocks);
         scene.add(this.object);
         sock.compress(true).emit('newName', sessionStorage.getItem("playerInitialName"));
     }
 
     // For Each Unit ID, Load Materials
-    loadMaterials(){
+    loadMaterials() {
         let imageDir = "image/unit_material/";
         this.materialList.length = this.unitIDList.length;
         for (let i = 0; i < this.unitIDList.length; i++) {
             // If It Has No geometryType, Don't Load Texture
             if (this.unitIDList[i].geometryType == null) continue;
             let texture;
-            if (this.unitIDList[i].fileName.length == 1){
+            if (this.unitIDList[i].fileName.length == 1) {
                 texture = this.loader.load(imageDir + this.unitIDList[i].fileName[0]);
                 if (this.unitIDList[i].IsPhongMaterial){
                     this.materialList[i] =  new THREE.MeshPhongMaterial({map: texture});
-                }else{
+                } else {
                     this.materialList[i] =  new THREE.MeshBasicMaterial({map: texture});
                 }
 
@@ -85,7 +85,7 @@ class map {
     }
 
     // Load THREE Geometry For Map
-    loadGeometry(){
+    loadGeometry() {
         var geometry;
         geometry = new THREE.PlaneGeometry(1, 1); // Geometry For All Plane
         this.geometryList.push(geometry); // 0
@@ -107,13 +107,13 @@ class map {
             return;
         }
         scope.GLTFLoader.load("model/" + scope.unitIDList[index].fileName, function (gltf) {
-            
+
             var newModel = gltf.scene;
             // Set Scale
             newModel.scale.set(scope.unitIDList[index].modelType, scope.unitIDList[index].modelType, scope.unitIDList[index].modelType);
             scope.unitIDList[index].modelType = newModel;
-    
-            if (scope.unitIDList.length > index + 1){
+
+            if (scope.unitIDList.length > index + 1) {
                 scope.loadModel(scope, index + 1, passInfo)
             } else {
                 scope.afterLoadFunction(passInfo);
@@ -128,39 +128,39 @@ class map {
         }
     }
 
-    getAllChildUnitCollision(unit){
+    getAllChildUnitCollision(unit) {
         return this.unitIDList[unit.ID].collision || (unit.childUnit == null ? false : this.getAllChildUnitCollision(unit.childUnit));
     }
 
     // Converting xy Coordinate To Block Coordinate
-    mapPosToBlockPos([mapX, mapY]){
+    mapPosToBlockPos([mapX, mapY]) {
         return [mapY / this.blockSize.y >> 0, mapX / this.blockSize.x >> 0];
     }
 
     // Return Block Based On xy Coordinate
-    getBlock([mapX, mapY]){
+    getBlock([mapX, mapY]) {
         let [floatBlockX, floatBlockY] = [mapX / this.blockSize.x, mapY / this.blockSize.y];
         if (this.blockNumber.x <= floatBlockX || 0 > floatBlockX || this.blockNumber.y <= floatBlockY || 0 > floatBlockY) return null;
         return this.blockList[floatBlockY >> 0][floatBlockX >> 0];
     }
 
     // Return The Unit Based On xy Coordinate
-    getUnit([mapX, mapY]){
+    getUnit([mapX, mapY]) {
         let theBlock = this.getBlock([mapX, mapY]);
         if (theBlock == null || theBlock.class == null) return null;
         return  theBlock.class.unitList[mapY % this.blockSize.y][mapX % this.blockSize.x];
     }
 
     // Creating Client Side Blocks
-    spawnBlocks(blockInfoList){
+    spawnBlocks(blockInfoList) {
         for (let i = 0; i < blockInfoList.length; i++) {
             this.spawnBlock(blockInfoList[i].x, blockInfoList[i].y, blockInfoList[i].block);
         }
     }
 
     // Creating Client Side Block
-    spawnBlock(x, y, blockClass){
-        if (this.blockList[y][x] == null && this.blockNumber.x > x && this.blockNumber.y > y){
+    spawnBlock(x, y, blockClass) {
+        if (this.blockList[y][x] == null && this.blockNumber.x > x && this.blockNumber.y > y) {
             this.blockList[y][x] = {
                 class: blockClass,
                 block: null,
@@ -173,15 +173,15 @@ class map {
     }
 
     // Creating Client Side Block
-    spawnBlockObject(x, y){
+    spawnBlockObject(x, y) {
         let theBlock = this.blockList[y][x];
-        if (theBlock != null){
-            if (theBlock.block == null){
+        if (theBlock != null) {
+            if (theBlock.block == null) {
                 var block = new THREE.Object3D();
                 let blockClass = theBlock.class;
-                
+
                 block.position.set(x * blockClass.unitList.length, y * blockClass.unitList[0].length, 0);
-                
+
                 // Double For Loop To Spawn Each Unit Within The Block
                 for (let y_Axis = 0; y_Axis < blockClass.unitList.length; y_Axis++) {
                     for (let x_Axis = 0; x_Axis < blockClass.unitList[y_Axis].length; x_Axis++) {
@@ -201,13 +201,13 @@ class map {
     }
 
     // Creating Client Side Unit
-    spawnUnit(x, y, unitClass, parent){
+    spawnUnit(x, y, unitClass, parent) {
         let mesh;
         if (this.unitIDList[unitClass.ID].geometryType != null) {
             // Getting Geometry And Materials
             let geometry = this.geometryList[this.unitIDList[unitClass.ID].geometryType];
             let material = this.materialList[unitClass.ID];
-            mesh = new THREE.Mesh(geometry, material);      
+            mesh = new THREE.Mesh(geometry, material);
         } else if(this.unitIDList[unitClass.ID].modelType != null) {
             mesh = this.unitIDList[unitClass.ID].modelType.clone();
         } else {
@@ -225,29 +225,28 @@ class map {
         mesh.rotation.z = unitClass.rotation;
     }
 
-
     // Removing A Block (No Longer Render This Block)
-    deleteBlock(block){
+    deleteBlock(block) {
         // Remove All Child Object
         this.removeAllChildUnit(block);
         this.object.remove(block);
     }
-    
+
     // return true when deletion successful
-    deleteUnit([[mapX, mapY], replaceUnitInfo]){ 
+    deleteUnit([[mapX, mapY], replaceUnitInfo]) {
         let theBlock = this.getBlock([mapX, mapY]);
-        if (theBlock != null && theBlock.class != null){
+        if (theBlock != null && theBlock.class != null) {
             let [x, y] = [mapX % this.blockSize.x, mapY % this.blockSize.y];
             let unit = theBlock.class.unitList[y][x];
 
             // If The Block Is Not null
-            if (theBlock.block != null){
+            if (theBlock.block != null) {
                 this.removeAllChildUnit(unit.mesh);
                 theBlock.block.remove(unit.mesh);
             }
-            
+
             // If ReplaceUnitInfo Is Valid
-            if (replaceUnitInfo.ID != null){
+            if (replaceUnitInfo.ID != null) {
                 unit.ID = replaceUnitInfo.ID;
                 unit.Height = replaceUnitInfo.Height;
                 unit.childUnit = replaceUnitInfo.childUnit;
@@ -263,7 +262,7 @@ class map {
     }
 
     // Remove All Child Units
-    removeAllChildUnit(parent){
+    removeAllChildUnit(parent) {
         for (var i = parent.children.length - 1; i >= 0; i--) {
             this.removeAllChildUnit(parent.children[i]);
             parent.remove(parent.children[i]);
@@ -271,18 +270,18 @@ class map {
     }
 
     // Remove All Block
-    clearAllBlock(){
+    clearAllBlock() {
         let theBlock;
         // Looping Through All Block
         for (let y_Axis = 0; y_Axis < this.blockList.length; ++y_Axis) {
             for (let x_Axis = 0; x_Axis < this.blockList[y_Axis].length; ++x_Axis) {
-                if (this.blockList[y_Axis][x_Axis] != null){
+                if (this.blockList[y_Axis][x_Axis] != null) {
                     theBlock = this.blockList[y_Axis][x_Axis].block;
-                    if (theBlock != null){
+                    if (theBlock != null) {
                         this.deleteBlock(theBlock);
                     }
                     delete this.blockList[y_Axis][x_Axis];
-                } 
+                }
             }
         }
     }

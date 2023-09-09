@@ -40,7 +40,7 @@ document.body.appendChild(renderer.domElement);
 
 // Light Setting
 
-// Hemisphere Light 
+// Hemisphere Light
 const hemisphereLight = new THREE.HemisphereLight(0xFFFFFF, 0x000000, 4); // SkyColor, GroundColor, Intensity
 hemisphereLight.position.set(0, 0, 1);
 scene.add(hemisphereLight);
@@ -98,17 +98,17 @@ function animate() {
     // helper.update()
     delta = clock.getDelta();
     player_controller.update(delta);
-    
+
     // Updating Event
-    for (let i = 0; i < playerArray.length; i++){
-        if (playerArray[i] != null && i != clientPlayerID){
+    for (let i = 0; i < playerArray.length; i++) {
+        if (playerArray[i] != null && i != clientPlayerID) {
             playerArray[i].update();
         }
     }
 
     // Updating Event
-    for (let i = 0; i < damageTextList.length; ++i){
-        if (damageTextList[i] != null){
+    for (let i = 0; i < damageTextList.length; ++i) {
+        if (damageTextList[i] != null) {
             damageTextList[i].update(delta, i);
         }
     }

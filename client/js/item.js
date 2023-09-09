@@ -1,5 +1,5 @@
 // Function To Load Item Image As THREE Material Mesh
-function loadItemMaterials(){
+function loadItemMaterials() {
     // Variable Declaration
     let itemMaterialsArray = [];
     let loader = new THREE.TextureLoader();
@@ -17,9 +17,9 @@ function loadItemMaterials(){
     return itemMaterialsArray;
 }
 
-// The Entire Item Class
+// Item Class
 class item {
-    // Item Constructor
+    // Item Class Constructor
     constructor(itemInfo, itemPosition) {
         // Basic Item Information
         this.itemInfo = itemInfo;
@@ -40,9 +40,9 @@ class item {
     delete() {
         // Remove All Child Object
         var obj;
-        for (var i = this.object.children.length - 1; i >= 0; i--) { 
+        for (var i = this.object.children.length - 1; i >= 0; i--) {
             obj = this.object.children[i];
-            this.object.remove(obj); 
+            this.object.remove(obj);
         }
 
         // Removing It From The Scene
