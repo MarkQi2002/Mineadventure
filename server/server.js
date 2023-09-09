@@ -6,9 +6,10 @@
 // Certain Acronym Used
 // EXP -> Experience
 
-// CommonJS Syntax
+// Import Modules
 // Hyper Text Transfer Protocol (HTTP)
-// Setting Socket Related Modules
+// Web Framework For Node.js
+// Low Latency, Bidirectional And Event Based Communication Between Server And Client
 const http = require('http');
 const express = require('express');
 const socketio = require('socket.io');
@@ -16,9 +17,6 @@ const socketio = require('socket.io');
 // Map Related Setting
 const map = require('./mapClass.js');
 const AI_controller = require('./AI_controller.js');
-const e = require('express');
-const { count } = require('console');
-const { runInThisContext } = require('vm');
 
 // An Express Function
 const app = express();
@@ -30,130 +28,17 @@ app.use(express.static(`${__dirname}/../client`));
 const server = http.createServer(app);
 const io = socketio(server);
 
-
-
-// -------------------Camp-------------------
-/*
-var campArray = [];
-campArray.length = 32;
-var newCampIndex = 0;
-
-class camp{
-	constructor(name){
-		newCampIndex = newDynamicArrayID(campArray, newCampIndex, 32, "Camp List")
-		campArray[newCampIndex] = this;
-		this.friendlyFire = false;
-		this.ID = newCampIndex;
-		this.name = name;
-		this.members = [];
-		this.enemyCamp = [];
-		this.friendCamp = [];
-	}
-
-	IsAttackable([creatureType, ID]){
-		if (this.friendlyFire) return true;
-		
-		let theCampID;
-		if (creatureType == "player") {
-			theCampID = playerArray[ID].camp;
-		} else {
-			theCampID = monsterArray[ID].camp;
-		}
-
-		if (this.IsFriend(theCampID) || this.IsMember([creatureType, ID]))return false;
-		
-		return true;
-
-	}
-
-	IsMember([creatureType, ID]){
-		// Return If the Creature ID Is Already Inside
-		if (creatureType == "player") {
-			if (playerArray[ID].camp == this.ID) return true;
-		} else {
-			if (monsterArray[ID].camp == this.ID) return true;
-		}
-		return false;
-	}
-
-	IsEnemy(theCampID){
-		let index = this.enemyCamp.indexOf(theCampID);
-		if (index == -1) return false;
-		return true;
-	}
-
-	IsFriend(theCampID){
-		let index = this.friendCamp.indexOf(theCampID)
-		if (index == -1) return false;
-		return true
-	}
-
-	addMember([creatureType, ID]){
-		// Return If the Creature ID Is Already Inside
-		if(this.IsMember([creatureType, ID])) return;
-
-		if (creatureType == "player") {
-			playerArray[ID].camp = this.ID;
-		} else {
-			monsterArray[ID].camp = this.ID;
-		}
-
-		this.members.push([creatureType, ID]);
-
-	}
-
-	addEnemy(theCampID){
-		// Return If the Camp ID Is Already Inside
-		if (theCampID >= campArray.length || this.IsEnemy(theCampID)) return;
-
-		// If FriendCamp Has The Came ID, Remove It
-		if (this.IsFriend(theCampID)) this.friendCamp.splice(i, 1); // 2nd parameter means remove one item only
-		this.enemyCamp.push(theCampID);
-
-	}
-
-	addFriend(theCampID){
-		// Return If the Camp ID Is Already Inside
-		if (theCampID >= campArray.length || this.IsFriend(theCampID)) return;
-
-		// If EnemyCamp Has The Came ID, Remove It
-		if (this.IsEnemy(theCampID)) this.enemyCamp.splie(i, 1); // 2nd parameter means remove one item only
-		this.friendCamp.push(theCampID);
-	}
-
-	removeMember([creatureType, ID]){
-		for (let index = 0; index < this.members.length; ++index){
-			if (this.members[index].creatureType == creatureType && this.members[index].ID == ID){
-				this.members.splie(index, 1);
-				return;
-			}
-		}
-	}
-
-	removeEnemy(theCampID){
-		let index = this.enemyCamp.indexOf(theCampID);
-		if (index > -1) this.enemyCamp.splie(index, 1);
-	}
-
-	removeFriend(theCampID){
-		let index = this.friendCamp.indexOf(theCampID);
-		if (index > -1) this.friendCamp.splie(index, 1);
-	}
-}*/
-
 // Default Camp Information
-function campInfo(){
+function campInfo() {
 	this["defaultPlayer"] = -100
 	this["defaultMonster"] = 0
 	this["monsterKiller"] = 0
 }
 
 // Return Attackability For Attacker Based On Defender Status
-function IsAttackable(attacker, attackerCampInfo, defender, defenderCamp){
+function IsAttackable(attacker, attackerCampInfo, defender, defenderCamp) {
 	return !(attacker[0] == defender[0] && attacker[1] == defender[1]) && attackerCampInfo[defenderCamp] < 50
 }
-
-// -------------------End Of Camp-------------------
 
 // -------------------Creature-------------------
 // Default Properties For All Creature
@@ -164,7 +49,7 @@ function properties() {
 	// Need 93745637 Exp To Get To Level 100
 	this["level"] = 1;
 	this["experience"] = 0;
-	
+
 	// Level Up Growth Amount
 	// Growth Is Linearly Scaled
 	// Defensive Property Growth
@@ -203,17 +88,17 @@ function creatureInfoClass(ID, creatureType, name, initPos, mapLevel, camp) {
 	this["creatureType"] = creatureType;
 	this["name"] = name;
 	this["position"] = initPos;
-	
 
+	// Camp Related Information
 	this["mapLevel"] =  mapLevel;
 	this["camp"] = camp
 	this["campInfo"] = new campInfo();
 
 	this["lastBlockPos"] = [initPos[0] / game_map.blockSize.x >> 0, initPos[1] / game_map.blockSize.y >> 0];
-		
+
 	// Creature Properties Information
 	this["properties"] = new properties();
-	
+
 	// Creature Item Array
 	this["creatureItemArray"] = {};
 
@@ -221,48 +106,51 @@ function creatureInfoClass(ID, creatureType, name, initPos, mapLevel, camp) {
 	this["state"] = {};
 }
 
+// Level Up Ability
 function abilityLevelUp(theAbility){
 	theAbility.level += 1;
 }
 
+// Ability Information
 var abilityTypeInfo = {
 	"Flame Manipulator": {
-		
-		add: // When Get Same Ability
+		// When Get Same Ability
+		add:
 			abilityLevelUp,
 
-		projectileAttack: //When Calculate Projectile Damage
-			function(theAbility, theProjectile, creatureInfo){
+		// When Calculate Projectile Damage
+		projectileAttack:
+			function(theAbility, theProjectile, creatureInfo) {
 				let damageInfo = theProjectile.damageInfo;
 				let growthRate = 2 / Math.PI * Math.atan((theAbility.level - 1) * 0.1);
 				if (Math.random() >= 0.1 + growthRate * 0.9) return null;
 
 				let newInfo = {
-					duration: theAbility.level * 0.5 + 3, 
+					duration: theAbility.level * 0.5 + 3,
 					typeInput: {
-						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]], 
+						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]],
 						criticalRate: damageInfo.properties.criticalRate,
 						stack: theAbility.level
 					}
 				};
 
-	
-				if (damageInfo.properties.ability["Fire Range"] != null){
+				if (damageInfo.properties.ability["Fire Range"] != null) {
 					abilityTypeInfo["Fire Range"].effect(damageInfo.properties.ability["Fire Range"], theProjectile, newInfo, creatureInfo);
 				}
-				
 
+				// Return Ability State
 				return {"state": {"Burning": newInfo}};
 			},
 	},
 
 	"Poisoner": {
-		
-		add: // When Get Same Ability
+		// When Get Same Ability
+		add:
 			abilityLevelUp,
 
-		projectileAttack: //When Calculate Projectile Damage
-			function(theAbility, theProjectile, creatureInfo){
+		// When Calculate Projectile Damage
+		projectileAttack:
+			function(theAbility, theProjectile, creatureInfo) {
 				let damageInfo = theProjectile.damageInfo;
 				let growthRate = 2 / Math.PI * Math.atan((theAbility.level - 1) * 0.1);
 				if (Math.random() >= 0.1 + growthRate * 0.9) return null;
@@ -270,23 +158,25 @@ var abilityTypeInfo = {
 				let newInfo = {
 					duration: theAbility.level * 2 + 30,
 					typeInput: {
-						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]], 
+						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]],
 						criticalRate: damageInfo.properties.criticalRate,
 						stack: theAbility.level
 					}
 				};
 
+				// Return Ability State
 				return {"state": {"Poisoning": newInfo}};
 			},
 	},
 
 	"Freezer": {
-		
-		add: // When Get Same Ability
+		// When Get Same Ability
+		add:
 			abilityLevelUp,
 
-		projectileAttack: //When Calculate Projectile Damage
-			function(theAbility, theProjectile, creatureInfo){
+		//When Calculate Projectile Damage
+		projectileAttack:
+			function(theAbility, theProjectile, creatureInfo) {
 				let damageInfo = theProjectile.damageInfo;
 				let growthRate = 2 / Math.PI * Math.atan((theAbility.level - 1) * 0.1);
 				if (Math.random() >= 0.1 + growthRate * 0.9) return null;
@@ -294,45 +184,49 @@ var abilityTypeInfo = {
 				let newInfo = {
 					duration: theAbility.level + 5,
 					typeInput: {
-						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]], 
+						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]],
 						criticalRate: damageInfo.properties.criticalRate,
 						stack: theAbility.level
 					}
 				};
-	
+
+				// Return Ability State
 				return {"state": {"Freezing": newInfo}};
 			},
 	},
 
 	"Repulsor": {
-		
-		add: // When Get Same Ability
+		// When Get Same Ability
+		add:
 			abilityLevelUp,
 
-		projectileAttack: //When Calculate Projectile Damage
-			function(theAbility, theProjectile, creatureInfo){
+		// When Calculate Projectile Damage
+		projectileAttack:
+			function(theAbility, theProjectile, creatureInfo) {
 				let damageInfo = theProjectile.damageInfo;
 				let newInfo = {
 					duration: theAbility.level * 0.1 + 0.4,
 					typeInput: {
-						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]], 
+						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]],
 						stack: theAbility.level,
 						initVelocity: theProjectile.initVelocity
 					}
 				};
 
+				// Return Ability State
 				return {"state": {"Knock Back": newInfo}};
 			},
 	},
 
 
 	"Fire Range": {
-		
-		add: // When Get Same Ability
+		// When Get Same Ability
+		add:
 			abilityLevelUp,
 
+		// Ability Affect
 		effect:
-			function(theAbility, theProjectile, newInfo, creatureInfo){
+			function(theAbility, theProjectile, newInfo, creatureInfo) {
 				let damageInfo = theProjectile.damageInfo;
 				let infoList = [];
 				let otherCreature;
@@ -352,69 +246,39 @@ var abilityTypeInfo = {
 						// For Calculating Manhattan Distance
 						let diffX = otherCreature.position[0] - theProjectile.position[0];
 						let diffY = otherCreature.position[1] - theProjectile.position[1];
-						if (Math.abs(diffX) + Math.abs(diffY) > radius + radius) continue; 
-						
+						if (Math.abs(diffX) + Math.abs(diffY) > radius + radius) continue;
+
 						// If Collision Occur, Move In Opposite Direction And Return True
 						// Calculate Direct Distance To Squared
-						if (diffX * diffX + diffY * diffY > radius * radius) continue; 
+						if (diffX * diffX + diffY * diffY > radius * radius) continue;
 
 
-						if (!IsAttackable([damageInfo.attacker[0], damageInfo.attacker[1]], damageInfo.attacker[2], 
+						if (!IsAttackable([damageInfo.attacker[0], damageInfo.attacker[1]], damageInfo.attacker[2],
 							[otherCreature.creatureType, otherCreature.ID], otherCreature.camp)) continue;
-						
-						
-						infoList.push([[otherCreature.creatureType, otherCreature.ID], {"state": {"Burning": newInfo}}]);
 
+						infoList.push([[otherCreature.creatureType, otherCreature.ID], {"state": {"Burning": newInfo}}]);
                     }
                 }
 
-				
 				creatureInfoChange(infoList);
-
-				
 			},
 
 	},
-
-	/*
-	"Corpse Explosion": {
-		
-		add: // When Get Same Ability
-			abilityLevelUp,
-
-		projectileAttack: //When Calculate Projectile Damage
-			function(theAbility, theProjectile){
-				let damageInfo = theProjectile.damageInfo;
-				let newInfo = {
-					duration: theAbility.level * 0.5,
-					typeInput: {
-						attacker: [damageInfo.attacker[0], damageInfo.attacker[1]], 
-						stack: theAbility.level,
-						projectilePos: theProjectile.position
-					}
-				};
-
-				return {"state": {"Freezing": newInfo}}
-			},
-
-	},*/
-	
-
 }
 
 // Add Each Ability Result
-function addAbilityResult(attackInfo, abilityResult){
+function addAbilityResult(attackInfo, abilityResult) {
 	for (let [type, info] of Object.entries(abilityResult)) {
-		if (attackInfo[type] != null){
+		if (attackInfo[type] != null) {
 			addAbilityResult(attackInfo[type], info);
-		}else{
+		} else {
 			attackInfo[type] = info;
 		}
 	}
-} 
+}
 
 // Calculate Projectile Damage and Ablility With Attacker Information
-function projectileAttackInfo(creatureInfo, theProjectile){
+function projectileAttackInfo(creatureInfo, theProjectile) {
 	let attackInfo = {"damage": theProjectile.damageInfo};
 
 	let abilityResult;
@@ -422,15 +286,15 @@ function projectileAttackInfo(creatureInfo, theProjectile){
 		if (abilityTypeInfo[type].projectileAttack == null) continue;
 
 		abilityResult = abilityTypeInfo[type].projectileAttack(theAbility, theProjectile, creatureInfo);
-		if (abilityResult != null){
+		if (abilityResult != null) {
 			addAbilityResult(attackInfo, abilityResult);
 		}
 	}
 	return attackInfo;
 }
 
-
-function addAbility(newAbility, theCreature){
+// Add Ability To Creature
+function addAbility(newAbility, theCreature) {
 	for (let [type, inputs] of Object.entries(newAbility)) {
 		if (theCreature.properties.ability[type] == null){
 			console.log(type, inputs)
@@ -443,13 +307,14 @@ function addAbility(newAbility, theCreature){
 	}
 }
 
+// Ability Function
 function ability (type, inputs) {
 	this.type = type;
 	this.level = inputs.level;
 }
 
-
-function getCreature([creatureType, ID]){
+// Get A Creature Information By Type And ID
+function getCreature([creatureType, ID]) {
 	if (creatureType == "player"){
 		return playerArray[ID];
 	} else {
@@ -457,17 +322,17 @@ function getCreature([creatureType, ID]){
 	}
 }
 
-function solveConflictState(inputs, theCreature, conflictStateList){
+// Conflicting State
+function solveConflictState(inputs, theCreature, conflictStateList) {
 	let element;
-	if (theCreature != null){
-		for (let i = 0; i < conflictStateList.length; ++i){
-			
-			while (theCreature.state[conflictStateList[i]] != null){
+	if (theCreature != null) {
+		for (let i = 0; i < conflictStateList.length; ++i) {
+			while (theCreature.state[conflictStateList[i]] != null) {
 				element = theCreature.state[conflictStateList[i]].list[0];
-				if (element.typeInput.stack <= inputs.typeInput.stack){
+				if (element.typeInput.stack <= inputs.typeInput.stack) {
 					inputs.typeInput.stack -= element.typeInput.stack;
 					theCreature.state[conflictStateList[i]].shift(theCreature);
-					if (inputs.typeInput.stack == 0){
+					if (inputs.typeInput.stack == 0) {
 						return true;
 					}
 				} else {
@@ -475,12 +340,10 @@ function solveConflictState(inputs, theCreature, conflictStateList){
 					theCreature.state[conflictStateList[i]].stack -= inputs.typeInput.stack;
 					return true;
 				}
-				
 			}
-
 		}
 	}
-	
+
 	return false;
 }
 
@@ -490,9 +353,9 @@ var stateTypeInfo = {
 			["Freezing"],
 
 		updateDamageType:
-			function(theState){
+			function(theState) {
 				theState["damageType"] =  {};
-				
+
 				let newDamage;
 				newDamage = theState.baseDamage * theState.stack >> 0;
 				theState.damageType["fire"] = newDamage;
@@ -501,23 +364,23 @@ var stateTypeInfo = {
 				if (newDamage) theState.damageType["true"] = newDamage;
 			},
 
-		stateBegin: 
-			function(theState){
+		stateBegin:
+			function(theState) {
 				theState["baseDamage"] = 10;
 				theState.period = 500;
 			},
 
-		stateAdd: 
-			function(theState, element){
+		stateAdd:
+			function(theState, element) {
 				theState["criticalRate"] = element.typeInput.criticalRate;
 				theState["attacker"] = element.typeInput.attacker;
-				
+
 				stateTypeInfo[theState.type].updateDamageType(theState);
 
 			},
 
-		atState: 
-			function(theState){
+		atState:
+			function(theState) {
 				let theCreature = getCreature(theState.creature);
 				if (theCreature == null) return;
 
@@ -529,7 +392,7 @@ var stateTypeInfo = {
 				return checkLifeStatus(theCreature, theState.attacker);
 			},
 
-		stateShift: 
+		stateShift:
 			function(theState, element){
 				stateTypeInfo[theState.type].updateDamageType(theState);
 			},
@@ -541,7 +404,7 @@ var stateTypeInfo = {
 
 	"Poisoning": {
 		updateDamageType:
-			function(theState){
+			function(theState) {
 				theState["damageType"] =  {};
 
 				let theCreature = getCreature(theState.creature);
@@ -550,7 +413,7 @@ var stateTypeInfo = {
 				let growthRate = 2 / Math.PI * Math.atan((theState.stack - 1) * 0.1);
 
 				let newDamage;
-				newDamage = (theCreature.properties.maxHealth * (0.01 + growthRate * 0.08) + 
+				newDamage = (theCreature.properties.maxHealth * (0.01 + growthRate * 0.08) +
 							theState.baseDamage * theState.stack + 1) >> 0;
 				theState.damageType["poison"] = newDamage;
 
@@ -558,20 +421,20 @@ var stateTypeInfo = {
 				if (newDamage) theState.damageType["true"] = newDamage;
 			},
 
-		stateBegin: 
-			function(theState){
+		stateBegin:
+			function(theState) {
 				theState["baseDamage"] = 1;
 			},
 
-		stateAdd: 
-			function(theState, element){
+		stateAdd:
+			function(theState, element) {
 				theState["criticalRate"] = element.typeInput.criticalRate;
 				theState["attacker"] = element.typeInput.attacker;
 				stateTypeInfo[theState.type].updateDamageType(theState);
 			},
 
-		atState: 
-			function(theState){
+		atState:
+			function(theState) {
 				let theCreature = getCreature(theState.creature);
 				if (theCreature == null) return;
 
@@ -579,26 +442,24 @@ var stateTypeInfo = {
 				newProperties.criticalRate = theState.criticalRate;
 
 				creatureInfoChange([[theState.creature, {"damage": damage(theState.attacker, theState.damageType, newProperties)}]]);
-				
+
 				return checkLifeStatus(theCreature, theState.attacker);
 			},
 
-		stateShift: 
-			function(theState, element){
+		stateShift:
+			function(theState, element) {
 				stateTypeInfo[theState.type].updateDamageType(theState);
 			},
 
-
 		stateEnd: null,
 	},
-
 
 	"Freezing": {
 		conflictState:
 			["Burning"],
 
 		updateDamageType:
-			function(theState){
+			function(theState) {
 				// Update Damage Type
 				theState["damageType"] =  {};
 
@@ -610,20 +471,20 @@ var stateTypeInfo = {
 				if (newDamage) theState.damageType["true"] = newDamage;
 			},
 
-		stateBegin: 
-			function(theState){
+		stateBegin:
+			function(theState) {
 				theState["baseDamage"] = 5;
 			},
 
-		stateAdd: 
-			function(theState, element){
+		stateAdd:
+			function(theState, element) {
 				theState["criticalRate"] = element.typeInput.criticalRate;
 				theState["attacker"] = element.typeInput.attacker;
-				
+
 				let growthRate = 2 / Math.PI * Math.atan((theState.stack - 1) * 0.1);
-				
+
 				stateTypeInfo[theState.type].updateDamageType(theState);
-				
+
 				let theCreature = getCreature(theState.creature);
 				if (theCreature == null) return;
 
@@ -637,8 +498,8 @@ var stateTypeInfo = {
 						"moveSpeed": ["-", element.typeInput.removedMoveSpeed]};
 			},
 
-		atState: 
-			function(theState){
+		atState:
+			function(theState) {
 				let theCreature = getCreature(theState.creature);
 				if (theCreature == null) return;
 
@@ -646,14 +507,14 @@ var stateTypeInfo = {
 				newProperties.criticalRate = theState.criticalRate;
 
 				creatureInfoChange([[theState.creature, {"damage": damage(theState.attacker, theState.damageType, newProperties)}]]);
-				
+
 				return checkLifeStatus(theCreature, theState.attacker);
 			},
 
-		stateShift: 
-			function(theState, element){
+		stateShift:
+			function(theState, element) {
 				stateTypeInfo[theState.type].updateDamageType(theState);
-				if (element.typeInput.removedAttackSpeed != null && element.typeInput.removedMoveSpeed != null){
+				if (element.typeInput.removedAttackSpeed != null && element.typeInput.removedMoveSpeed != null) {
 					let theCreature = getCreature(theState.creature);
 					if (theCreature == null) return;
 
@@ -662,40 +523,37 @@ var stateTypeInfo = {
 				}
 			},
 
-
 		stateEnd: null,
 	},
 
-
-
 	"Knock Back": {
-
-		stateBegin: 
-			function(theState){
-				theState.period = 1000000000; // Never Run "atState"
+		stateBegin:
+			// Never Run "atState"
+			function(theState) {
+				theState.period = 1000000000;
 			},
 
-		stateAdd: 
-			function(theState, element){
+		stateAdd:
+			function(theState, element) {
 				theState["attacker"] = element.typeInput.attacker;
-				
+
 				let theCreature = getCreature(theState.creature);
 				if (theCreature == null) return;
 
 				let [diffX, diffY] = [element.typeInput.initVelocity[0], element.typeInput.initVelocity[1]];
 				let magnitude = Math.sqrt(diffX * diffX + diffY * diffY);
 
-				if (theState.movementVector != null){
+				if (theState.movementVector != null) {
 					let lastVector = theState.movementVector;
 					[diffX, diffY] = [lastVector[0] + diffX / magnitude, lastVector[0] + diffY / magnitude];
 					magnitude = Math.sqrt(diffX * diffX + diffY * diffY);
 				}
-				
+
 				theState["movementVector"] = [diffX / magnitude, diffY / magnitude];
-			
+
 				element.typeInput["removedMoveSpeed"] = theCreature.properties.moveSpeed * 0.5;
 				let theController = AI_controllerList[theCreature.ID];
-				if (theCreature.creatureType == "monster" && theController != null){
+				if (theCreature.creatureType == "monster" && theController != null) {
 					let speed = (theState.list[theState.list.length - 1].endTime - element.startTime) / 5000 * (0.5 + element.typeInput.stack * 0.05);
 					theController.velocity[0] = theState.movementVector[0] * speed;
 					theController.velocity[1] = theState.movementVector[1] * speed;
@@ -704,24 +562,14 @@ var stateTypeInfo = {
 				return {"moveSpeed": ["-", element.typeInput.removedMoveSpeed]};
 			},
 
-		atState: 
-			function(theState){
-				/*
-				let theCreature = getCreature(theState.creature);
-				if (theCreature == null) return;
+		atState:
+			function(theState) {
 
-				let speed = (theState.list[theState.list.length - 1].endTime - theState.currentTime) / 5000;
-				
-				theCreature.position[0] += theState.movementVector[0] * speed;
-
-				theCreature.position[1] += theState.movementVector[1] * speed;
-			
-				*/
 			},
 
-		stateShift: 
-			function(theState, element){
-				if ( element.typeInput.removedMoveSpeed != null){
+		stateShift:
+			function(theState, element) {
+				if ( element.typeInput.removedMoveSpeed != null) {
 					let theCreature = getCreature(theState.creature);
 					if (theCreature == null) return;
 
@@ -732,12 +580,10 @@ var stateTypeInfo = {
 
 		stateEnd: null,
 	},
-
-
 };
-	
-class state{
-	constructor(type, creature, duration, typeInput){
+
+class state {
+	constructor(type, creature, duration, typeInput) {
 		this.type = type;
 		this.creature = creature;
 		this.stack = 0;
@@ -749,8 +595,8 @@ class state{
 		this.add(duration, typeInput)
 	}
 
-	update(creatureInfo, currentTime){
-		if (this.nextTime < currentTime){
+	update(creatureInfo, currentTime) {
+		if (this.nextTime < currentTime) {
 			if (stateTypeInfo[this.type].atState(this) == true) return;
 			this.nextTime += this.period;
 		}
@@ -758,28 +604,27 @@ class state{
 		while (this.list.length > 0) {
             if (this.list[0].endTime <= currentTime) {
 				this.shift(creatureInfo);
-            }else{
+            } else {
 				break;
 			}
         }
-
 	}
 
-	shift(creatureInfo){
+	shift(creatureInfo) {
 		let element = this.list.shift()
 		this.stack -= element.typeInput.stack;
 		let outputCommand = stateTypeInfo[this.type].stateShift(this, element);
 		let newCommand = {};
-		if (this.list.length <= 0){
+		if (this.list.length <= 0) {
 			delete creatureInfo.state[this.type];
 			newCommand[this.type] = {command: "Delete", info: null};
-		}else{
+		} else {
 			newCommand[this.type] = {command: "Shift", info:  {state: this, deletedElement: element}};
 		}
 		creatureInfoChange([[this.creature, {...outputCommand,"state": newCommand}]]);
 	}
 
-	add(duration, typeInput){
+	add(duration, typeInput) {
 		let startTime = new Date().getTime();
 		let newElement = {
 			startTime: startTime,
@@ -794,7 +639,7 @@ class state{
 			this.list.push(newElement);
 			addIndex = this.list.length - 1;
 			contain = true;
-		}else{
+		} else {
 			// Correct Location Of The Queue
 			for (var i = this.list.length - 2; i >= 0; --i) {
 				if (this.list[i].endTime < newElement.endTime) {
@@ -807,7 +652,7 @@ class state{
 				}
 			}
 		}
-    
+
         // If The Element Have The Highest endTime
         if (!contain) {
             this.list.splice(0, 0, newElement);
@@ -825,12 +670,13 @@ class state{
 		creatureInfoChange([[this.creature, {...outputCommand,"state": newCommand}]]);
 	}
 
-	setEndTime(){
+	// Set End Time
+	setEndTime() {
 		this.endTime = this.list[this.list.length - 1].endTime;
 	}
 }
 
-function addState(newState, theCreature){
+function addState(newState, theCreature) {
 	for (let [type, inputs] of Object.entries(newState)) {
 		if (inputs.command != null) continue;
 		if (stateTypeInfo[type].conflictState != null && solveConflictState(inputs, theCreature, stateTypeInfo[type].conflictState)) continue;
@@ -841,7 +687,7 @@ function addState(newState, theCreature){
 			theCreature.state[type].add(inputs.duration, inputs.typeInput);
 		}
 		newState[type] = {command: "New", info: {state: theCreature.state[type]}};
-		
+
 	}
 }
 
@@ -913,7 +759,7 @@ function levelUp(creatureInfo, experience) {
 	let nextLevelEXP = experienceRequire(creaturelevel);
 	let number = 0;
 	// Continuously Level Up Creature Until Not Enough EXP To Level Up Further More
-	while (creatureInfo.properties.experience >= nextLevelEXP){
+	while (creatureInfo.properties.experience >= nextLevelEXP) {
 		// Level Up And Remove EXP
 		creaturelevel += 1;
 		creatureInfo.properties.experience -= nextLevelEXP;
@@ -933,14 +779,13 @@ function levelUp(creatureInfo, experience) {
 						"attackSpeed": ["=", creatureInfo.properties.attackSpeed],
 						"criticalRate": ["=", creatureInfo.properties.criticalRate]
 					};
-	
+
 	// Sending Package To All Clients
 	io.to("level " + creatureInfo.mapLevel).compress(true).emit('creatureInfoChange', [[[creatureInfo.creatureType, creatureInfo.ID], levelUpInfo]]);
 }
 
-
 // Get A New ID From A DynamicArray
-function newDynamicArrayID(dynamicArray, arrayCount, IncreaseAmount, printName){
+function newDynamicArrayID(dynamicArray, arrayCount, IncreaseAmount, printName) {
 	let exceedCount = 0;
 	// Stop Untill Get An playerID Corresponding To An Empty Space In dynamicArray
 	while (dynamicArray[arrayCount] != null) {
@@ -969,7 +814,7 @@ function creatureOnHit(creatureInfo, theMapLevel) {
 	// Get The Block The Creature Located Within
 	let theBlock = theMapLevel.getBlock([(creatureInfo.position[0] + 0.5) >> 0,
 										 (creatureInfo.position[1] + 0.5) >> 0]);
-	
+
 	// If Outside Border Return
 	if (theBlock == null) return;
 
@@ -998,16 +843,15 @@ function creatureOnHit(creatureInfo, theMapLevel) {
 		let diffY = theProjectile.position[1] - creatureInfo.position[1];
 
 		// Calculate Manhattan Distance
-		if (Math.abs(diffX) + Math.abs(diffY) < 2){
+		if (Math.abs(diffX) + Math.abs(diffY) < 2) {
 			// Calculate Z Coordinate Difference
 			let diffZ = theProjectile.position[2] - creatureInfo.position[2];
-			
+
 			// Calculate Distance To Squared
 			if (diffX * diffX + diffY * diffY + diffZ * diffZ <= 0.49){
-
 				// Updating Creature Information
 				creatureInfoChange([[[creatureInfo.creatureType, creatureInfo.ID], projectileAttackInfo(creatureInfo, theProjectile)]]);
-				
+
 				// Set Projectile Deletion Tag
 				theMapLevel.levelProjectileArray[blockProjectileList[projectileIndex]] = "deletion";
 
@@ -1017,14 +861,14 @@ function creatureOnHit(creatureInfo, theMapLevel) {
 	}
 }
 
+// Check Creature Alive Or Not
 function checkLifeStatus(creatureInfo, attacker){
 	if (creatureInfo.creatureType == "player"){
 		// Do Nothing
-		
 	} else {
 		if (AI_controllerList[creatureInfo.ID] != null) AI_controllerList[creatureInfo.ID].setAggro(attacker[0], attacker[1], 1);
 		// Creature On Hit Health Below 0
-		if (creatureInfo.properties["health"] <= 0){
+		if (creatureInfo.properties["health"] <= 0) {
 			// Monster Creature, Delete Monster And Give Attacker EXP
 			itemDrop(creatureInfo.ID);
 			deleteMonster(creatureInfo.ID);
@@ -1035,9 +879,6 @@ function checkLifeStatus(creatureInfo, attacker){
 	return false;
 }
 
-// -------------------End Of Creature-------------------
-
-// -------------------Player-------------------
 // Player Related Variable Declaration
 var playerArray = [];
 var sockArray = [];
@@ -1066,7 +907,7 @@ const CreateNewPlayer = (playerID, playerName, spawnPos, mapLevel, sock) => {
     lastBlock.blockCreatureArray.push([playerInfo.creatureType, playerInfo.ID]);
 
 	// Add Sock In sockArray
-	if (sockArray.length < playerArray.length){
+	if (sockArray.length < playerArray.length) {
 		sockArray.length = playerArray.length;
 	}
 	sockArray[playerID] = sock;
@@ -1088,8 +929,8 @@ function updatePlayer(delta, theMapLevel) {
 	// Loop Through All Player Within theMapLevel
 	for (let i = 0; i < theMapLevel.levelPlayerArray.length; ++i) {
 		thePlayer = theMapLevel.levelPlayerArray[i];
-		if (thePlayer == null) continue; 
-		
+		if (thePlayer == null) continue;
+
 		// Check Player Collision With Projectile
 		creatureOnHit(thePlayer, theMapLevel);
 
@@ -1102,10 +943,10 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 	// Updating Player Position
 	if (playerArray[playerID] != null) {
 		let [blockX, blockY] = [Pos[0] / game_map.blockSize.x >> 0, Pos[1] / game_map.blockSize.y >> 0];
-		if (blockX != playerArray[playerID].lastBlockPos[0] || blockY != playerArray[playerID].lastBlockPos[1]){
+		if (blockX != playerArray[playerID].lastBlockPos[0] || blockY != playerArray[playerID].lastBlockPos[1]) {
 			let theMapLevel = game_map.mapLevel[playerArray[playerID].mapLevel];
 			let lastBlock = theMapLevel.getBlockByBlockPos([playerArray[playerID].lastBlockPos[0], playerArray[playerID].lastBlockPos[1]]);
-			
+
 			// Loop Through All Block Array
 			if (lastBlock != null) {
 				let theBlockArray = lastBlock.blockCreatureArray;
@@ -1116,9 +957,9 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 					}
 				}
 			}
-			
+
 			let newBlock = theMapLevel.getBlock([Pos[0], Pos[1]]);
-			if (newBlock != null){
+			if (newBlock != null) {
 				newBlock.blockCreatureArray.push([playerArray[playerID].creatureType, playerArray[playerID].ID]);
 				playerArray[playerID].lastBlockPos = [blockX, blockY];
 			}
@@ -1126,7 +967,7 @@ const UpdatePlayerPosition = (Pos, playerID) => {
 
 		// Updating The Position
 		playerArray[playerID].position = Pos;
-		
+
 		// Send To All Player On Same Level
 		io.to("level " + playerArray[playerID].mapLevel).compress(true).emit('clientPos', [Pos, playerID]);
 	}
@@ -1147,13 +988,13 @@ const clientDisconnect = (Info, playerID) => {
 			game_map.mapLevel[mapLevelIndex].levelPlayerArray.splice(index, 1); // 2nd parameter means remove one item only
 		}
 
-		
+
 		//Remove from blockCreatureArray
 		let lastBlock = game_map.mapLevel[mapLevelIndex].getBlockByBlockPos([playerArray[playerID].lastBlockPos[0], playerArray[playerID].lastBlockPos[1]]);
-		if (lastBlock != null){
+		if (lastBlock != null) {
 			let theBlockArray = lastBlock.blockCreatureArray;
-			for (let i = 0; i < theBlockArray.length; ++i){
-				if (theBlockArray[i] != null && theBlockArray[i][1] == playerArray[playerID].ID && theBlockArray[i][0] == playerArray[playerID].creatureType){
+			for (let i = 0; i < theBlockArray.length; ++i) {
+				if (theBlockArray[i] != null && theBlockArray[i][1] == playerArray[playerID].ID && theBlockArray[i][0] == playerArray[playerID].creatureType) {
 					lastBlock.blockCreatureArray.splice(i, 1);
 					break;
 				}
@@ -1161,7 +1002,7 @@ const clientDisconnect = (Info, playerID) => {
 		}
 
 		// Delete This Player's Info
-		console.log("Player ID:", playerID, " Name:", playerArray[playerID].name, "is disconnected!  Info:", Info);
+		console.log("Player ID:", playerID, " Name:", playerArray[playerID].name, "is disconnected! Info:", Info);
 		delete playerArray[playerID];
 		playerArray[playerID] = null;
 		sockArray[playerID] = null;
@@ -1177,13 +1018,13 @@ const serverCommand = (playerID, theCommand) => {
 };
 
 // Switching Between Different Map Level
-function SwitchMapLevel(spawnPos, playerInfo, newMapLevelIndex){
+function SwitchMapLevel(spawnPos, playerInfo, newMapLevelIndex) {
 	// Remove The Player From mapLevel
 	let mapLevelIndex = playerInfo.mapLevel;
 	let sock = sockArray[playerInfo.ID];
 	sock.leave("level " + mapLevelIndex);
 	let index = game_map.mapLevel[mapLevelIndex].levelPlayerArray.indexOf(playerInfo);
-	
+
 	// Only Splice Array When Item Is Found
 	if (index > -1) {
 		game_map.mapLevel[mapLevelIndex].levelPlayerArray.splice(index, 1); // 2nd Parameter Means Remove One Item Only
@@ -1199,7 +1040,7 @@ function SwitchMapLevel(spawnPos, playerInfo, newMapLevelIndex){
 }
 
 // Setting Map Level
-function setMapLevel(sock, spawnPos, playerID, newMapLevelIndex){
+function setMapLevel(sock, spawnPos, playerID, newMapLevelIndex) {
 	// Add Player To The New mapLevel
 	sock.join("level " + newMapLevelIndex);
 	sock.compress(true).emit('initSelf', playerID, game_map.mapLevel[newMapLevelIndex].levelPlayerArray, playerArray.length,
@@ -1207,9 +1048,8 @@ function setMapLevel(sock, spawnPos, playerID, newMapLevelIndex){
 							 game_map.mapLevel[newMapLevelIndex].levelMonsterArray, monsterArray.length, newMapLevelIndex,
 							 game_map.mapLevel[newMapLevelIndex].itemArray, itemInfoArray);
 }
-// -------------------End Of Player-------------------
 
-// -------------------Monster-------------------
+// Monster Variables
 var AI_controllerList = [];
 AI_controllerList.length = 100;
 var monsterArray = [];
@@ -1220,8 +1060,8 @@ var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower",
 						  "camp": "defaultMonster",
 					      "campInfo": {"defaultMonster": 100}
 						},{}],
-						
-						[{"name": "Fakecat", "type": "burrower", 
+
+						[{"name": "Fakecat", "type": "burrower",
 						  "properties":{"health": 100, "maxHealth": 100, "attackDamage": 20, "attackSpeed": 0.5, "moveSpeed": 3},
 						  "camp": "defaultMonster",
 					      "campInfo": {"defaultMonster": 100}
@@ -1231,7 +1071,7 @@ var monsterInfoArray = [[{"name": "Fakedoge", "type": "burrower",
 // Creating A New Monster
 function createNewMonster(ID, level, spawnPos, mapLevel, monsterID) {
 	// Input Control
-	if (monsterID == null){
+	if (monsterID == null) {
 		monster_ID_Count = newDynamicArrayID(monsterArray, monster_ID_Count, 100, "Monster Array");
 		monsterID = monster_ID_Count;
 	}
@@ -1244,13 +1084,13 @@ function createNewMonster(ID, level, spawnPos, mapLevel, monsterID) {
 											[spawnPos[0], spawnPos[1], 1],
 											mapLevel,
 											monsterInfoArray[ID][0].camp);
-	
+
 	// Monster Can't Attack Each Other
 	//monsterInfo.campInfo.defaultMonster = 100;
 	for (let [key, value] of Object.entries(monsterInfoArray[ID][0]["campInfo"])) {
 		monsterInfo.campInfo[key] = value;
 	}
-											
+
 	// Add Properties By ID
 	for (let [key, value] of Object.entries(monsterInfoArray[ID][0]["properties"])) {
 		monsterInfo.properties[key] = value;
@@ -1301,7 +1141,7 @@ function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 	let surroundingBlocks = game_map.getSurroundingBlock(thePlayer.lastBlockPos, thePlayer.mapLevel, [1, 1])
 	for (let i = 0; i < surroundingBlocks.length; ++i) {
 		theBlock = surroundingBlocks[i][2];
-		if (!theBlock.updated){
+		if (!theBlock.updated) {
 			theBlock.updated = true;
 			theBlock.surroundingMonsterNumber = 0;
 			theMapLevel.resetBlockUpdated.push(theBlock);
@@ -1309,7 +1149,7 @@ function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 			// Loop Through All The Creatures Within The Creature Array
 			for (let ii = 0; ii < theBlock.blockCreatureArray.length; ++ii) {
 				// If The Creature Is A Active Player
-				if (theBlock.blockCreatureArray[ii][0] == "player"){
+				if (theBlock.blockCreatureArray[ii][0] == "player") {
 					let aPlayer = playerArray[theBlock.blockCreatureArray[ii][1]];
 					if (aPlayer != null){
 						totalSurroundingPlayerLevel += aPlayer.properties.level;
@@ -1319,7 +1159,7 @@ function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 				};
 
 				monsterID = theBlock.blockCreatureArray[ii][1];
-			
+
 				// If Monster Is Empty Continue
 				if (AI_controllerList[monsterID] == null) continue;
 
@@ -1336,12 +1176,12 @@ function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 				creatureOnHit(theMonster, theMapLevel);
 			}
 		}
-		
+
 		surroundingMonsterNumber += theBlock.surroundingMonsterNumber;
 	}
 
 	// Spawing New Monster Arround Active Player
-	if (surroundingMonsterNumber < 10 && totalSurroundingPlayerNumber > 0){
+	if (surroundingMonsterNumber < 10 && totalSurroundingPlayerNumber > 0) {
 		let newSpawnPos = createSurroundingSpawnPosition(thePlayer.mapLevel, thePlayer.lastBlockPos, [1, 1], [game_map.blockSize.x / 2, game_map.blockSize.y / 2])
 		let [monsterInfoID, minLevel, maxLevel, levelHalfRange] = theMapLevel.monsterSpawnFunction(theMapLevel.monsterSpawnInfo);
 
@@ -1357,7 +1197,7 @@ function updateSurroundingMonster(delta, thePlayer, theMapLevel) {
 
 
 // Randomly Generating An Item ID Based On Rarity Distribution
-function itemDrop(monsterID){
+function itemDrop(monsterID) {
 	if (monsterArray[monsterID] == null) return;
 	// Variable Declaration For Spawning Item After Monster Dead
 	let newItemID;
@@ -1369,7 +1209,7 @@ function itemDrop(monsterID){
 	if (randomNumber < 0.60 * monsterDropRate) newItemID = itemRarityArray[0][Math.floor(Math.random() * itemRarityArray[0].length)];
 	else if (randomNumber < 0.85 * monsterDropRate) newItemID = itemRarityArray[1][Math.floor(Math.random() * itemRarityArray[1].length)];
 	else if (randomNumber < 0.95 * monsterDropRate) newItemID = itemRarityArray[2][Math.floor(Math.random() * itemRarityArray[2].length)];
-	else if (randomNumber < 1.00 * monsterDropRate) newItemID = itemRarityArray[3][Math.floor(Math.random() * itemRarityArray[3].length)];	
+	else if (randomNumber < 1.00 * monsterDropRate) newItemID = itemRarityArray[3][Math.floor(Math.random() * itemRarityArray[3].length)];
 
 	// Spawning The Actual Item
 	if (newItemID != null && typeof newItemID != "undefined") newItem(newItemID, newItemPosition, monsterArray[monsterID].mapLevel);
@@ -1387,13 +1227,13 @@ function deleteMonster(monsterID) {
 		if (index > -1) { // Only Splice Array When Item Is Found
 			game_map.mapLevel[mapLevelIndex].levelMonsterArray.splice(index, 1); // 2nd Parameter Means Remove One Item Only
 		}
-		
-		//Remove from blockCreatureArray
+
+		// Remove from blockCreatureArray
 		let lastBlock = game_map.mapLevel[mapLevelIndex].getBlockByBlockPos([monsterArray[monsterID].lastBlockPos[0], monsterArray[monsterID].lastBlockPos[1]]);
-		if (lastBlock != null){
+		if (lastBlock != null) {
 			let theBlockArray = lastBlock.blockCreatureArray;
-			for (let i = 0; i < theBlockArray.length; ++i){
-				if (theBlockArray[i] != null && theBlockArray[i][1] == monsterArray[monsterID].ID && theBlockArray[i][0] == monsterArray[monsterID].creatureType){
+			for (let i = 0; i < theBlockArray.length; ++i) {
+				if (theBlockArray[i] != null && theBlockArray[i][1] == monsterArray[monsterID].ID && theBlockArray[i][0] == monsterArray[monsterID].creatureType) {
 					lastBlock.blockCreatureArray.splice(i, 1);
 					break;
 				}
@@ -1459,13 +1299,13 @@ function itemInfo(name, changeInfo) {
 	for (let [key, value] of Object.entries(changeInfo)) {
 		newItemInfo[key] = value;
 	}
-	
-	if (newItemInfo.itemType == "propertyChange"){
 
-	}else if (newItemInfo.itemType == "consumable"){
-
+	if (newItemInfo.itemType == "propertyChange") {
+		// PLACEHOLDER For Item With Property Change
+	} else if (newItemInfo.itemType == "consumable") {
+		// PLACEHOLDER For Cosumable Item
 	}
-	
+
 	return newItemInfo;
 }
 
@@ -1501,7 +1341,7 @@ Red (Legendary) (5%) Index: 3
 var itemRarityArray = [[], [], [], []];
 
 // Pushing Item Into itemRarityArray
-for (let itemInfoIndex = 0; itemInfoIndex < itemInfoArray.length; ++itemInfoIndex){
+for (let itemInfoIndex = 0; itemInfoIndex < itemInfoArray.length; ++itemInfoIndex) {
 	// Input Control
 	if (itemInfoArray[itemInfoIndex].length <= 0) continue;
 
@@ -1519,14 +1359,13 @@ const creatureItemArrayUpdate = (additionalItemID, updatePlayerID, removeItemID)
 
 	let mapLevelIndex = thePlayer.mapLevel;
 
-	if (itemInfoArray[additionalItemID].propertyChange != null){
+	if (itemInfoArray[additionalItemID].propertyChange != null) {
 		// Update Player Property Based On Item
 		let playerInfo = [[["player", updatePlayerID], itemInfoArray[additionalItemID].propertyChange]];
 		creatureInfoChange(playerInfo);
 	}
 
-
-	if (!itemInfoArray[additionalItemID].consumable){
+	if (!itemInfoArray[additionalItemID].consumable) {
 		// Update Server Side Player Item Array
 		if (thePlayer.creatureItemArray[additionalItemID] != null)
 			thePlayer.creatureItemArray[additionalItemID]++;
@@ -1549,10 +1388,10 @@ const newItem = (newItemID, newItemPosition, mapLevelIndex) => {
 
 	// Save The ItemID Into The Server Item Array
 	theMapLevel.itemArray[itemIndex] = {"itemID": newItemID, "itemPosition": newItemPosition};
-	
+
 	// Log The ItemInfo On The Server Side
 	console.log(itemInfoArray[newItemID], itemIndex);
-	
+
 	io.to("level " + mapLevelIndex).compress(true).emit('clientNewItem', newItemID, newItemPosition, itemIndex);
 };
 
@@ -1576,13 +1415,13 @@ function removeItem(removeItemID, mapLevelIndex) {
 
 // -------------------Projectile-------------------
 // Spawning New Projectiles
-function spawnProjectile([projectileInfo, mapLevelIndex]){
+function spawnProjectile([projectileInfo, mapLevelIndex]) {
 	let projectileSpawnInfo = [];
 	let theMapLevel = game_map.mapLevel[mapLevelIndex];
 	let newProjectileID, theBlock;
 
 	// Loop Through All Projectiles Within ProjectileInfo
-	for (let i = 0; i < projectileInfo.length; i++){
+	for (let i = 0; i < projectileInfo.length; i++) {
 		theMapLevel.projectile_count = newDynamicArrayID(theMapLevel.levelProjectileArray, theMapLevel.projectile_count, 100, "Projectile Array");
 		newProjectileID = theMapLevel.projectile_count;
 		theMapLevel.levelProjectileArray[newProjectileID] = projectileInfo[i];
@@ -1606,31 +1445,26 @@ function spawnProjectile([projectileInfo, mapLevelIndex]){
 function initPlayerProjectile(mapLevelIndex){
 	let projectileSpawnInfo = [];
 	let theMapLevel = game_map.mapLevel[mapLevelIndex];
-	for (let i = 0; i < theMapLevel.levelProjectileArray.length; i++){
+	for (let i = 0; i < theMapLevel.levelProjectileArray.length; i++) {
 		projectileSpawnInfo.push([i, theMapLevel.levelProjectileArray[i]])
 	}
 	return projectileSpawnInfo;
 }
 
 // Update All Projectiles
-function updateProjectile(delta, mapLevelIndex){
+function updateProjectile(delta, mapLevelIndex) {
+	// Variable Declaration
 	let theMapLevel = game_map.mapLevel[mapLevelIndex];
 	theMapLevel.updateProjectileArray =[];
 	let deleteProjectileList = [];
 	let deleteUnitList = [];
 	let projectilePos;
 
-	//for (let i = 0; i < theMapLevel.clearBlockProjectileArray.length; i++){
-		//theMapLevel.clearBlockProjectileArray[i].projectileList = [];
-	//}
-
-	//theMapLevel.clearBlockProjectileArray = [];
-
 	let projectileArray, unit, theBlock, mapX, mapY, unitIndexX, unitIndexY, floatBlockX, floatBlockY, blockX, blockY, OnXBorder, lastBlock;
 	// Check All Projectile List
 	for (let i = 0; i < theMapLevel.levelProjectileArray.length; i++) {
 		projectileArray = theMapLevel.levelProjectileArray[i];
-		if (projectileArray == "deletion"){
+		if (projectileArray == "deletion") {
 			// For Delete Projectile
 			deleteProjectile(theMapLevel, i);
 			deleteProjectileList.push(i);
@@ -1639,7 +1473,7 @@ function updateProjectile(delta, mapLevelIndex){
 			let [lastBlockX, lastBlockY] = [(projectileArray.position[0] + 0.5) / game_map.blockSize.x >> 0, (projectileArray.position[1] + 0.5) / game_map.blockSize.y >> 0];
 			projectileArray.position[0] += projectileArray.initVelocity[0] * delta;
 			projectileArray.position[1] += projectileArray.initVelocity[1] * delta;
-			
+
 			// Projectile Position
 			projectilePos = [
 				projectileArray.position[0],
@@ -1661,36 +1495,35 @@ function updateProjectile(delta, mapLevelIndex){
 				unit = theBlock.unitList[unitIndexY][unitIndexX];
 			}
 
-			
-			if (unit == null){
+			if (unit == null) {
 				// For Delete Projectile
 				deleteProjectile(theMapLevel, i);
 				deleteProjectileList.push(i);
 				continue;
 			} else {
-				if (getAllChildUnitDestroyable(unit)){
+				if (getAllChildUnitDestroyable(unit)) {
 					// For Delete Unit
 					let isNotIn = true;
-					for (let ii = 0; ii < deleteUnitList.length; ii++){
-						if (deleteUnitList[ii][0][0] == mapX && deleteUnitList[ii][0][1] == mapY){
+					for (let ii = 0; ii < deleteUnitList.length; ii++) {
+						if (deleteUnitList[ii][0][0] == mapX && deleteUnitList[ii][0][1] == mapY) {
 							isNotIn == false;
 						}
 					}
 
 					// Check Is The Unit Is Already Hit
-					if (isNotIn){
+					if (isNotIn) {
 						// For Delete Projectile
 						deleteProjectile(theMapLevel, i);
 						deleteProjectileList.push(i);
 
-						if (game_map.unitIDList[unit.ID].destroyable){
+						if (game_map.unitIDList[unit.ID].destroyable) {
 							unit.ID = game_map.unitIDList[unit.ID].replacingUnit;
 							if (unit.ID == null) {
 								unit.ID = theMapLevel.initSpawnMethodOutput[1].defaultReplacingUnit;
 								unit.Height = 0;
 							}
 						}
-						
+
 						unit.childUnit = null;
 						deleteUnitList.push([[mapX, mapY], unit]);
 						continue;
@@ -1699,8 +1532,8 @@ function updateProjectile(delta, mapLevelIndex){
 			}
 
 			// Update Only If Block Change
-			if (lastBlockX != blockX || lastBlockY != blockY){
-				for (let ii = 0; ii < theMapLevel.clearBlockProjectileArray[i].length; ++ii){
+			if (lastBlockX != blockX || lastBlockY != blockY) {
+				for (let ii = 0; ii < theMapLevel.clearBlockProjectileArray[i].length; ++ii) {
 					lastBlock = theMapLevel.clearBlockProjectileArray[i][ii];
 					lastBlock.projectileList.remove(i);
 				}
@@ -1710,8 +1543,8 @@ function updateProjectile(delta, mapLevelIndex){
 				theBlock.projectileList.insert(i);
 				theMapLevel.clearBlockProjectileArray[i].push(theBlock);
 
-
 				OnXBorder = false;
+
 				// For Projectile On the Border Of The Block
 				if (unitIndexX == 0) {
 					blockX = (floatBlockX - 1) >> 0;
@@ -1756,20 +1589,20 @@ function updateProjectile(delta, mapLevelIndex){
 						}
 					}
 				}
-			} 
+			}
 
 			theMapLevel.updateProjectileArray.push([i, projectilePos]);
 		}
 	}
-	
+
 	// Sending Deletion Event To Clients
-	if (deleteProjectileList.length > 0){
+	if (deleteProjectileList.length > 0) {
 		io.to("level " + mapLevelIndex).emit('deleteEvent', [deleteProjectileList, deleteUnitList]);
 	}
 }
 
 // Deleting A Projectile From BlockProjectileArray
-function deleteProjectile(theMapLevel, projectileID){
+function deleteProjectile(theMapLevel, projectileID) {
 	let lastBlock;
 	for (let ii = 0; ii < theMapLevel.clearBlockProjectileArray[projectileID].length; ++ii){
 		lastBlock = theMapLevel.clearBlockProjectileArray[projectileID][ii];
@@ -1782,25 +1615,20 @@ function deleteProjectile(theMapLevel, projectileID){
 }
 
 // Get Check If Something Is Destroyable Or Not
-function getAllChildUnitDestroyable(unit){
+function getAllChildUnitDestroyable(unit) {
 	return game_map.unitIDList[unit.ID].destroyable || (unit.childUnit == null ? false : getAllChildUnitDestroyable(unit.childUnit));
 }
 
-// -------------------End Of Projectile-------------------
-
-// -------------------Server Loop-------------------
 var timeInterval = 5;
 setInterval(serverLoop, timeInterval);
 let startDate = new Date();
 let endDate = new Date();
 
-
 // Looping Certain Functions Per Server Frame
-function serverLoop(){
+function serverLoop() {
 	endDate = new Date();
 	let delta = (endDate.getTime() - startDate.getTime()) / 1000;
-	if (delta > 0.01){
-		
+	if (delta > 0.01) {
 		// For Each MapLevel
 		let theMapLevel;
 		for (let i = 0; i < game_map.mapLevel.length; ++i) {
@@ -1813,16 +1641,12 @@ function serverLoop(){
 			theMapLevel.updateMonsterPos = [];
 			updateProjectile(delta, i);
 			updatePlayer(delta, theMapLevel);
-			
-
 		}
+
 		startDate = new Date();
 	}
-	
 }
 
-
-// -------------------End Of Server Loop-------------------
 // Update Client Frame
 function ClientFrameUpdate(playerID) {
 	if (playerArray[playerID] == null) return;
@@ -1844,7 +1668,7 @@ function creatureInfoChange(info) {
 			if (monsterArray[creatureInfo[i][0][1]] == null) continue;
 			theCreature = monsterArray[creatureInfo[i][0][1]];
 		}
-		
+
 		// Changing Certain Properties Based On The Input
 		for (let [key, value] of Object.entries(creatureInfo[i][1])) {
 			if (key == "damage"){
@@ -1899,14 +1723,14 @@ function damagefunction(damageInfo, defender){
 			}else{
 				damageInfo.type.heal =  {amount: amount, criticalAttack: false};
 			}
-		// Fire Attack	
+		// Fire Attack
 		} else if (key == "fire") {
 			let rate = 1 - defender.properties.fireResistance;
 			if (rate < 0) rate = 0;
 			let amount = rate * value * (1 + criticalAttack) >> 0;
 			defender.properties.health -= amount;
 			damageInfo.type.fire = {amount: amount, criticalAttack: criticalAttack};
-		// Poison Attack	
+		// Poison Attack
 		} else if (key == "poison") {
 			let rate = 1 - defender.properties.poisonResistance;
 			if (rate < 0) rate = 0;
@@ -1928,13 +1752,10 @@ function damagefunction(damageInfo, defender){
 	return defender.properties.health;
 }
 
-// -------------------Map-------------------
 // Setting The Size Of The Map
 var game_map = new map([20, 20],[20, 20]);
 game_map.createMapLevel();
-// -------------------End Of Map-------------------
 
-// -------------------Sending And Receiving Information-------------------
 // Once A New Player Join, Update To All Other Clients
 io.on('connection', (sock) => {
 	// Setting The New PlayerID
@@ -1946,7 +1767,7 @@ io.on('connection', (sock) => {
 	setMapLevel(sock, spawnPos, playerID, initMapLevel);
 
 	console.log("new player joined, ID: ", playerID);
-	
+
 	// Receiving Information From Client And Calling Function
 	// sock.on Is The Newly Connected Player (sock), io.emit (Send Information To All Clients)
 	// First Parameter Data Name (Same As Client Side), Second Parameter The Actual Data
@@ -1986,12 +1807,12 @@ server.listen(8080, () => {
 
 
 // TESTING USE
-/* // Spawning 1000 Monsters Randomly Throughout The Map
-for (let monsterIndex = 0; monsterIndex < 1000; ++monsterIndex){
-	createNewMonster(0, createSpawnPosition(0), 0);
-}
+// Spawning 1000 Monsters Randomly Throughout The Map
+// for (let monsterIndex = 0; monsterIndex < 1000; ++monsterIndex){
+// 	createNewMonster(0, createSpawnPosition(0), 0);
+// }
 
 // Spawning 1000 Monsters Randomly Throughout The Map
-for (let monsterIndex = 0; monsterIndex < 1000; ++monsterIndex){
-	createNewMonster(1, createSpawnPosition(1), 1);
-} */
+// for (let monsterIndex = 0; monsterIndex < 1000; ++monsterIndex){
+// 	createNewMonster(1, createSpawnPosition(1), 1);
+// }
